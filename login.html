@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login Page</title>
+  <link rel="stylesheet" href="login.css">
+</head>
+<body>
+  <div>
+    <img src="./assets/images/login_signup_2.1.svg" alt="Background Image 1">
+    <img src="./assets/images/login_signup_2.0.svg" alt="Background Image 2">
+  </div>
+  <div class="login-container">
+    <img src="./assets/images/logo.png" alt="Logo" class="logo">
+    <h1>Login into account</h1>
+    <p>Use your credentials to access your account</p>
+    <div class="input-group">
+      <span class="icon user-icon"></span>
+      <input type="text" placeholder="Username" oninput="this.previousElementSibling.style.display = this.value ? 'none' : 'block'">
+    </div>
+    <div class="input-group">
+      <span class="icon lock-icon"></span>
+      <input type="password" placeholder="Password" oninput="this.previousElementSibling.style.display = this.value ? 'none' : 'block'">
+    </div>
+    <button id="login-btn">Login</button>
+    <a href="#">Forgot password?</a>
+    <div class="separator">or login with</div>
+    <div class="social-login">
+      <div id="facebook-login" class="social-icon facebook">
+        <img src="./assets/icons/facebook-logo.svg" alt="Facebook Login" id="facebook-login-img">
+      </div>
+      <div id="google-login" class="social-icon google">
+        <img src="./assets/icons/google-logo.svg" alt="Google Login" id="google-login-img">
+      </div>
+      <div id="apple-login" class="social-icon apple">
+        <img src="./assets/icons/apple-logo.svg" alt="Apple Login" id="apple-login-img">
+      </div>
+    </div>    
+    <p>Don’t have an account? <a href="signup.html">Register here</a></p>
+  </div>
+
+  <!---To link the JavaScript File-->
+  <script src="./script.js"></script>
+
+
+</body>
+</html>

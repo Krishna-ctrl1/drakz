@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Signup Page</title>
+  <link rel="stylesheet" href="signup.css">
+</head>
+<body>
+  <div>
+    <img src="./assets/images/login_signup_2.1.svg" alt="Background Image 1">
+    <img src="./assets/images/login_signup_2.0.svg" alt="Background Image 2">
+  </div>
+  <div class="login-container">
+    <img src="./assets/images/logo.png" alt="Logo" class="logo">
+    <h1>Create an account</h1>
+    <p>Setup a new account in a minute</p>
+    <div class="input-group">
+      <span class="icon user-icon"></span>
+      <input type="text" placeholder="Username" oninput="this.previousElementSibling.style.display = this.value ? 'none' : 'block'">
+    </div>
+    <div class="input-group">
+      <span class="icon email-icon"></span>
+      <input type="email" placeholder="Email Address" oninput="this.previousElementSibling.style.display = this.value ? 'none' : 'block'">
+    </div>
+    <div class="input-group">
+      <span class="icon lock-icon"></span>
+      <input type="password" placeholder="Password" oninput="this.previousElementSibling.style.display = this.value ? 'none' : 'block'">
+    </div>
+    <div class="input-group">
+      <span class="icon lock-icon"></span>
+      <input type="password" placeholder="Confirm Password" oninput="this.previousElementSibling.style.display = this.value ? 'none' : 'block'">
+    </div>
+    <button>Sign Up</button>
+    <div class="separator">or</div>
+    <div class="social-login">
+      <div id="facebook-login" class="social-icon facebook">
+        <img src="./assets/icons/facebook-logo.svg" alt="Facebook Login" id="facebook-login-img">
+      </div>
+      <div id="google-login" class="social-icon google">
+        <img src="./assets/icons/google-logo.svg" alt="Google Login" id="google-login-img">
+      </div>
+      <div id="apple-login" class="social-icon apple">
+        <img src="./assets/icons/apple-logo.svg" alt="Apple Login" id="apple-login-img">
+      </div>
+    </div>
+    <p>Already have an account? <a href="login.html">Login here</a></p>
+  </div>
+
+  <!---To link the JavaScript File-->
+  <script src="./script.js"></script>
+
+</body>
+</html>
