@@ -68,21 +68,21 @@ app.get('/dashboard', (req, res) => {
 
 // POST request to handle Admin Login
 app.post('/admin-login', (req, res) => {
-    const { username, password } = req.body;
+    const { email, password } = req.body;
   
-    console.log('Admin login attempt:', { username, password }); // Debugging
+    console.log('Admin login attempt:', { email, password }); // Debugging
   
-    if (!username || !password) {
-      console.error('Missing username or password');
-      return res.status(400).send('Username and password are required');
+    if (!email || !password) {
+      console.error('Missing email or password');
+      return res.status(400).send('Email and password are required');
     }
   
     const hashedPassword = hashPassword(password);
     console.log('Hashed password:', hashedPassword); // Debugging
   
-    const query = 'SELECT * FROM admins WHERE username = ? AND password = ?';
+    const query = 'SELECT * FROM admins WHERE email = ? AND password = ?';
   
-    db.query(query, [username, hashedPassword], (err, results) => {
+    db.query(query, [email, hashedPassword], (err, results) => {
       if (err) {
         console.error('Database query error:', err); // Log the exact error
         return res.status(500).send('Internal Server Error');
@@ -91,72 +91,73 @@ app.post('/admin-login', (req, res) => {
       console.log('Query results:', results); // Debugging
   
       if (results.length > 0) {
-        console.log('Admin login successful for:', username);
+        console.log('Admin login successful for:', email);
         res.redirect('/admin-dashboard'); // Redirect to Admin Dashboard
       } else {
-        console.warn('Invalid login credentials for username:', username);
-        res.status(401).send('Invalid username or password');
+        console.warn('Invalid login credentials for email:', email);
+        res.status(401).send('Invalid email or password');
       }
     });
   });  
 
 // POST request to handle Advisor Login
 app.post('/advisor-login', (req, res) => {
-  const { username, password } = req.body;
+  const { email, password } = req.body;
 
-  if (!username || !password) {
-    console.error('Username or password is missing');
-    return res.status(400).send('Username and password are required');
+  if (!email || !password) {
+    console.error('Email or password is missing');
+    return res.status(400).send('Email and password are required');
   }
 
   const hashedPassword = hashPassword(password);
 
-  const query = 'SELECT * FROM advisors WHERE username = ? AND password = ?';
+  const query = 'SELECT * FROM advisors WHERE email = ? AND password = ?';
 
-  db.query(query, [username, hashedPassword], (err, results) => {
+  db.query(query, [email, hashedPassword], (err, results) => {
     if (err) {
       console.error('Error executing query:', err);
       return res.status(500).send('Internal Server Error');
     }
 
     if (results.length > 0) {
-      console.log('Advisor login successful for:', username);
+      console.log('Advisor login successful for:', email);
       res.redirect('/advisor-dashboard'); // Redirect to Advisor Dashboard
     } else {
-      console.warn('Invalid login attempt for username:', username);
-      res.send('Invalid username or password');
+      console.warn('Invalid login attempt for email:', email);
+      res.send('Invalid email or password');
     }
   });
 });
 
 // POST request to handle User Login
 app.post('/login', (req, res) => {
-  const { username, password } = req.body;
+  const { email, password } = req.body;
 
-  if (!username || !password) {
-    console.error('Username or password is missing');
-    return res.status(400).send('Username and password are required');
+  if (!email || !password) {
+    console.error('Email or password is missing');
+    return res.status(400).send('Email and password are required');
   }
 
   const hashedPassword = hashPassword(password);
 
-  const query = 'SELECT * FROM users WHERE username = ? AND password = ?';
+  const query = 'SELECT * FROM users WHERE email = ? AND password = ?';
 
-  db.query(query, [username, hashedPassword], (err, results) => {
+  db.query(query, [email, hashedPassword], (err, results) => {
     if (err) {
       console.error('Error executing query:', err);
       return res.status(500).send('Internal Server Error');
     }
 
     if (results.length > 0) {
-      console.log('User login successful for:', username);
+      console.log('User login successful for:', email);
       res.redirect('/dashboard'); // Redirect to User Dashboard
     } else {
-      console.warn('Invalid login attempt for username:', username);
-      res.send('Invalid username or password');
+      console.warn('Invalid login attempt for email:', email);
+      res.send('Invalid email or password');
     }
   });
 });
+
 
 // POST request to handle Signup
 app.post('/signup', (req, res) => {
