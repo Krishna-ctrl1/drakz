@@ -3,27 +3,42 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login Page</title>
-  <link rel="stylesheet" href="login.css">
+  <title>Advisor Login</title>
+  <link rel="stylesheet" href="advisor-login.css">
 </head>
 <body>
   <div>
     <img src="./assets/images/login_signup_2.1.svg" alt="Background Image 1">
     <img src="./assets/images/login_signup_2.0.svg" alt="Background Image 2">
   </div>
+
   <div class="login-container">
     <img src="./assets/images/logo.png" alt="Logo" class="logo">
-    <h1>Login into account</h1>
-    <p>Use your credentials to access your account</p>
-    <div class="input-group">
-      <span class="icon user-icon"></span>
-      <input type="text" placeholder="Username" oninput="this.previousElementSibling.style.display = this.value ? 'none' : 'block'">
-    </div>
-    <div class="input-group">
-      <span class="icon lock-icon"></span>
-      <input type="password" placeholder="Password" oninput="this.previousElementSibling.style.display = this.value ? 'none' : 'block'">
-    </div>
-    <button id="login-btn">Login</button>
+    <h1>Financial Advisor Login</h1>
+    <p>Access your advisor portal with your credentials</p>
+    <form action="/advisor-login" method="POST">
+      <div class="input-group">
+        <span class="icon user-icon"></span>
+        <input 
+          type="text" 
+          name="username" 
+          placeholder="Advisor Username" 
+          oninput="this.previousElementSibling.style.display = this.value ? 'none' : 'block'"
+          required
+        >
+      </div>
+      <div class="input-group">
+        <span class="icon lock-icon"></span>
+        <input 
+          type="password" 
+          name="password" 
+          placeholder="Password" 
+          oninput="this.previousElementSibling.style.display = this.value ? 'none' : 'block'"
+          required
+        >
+      </div>
+      <button type="submit">Login</button>
+    </form>
     <a href="#">Forgot password?</a>
     <div class="separator">or login with</div>
     <div class="social-login">
@@ -37,12 +52,10 @@
         <img src="./assets/icons/apple-logo.svg" alt="Apple Login" id="apple-login-img">
       </div>
     </div>    
-    <p>Don’t have an account? <a href="signup.html">Register here</a></p>
+    <p>Not an Advisor? <a href="login.html">Go back to User Login</a></p>
   </div>
 
-  <!---To link the JavaScript File-->
+  <!-- Link to JavaScript file -->
   <script src="./script.js"></script>
-
-
 </body>
 </html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login</title>
+  <link rel="stylesheet" href="admin-login.css">
+</head>
+<body>
+  <div>
+    <img src="./assets/images/login_signup_2.1.svg" alt="Background Image 1">
+    <img src="./assets/images/login_signup_2.0.svg" alt="Background Image 2">
+  </div>
+
+  <div class="login-container">
+    <img src="./assets/images/logo.png" alt="Logo" class="logo">
+    <h1>Admin Login</h1>
+    <p>Use your Admin Login to access the Statistics</p>
+    <form action="/admin-login" method="POST">
+      <div class="input-group">
+        <span class="icon user-icon"></span>
+        <input 
+          type="text" 
+          name="username" 
+          placeholder="Admin Username" 
+          oninput="this.previousElementSibling.style.display = this.value ? 'none' : 'block'"
+          required
+        >
+      </div>
+      <div class="input-group">
+        <span class="icon lock-icon"></span>
+        <input 
+          type="password" 
+          name="password" 
+          placeholder="Password" 
+          oninput="this.previousElementSibling.style.display = this.value ? 'none' : 'block'"
+          required
+        >
+      </div>
+      <button type="submit">Login</button>
+    </form>
+    <a href="#">Forgot password?</a>
+    <div class="separator">or login with</div>
+    <div class="social-login">
+      <div id="facebook-login" class="social-icon facebook">
+        <img src="./assets/icons/facebook-logo.svg" alt="Facebook Login" id="facebook-login-img">
+      </div>
+      <div id="google-login" class="social-icon google">
+        <img src="./assets/icons/google-logo.svg" alt="Google Login" id="google-login-img">
+      </div>
+      <div id="apple-login" class="social-icon apple">
+        <img src="./assets/icons/apple-logo.svg" alt="Apple Login" id="apple-login-img">
+      </div>
+    </div>    
+    <p>Not an Admin? <a href="login.html">Go back to User Login</a></p>
+  </div>
+
+  <!-- Link to JavaScript file -->
+  <script src="./script.js"></script>
+</body>
+</html>
