@@ -17,7 +17,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 const db = mysql.createConnection({
   host: 'localhost',
   user: 'root',          // MySQL username
-  password: '1234567890',  // MySQL password
+  password: 'Abhi04@28',  // MySQL password
   database: 'DRAKZDatabase'  // The database you created earlier
 });
 
