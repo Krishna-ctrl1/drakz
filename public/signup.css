@@ -1,49 +1,148 @@
+/* Existing styles with modifications */
 body {
   display: flex;
   justify-content: center;
   height: 100vh;
   align-items: center;
   background-image: url('./assets/images/sign_bg.png');
-  background-size: 110%;
+  background-size: cover;
   background-position: center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-  overflow: hidden;
-}
 
-img {
-  width: 10%;
-  height: 10%;
 }
 
 .form {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 15px;
   background-color: #ffffff;
   padding: 30px;
-  padding-right: 50px;
   border-radius: 20px;
-  width: 450px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  width: 480px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
 }
 
-::placeholder {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+.form-progress {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #2d79f3;
+  font-weight: 500;
+  font-size: 0.9rem;
 }
 
-.form button {
-  align-self: flex-end;
+.form-step {
+  display: none;
 }
 
-.flex-column > label {
+.form-step.active {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.hidden {
+  display: none;
+}
+
+/* Button Group Styles */
+.button-group {
+  display: flex;
+  gap: 15px;
+  margin-top: 25px;
+  width: 100%;
+}
+
+/* For steps that need both previous and next/submit buttons */
+.form-step[data-step="1"] .button-group,
+.form-step[data-step="2"] .button-group,
+.form-step[data-step="3"] .button-group {
+  justify-content: space-between; /* Spreads out buttons when there are two */
+}
+
+.button-signin,
+.button-prev,
+.button-next,
+.button-submit {
+  padding: 12px 25px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  min-width: 120px; /* Ensures consistent button width */
+}
+
+.button-prev, .button-signin {
+  background: none;
+  border: 2px solid #ecedec;
   color: #151717;
-  font-weight: 600;
 }
 
-/* Input field container */
+.button-next,
+.button-submit {
+  background-color: #2d79f3;
+  border: 2px solid #2d79f3;
+  color: white;
+}
+
+.button-prev:hover, .button-signin:hover {
+  border-color: #2d79f3;
+  color: #2d79f3;
+}
+
+.button-next:hover,
+.button-submit:hover {
+  background-color: #1a5bbf;
+  transform: translateY(-1px);
+}
+
+/* Social Login Section Styles */
+.p.line {
+  margin: 25px 0 15px;
+  text-align: center;
+}
+
+.flex-row {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+/* Rest of your existing CSS styles remain the same */
+
+body {
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+  align-items: center;
+  background-image: url('./assets/images/sign_bg.png');
+  background-size: cover;
+  background-position: center;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, 
+              Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  padding: 20px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  background-color: #ffffff;
+  padding: 30px;
+  border-radius: 20px;
+  width: 480px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+.section-header {
+  font-size: 1.2rem;
+  color: #2d79f3;
+  font-weight: 600;
+  margin: 15px 0 10px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #ecedec;
+}
+
 .inputForm {
-  border: 2px solid #ecedec; /* Increased for better visibility */
+  border: 2px solid #ecedec;
   border-radius: 10px;
   height: 50px;
   display: flex;
@@ -51,19 +150,25 @@ img {
   transition: 0.2s ease-in-out;
   width: 100%;
   position: relative;
-  padding-left: 10px;
-  padding-right: 10px;
 }
 
-/* Input field styling */
+.inputForm select {
+  appearance: none;
+  background: transparent;
+}
+
+.inputForm svg {
+  position: absolute;
+  left: 15px;
+  z-index: 1;
+}
+
 .input {
   border: none;
-  border-radius: 10px;
   width: 100%;
   height: 100%;
-  padding: 0 15px; /* Padding inside input */
-  padding-left: 20px;
-  padding-right: 20px;
+  padding: 0 15px 0 45px;
+  font-size: 0.95rem;
   background: transparent;
 }
 
@@ -71,74 +176,296 @@ img {
   outline: none;
 }
 
-/* Blue border fix when focusing on email/password */
 .inputForm:focus-within {
+  border-color: #2d79f3;
+  box-shadow: 0 0 5px rgba(45, 121, 243, 0.3);
+}
+
+/* Select dropdown styling */
+.inputForm select {
+  padding-right: 30px;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 1em;
+}
+
+.checkbox-group,
+.radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 10px 0;
+}
+
+.checkbox-group label,
+.radio-group label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #454545;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #2d79f3;
+}
+
+.terms {
+  margin: 15px 0;
+  font-size: 0.85rem;
+}
+
+.terms a {
+  color: #2d79f3;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.terms a:hover {
+  text-decoration: underline;
+}
+
+.button-submit {
+  margin: 25px 0 15px;
+  background-color: #151717;
+  transition: all 0.3s ease;
+}
+
+.button-submit:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 520px) {
+  .form {
+    width: 100%;
+    padding: 25px;
+  }
+  
+  .inputForm {
+    height: 48px;
+  }
+  
+  .section-header {
+    font-size: 1.1rem;
+  }
+}
+
+/* Social Buttons */
+.btn {
+  border: 1px solid #ecedec;
+  transition: all 0.2s ease;
+}
+
+.btn:hover {
+  border-color: #2d79f3;
+  transform: translateY(-1px);
+}
+
+/* Add these to your existing CSS */
+/* Step Navigation */
+.form-step {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.navigation-buttons {
+  margin-top: 2rem;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+}
+
+.button-submit[type="submit"] {
+  background-color: #2d79f3;
+}
+
+.button-prev {
+  background-color: #f1f3f5;
+  color: #454545;
+}
+
+.button-prev:hover {
+  background-color: #e9ecef;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* Step Indicator */
+.step-indicator {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.step-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #ecedec;
+  transition: 0.3s ease;
+}
+
+.step-dot.active {
+  background-color: #2d79f3;
+  transform: scale(1.2);
+}
+
+/* Error Messages */
+.error-message {
+  color: #dc3545;
+  font-size: 0.8rem;
+  margin-top: 5px;
+  display: none;
+}
+
+.inputForm.invalid {
+  border-color: #dc3545;
+}
+
+.inputForm.invalid + .error-message {
+  display: block;
+}
+
+
+
+/* Progress Dots - Moved to top */
+.progress-dots {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 30px;
+  position: absolute;
+  top: -40px; /* Move dots above the form */
+  left: 0;
+  right: 0;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  background-color: #ccc;
+  border-radius: 50%;
+  transition: background-color 0.3s ease;
+}
+
+.dot.active {
+  background-color: #2d79f3;
+}
+
+/* Form container - Add positioning context */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  background-color: #ffffff;
+  padding: 30px;
+  border-radius: 20px;
+  width: 480px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  position: relative; /* Added for absolute positioning of dots */
+  margin-top: 40px; /* Make space for the dots */
+}
+
+/* Button Group Styles */
+.button-group {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  margin-top: 25px;
+  width: 100%;
+}
+
+/* For steps that need both previous and next/submit buttons */
+.form-step[data-step="2"] .button-group,
+.form-step[data-step="3"] .button-group {
+  justify-content: space-between;
+}
+
+/* Base button styles */
+.button-prev,
+.button-next,
+.button-submit {
+  padding: 12px 25px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  min-width: 120px;
+  height: 45px; /* Fixed height for all buttons */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.button-prev {
+  background: none;
+  border: 2px solid #ecedec;
+  color: #151717;
+}
+
+.button-next,
+.button-submit {
+  background-color: #2d79f3;
   border: 2px solid #2d79f3;
-  box-shadow: 0 0 5px rgba(45, 121, 243, 0.5);
+  color: white;
+}
+
+.button-prev:hover {
+  border-color: #2d79f3;
+  color: #2d79f3;
+}
+
+.button-next:hover,
+.button-submit:hover {
+  background-color: #1a5bbf;
+  transform: translateY(-1px);
+}
+
+/* Social Login Section Styles */
+.p.line {
+  margin: 25px 0 15px;
+  text-align: center;
 }
 
 .flex-row {
   display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 10px;
-  justify-content: space-between;
-}
-
-.flex-row > div > label {
-  font-size: 14px;
-  color: black;
-  font-weight: 400;
-}
-
-.span {
-  font-size: 14px;
-  margin-left: 5px;
-  color: #2d79f3;
-  font-weight: 500;
-  cursor: pointer;
-}
-
-.button-submit {
-  margin: 20px 0 10px 0;
-  background-color: #151717;
-  border: none;
-  color: white;
-  font-size: 15px;
-  font-weight: 500;
-  border-radius: 10px;
-  height: 50px;
-  width: 100%;
-  cursor: pointer;
-}
-
-.button-submit:hover {
-  background-color: #252727;
-}
-
-.p {
-  text-align: center;
-  color: black;
-  font-size: 14px;
-  margin: 5px 0;
-}
-
-.btn {
-  margin-top: 10px;
-  width: 100%;
-  height: 50px;
-  border-radius: 10px;
-  display: flex;
   justify-content: center;
-  align-items: center;
-  font-weight: 500;
-  gap: 10px;
-  border: 1px solid #ededef;
-  background-color: white;
-  cursor: pointer;
-  transition: 0.2s ease-in-out;
+  gap: 15px;
 }
 
-.btn:hover {
-  border: 1px solid #2d79f3;
+/* Responsive adjustments */
+@media (max-width: 520px) {
+  .form {
+    margin-top: 50px; /* Slightly more space on mobile */
+  }
+  
+  .progress-dots {
+    top: -35px;
+  }
+}
+
+.button-back {
+  background-color: #ccc;
+  color: #000;
+  text-decoration: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  display: inline-block;
+  text-align: center;
+  margin-left: 10px;
+}
+
+.button-back:hover {
+  background-color: #bbb;
 }

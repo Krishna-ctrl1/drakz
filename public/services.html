@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banking Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+   <link href="services.css" rel="stylesheet" >
+</head>
+<body>
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+        <div class="nav-left">
+            <div class="logo-space"></div>
+            <div class="brand">Servicce</div>
+        </div>
+        <div class="nav-right">
+            <div class="search-container">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" class="search-input" placeholder="Search for something">
+            </div>
+            <div class="nav-icons">
+                <div class="icon-button">
+                    <i class="fas fa-cog"></i>
+                </div>
+                <div class="icon-button">
+                    <i class="fas fa-bell"></i>
+                </div>
+                <img src="/api/placeholder/32/32" alt="Profile" class="profile-image">
+            </div>
+        </div>
+    </nav>
+
+
+    <div class="container">
+        <div class="sidebar">
+            <a href="dashboard.html" class="nav-item">
+                <i class="fas fa-home"></i>
+                Dashboard
+            </a>
+            <a href="transactions.html" class="nav-item">
+                <i class="fas fa-exchange-alt"></i>
+                Transactions
+            </a>
+            <a href="accounts.html" class="nav-item">
+                <i class="fas fa-users"></i>
+                Accounts
+            </a>
+            <a href="investments.html" class="nav-item">
+                <i class="fas fa-chart-pie"></i>
+                Investments
+            </a>
+            <a href="credit_cards.html" class="nav-item">
+                <i class="fas fa-credit-card"></i>
+                Credit Cards
+            </a>
+            <a href="loans.html" class="nav-item">
+                <i class="fas fa-building"></i>
+                Loans
+            </a>
+            <a href="services.html" class="nav-item">
+                <i class="fas fa-cog"></i>
+                Services
+            </a>
+            <a href="My_privilege.html" class="nav-item active">
+                <i class="fas fa-shield-alt"></i>
+                My Privileges
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fas fa-cog"></i>
+                Settings
+            </a>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Service Cards -->
+            <div class="service-cards">
+                <div class="service-card">
+                    <div class="service-icon blue">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3>Life Insurance</h3>
+                    <p>Unlimited protection</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon yellow">
+                        <i class="fas fa-shopping-bag"></i>
+                    </div>
+                    <h3>Shopping</h3>
+                    <p>Buy. Think. Grow.</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon green">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <h3>Safety</h3>
+                    <p>We are your allies</p>
+                </div>
+            </div>
+
+            <!-- Services List -->
+            <div class="services-list">
+                <h2>Bank Services List</h2>
+                
+                <!-- Service Items -->
+                <div class="service-item">
+                    <div class="service-icon" style="background-color: #fee2e2;">
+                        <i class="fas fa-briefcase" style="color: #ef4444;"></i>
+                    </div>
+                    <div class="service-details">
+                        <div class="service-info">
+                            <h3>Business loans</h3>
+                            <p>It is a long established</p>
+                        </div>
+                        <div class="service-info">
+                            <p>Lorem ipsum</p>
+                            <p>Many publishing</p>
+                        </div>
+                        <div class="service-info">
+                            <p>Lorem ipsum</p>
+                            <p>Many publishing</p>
+                        </div>
+                        <a href="#" class="view-details">View Details</a>
+                    </div>
+                </div>
+
+                <div class="service-item">
+                    <div class="service-icon" style="background-color: #fef3c7;">
+                        <i class="fas fa-wallet" style="color: #d97706;"></i>
+                    </div>
+                    <div class="service-details">
+                        <div class="service-info">
+                            <h3>Checking accounts</h3>
+                            <p>It is a long established</p>
+                        </div>
+                        <div class="service-info">
+                            <p>Lorem ipsum</p>
+                            <p>Many publishing</p>
+                        </div>
+                        <div class="service-info">
+                            <p>Lorem ipsum</p>
+                            <p>Many publishing</p>
+                        </div>
+                        <a href="#" class="view-details">View Details</a>
+                    </div>
+                </div>
+
+                <div class="service-item">
+                    <div class="service-icon" style="background-color: #dbeafe;">
+                        <i class="fas fa-piggy-bank" style="color: #3b82f6;"></i>
+                    </div>
+                    <div class="service-details">
+                        <div class="service-info">
+                            <h3>Savings accounts</h3>
+                            <p>It is a long established</p>
+                        </div>
+                        <div class="service-info">
+                            <p>Lorem ipsum</p>
+                            <p>Many publishing</p>
+                        </div>
+                        <div class="service-info">
+                            <p>Lorem ipsum</p>
+                            <p>Many publishing</p>
+                        </div>
+                        <a href="#" class="view-details">View Details</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

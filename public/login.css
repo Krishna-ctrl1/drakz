@@ -40,7 +40,6 @@ img {
   font-weight: 600;
 }
 
-/* Input field container */
 .inputForm {
   border: 2px solid #ecedec; /* Increased for better visibility */
   border-radius: 10px;
@@ -54,7 +53,6 @@ img {
   padding-right: 10px;
 }
 
-/* Input field styling */
 .input {
   border: none;
   border-radius: 10px;
@@ -70,7 +68,6 @@ img {
   outline: none;
 }
 
-/* Blue border fix when focusing on email/password */
 .inputForm:focus-within {
   border: 2px solid #2d79f3;
   box-shadow: 0 0 5px rgba(45, 121, 243, 0.5);
@@ -140,4 +137,48 @@ img {
 
 .btn:hover {
   border: 1px solid #2d79f3;
+}
+
+/* Add these styles to your login.css */
+.role-buttons {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  gap: 20px;
+}
+
+.advisor-login,
+.admin-login {
+  background: none;
+  border: none;
+  color: #2d79f3; /* Matching your existing link color */
+  padding: 0;
+  margin: 0;
+  font-size: 16px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: color 0.2s ease-in-out;
+}
+
+.advisor-login:hover,
+.admin-login:hover {
+  color: #1a5bbf; /* Darker shade on hover */
+  text-decoration: underline;
+}
+
+/* Error Messages */
+.error-message {
+  color: #dc3545;
+  font-size: 0.8rem;
+  margin-top: 5px;
+  display: none;
+}
+
+.inputForm.invalid {
+  border-color: #dc3545;
+}
+
+.inputForm.invalid + .error-message {
+  display: block;
 }

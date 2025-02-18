@@ -23,4 +23,3 @@ function handleFacebookLogin() {
     if (googleBtn) googleBtn.addEventListener("click", handleGoogleLogin);
     if (appleBtn) appleBtn.addEventListener("click", handleAppleLogin);
   });
-  

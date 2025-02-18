@@ -7,11 +7,12 @@
     <link rel="stylesheet" href="login.css">
 </head>
 <body>
-    <div>
-      <button class="advisor-login" id="advisor-login" onclick="window.location.href='advisor-login.html'">Advisor</button>
-      <button class="admin-login" id="admin-login" onclick="window.location.href='admin-login.html'">Admin</button>
+    <!-- Add a container div with class "role-buttons" around the buttons -->
+    <div class="role-buttons">
+      <button class="advisor-login" onclick="window.location.href='advisor-login.html'">Advisor</button>
+      <button class="admin-login" onclick="window.location.href='admin-login.html'">Admin</button>
     </div>
-    <form class="form" action="/login" method="POST">
+    <form class="form" action="/login" method="POST" novalidate>
         <div class="flex-column">
           <label>Email </label>
         </div>
@@ -68,6 +69,7 @@
     </button></div></form>
 
     <!-- Link JavaScript File -->
-  <script src="./script.js"></script>
+  <script src="./login.js"></script>
+  <script src="./social.js"></script>
 </body>
 </html>
