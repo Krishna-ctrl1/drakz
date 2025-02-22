@@ -8,6 +8,8 @@ body {
   background-position: center;
   background-repeat: no-repeat;
   background-attachment: fixed;
+  padding-bottom: 5%;
+  overflow: hidden;
 }
 
 img {
@@ -24,7 +26,9 @@ img {
   padding-right: 50px;
   border-radius: 20px;
   width: 350px;
+  margin-top: -5vh; /* Moved the form up */
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Added subtle shadow */
 }
 
 ::placeholder {
@@ -41,7 +45,7 @@ img {
 }
 
 .inputForm {
-  border: 2px solid #ecedec; /* Increased for better visibility */
+  border: 2px solid #ecedec;
   border-radius: 10px;
   height: 50px;
   display: flex;
@@ -58,7 +62,7 @@ img {
   border-radius: 10px;
   width: 100%;
   height: 100%;
-  padding: 0 15px; /* Padding inside input */
+  padding: 0 15px;
   padding-left: 20px;
   padding-right: 20px;
   background: transparent;
@@ -95,7 +99,7 @@ img {
   cursor: pointer;
 }
 
-.button-submit {
+.button-submit, .button-next, .button-prev {
   margin: 20px 0 10px 0;
   background-color: #151717;
   border: none;
@@ -104,12 +108,35 @@ img {
   font-weight: 500;
   border-radius: 10px;
   height: 50px;
-  width: 100%;
+  padding: 0 20px;
   cursor: pointer;
+  transition: background-color 0.2s ease;
 }
 
-.button-submit:hover {
+.button-submit {
+  width: 100%;
+}
+
+.button-next, .button-prev {
+  min-width: 100px;
+}
+
+.button-prev {
+  background-color: #666;
+}
+
+.button-submit:hover, .button-next:hover {
   background-color: #252727;
+}
+
+.button-prev:hover {
+  background-color: #555;
+}
+
+.button-group {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
 }
 
 .p {
@@ -139,7 +166,6 @@ img {
   border: 1px solid #2d79f3;
 }
 
-/* Add these styles to your login.css */
 .role-buttons {
   position: absolute;
   top: 20px;
@@ -152,7 +178,7 @@ img {
 .admin-login {
   background: none;
   border: none;
-  color: #2d79f3; /* Matching your existing link color */
+  color: #2d79f3;
   padding: 0;
   margin: 0;
   font-size: 16px;
@@ -163,7 +189,7 @@ img {
 
 .advisor-login:hover,
 .admin-login:hover {
-  color: #1a5bbf; /* Darker shade on hover */
+  color: #1a5bbf;
   text-decoration: underline;
 }
 
@@ -172,13 +198,98 @@ img {
   color: #dc3545;
   font-size: 0.8rem;
   margin-top: 5px;
-  display: none;
 }
 
 .inputForm.invalid {
   border-color: #dc3545;
 }
 
-.inputForm.invalid + .error-message {
-  display: block;
+/* Progress Dots */
+.progress-dots {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #ddd;
+  margin: 0 5px;
+  transition: background-color 0.3s ease;
+}
+
+.dot.active {
+  background-color: #2d79f3;
+}
+
+/* Section Header */
+.section-header {
+  font-weight: 600;
+  font-size: 18px;
+  margin-bottom: 15px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid #eee;
+}
+
+/* Form Steps */
+.form-step {
+  transition: opacity 0.3s ease;
+}
+
+.form-step.hidden {
+  display: none;
+}
+
+/* Checkboxes and Radio Buttons */
+.checkbox-group, .radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.checkbox-group label, .radio-group label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.terms {
+  margin: 15px 0;
+}
+
+/* Responsive adjustments */
+@media (max-height: 800px) {
+  .form {
+    margin-top: -8vh; /* Move up more on smaller screens */
+  }
+}
+
+@media (max-height: 600px) {
+  body {
+    align-items: flex-start;
+    padding-top: 30px;
+    padding-bottom: 0;
+  }
+  
+  .form {
+    margin-top: 0;
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+}
+
+@media (max-width: 400px) {
+  .form {
+    width: 90%;
+    padding: 20px 15px;
+  }
+  
+  .button-next, .button-prev {
+    padding: 0 15px;
+    font-size: 14px;
+  }
 }
