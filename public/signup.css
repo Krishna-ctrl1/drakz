@@ -124,7 +124,9 @@ img {
 .button-prev,
 .button-next,
 .button-submit,
-.button-signin {
+.button-signin,
+.aadhaar,
+.pan {
   padding: 12px 25px;
   border-radius: 8px;
   cursor: pointer;
@@ -145,7 +147,9 @@ img {
 }
 
 .button-next,
-.button-submit {
+.button-submit,
+.aadhaar,
+.pan {
   background-color: #2d79f3;
   border: 2px solid #2d79f3;
   color: white;
@@ -158,7 +162,9 @@ img {
 }
 
 .button-next:hover,
-.button-submit:hover {
+.button-submit:hover,
+.aadhaar:hover,
+.pan:hover {
   background-color: #1a5bbf;
   transform: translateY(-1px);
 }
@@ -337,4 +343,13 @@ input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
+}
+
+.aadhaar-btn-grp,
+.pan-btn-grp {
+  margin-top: 20px;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
 }

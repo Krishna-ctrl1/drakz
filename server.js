@@ -2,9 +2,12 @@ const express = require('express');
 const mysql = require('mysql2');
 const bodyParser = require('body-parser');
 const path = require('path');
+const cors = require("cors");
 const crypto = require('crypto');
 
 const app = express();
+app.use(cors()); 
+app.use(bodyParser.json());
 const port = 4000;
 
 // Serve static files (like HTML, CSS, images, etc.) from the "public" folder
@@ -17,7 +20,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 const db = mysql.createConnection({
   host: 'localhost',
   user: 'root',          // MySQL username
-  password: 'MERImarzi@1',  // MySQL password
+  password: '1234567890',  // MySQL password
   database: 'DRAKZDatabase'  // The database you created earlier
 });
 
@@ -129,71 +132,208 @@ app.post('/advisor-login', (req, res) => {
   });
 });
 
-// POST request to handle User Login
-app.post('/login', (req, res) => {
-  const { email, password } = req.body;
+// POST request to handle User Loginapp.post('/login', (req, res) => {
+  app.post('/login', (req, res) => {
+    const { email, password } = req.body;
+  
+    // Basic validation
+    if (!email || !password) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Email and password are required'
+      });
+    }
+  
+    const hashedPassword = hashPassword(password);
+  
+    const query = 'SELECT * FROM users WHERE email = ? AND password = ?';
+    
+    db.query(query, [email, hashedPassword], (err, results) => {
+      if (err) {
+        console.error('Database error during login:', err);
+        return res.status(500).json({
+          status: 'error',
+          message: 'Internal server error'
+        });
+      }
+  
+      if (results.length === 0) {
+        return res.status(401).json({
+          status: 'error',
+          message: 'Invalid email or password'
+        });
+      }
+  
+      // User found, redirect to dashboard
+      console.log('Login successful for user:', email);
+      res.redirect('/dashboard');
+    });
+  });
 
-  if (!email || !password) {
-    console.error('Email or password is missing');
-    return res.status(400).send('Email and password are required');
+
+// Email validation endpoint
+app.post('/check-email', (req, res) => {
+  const { email } = req.body;
+  
+  const query = 'SELECT email FROM users WHERE email = ?';
+  db.query(query, [email], (err, results) => {
+    if (err) {
+      console.error('Database query error:', err);
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
+    
+    if (results.length > 0) {
+      res.json({ exists: true });
+    } else {
+      res.json({ exists: false });
+    }
+  });
+});
+
+// Updated signup endpoint to handle all user details
+app.post('/signup', (req, res) => {
+  const {
+    fullname,
+    email,
+    password,
+    income,
+    employment,
+    goals,
+    risk,
+    aadhaar,
+    pan
+  } = req.body;
+
+  // Basic validation
+  if (!fullname || !email || !password) {
+    return res.status(400).json({ error: 'Required fields are missing' });
   }
 
-  const hashedPassword = hashPassword(password);
-
-  const query = 'SELECT * FROM users WHERE email = ? AND password = ?';
-
-  db.query(query, [email, hashedPassword], (err, results) => {
+  // First check if email exists
+  const checkEmailQuery = 'SELECT email FROM users WHERE email = ?';
+  db.query(checkEmailQuery, [email], (err, results) => {
     if (err) {
-      console.error('Error executing query:', err);
-      return res.status(500).send('Internal Server Error');
+      console.error('Database query error:', err);
+      return res.status(500).json({ error: 'Internal Server Error' });
     }
 
     if (results.length > 0) {
-      console.log('User login successful for:', email);
-      res.redirect('/dashboard'); // Redirect to User Dashboard
-    } else {
-      console.warn('Invalid login attempt for email:', email);
-      res.send('Invalid email or password');
+      return res.status(409).json({ error: 'Email already exists' });
     }
-  });
-});
 
-
-// POST request to handle Signup
-app.post('/signup', (req, res) => {
-  const { username, email, password, confirm_password } = req.body;
-
-  // Check if all required fields are provided
-  if (!username || !email || !password || !confirm_password) {
-    return res.status(400).send('All fields are required');
-  }
-
-  // Check if passwords match
-  if (password !== confirm_password) {
-    return res.status(400).send('Passwords do not match');
-  }
-
-  const hashedPassword = hashPassword(password);
-
-  // Insert new user into the database
-  const query = 'INSERT INTO users (username, name, email, password) VALUES (?, ?, ?, ?)';
-  db.query(query, [username, "ABCD",email, hashedPassword], (err, result) => {
-    if (err) {
-      console.error('Error inserting user into database:', err);
-      return res.status(500).send('Internal Server Error');
-    }
+    // If email doesn't exist, proceed with insertion
+    const hashedPassword = hashPassword(password);
     
-    console.log('New user created:', result);
+    // Convert goals array to string if it exists
+    const goalsString = Array.isArray(goals) ? goals.join(',') : goals;
 
-    // Redirect to the "details.html" page after successful signup
-    res.redirect('/details.html'); // Assuming you have this page available
+    const insertQuery = `
+      INSERT INTO users (
+        name,
+        email,
+        password,
+        monthly_income,
+        employment_status,
+        financial_goals,
+        risk_tolerance,
+        aadhaar_number,
+        pan_number,
+        created_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+    `;
+
+    const values = [
+      fullname,
+      email,
+      hashedPassword,
+      income || null,
+      employment || null,
+      goalsString || null,
+      risk || null,
+      aadhaar || null,
+      pan || null
+    ];
+
+    db.query(insertQuery, values, (err, result) => {
+      if (err) {
+        console.error('Error inserting user into database:', err);
+        return res.status(500).json({ error: 'Internal Server Error' });
+      }
+      
+      console.log('New user created:', result);
+      res.redirect('/dashboard');
+    });
   });
 });
 
-// Serve the details page after signup (if it exists)
-app.get('/details.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'details.html'));
+const otpStore_aadhaar = {}; // Temporary storage for OTPs
+
+// Generate a simulated OTP for Aadhaar
+app.post("/aadhaar-otp", (req, res) => {
+    const { aadhaarNumber } = req.body;
+
+    if (!aadhaarNumber || aadhaarNumber.length !== 12) {
+        return res.status(400).json({ success: false, message: "Invalid Aadhaar number" });
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000); // Generate a 6-digit OTP
+    otpStore_aadhaar[aadhaarNumber] = otp;
+
+    console.log(`Simulated OTP for Aadhaar ${aadhaarNumber}: ${otp}`); // Log OTP for testing
+
+    res.json({ success: true, message: "OTP sent (simulated)." });
 });
+
+// Verify simulated OTP
+app.post("/aadhaar-verify", (req, res) => {
+    const { aadhaarNumber, otp } = req.body;
+
+    if (!aadhaarNumber || !otp || otp.length !== 6) {
+        return res.status(400).json({ success: false, message: "Invalid request" });
+    }
+
+    if (otpStore_aadhaar[aadhaarNumber] == otp) {
+        delete otpStore_aadhaar[aadhaarNumber]; // Remove OTP after verification
+        res.json({ success: true, message: "Aadhaar verified successfully!" });
+    } else {
+        res.json({ success: false, message: "Invalid OTP. Please try again." });
+    }
+});
+
+const otpStore_pan = {}; // Temporary storage for OTPs
+
+// Generate a simulated OTP for PAN
+app.post("/pan-otp", (req, res) => {
+    const { panNumber } = req.body;
+
+    if (!panNumber || panNumber.length !== 10) {
+        return res.status(400).json({ success: false, message: "Invalid PAN number" });
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000); // Generate a 6-digit OTP
+    otpStore_pan[panNumber] = otp;
+
+    console.log(`Simulated OTP for PAN ${panNumber}: ${otp}`); // Log OTP for testing
+
+    res.json({ success: true, message: "OTP sent (simulated)." });
+});
+
+// Verify simulated OTP
+app.post("/pan-verify", (req, res) => {
+    const { panNumber, otp } = req.body;
+
+    if (!panNumber || !otp || otp.length !== 6) {
+        return res.status(400).json({ success: false, message: "Invalid request" });
+    }
+
+    if (otpStore_pan[panNumber] == otp) {
+        delete otpStore_pan[panNumber]; // Remove OTP after verification
+        res.json({ success: true, message: "PAN verified successfully!" });
+    } else {
+        res.json({ success: false, message: "Invalid OTP. Please try again." });
+    }
+});
+
 
 // Start the server
 app.listen(port, () => {

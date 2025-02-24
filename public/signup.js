@@ -201,3 +201,120 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 
+//Aadhaar OTP
+document.querySelector(".aadhaar").addEventListener("click", async function () {
+  const aadhaarNumber = document.querySelector("input[name='aadhaar']").value;
+
+  if (aadhaarNumber.length !== 12) {
+      alert("Enter a valid 12-digit Aadhaar number.");
+      return;
+  }
+
+  try {
+      const response = await fetch("/aadhaar-otp", {
+          method: "POST",
+          headers: {
+              "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ aadhaarNumber })
+      });
+
+      const data = await response.json();
+      if (data.success) {
+          alert("OTP sent (simulated). Check console for OTP.");
+      } else {
+          alert("Failed to send OTP.");
+      }
+  } catch (error) {
+      console.error("Error:", error);
+  }
+});
+
+document.querySelector(".aadhaar-next").addEventListener("click", async function () {
+  const aadhaarNumber = document.querySelector("input[name='aadhaar']").value;
+  const otp = document.querySelector("input[name='aadhaar_otp']").value;
+
+  if (otp.length !== 6) {
+      alert("Enter a valid 6-digit OTP.");
+      return;
+  }
+
+  try {
+      const response = await fetch("/aadhaar-verify", {
+          method: "POST",
+          headers: {
+              "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ aadhaarNumber, otp })
+      });
+
+      const data = await response.json();
+      if (data.success) {
+          alert("Aadhaar Verified Successfully!");
+      } else {
+          alert("Invalid OTP. Try again.");
+      }
+  } catch (error) {
+      console.error("Error:", error);
+  }
+});
+
+
+//PAN OTP
+
+document.querySelector(".pan").addEventListener("click", async function () {
+  const panNumber = document.querySelector("input[name='pan']").value;
+
+  if (panNumber.length !== 10) {
+      alert("Enter a valid PAN Card number.");
+      return;
+  }
+
+  try {
+      const response = await fetch("/pan-otp", {
+          method: "POST",
+          headers: {
+              "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ panNumber })
+      });
+
+      const data = await response.json();
+      if (data.success) {
+          alert("OTP sent (simulated). Check console for OTP.");
+      } else {
+          alert("Failed to send OTP.");
+      }
+  } catch (error) {
+      console.error("Error:", error);
+  }
+});
+
+document.querySelector(".button-submit").addEventListener("click", async function () {
+  const panNumber = document.querySelector("input[name='pan']").value;
+  const otp = document.querySelector("input[name='pan_otp']").value;
+
+  if (otp.length !== 6) {
+      alert("Enter a valid 6-digit OTP.");
+      return;
+  }
+
+  try {
+      const response = await fetch("/pan-verify", {
+          method: "POST",
+          headers: {
+              "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ panNumber, otp })
+      });
+
+      const data = await response.json();
+      if (data.success) {
+          alert("PAN Verified Successfully!");
+      } else {
+          alert("Invalid OTP. Try again.");
+      }
+  } catch (error) {
+      console.error("Error:", error);
+  }
+});
