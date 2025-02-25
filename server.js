@@ -4,11 +4,26 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const cors = require("cors");
 const crypto = require('crypto');
+const nodemailer = require('nodemailer'); // Add nodemailer for email
+
+const session = require('express-session');
+require('dotenv').config();
 
 const app = express();
 app.use(cors()); 
 app.use(bodyParser.json());
 const port = 4000;
+
+// Use a more secure session configuration
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'your-secret-key', // Use environment variable for production
+  resave: false,
+  saveUninitialized: true,
+  cookie: { 
+    secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  }
+}));
 
 // Serve static files (like HTML, CSS, images, etc.) from the "public" folder
 app.use(express.static(path.join(__dirname, 'public')));
@@ -19,9 +34,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Create MySQL connection
 const db = mysql.createConnection({
   host: 'localhost',
-  user: 'root',          // MySQL username
-  password: '1234567890',  // MySQL password
-  database: 'DRAKZDatabase'  // The database you created earlier
+  user: 'root',
+  password: '1234567890',
+  database: 'DRAKZDatabase'
 });
 
 // Connect to MySQL
@@ -33,17 +48,63 @@ db.connect((err) => {
   console.log('Connected to MySQL database');
 });
 
+// Configure email transporter
+const transporter = nodemailer.createTransport({
+  service: 'gmail', // Or use your preferred email service
+  auth: {
+    user: process.env.EMAIL_USER || 'your-email@gmail.com',
+    pass: process.env.EMAIL_PASSWORD || 'your-email-password'
+  }
+});
+
+// Function to send OTP via email
+async function sendOTPEmail(email, otp) {
+  try {
+    const mailOptions = {
+      from: process.env.EMAIL_USER || 'your-email@gmail.com',
+      to: email,
+      subject: 'Your Verification Code',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
+          <h2 style="color: #333;">Verification Code</h2>
+          <p>Your verification code is:</p>
+          <h1 style="background-color: #f5f5f5; padding: 10px; text-align: center; letter-spacing: 5px; font-size: 32px;">${otp}</h1>
+          <p>This code will expire in 10 minutes.</p>
+          <p style="color: #777; font-size: 12px;">If you did not request this code, please ignore this email.</p>
+        </div>
+      `
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log('Email sent:', info.messageId);
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    console.error('Error sending email:', error);
+    return { success: false, error: error.message };
+  }
+}
+
 // Function to hash password using SHA-256
 function hashPassword(password) {
   return crypto.createHash('sha256').update(password).digest('hex');
 }
 
-// Serve the startup page (startup_page.html)
+// Function to generate a 6-digit OTP
+function generateOTP() {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+// Function to verify OTP (simulated verification since we're storing in session)
+async function verifyOTP(email, submittedOTP, sessionOTP) {
+  // Simple comparison for verification
+  return submittedOTP === sessionOTP;
+}
+
+// Route definitions (unchanged)
 app.get('/start_page', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'start_page.html'));
 });
 
-// Serve login pages for different roles
 app.get('/admin-login', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'admin-login.html'));
 });
@@ -56,7 +117,6 @@ app.get('/login', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
-// Dashboard Routes
 app.get('/admin-dashboard', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'admin-dashboard.html'));
 });
@@ -69,41 +129,34 @@ app.get('/dashboard', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
 });
 
-// POST request to handle Admin Login
+// Login handlers (unchanged)
 app.post('/admin-login', (req, res) => {
-    const { email, password } = req.body;
-  
-    console.log('Admin login attempt:', { email, password }); // Debugging
-  
-    if (!email || !password) {
-      console.error('Missing email or password');
-      return res.status(400).send('Email and password are required');
-    }
-  
-    const hashedPassword = hashPassword(password);
-    console.log('Hashed password:', hashedPassword); // Debugging
-  
-    const query = 'SELECT * FROM admins WHERE email = ? AND password = ?';
-  
-    db.query(query, [email, hashedPassword], (err, results) => {
-      if (err) {
-        console.error('Database query error:', err); // Log the exact error
-        return res.status(500).send('Internal Server Error');
-      }
-  
-      console.log('Query results:', results); // Debugging
-  
-      if (results.length > 0) {
-        console.log('Admin login successful for:', email);
-        res.redirect('/admin-dashboard'); // Redirect to Admin Dashboard
-      } else {
-        console.warn('Invalid login credentials for email:', email);
-        res.status(401).send('Invalid email or password');
-      }
-    });
-  });  
+  const { email, password } = req.body;
 
-// POST request to handle Advisor Login
+  if (!email || !password) {
+    console.error('Missing email or password');
+    return res.status(400).send('Email and password are required');
+  }
+
+  const hashedPassword = hashPassword(password);
+  const query = 'SELECT * FROM admins WHERE email = ? AND password = ?';
+
+  db.query(query, [email, hashedPassword], (err, results) => {
+    if (err) {
+      console.error('Database query error:', err);
+      return res.status(500).send('Internal Server Error');
+    }
+
+    if (results.length > 0) {
+      console.log('Admin login successful for:', email);
+      res.redirect('/admin-dashboard');
+    } else {
+      console.warn('Invalid login credentials for email:', email);
+      res.status(401).send('Invalid email or password');
+    }
+  });
+});  
+
 app.post('/advisor-login', (req, res) => {
   const { email, password } = req.body;
 
@@ -113,7 +166,6 @@ app.post('/advisor-login', (req, res) => {
   }
 
   const hashedPassword = hashPassword(password);
-
   const query = 'SELECT * FROM advisors WHERE email = ? AND password = ?';
 
   db.query(query, [email, hashedPassword], (err, results) => {
@@ -124,7 +176,7 @@ app.post('/advisor-login', (req, res) => {
 
     if (results.length > 0) {
       console.log('Advisor login successful for:', email);
-      res.redirect('/advisor-dashboard'); // Redirect to Advisor Dashboard
+      res.redirect('/advisor-dashboard');
     } else {
       console.warn('Invalid login attempt for email:', email);
       res.send('Invalid email or password');
@@ -132,44 +184,41 @@ app.post('/advisor-login', (req, res) => {
   });
 });
 
-// POST request to handle User Loginapp.post('/login', (req, res) => {
-  app.post('/login', (req, res) => {
-    const { email, password } = req.body;
+app.post('/login', (req, res) => {
+  const { email, password } = req.body;
+
+  // Basic validation
+  if (!email || !password) {
+    return res.status(400).json({
+      status: 'error',
+      message: 'Email and password are required'
+    });
+  }
+
+  const hashedPassword = hashPassword(password);
+  const query = 'SELECT * FROM users WHERE email = ? AND password = ?';
   
-    // Basic validation
-    if (!email || !password) {
-      return res.status(400).json({
+  db.query(query, [email, hashedPassword], (err, results) => {
+    if (err) {
+      console.error('Database error during login:', err);
+      return res.status(500).json({
         status: 'error',
-        message: 'Email and password are required'
+        message: 'Internal server error'
       });
     }
-  
-    const hashedPassword = hashPassword(password);
-  
-    const query = 'SELECT * FROM users WHERE email = ? AND password = ?';
-    
-    db.query(query, [email, hashedPassword], (err, results) => {
-      if (err) {
-        console.error('Database error during login:', err);
-        return res.status(500).json({
-          status: 'error',
-          message: 'Internal server error'
-        });
-      }
-  
-      if (results.length === 0) {
-        return res.status(401).json({
-          status: 'error',
-          message: 'Invalid email or password'
-        });
-      }
-  
-      // User found, redirect to dashboard
-      console.log('Login successful for user:', email);
-      res.redirect('/dashboard');
-    });
-  });
 
+    if (results.length === 0) {
+      return res.status(401).json({
+        status: 'error',
+        message: 'Invalid email or password'
+      });
+    }
+
+    // User found, redirect to dashboard
+    console.log('Login successful for user:', email);
+    res.redirect('/dashboard');
+  });
+});
 
 // Email validation endpoint
 app.post('/check-email', (req, res) => {
@@ -190,7 +239,7 @@ app.post('/check-email', (req, res) => {
   });
 });
 
-// Updated signup endpoint to handle all user details
+// Updated signup endpoint
 app.post('/signup', (req, res) => {
   const {
     fullname,
@@ -201,7 +250,8 @@ app.post('/signup', (req, res) => {
     goals,
     risk,
     aadhaar,
-    pan
+    pan,
+    email_verified // Added to track email verification
   } = req.body;
 
   // Basic validation
@@ -238,8 +288,9 @@ app.post('/signup', (req, res) => {
         risk_tolerance,
         aadhaar_number,
         pan_number,
+        email_verified,
         created_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
     `;
 
     const values = [
@@ -251,7 +302,8 @@ app.post('/signup', (req, res) => {
       goalsString || null,
       risk || null,
       aadhaar || null,
-      pan || null
+      pan || null,
+      email_verified === 'true' ? 1 : 0
     ];
 
     db.query(insertQuery, values, (err, result) => {
@@ -260,80 +312,245 @@ app.post('/signup', (req, res) => {
         return res.status(500).json({ error: 'Internal Server Error' });
       }
       
+      // If Aadhaar and PAN are provided, store them in the verification table as well
+      if (aadhaar && pan) {
+        const verifyQuery = `
+          INSERT INTO users_aadhaar_pan (
+            user_id,
+            aadhaar_number,
+            pan_number,
+            email,
+            created_at
+          ) VALUES (?, ?, ?, ?, NOW())
+        `;
+        
+        db.query(verifyQuery, [result.insertId, aadhaar, pan, email], (verifyErr) => {
+          if (verifyErr) {
+            console.error('Error storing verification data:', verifyErr);
+            // Continue with signup even if this fails
+          }
+        });
+      }
+      
       console.log('New user created:', result);
       res.redirect('/dashboard');
     });
   });
 });
 
-const otpStore_aadhaar = {}; // Temporary storage for OTPs
+// Updated Aadhaar OTP endpoint to use email
+// Updated Aadhaar OTP endpoint to look up email from database
+app.post("/aadhaar-otp", async (req, res) => {
+  const { aadhaarNumber } = req.body;
 
-// Generate a simulated OTP for Aadhaar
-app.post("/aadhaar-otp", (req, res) => {
-    const { aadhaarNumber } = req.body;
+  console.log(`Received Aadhaar OTP request for: ${aadhaarNumber}`);
 
-    if (!aadhaarNumber || aadhaarNumber.length !== 12) {
-        return res.status(400).json({ success: false, message: "Invalid Aadhaar number" });
-    }
+  if (!aadhaarNumber || aadhaarNumber.length !== 12) {
+    return res.status(400).json({ success: false, message: "Invalid Aadhaar number" });
+  }
 
-    const otp = Math.floor(100000 + Math.random() * 900000); // Generate a 6-digit OTP
-    otpStore_aadhaar[aadhaarNumber] = otp;
-
-    console.log(`Simulated OTP for Aadhaar ${aadhaarNumber}: ${otp}`); // Log OTP for testing
-
-    res.json({ success: true, message: "OTP sent (simulated)." });
+  try {
+    // Look up the email associated with this Aadhaar number
+    const lookupQuery = 'SELECT email FROM users_aadhaar_pan WHERE aadhaar_number = ?';
+    
+    db.query(lookupQuery, [aadhaarNumber], async (err, results) => {
+      if (err) {
+        console.error('Database query error:', err);
+        return res.status(500).json({ success: false, message: "Error verifying Aadhaar number" });
+      }
+      
+      if (results.length === 0) {
+        return res.status(404).json({ success: false, message: "Aadhaar number not found in our records" });
+      }
+      
+      const email = results[0].email;
+      console.log(`Found email for Aadhaar: ${email}`);
+      
+      // Generate a new OTP
+      const otp = generateOTP();
+      
+      // Send OTP via email
+      const result = await sendOTPEmail(email, otp);
+      
+      if (result.success) {
+        // Store verification data in session
+        req.session.aadhaarVerification = {
+          aadhaarNumber,
+          email,
+          otp,
+          createdAt: Date.now()
+        };
+        
+        return res.json({ 
+          success: true, 
+          message: `Verification code sent to your registered email (${maskEmail(email)})`,
+          maskedEmail: maskEmail(email)
+        });
+      } else {
+        console.error(`Failed to send email to ${email}:`, result.error);
+        return res.status(500).json({ 
+          success: false, 
+          message: "Failed to send verification code. Please try again later."
+        });
+      }
+    });
+  } catch (error) {
+    console.error('Error sending OTP:', error);
+    return res.status(500).json({ success: false, message: "Error processing request" });
+  }
 });
 
-// Verify simulated OTP
-app.post("/aadhaar-verify", (req, res) => {
-    const { aadhaarNumber, otp } = req.body;
+// Helper function to mask email for privacy
+function maskEmail(email) {
+  const [name, domain] = email.split('@');
+  const maskedName = name.charAt(0) + '*'.repeat(name.length - 2) + name.charAt(name.length - 1);
+  return `${maskedName}@${domain}`;
+}
 
-    if (!aadhaarNumber || !otp || otp.length !== 6) {
-        return res.status(400).json({ success: false, message: "Invalid request" });
-    }
-
-    if (otpStore_aadhaar[aadhaarNumber] == otp) {
-        delete otpStore_aadhaar[aadhaarNumber]; // Remove OTP after verification
-        res.json({ success: true, message: "Aadhaar verified successfully!" });
+// Aadhaar OTP verification endpoint
+app.post("/aadhaar-verify", async (req, res) => {
+  const { aadhaarNumber, otp } = req.body;
+  
+  if (!aadhaarNumber || !otp || otp.length !== 6) {
+    return res.status(400).json({ success: false, message: "Invalid request" });
+  }
+  
+  if (!req.session.aadhaarVerification || 
+      req.session.aadhaarVerification.aadhaarNumber !== aadhaarNumber ||
+      Date.now() > req.session.aadhaarVerification.createdAt + (10 * 60 * 1000)) {
+    return res.status(400).json({ success: false, message: "Verification session expired or invalid" });
+  }
+  
+  const email = req.session.aadhaarVerification.email;
+  const sessionOTP = req.session.aadhaarVerification.otp;
+  
+  try {
+    // Verify the OTP by comparing with the stored OTP
+    const isValid = await verifyOTP(email, otp, sessionOTP);
+    
+    if (isValid) {
+      // Mark Aadhaar as verified in session
+      req.session.aadhaarVerified = true;
+      
+      return res.json({ 
+        success: true, 
+        message: "Aadhaar verified successfully!",
+        email: email
+      });
     } else {
-        res.json({ success: false, message: "Invalid OTP. Please try again." });
+      return res.json({ success: false, message: "Invalid verification code. Please try again." });
     }
+  } catch (error) {
+    console.error('Error during verification:', error);
+    return res.status(500).json({ success: false, message: "Verification error. Please try again." });
+  }
 });
 
-const otpStore_pan = {}; // Temporary storage for OTPs
+// Updated PAN OTP endpoint to look up email from database
+app.post("/pan-otp", async (req, res) => {
+  const { panNumber } = req.body;
 
-// Generate a simulated OTP for PAN
-app.post("/pan-otp", (req, res) => {
-    const { panNumber } = req.body;
+  console.log(`Received PAN OTP request for: ${panNumber}`);
 
-    if (!panNumber || panNumber.length !== 10) {
-        return res.status(400).json({ success: false, message: "Invalid PAN number" });
-    }
+  if (!panNumber || panNumber.length !== 10) {
+    return res.status(400).json({ success: false, message: "Invalid PAN number" });
+  }
 
-    const otp = Math.floor(100000 + Math.random() * 900000); // Generate a 6-digit OTP
-    otpStore_pan[panNumber] = otp;
-
-    console.log(`Simulated OTP for PAN ${panNumber}: ${otp}`); // Log OTP for testing
-
-    res.json({ success: true, message: "OTP sent (simulated)." });
+  try {
+    // Look up the email associated with this PAN number
+    const lookupQuery = 'SELECT email FROM users_aadhaar_pan WHERE pan_number = ?';
+    
+    db.query(lookupQuery, [panNumber], async (err, results) => {
+      if (err) {
+        console.error('Database query error:', err);
+        return res.status(500).json({ success: false, message: "Error verifying PAN number" });
+      }
+      
+      if (results.length === 0) {
+        return res.status(404).json({ success: false, message: "PAN number not found in our records" });
+      }
+      
+      const email = results[0].email;
+      console.log(`Found email for PAN: ${email}`);
+      
+      // Generate a new OTP
+      const otp = generateOTP();
+      
+      // Send OTP via email
+      const result = await sendOTPEmail(email, otp);
+      
+      if (result.success) {
+        // Store verification data in session
+        req.session.panVerification = {
+          panNumber,
+          email,
+          otp,
+          createdAt: Date.now()
+        };
+        
+        return res.json({ 
+          success: true, 
+          message: `Verification code sent to your registered email (${maskEmail(email)})`,
+          maskedEmail: maskEmail(email)
+        });
+      } else {
+        console.error(`Failed to send email to ${email}:`, result.error);
+        return res.status(500).json({ 
+          success: false, 
+          message: "Failed to send verification code. Please try again later."
+        });
+      }
+    });
+  } catch (error) {
+    console.error('Error sending OTP:', error);
+    return res.status(500).json({ success: false, message: "Error processing request" });
+  }
 });
 
-// Verify simulated OTP
-app.post("/pan-verify", (req, res) => {
-    const { panNumber, otp } = req.body;
-
-    if (!panNumber || !otp || otp.length !== 6) {
-        return res.status(400).json({ success: false, message: "Invalid request" });
-    }
-
-    if (otpStore_pan[panNumber] == otp) {
-        delete otpStore_pan[panNumber]; // Remove OTP after verification
-        res.json({ success: true, message: "PAN verified successfully!" });
+// PAN OTP verification endpoint
+app.post("/pan-verify", async (req, res) => {
+  const { panNumber, otp } = req.body;
+  
+  if (!panNumber || !otp || otp.length !== 6) {
+    return res.status(400).json({ success: false, message: "Invalid request" });
+  }
+  
+  if (!req.session.panVerification || 
+      req.session.panVerification.panNumber !== panNumber ||
+      Date.now() > req.session.panVerification.createdAt + (10 * 60 * 1000)) {
+    return res.status(400).json({ success: false, message: "Verification session expired or invalid" });
+  }
+  
+  const email = req.session.panVerification.email;
+  const sessionOTP = req.session.panVerification.otp;
+  
+  try {
+    // Verify the OTP by comparing with the stored OTP
+    const isValid = await verifyOTP(email, otp, sessionOTP);
+    
+    if (isValid) {
+      // Mark PAN as verified in session
+      req.session.panVerified = true;
+      
+      return res.json({ 
+        success: true, 
+        message: "PAN verified successfully!",
+        email: email
+      });
     } else {
-        res.json({ success: false, message: "Invalid OTP. Please try again." });
+      return res.json({ success: false, message: "Invalid verification code. Please try again." });
     }
+  } catch (error) {
+    console.error('Error during verification:', error);
+    return res.status(500).json({ success: false, message: "Verification error. Please try again." });
+  }
 });
 
+// Helper function to validate email format
+function isValidEmail(email) {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
 
 // Start the server
 app.listen(port, () => {

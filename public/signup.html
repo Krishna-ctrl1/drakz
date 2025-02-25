@@ -4,6 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Signup - FinAssist</title>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="signup.js"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <meta name="google-signin-client_id" content="1037396813768-4643uec933fpoqbce7lf7i73g4najnso.apps.googleusercontent.com">
   <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline' https://apis.google.com https://www.gstatic.com;">
@@ -198,6 +202,7 @@
              placeholder="ABCDE1234F" pattern="[A-Z]{5}[0-9]{4}[A-Z]{1}" 
              title="10-character PAN number">
     </div>
+    <p id="aadhaar-status" class=""></p>
   </div>
 
   <div class="pan-btn-grp">
@@ -212,6 +217,7 @@
              placeholder="Enter 6-digit OTP" pattern="\d{6}" 
              title="6-digit OTP" maxlength="6">
     </div>
+    <p id="pan-status" class=""></p>
   </div>
 
   <div class="button-group">
@@ -220,5 +226,6 @@
   </form>
 
   <script src="./signup.js"></script>
+  <script src="../server.js"></script>
 </body>
 </html>

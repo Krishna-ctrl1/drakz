@@ -136,7 +136,43 @@ function handlePrevious() {
   }
 }
 
+// Function to check if email already exists
+async function checkEmailExists(email) {
+  try {
+    const response = await fetch('/check-email', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email }),
+    });
+    
+    const data = await response.json();
+    return data.exists;
+  } catch (error) {
+    console.error('Error checking email:', error);
+    return false;
+  }
+}
+
+// Store user verification data
+let userVerificationData = {
+  email: null,
+  aadhaarVerified: false,
+  panVerified: false
+};
+
 document.addEventListener('DOMContentLoaded', function () {
+  // Add status elements for Aadhaar and PAN verification
+  const aadhaarOtpInput = document.querySelector("input[name='aadhaar_otp']").parentNode;
+  const aadhaarStatus = document.createElement('p');
+  aadhaarStatus.id = 'aadhaar-status';
+  aadhaarOtpInput.parentNode.appendChild(aadhaarStatus);
+  
+  const panOtpInput = document.querySelector("input[name='pan_otp']").parentNode;
+  const panStatus = document.createElement('p');
+  panStatus.id = 'pan-status';
+  panOtpInput.parentNode.appendChild(panStatus);
 
   const style = document.createElement('style');
   style.textContent = `
@@ -146,6 +182,29 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     .error-message {
       font-size: 12px;
+    }
+    #aadhaar-status, #pan-status {
+      margin-top: 10px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .text-green-500 {
+      color: #10b981;
+    }
+    .text-red-500 {
+      color: #ef4444;
+    }
+    .text-blue-500 {
+      color: #3b82f6;
+    }
+    .font-bold {
+      font-weight: 700;
+    }
+    .verified {
+      border: 2px solid #10b981;
+      padding: 5px;
+      border-radius: 5px;
+      background-color: rgba(16, 185, 129, 0.1);
     }
   `;
   document.head.appendChild(style);
@@ -162,6 +221,30 @@ document.addEventListener('DOMContentLoaded', function () {
   if (backToSignInBtn) {
     backToSignInBtn.addEventListener("click", function () {
       window.location.href = "login.html";
+    });
+  }
+  
+  // Email validation for first step
+  const emailInput = document.querySelector("input[name='email']");
+  if (emailInput) {
+    emailInput.addEventListener('blur', async function() {
+      if (this.value && this.checkValidity()) {
+        const emailExists = await checkEmailExists(this.value);
+        const inputForm = this.closest('.inputForm');
+        let errorMessage = inputForm.querySelector('.error-message');
+        
+        if (!errorMessage) {
+          errorMessage = document.createElement('span');
+          errorMessage.classList.add('error-message');
+          errorMessage.style.color = 'red';
+          inputForm.appendChild(errorMessage);
+        }
+        
+        if (emailExists) {
+          inputForm.classList.add('invalid');
+          errorMessage.textContent = "This email is already registered";
+        }
+      }
     });
   }
   
@@ -198,123 +281,295 @@ document.addEventListener('DOMContentLoaded', function () {
   
   // Start at step 1
   showStep(1);
+  
+  // Disable OTP input fields initially
+  document.querySelector("input[name='aadhaar_otp']").disabled = true;
+  document.querySelector("input[name='pan_otp']").disabled = true;
+  
+  // Disable the submit button initially
+  const submitButton = document.querySelector(".button-submit");
+  if (submitButton) {
+    submitButton.disabled = true;
+  }
+  
+  // Update the Aadhaar OTP request event listener
+  const aadhaarOtpBtn = document.querySelector(".aadhaar");
+  if (aadhaarOtpBtn) {
+    aadhaarOtpBtn.addEventListener("click", handleAadhaarVerification);
+  }
+  
+  // Update the Aadhaar OTP verification event listener
+  const aadhaarVerifyBtn = document.querySelector(".aadhaar-next");
+  if (aadhaarVerifyBtn) {
+    aadhaarVerifyBtn.addEventListener("click", verifyAadhaarOTP);
+  }
+  
+  // Update the PAN OTP request event listener
+  const panOtpBtn = document.querySelector(".pan");
+  if (panOtpBtn) {
+    panOtpBtn.addEventListener("click", handlePANVerification);
+  }
+  
+  // Update the PAN OTP verification event listener
+  const panVerifyBtn = document.querySelector(".pan-next");
+  if (panVerifyBtn) {
+    panVerifyBtn.addEventListener("click", verifyPANOTP);
+  }
 });
 
-
-//Aadhaar OTP
-document.querySelector(".aadhaar").addEventListener("click", async function () {
+function handleAadhaarVerification() {
   const aadhaarNumber = document.querySelector("input[name='aadhaar']").value;
-
-  if (aadhaarNumber.length !== 12) {
-      alert("Enter a valid 12-digit Aadhaar number.");
-      return;
+  const aadhaarStatus = document.querySelector("#aadhaar-status");
+  
+  // Validate Aadhaar Number
+  if (aadhaarNumber.length !== 12 || !/^\d{12}$/.test(aadhaarNumber)) {
+    aadhaarStatus.textContent = "Please enter a valid 12-digit Aadhaar number.";
+    aadhaarStatus.className = "text-red-500";
+    return;
   }
 
-  try {
-      const response = await fetch("/aadhaar-otp", {
-          method: "POST",
-          headers: {
-              "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ aadhaarNumber })
-      });
+  // Show loading state
+  aadhaarStatus.textContent = "Verifying Aadhaar and sending OTP...";
+  aadhaarStatus.className = "text-blue-500";
+  
+  // Request OTP from server - it will look up the email from the database
+  fetch('/aadhaar-otp', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ aadhaarNumber }),
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      // Store the masked email to display to the user
+      const maskedEmail = data.maskedEmail || "your registered email";
+      aadhaarStatus.textContent = `OTP sent to ${maskedEmail}`;
+      aadhaarStatus.className = "text-green-500";
+      
+      // Enable OTP input
+      document.querySelector("input[name='aadhaar_otp']").disabled = false;
+      document.querySelector("input[name='aadhaar_otp']").focus();
+    } else {
+      aadhaarStatus.textContent = data.message || "Error sending verification code. Aadhaar may not be registered.";
+      aadhaarStatus.className = "text-red-500";
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    aadhaarStatus.textContent = "Server error. Please try again later.";
+    aadhaarStatus.className = "text-red-500";
+  });
+}
 
-      const data = await response.json();
-      if (data.success) {
-          alert("OTP sent (simulated). Check console for OTP.");
-      } else {
-          alert("Failed to send OTP.");
-      }
-  } catch (error) {
-      console.error("Error:", error);
-  }
-});
-
-document.querySelector(".aadhaar-next").addEventListener("click", async function () {
+function verifyAadhaarOTP(event) {
+  event.preventDefault();
+  event.stopPropagation();
+  
   const aadhaarNumber = document.querySelector("input[name='aadhaar']").value;
   const otp = document.querySelector("input[name='aadhaar_otp']").value;
+  const aadhaarStatus = document.querySelector("#aadhaar-status");
 
-  if (otp.length !== 6) {
-      alert("Enter a valid 6-digit OTP.");
-      return;
+  if (otp.length !== 6 || !/^\d{6}$/.test(otp)) {
+    aadhaarStatus.textContent = "Please enter a valid 6-digit verification code.";
+    aadhaarStatus.className = "text-red-500";
+    return;
   }
 
-  try {
-      const response = await fetch("/aadhaar-verify", {
-          method: "POST",
-          headers: {
-              "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ aadhaarNumber, otp })
-      });
-
-      const data = await response.json();
-      if (data.success) {
-          alert("Aadhaar Verified Successfully!");
-      } else {
-          alert("Invalid OTP. Try again.");
+  // Show loading state
+  aadhaarStatus.textContent = "Verifying...";
+  aadhaarStatus.className = "text-blue-500";
+  
+  // Verify OTP with server
+  fetch('/aadhaar-verify', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ aadhaarNumber, otp }),
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      aadhaarStatus.textContent = "✓ Verification successful!";
+      aadhaarStatus.className = "text-green-500 font-bold";
+      
+      // Mark as verified visually
+      document.querySelector(".aadhaar-verification").classList.add("verified");
+      
+      // Store verification data
+      userVerificationData.aadhaarVerified = true;
+      
+      // If email was returned and different from current
+      if (data.email && data.email !== userVerificationData.email) {
+        userVerificationData.email = data.email;
       }
-  } catch (error) {
-      console.error("Error:", error);
-  }
-});
+      
+      // Now move to next step
+      handleNext();
+    } else {
+      aadhaarStatus.textContent = data.message || "Invalid verification code. Please try again.";
+      aadhaarStatus.className = "text-red-500";
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    aadhaarStatus.textContent = "Server error. Please try again later.";
+    aadhaarStatus.className = "text-red-500";
+  });
+}
 
-
-//PAN OTP
-
-document.querySelector(".pan").addEventListener("click", async function () {
+function handlePANVerification() {
   const panNumber = document.querySelector("input[name='pan']").value;
+  const panStatus = document.querySelector("#pan-status");
 
-  if (panNumber.length !== 10) {
-      alert("Enter a valid PAN Card number.");
-      return;
+  // PAN format validation - 5 letters, 4 digits, 1 letter
+  const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
+  if (!panRegex.test(panNumber)) {
+    panStatus.textContent = "Please enter a valid PAN number (format: ABCDE1234F).";
+    panStatus.className = "text-red-500";
+    return;
   }
 
-  try {
-      const response = await fetch("/pan-otp", {
-          method: "POST",
-          headers: {
-              "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ panNumber })
-      });
+  // Show loading state
+  panStatus.textContent = "Verifying PAN and sending OTP...";
+  panStatus.className = "text-blue-500";
+  
+  // Request OTP from server using email
+  fetch('/pan-otp', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ panNumber }),
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      // Store the masked email to display to the user
+      const maskedEmail = data.maskedEmail || "your registered email";
+      panStatus.textContent = `OTP sent to ${maskedEmail}`;
+      panStatus.className = "text-green-500";
+      
+      // Enable OTP input
+      document.querySelector("input[name='pan_otp']").disabled = false;
+      document.querySelector("input[name='pan_otp']").focus();
+    } else {
+      panStatus.textContent = data.message || "Error sending verification code. PAN may not be registered.";
+      panStatus.className = "text-red-500";
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    panStatus.textContent = "Server error. Please try again later.";
+    panStatus.className = "text-red-500";
+  });
+}
 
-      const data = await response.json();
-      if (data.success) {
-          alert("OTP sent (simulated). Check console for OTP.");
-      } else {
-          alert("Failed to send OTP.");
-      }
-  } catch (error) {
-      console.error("Error:", error);
-  }
-});
-
-document.querySelector(".button-submit").addEventListener("click", async function () {
+function verifyPANOTP(event) {
+  event.preventDefault();
+  event.stopPropagation();
+  
   const panNumber = document.querySelector("input[name='pan']").value;
   const otp = document.querySelector("input[name='pan_otp']").value;
+  const panStatus = document.querySelector("#pan-status");
 
-  if (otp.length !== 6) {
-      alert("Enter a valid 6-digit OTP.");
-      return;
+  if (otp.length !== 6 || !/^\d{6}$/.test(otp)) {
+    panStatus.textContent = "Please enter a valid 6-digit verification code.";
+    panStatus.className = "text-red-500";
+    return;
   }
 
-  try {
-      const response = await fetch("/pan-verify", {
-          method: "POST",
-          headers: {
-              "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ panNumber, otp })
-      });
-
-      const data = await response.json();
-      if (data.success) {
-          alert("PAN Verified Successfully!");
-      } else {
-          alert("Invalid OTP. Try again.");
+  // Show loading state
+  panStatus.textContent = "Verifying...";
+  panStatus.className = "text-blue-500";
+  
+  // Verify OTP with server
+  fetch('/pan-verify', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ panNumber, otp }),
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      panStatus.textContent = "✓ Verification successful!";
+      panStatus.className = "text-green-500 font-bold";
+      
+      // Mark as verified visually
+      document.querySelector(".pan-verification").classList.add("verified");
+      
+      // Store verification data
+      userVerificationData.panVerified = true;
+      
+      // If email was returned and different from current
+      if (data.email && data.email !== userVerificationData.email) {
+        userVerificationData.email = data.email;
       }
-  } catch (error) {
-      console.error("Error:", error);
+      
+      // Enable submit button
+      document.querySelector(".button-submit").disabled = false;
+    } else {
+      panStatus.textContent = data.message || "Invalid verification code. Please try again.";
+      panStatus.className = "text-red-500";
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    panStatus.textContent = "Server error. Please try again later.";
+    panStatus.className = "text-red-500";
+  });
+}
+
+// Helper function to validate email format
+function isValidEmail(email) {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
+
+// Function to handle form submission
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.querySelector('form');
+  
+  if (form) {
+    form.addEventListener('submit', function(event) {
+      // Add email verification status to form data
+      if (!document.getElementById('email_verified')) {
+        const emailVerified = document.createElement('input');
+        emailVerified.type = 'hidden';
+        emailVerified.id = 'email_verified';
+        emailVerified.name = 'email_verified';
+        emailVerified.value = (userVerificationData.aadhaarVerified && userVerificationData.panVerified) ? 'true' : 'false';
+        form.appendChild(emailVerified);
+      } else {
+        document.getElementById('email_verified').value = (userVerificationData.aadhaarVerified && userVerificationData.panVerified) ? 'true' : 'false';
+      }
+      
+      // Add hidden fields for verification status
+      if (!document.getElementById('aadhaar_verified')) {
+        const aadhaarVerified = document.createElement('input');
+        aadhaarVerified.type = 'hidden';
+        aadhaarVerified.id = 'aadhaar_verified';
+        aadhaarVerified.name = 'aadhaar_verified';
+        aadhaarVerified.value = userVerificationData.aadhaarVerified ? 'true' : 'false';
+        form.appendChild(aadhaarVerified);
+      } else {
+        document.getElementById('aadhaar_verified').value = userVerificationData.aadhaarVerified ? 'true' : 'false';
+      }
+      
+      if (!document.getElementById('pan_verified')) {
+        const panVerified = document.createElement('input');
+        panVerified.type = 'hidden';
+        panVerified.id = 'pan_verified';
+        panVerified.name = 'pan_verified';
+        panVerified.value = userVerificationData.panVerified ? 'true' : 'false';
+        form.appendChild(panVerified);
+      } else {
+        document.getElementById('pan_verified').value = userVerificationData.panVerified ? 'true' : 'false';
+      }
+    });
   }
 });
