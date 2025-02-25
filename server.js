@@ -12,7 +12,7 @@ require('dotenv').config();
 const app = express();
 app.use(cors()); 
 app.use(bodyParser.json());
-const port = 3000;
+const port = 4000;
 
 // Use a more secure session configuration
 app.use(session({
@@ -239,61 +239,79 @@ app.post('/check-email', (req, res) => {
   });
 });
 
-// Updated signup endpoint with better error handling
+// Update the signup endpoint with better error handling and logging
 app.post('/signup', (req, res) => {
   const {
-    fullname,
-    email,
-    password,
-    income,
-    employment,
-    goals,
+    name, 
+    email, 
+    password, 
+    monthly_income, 
+    employment_status,
+    financial_goals, 
     risk,
-    aadhaar,
-    pan,
+    aadhaar_number,
+    pan_number,
     email_verified
   } = req.body;
 
-  console.log('Received signup request:', { 
-    fullname, email, 
+  console.log('Signup request:', {
+    name, 
+    email,
     // Don't log password
-    income, employment, 
-    goals: Array.isArray(goals) ? goals.join(',') : goals,
-    risk, 
-    // Don't log full Aadhaar/PAN for security
-    aadhaar: aadhaar ? '****' + aadhaar.slice(-4) : null,
-    pan: pan ? '****' + pan.slice(-4) : null,
+    monthly_income, 
+    employment_status,
+    financial_goals: Array.isArray(financial_goals) ? financial_goals : [financial_goals],
+    risk,
+    aadhaar_number: aadhaar_number ? '****' + aadhaar_number.substr(-4) : null,
+    pan_number: pan_number ? '****' + pan_number.substr(-4) : null,
     email_verified
   });
 
-  // Basic validation
-  if (!fullname || !email || !password) {
-    console.error('Required fields missing:', { 
-      fullname: !fullname, 
-      email: !email, 
-      password: !password 
-    });
+  // Improved validation
+  if (!name || !email || !password) {
     return res.status(400).json({ error: 'Required fields are missing' });
   }
 
-  // First check if email exists
+  // Check if email exists
   const checkEmailQuery = 'SELECT email FROM users WHERE email = ?';
   db.query(checkEmailQuery, [email], (err, results) => {
     if (err) {
-      console.error('Database query error during email check:', err);
-      return res.status(500).json({ error: 'Internal Server Error: Unable to check email' });
+      console.error('Database error during email check:', err);
+      return res.status(500).json({ error: 'Database error during email check' });
     }
 
     if (results.length > 0) {
       return res.status(409).json({ error: 'Email already exists' });
     }
 
-    // If email doesn't exist, proceed with insertion
+    // Hash password
     const hashedPassword = hashPassword(password);
     
-    // Convert goals array to string if it exists
-    const goalsString = Array.isArray(goals) ? goals.join(',') : goals;
+    // Properly handle financial_goalss array or string
+    let financial_goals;
+    if (Array.isArray(financial_goals)) {
+      financial_goals = financial_goals.join(',');
+    } else if (typeof financial_goals === 'string') {
+      financial_goals = financial_goals;
+    } else {
+      financial_goals = null;
+    }
 
+    // Log what we're inserting for debugging
+    console.log('Inserting user with values:', {
+      name,
+      email,
+      // password obfuscated
+      monthly_income: monthly_income || null,
+      employment_status: employment_status || null,
+      financial_goals: financial_goals || null,
+      risk: risk || null,
+      aadhaar_number: aadhaar_number ? '****' + aadhaar_number.substr(-4) : null,
+      pan_number: pan_number ? '****' + pan_number.substr(-4) : null,
+      email_verified: email_verified === 'true' ? 1 : 0
+    });
+
+    // Create a prepared statement to ensure safe insertion
     const insertQuery = `
       INSERT INTO users (
         name,
@@ -311,53 +329,33 @@ app.post('/signup', (req, res) => {
     `;
 
     const values = [
-      fullname,
+      name,
       email,
       hashedPassword,
-      income || null,
-      employment || null,
-      goalsString || null,
+      monthly_income || null,
+      employment_status || null,
+      financial_goals || null,
       risk || null,
-      aadhaar || null,
-      pan || null,
+      aadhaar_number || null,
+      pan_number || null,
       email_verified === 'true' ? 1 : 0
     ];
 
+    // Execute the insert
     db.query(insertQuery, values, (err, result) => {
       if (err) {
-        console.error('Error inserting user into database:', err);
-        return res.status(500).json({ error: 'Internal Server Error: Unable to create user' });
+        console.error('Database error during user creation:', err);
+        return res.status(500).json({ error: 'Database error during user creation' });
       }
       
-      // If Aadhaar and PAN are provided, store them in the verification table as well
-      if (aadhaar && pan) {
-        const verifyQuery = `
-          INSERT INTO users_aadhaar_pan (
-            user_id,
-            aadhaar_number,
-            pan_number,
-            email,
-            created_at
-          ) VALUES (?, ?, ?, ?, NOW())
-        `;
-        
-        db.query(verifyQuery, [result.insertId, aadhaar, pan, email], (verifyErr) => {
-          if (verifyErr) {
-            console.error('Error storing verification data:', verifyErr);
-            // Continue with signup even if this fails
-          }
-        });
-      }
+      console.log('User created successfully with ID:', result.insertId);
       
-      console.log('New user created with ID:', result.insertId);
-      
-      // Set user session data
+      // Set user session
       req.session.userId = result.insertId;
       req.session.email = email;
       req.session.isLoggedIn = true;
       
-      // Redirect to dashboard
-      res.status(200).json({ success: true, redirect: '/dashboard' });
+      return res.status(200).json({ success: true, redirect: '/dashboard' });
     });
   });
 });

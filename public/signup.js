@@ -552,7 +552,6 @@ function isValidEmail(email) {
   return emailRegex.test(email);
 }
 
-// Function to handle form submission
 document.addEventListener('DOMContentLoaded', function() {
   const form = document.querySelector('form');
   
@@ -560,42 +559,40 @@ document.addEventListener('DOMContentLoaded', function() {
     form.addEventListener('submit', function(event) {
       event.preventDefault(); // Prevent default form submission
       
-      // Gather all form data
-      const formData = new FormData(form);
-      const jsonData = {};
-      
-      // Convert FormData to JSON object
-      for (const [key, value] of formData.entries()) {
-        jsonData[key] = value;
-      }
-      
-      // Handle special fields
-      jsonData.email_verified = (userVerificationData.aadhaarVerified && userVerificationData.panVerified) ? 'true' : 'false';
+      // Create a data object with all form fields
+      const formData = {
+        name: document.querySelector('input[name="fullname"]').value,
+        email: document.querySelector('input[name="email"]').value,
+        password: document.querySelector('input[name="password"]').value,
+        monthly_income: document.querySelector('input[name="income"]').value,
+        employment_status: document.querySelector('select[name="employment"]').value,
+        risk: document.querySelector('input[name="risk"]:checked')?.value || 'moderate',
+        aadhaar_number: document.querySelector('input[name="aadhaar"]').value,
+        pan_number: document.querySelector('input[name="pan"]').value,
+        email_verified: (userVerificationData.aadhaarVerified && userVerificationData.panVerified) ? 'true' : 'false'
+      };
       
       // Handle goals checkbox group
       const goals = Array.from(document.querySelectorAll('input[name="goals"]:checked')).map(el => el.value);
       if (goals.length > 0) {
-        jsonData.goals = goals;
+        formData.financial_goals = goals;
       }
       
-      console.log('Submitting form data:', jsonData);
+      console.log('Submitting form data:', formData);
       
       // Send data as JSON
-      fetch('/signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(jsonData),
+      fetch("/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData)
       })
       .then(response => {
-        if (response.ok) {
-          return response.json();
-        } else {
+        if (!response.ok) {
           return response.json().then(data => {
-            throw new Error(data.error || 'Signup failed');
+            throw new Error(data.error || `Signup failed with status ${response.status}`);
           });
         }
+        return response.json();
       })
       .then(data => {
         if (data.success && data.redirect) {
@@ -605,8 +602,22 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       })
       .catch(error => {
-        console.error('Error:', error);
-        alert(error.message || 'An error occurred during signup');
+        console.error('Error during signup:', error);
+        
+        // Create or update error message element
+        let errorElement = document.getElementById('signup-error');
+        if (!errorElement) {
+          errorElement = document.createElement('div');
+          errorElement.id = 'signup-error';
+          errorElement.style.color = 'red';
+          errorElement.style.marginTop = '10px';
+          errorElement.style.padding = '10px';
+          errorElement.style.backgroundColor = '#ffeeee';
+          errorElement.style.borderRadius = '5px';
+          document.querySelector('form').appendChild(errorElement);
+        }
+        
+        errorElement.textContent = error.message || 'An error occurred during signup';
       });
     });
   }
