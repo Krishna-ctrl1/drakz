@@ -12,7 +12,7 @@ require('dotenv').config();
 const app = express();
 app.use(cors()); 
 app.use(bodyParser.json());
-const port = 4000;
+const port = 3000;
 
 // Use a more secure session configuration
 app.use(session({
@@ -239,7 +239,7 @@ app.post('/check-email', (req, res) => {
   });
 });
 
-// Updated signup endpoint
+// Updated signup endpoint with better error handling
 app.post('/signup', (req, res) => {
   const {
     fullname,
@@ -251,11 +251,28 @@ app.post('/signup', (req, res) => {
     risk,
     aadhaar,
     pan,
-    email_verified // Added to track email verification
+    email_verified
   } = req.body;
+
+  console.log('Received signup request:', { 
+    fullname, email, 
+    // Don't log password
+    income, employment, 
+    goals: Array.isArray(goals) ? goals.join(',') : goals,
+    risk, 
+    // Don't log full Aadhaar/PAN for security
+    aadhaar: aadhaar ? '****' + aadhaar.slice(-4) : null,
+    pan: pan ? '****' + pan.slice(-4) : null,
+    email_verified
+  });
 
   // Basic validation
   if (!fullname || !email || !password) {
+    console.error('Required fields missing:', { 
+      fullname: !fullname, 
+      email: !email, 
+      password: !password 
+    });
     return res.status(400).json({ error: 'Required fields are missing' });
   }
 
@@ -263,8 +280,8 @@ app.post('/signup', (req, res) => {
   const checkEmailQuery = 'SELECT email FROM users WHERE email = ?';
   db.query(checkEmailQuery, [email], (err, results) => {
     if (err) {
-      console.error('Database query error:', err);
-      return res.status(500).json({ error: 'Internal Server Error' });
+      console.error('Database query error during email check:', err);
+      return res.status(500).json({ error: 'Internal Server Error: Unable to check email' });
     }
 
     if (results.length > 0) {
@@ -309,7 +326,7 @@ app.post('/signup', (req, res) => {
     db.query(insertQuery, values, (err, result) => {
       if (err) {
         console.error('Error inserting user into database:', err);
-        return res.status(500).json({ error: 'Internal Server Error' });
+        return res.status(500).json({ error: 'Internal Server Error: Unable to create user' });
       }
       
       // If Aadhaar and PAN are provided, store them in the verification table as well
@@ -332,14 +349,20 @@ app.post('/signup', (req, res) => {
         });
       }
       
-      console.log('New user created:', result);
-      res.redirect('/dashboard');
+      console.log('New user created with ID:', result.insertId);
+      
+      // Set user session data
+      req.session.userId = result.insertId;
+      req.session.email = email;
+      req.session.isLoggedIn = true;
+      
+      // Redirect to dashboard
+      res.status(200).json({ success: true, redirect: '/dashboard' });
     });
   });
 });
 
-// Updated Aadhaar OTP endpoint to use email
-// Updated Aadhaar OTP endpoint to look up email from database
+//Aadhaar OTP endpoint
 app.post("/aadhaar-otp", async (req, res) => {
   const { aadhaarNumber } = req.body;
 

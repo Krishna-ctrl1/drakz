@@ -174,6 +174,18 @@ document.addEventListener('DOMContentLoaded', function () {
   panStatus.id = 'pan-status';
   panOtpInput.parentNode.appendChild(panStatus);
 
+  const aadhaarStepNumber = 4;
+  const aadhaarNextButton = document.querySelector(`.form-step[data-step="${aadhaarStepNumber}"] .button-next`);
+  if (aadhaarNextButton) {
+    aadhaarNextButton.disabled = true;
+  }
+
+  const panStepNumber = 5;
+  const panNextButton = document.querySelector(`.form-step[data-step="${panStepNumber}"] .button-next`);
+  if (panNextButton) {
+    panNextButton.disabled = true;
+  }
+
   const style = document.createElement('style');
   style.textContent = `
     .radio-group .error-message, .terms .error-message {
@@ -292,28 +304,28 @@ document.addEventListener('DOMContentLoaded', function () {
     submitButton.disabled = true;
   }
   
-  // Update the Aadhaar OTP request event listener
-  const aadhaarOtpBtn = document.querySelector(".aadhaar");
-  if (aadhaarOtpBtn) {
-    aadhaarOtpBtn.addEventListener("click", handleAadhaarVerification);
-  }
-  
-  // Update the Aadhaar OTP verification event listener
-  const aadhaarVerifyBtn = document.querySelector(".aadhaar-next");
-  if (aadhaarVerifyBtn) {
-    aadhaarVerifyBtn.addEventListener("click", verifyAadhaarOTP);
-  }
-  
   // Update the PAN OTP request event listener
-  const panOtpBtn = document.querySelector(".pan");
+  const panOtpBtn = document.querySelector(".pan-otp-send-btn");
   if (panOtpBtn) {
     panOtpBtn.addEventListener("click", handlePANVerification);
   }
   
   // Update the PAN OTP verification event listener
-  const panVerifyBtn = document.querySelector(".pan-next");
+  const panVerifyBtn = document.querySelector(".pan-otp-verify-btn");
   if (panVerifyBtn) {
     panVerifyBtn.addEventListener("click", verifyPANOTP);
+  }
+
+  // Link the Aadhaar OTP send functionality to the button with class "aadhaar-otp-send-button"
+  const aadhaarOtpSendButton = document.querySelector(".aadhaar-otp-send-btn");
+  if (aadhaarOtpSendButton) {
+    aadhaarOtpSendButton.addEventListener("click", handleAadhaarVerification);
+  }
+
+  // Link the Aadhaar OTP verification functionality to the button with class "aadhaar-otp-verify-btn"
+  const aadhaarOtpVerifyButton = document.querySelector(".aadhaar-otp-verify-btn");
+  if (aadhaarOtpVerifyButton) {
+    aadhaarOtpVerifyButton.addEventListener("click", verifyAadhaarOTP);
   }
 });
 
@@ -392,11 +404,14 @@ function verifyAadhaarOTP(event) {
   .then(response => response.json())
   .then(data => {
     if (data.success) {
-      aadhaarStatus.textContent = "✓ Verification successful!";
+      aadhaarStatus.textContent = "✓ Verification successful! You can now proceed to the next step.";
       aadhaarStatus.className = "text-green-500 font-bold";
       
-      // Mark as verified visually
-      document.querySelector(".aadhaar-verification").classList.add("verified");
+      // Mark as verified visually - check if element exists first
+      const aadhaarVerificationElement = document.querySelector(".aadhaar-verification");
+      if (aadhaarVerificationElement) {
+        aadhaarVerificationElement.classList.add("verified");
+      }
       
       // Store verification data
       userVerificationData.aadhaarVerified = true;
@@ -406,8 +421,12 @@ function verifyAadhaarOTP(event) {
         userVerificationData.email = data.email;
       }
       
-      // Now move to next step
-      handleNext();
+      // Enable the Next button in this step
+      const nextButton = document.querySelector(`.form-step[data-step="${currentStep}"] .button-next`);
+      if (nextButton) {
+        nextButton.disabled = false;
+      }
+    
     } else {
       aadhaarStatus.textContent = data.message || "Invalid verification code. Please try again.";
       aadhaarStatus.className = "text-red-500";
@@ -500,7 +519,10 @@ function verifyPANOTP(event) {
       panStatus.className = "text-green-500 font-bold";
       
       // Mark as verified visually
-      document.querySelector(".pan-verification").classList.add("verified");
+      const panVerificationElement = document.querySelector(".pan-verification");
+      if (panVerificationElement) {
+        panVerificationElement.classList.add("verified");
+      }
       
       // Store verification data
       userVerificationData.panVerified = true;
@@ -536,40 +558,56 @@ document.addEventListener('DOMContentLoaded', function() {
   
   if (form) {
     form.addEventListener('submit', function(event) {
-      // Add email verification status to form data
-      if (!document.getElementById('email_verified')) {
-        const emailVerified = document.createElement('input');
-        emailVerified.type = 'hidden';
-        emailVerified.id = 'email_verified';
-        emailVerified.name = 'email_verified';
-        emailVerified.value = (userVerificationData.aadhaarVerified && userVerificationData.panVerified) ? 'true' : 'false';
-        form.appendChild(emailVerified);
-      } else {
-        document.getElementById('email_verified').value = (userVerificationData.aadhaarVerified && userVerificationData.panVerified) ? 'true' : 'false';
+      event.preventDefault(); // Prevent default form submission
+      
+      // Gather all form data
+      const formData = new FormData(form);
+      const jsonData = {};
+      
+      // Convert FormData to JSON object
+      for (const [key, value] of formData.entries()) {
+        jsonData[key] = value;
       }
       
-      // Add hidden fields for verification status
-      if (!document.getElementById('aadhaar_verified')) {
-        const aadhaarVerified = document.createElement('input');
-        aadhaarVerified.type = 'hidden';
-        aadhaarVerified.id = 'aadhaar_verified';
-        aadhaarVerified.name = 'aadhaar_verified';
-        aadhaarVerified.value = userVerificationData.aadhaarVerified ? 'true' : 'false';
-        form.appendChild(aadhaarVerified);
-      } else {
-        document.getElementById('aadhaar_verified').value = userVerificationData.aadhaarVerified ? 'true' : 'false';
+      // Handle special fields
+      jsonData.email_verified = (userVerificationData.aadhaarVerified && userVerificationData.panVerified) ? 'true' : 'false';
+      
+      // Handle goals checkbox group
+      const goals = Array.from(document.querySelectorAll('input[name="goals"]:checked')).map(el => el.value);
+      if (goals.length > 0) {
+        jsonData.goals = goals;
       }
       
-      if (!document.getElementById('pan_verified')) {
-        const panVerified = document.createElement('input');
-        panVerified.type = 'hidden';
-        panVerified.id = 'pan_verified';
-        panVerified.name = 'pan_verified';
-        panVerified.value = userVerificationData.panVerified ? 'true' : 'false';
-        form.appendChild(panVerified);
-      } else {
-        document.getElementById('pan_verified').value = userVerificationData.panVerified ? 'true' : 'false';
-      }
+      console.log('Submitting form data:', jsonData);
+      
+      // Send data as JSON
+      fetch('/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(jsonData),
+      })
+      .then(response => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          return response.json().then(data => {
+            throw new Error(data.error || 'Signup failed');
+          });
+        }
+      })
+      .then(data => {
+        if (data.success && data.redirect) {
+          window.location.href = data.redirect;
+        } else {
+          throw new Error('Signup response missing redirect information');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert(error.message || 'An error occurred during signup');
+      });
     });
   }
 });
