@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Update Client Info</title>
+  <link rel="stylesheet" href="advisor_dashboard.css">
+  <link rel="stylesheet" href="update.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header>
+    <div class="search-container">
+      <i class="fa fa-search"></i>
+      <input type="text" placeholder="Search...">
+    </div>
+    <nav>
+      <a href="advisor-dashboard.html">Your Clients</a>
+      <a href="advisor-video.html">Videos | Live</a>
+      <a href="update.html" class="active">Update</a>
+    </nav>
+    <div class="header-right">
+      <div class="user-icon">
+        <img src="assets/images/logo.png" alt="User Icon">
+      </div>
+    </div>
+  </header>
+  
+  <div class="main">
+    <aside>
+      <h2>Your Clients</h2>
+      <ul class="client-list" id="clientList">
+        <!-- Client items populated dynamically -->
+      </ul>
+    </aside>
+    
+    <div class="content">
+      <!-- Client Info Section -->
+      <section class="client-info" id="clientInfo">
+        <div class="client-photo" id="updatePhotoPreview" style="cursor: pointer;">
+          <img src="https://via.placeholder.com/120" alt="Client Photo" id="clientPhoto">
+        </div>
+        <input type="file" id="updatePhotoInput" accept="image/*" hidden>
+        <div class="client-details">
+          <input type="text" placeholder="First Name" id="clientFirstName">
+          <input type="text" placeholder="Last Name" id="clientLastName">
+          <input type="email" placeholder="Email" id="clientEmail">
+          <input type="text" placeholder="Phone" id="clientPhone">
+          <input type="text" placeholder="Country" id="clientCountry">
+          <input type="text" placeholder="Postal Code" id="clientPostalCode">
+        </div>
+        <button id="updateClientBtn" class="update-client-btn">Update Client</button>
+      </section>
+      
+      <!-- Stocks Section -->
+      <section class="stocks" id="stocksSection">
+        <div class="stocks-header">
+          <h3>Stocks</h3>
+        </div>
+        <div class="stocks-grid" id="stocksGrid">
+          <!-- Stock rows will be added here -->
+        </div>
+        <button id="addStockBtn" class="add-dynamic-btn"><i class="fa fa-plus"></i> Add Stock</button>
+      </section>
+      
+      <!-- Investments Section -->
+      <section class="stocks" id="investmentsSection">
+        <div class="stocks-header">
+          <h3>Investments</h3>
+        </div>
+        <div class="stocks-grid" id="investmentsGrid">
+          <!-- Investment rows will be added here -->
+        </div>
+        <button id="addInvestmentBtn" class="add-dynamic-btn"><i class="fa fa-plus"></i> Add Investment</button>
+      </section>
+    </div>
+  </div>
+  
+  <script src="update.js"></script>
+</body>
+</html>

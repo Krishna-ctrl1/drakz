@@ -96,6 +96,7 @@ const stocksGridEl = document.getElementById("stocksGrid");
 const seeAllLink = document.getElementById("seeAllLink");
 const deleteClientBtn = document.getElementById("deleteClientBtn");
 
+
 // Populate sidebar client list
 function populateClientList() {
   clientListEl.innerHTML = "";
