@@ -34,7 +34,10 @@ body {
     font-size: 18px;
     font-weight: 600;
     color: #1e293b;
-    padding-left: 220px;
+    margin-left: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
 .nav-right {
@@ -93,20 +96,98 @@ body {
     object-fit: cover;
 }
 
-/* Main Container Styles */
+/* Toggle Button */
+.toggle-checkbox {
+    display: none;
+}
+
+.toggle {
+    position: relative;
+    height: 40px;
+    width: 70px;
+    cursor: pointer;
+    border-radius: 9px;
+    padding-left: 25px;
+    background-color: white;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: left 0.3s ease-in-out;
+    left: -30px;
+    top: 10px;
+}
+
+.toggle .common {
+    position: absolute;
+    height: 2px;
+    width: 20px;
+    background-color: #3b82f6;
+    border-radius: 50px;
+    transition: 0.3s ease;
+}
+
+.toggle .top-line {
+    top: 30%;
+}
+
+.toggle .middle-line {
+    top: 50%;
+}
+
+.toggle .bottom-line {
+    top: 70%;
+}
+
+.toggle-checkbox:checked ~ .container .toggle .top-line {
+    transform: rotate(32deg) translate(4px, 0px);
+}
+
+.toggle-checkbox:checked ~ .container .toggle .bottom-line {
+    transform: rotate(-40deg) translate(5px, 0px);
+}
+
+.toggle-checkbox:checked ~ .container .toggle .middle-line {
+    opacity: 0;
+}
+
+/* Main Layout */
 .container {
     display: flex;
     min-height: calc(100vh - 64px);
+    transition: all 0.4s ease-in-out;
 }
 
-/* Sidebar Styles */
+/* Sidebar */
 .sidebar {
     width: 256px;
     background-color: white;
     border-right: 1px solid #e2e8f0;
     padding: 24px 16px;
+    transition: width 0.4s ease-in-out, padding 0.4s ease-in-out;
+    overflow: hidden;
+    flex-shrink: 0;
 }
 
+/* When toggled, sidebar hides */
+.toggle-checkbox:checked ~ .container .sidebar {
+    width: 0;
+    padding: 0;
+    border: none;
+}
+
+/* Main Content */
+.main-content {
+    flex-grow: 1;
+    padding: 24px;
+    transition: margin-left 0.4s ease-in-out, width 0.4s ease-in-out;
+    width: calc(100% - 256px); /* Default width when sidebar is visible */
+}
+
+/* When sidebar is hidden, expand main content */
+.toggle-checkbox:checked ~ .container .main-content {
+    width: 100%;
+}
 .nav-item {
     display: flex;
     align-items: center;
@@ -137,6 +218,7 @@ body {
 .main-content {
     flex: 1;
     padding: 32px;
+    transition: margin-left 0.3s ease;
 }
 
 .content-card {
