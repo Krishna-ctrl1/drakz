@@ -1,32 +1,69 @@
 require('dotenv').config();
-const nodemailer = require("nodemailer");
+const mysql = require('mysql2');
 
-// Email transporter setup
-const transporter = nodemailer.createTransport({
-    service: "gmail", // Use Gmail, Outlook, Yahoo, or any SMTP provider
-    auth: {
-        user: process.env.EMAIL_USER, // Your email
-        pass: process.env.EMAIL_PASS  // App password (not your actual email password)
-    }
+// Create MySQL connection with same config as your server
+const db = mysql.createConnection({
+  host: 'localhost',
+  user: 'root',
+  password: '1234567890',
+  database: 'DRAKZDatabase'
 });
 
-// Function to send OTP via email
-async function sendOTP(email, otp) {
-    try {
-        const mailOptions = {
-            from: process.env.EMAIL_USER,
-            to: email,
-            subject: "Your OTP Code",
-            text: `Your OTP is: ${otp}. Do not share it with anyone.`
-        };
-
-        const info = await transporter.sendMail(mailOptions);
-        console.log("✅ OTP Sent via Email:", info.response);
-        return { success: true };
-    } catch (error) {
-        console.error("❌ Error sending OTP:", error);
-        return { success: false, error: error.message };
+// Connect to MySQL
+db.connect((err) => {
+  if (err) {
+    console.error('❌ Error connecting to the database: ', err.stack);
+    return;
+  }
+  console.log('✅ Connected to MySQL database');
+  
+  // Check if users table exists
+  db.query("SHOW TABLES LIKE 'users'", (err, results) => {
+    if (err) {
+      console.error('❌ Error checking tables:', err);
+      return;
     }
-}
+    
+    if (results.length === 0) {
+      console.error('❌ Users table does not exist!');
+      createTables();
+    } else {
+      console.log('✅ Users table exists');
+      checkColumns();
+    }
+  });
+});
 
-module.exports = { sendOTP };
+function checkColumns() {
+  db.query("DESCRIBE users", (err, results) => {
+    if (err) {
+      console.error('❌ Error describing users table:', err);
+      return;
+    }
+    
+    console.log('📊 User table schema:');
+    results.forEach(column => {
+      console.log(`  - ${column.Field} (${column.Type}, ${column.Null === 'YES' ? 'nullable' : 'not nullable'})`);
+    });
+    
+    // Check required columns
+    const requiredColumns = [
+      'name', 'email', 'password', 'monthly_income', 'employment_status', 
+      'financial_goals', 'risk_tolerance', 'aadhaar_number', 'pan_number', 
+      'email_verified', 'created_at'
+    ];
+    
+    const missingColumns = requiredColumns.filter(col => 
+      !results.some(dbCol => dbCol.Field === col)
+    );
+    
+    if (missingColumns.length > 0) {
+      console.error(`❌ Missing columns: ${missingColumns.join(', ')}`);
+    } else {
+      console.log('✅ All required columns exist');
+    }
+    
+    console.log('\n✨ Database check complete');
+    process.exit(0);
+  });
+}
