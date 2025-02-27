@@ -573,6 +573,321 @@ function isValidEmail(email) {
   return emailRegex.test(email);
 }
 
+// API endpoint to get all users for admin dashboard
+app.get('/api/users', (req, res) => {
+  // Check if user is authenticated as admin (implement proper authentication middleware in production)
+  
+  const query = `
+    SELECT 
+      id, 
+      name, 
+      email, 
+      monthly_income, 
+      employment_status, 
+      financial_goals, 
+      risk_tolerance,
+      email_verified, 
+      DATE_FORMAT(created_at, '%d %b %Y') as join_date
+    FROM users
+    ORDER BY created_at DESC
+  `;
+  
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error('Error fetching users:', err);
+      return res.status(500).json({ error: 'Database error' });
+    }
+    
+    // Format the data to match the expected structure in the dashboard
+    const formattedUsers = results.map(user => {
+      // Split the name into first and last name (assuming format is "First Last")
+      const nameParts = user.name.split(' ');
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || '';
+      
+      return {
+        id: user.id,
+        firstName: firstName,
+        lastName: lastName,
+        email: user.email,
+        role: 'standard', // Default role, can be updated if you add role to users table
+        status: user.email_verified ? 'active' : 'pending',
+        joinDate: user.join_date,
+        // Additional fields for detailed view
+        monthlyIncome: user.monthly_income,
+        employmentStatus: user.employment_status,
+        financialGoals: user.financial_goals,
+        riskTolerance: user.risk_tolerance
+      };
+    });
+    
+    res.json(formattedUsers);
+  });
+});
+
+// API endpoint to get all admins
+app.get('/api/admins', (req, res) => {
+  // Check if user is authenticated as admin (implement proper authentication middleware in production)
+  
+  const query = `
+    SELECT 
+      id, 
+      username,
+      name, 
+      email, 
+      DATE_FORMAT(created_at, '%d %b %Y') as join_date
+    FROM admins
+    ORDER BY created_at DESC
+  `;
+  
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error('Error fetching admins:', err);
+      return res.status(500).json({ error: 'Database error' });
+    }
+    
+    // Format the data to match the expected structure
+    const formattedAdmins = results.map(admin => {
+      const nameParts = admin.name.split(' ');
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || '';
+      
+      return {
+        id: admin.id,
+        firstName: firstName,
+        lastName: lastName,
+        email: admin.email,
+        username: admin.username,
+        role: 'admin',
+        status: 'active',
+        joinDate: admin.join_date
+      };
+    });
+    
+    res.json(formattedAdmins);
+  });
+});
+
+// API endpoint to get all advisors
+app.get('/api/advisors', (req, res) => {
+  // Check if user is authenticated as admin (implement proper authentication middleware in production)
+  
+  const query = `
+    SELECT 
+      id, 
+      username,
+      name, 
+      email, 
+      DATE_FORMAT(created_at, '%d %b %Y') as join_date
+    FROM advisors
+    ORDER BY created_at DESC
+  `;
+  
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error('Error fetching advisors:', err);
+      return res.status(500).json({ error: 'Database error' });
+    }
+    
+    // Format the data to match the expected structure
+    const formattedAdvisors = results.map(advisor => {
+      const nameParts = advisor.name.split(' ');
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || '';
+      
+      return {
+        id: advisor.id,
+        firstName: firstName,
+        lastName: lastName,
+        email: advisor.email,
+        username: advisor.username,
+        role: 'advisor',
+        status: 'active',
+        joinDate: advisor.join_date
+      };
+    });
+    
+    res.json(formattedAdvisors);
+  });
+});
+
+// API endpoint to get all system users (combined users, admins, advisors)
+app.get('/api/all-users', (req, res) => {
+  // Run multiple queries to get data from all three tables
+  const userQuery = `
+    SELECT 
+      id, 
+      name, 
+      email, 
+      'standard' as role,
+      email_verified, 
+      DATE_FORMAT(created_at, '%d %b %Y') as join_date
+    FROM users
+  `;
+  
+  const adminQuery = `
+    SELECT 
+      id, 
+      name, 
+      email, 
+      'admin' as role,
+      1 as email_verified, 
+      DATE_FORMAT(created_at, '%d %b %Y') as join_date
+    FROM admins
+  `;
+  
+  const advisorQuery = `
+    SELECT 
+      id, 
+      name, 
+      email, 
+      'advisor' as role,
+      1 as email_verified, 
+      DATE_FORMAT(created_at, '%d %b %Y') as join_date
+    FROM advisors
+  `;
+  
+  // Execute all queries
+  db.query(userQuery, (err, users) => {
+    if (err) {
+      console.error('Error fetching users:', err);
+      return res.status(500).json({ error: 'Database error' });
+    }
+    
+    db.query(adminQuery, (err, admins) => {
+      if (err) {
+        console.error('Error fetching admins:', err);
+        return res.status(500).json({ error: 'Database error' });
+      }
+      
+      db.query(advisorQuery, (err, advisors) => {
+        if (err) {
+          console.error('Error fetching advisors:', err);
+          return res.status(500).json({ error: 'Database error' });
+        }
+        
+        // Combine and format all results
+        const allUsers = [...users, ...admins, ...advisors].map(user => {
+          const nameParts = user.name.split(' ');
+          const firstName = nameParts[0] || '';
+          const lastName = nameParts.slice(1).join(' ') || '';
+          
+          return {
+            id: user.id,
+            firstName: firstName,
+            lastName: lastName,
+            email: user.email,
+            role: user.role,
+            status: user.email_verified ? 'active' : 'pending',
+            joinDate: user.join_date
+          };
+        });
+        
+        res.json(allUsers);
+      });
+    });
+  });
+});
+
+// API endpoint to update user status (active/suspended)
+app.put('/api/users/:id/status', (req, res) => {
+  const userId = req.params.id;
+  const { status } = req.body;
+  
+  if (!status || !['active', 'pending', 'suspended'].includes(status)) {
+    return res.status(400).json({ error: 'Invalid status value' });
+  }
+  
+  // Convert status to email_verified value
+  const emailVerified = status === 'active' ? 1 : 0;
+  
+  const query = 'UPDATE users SET email_verified = ? WHERE id = ?';
+  
+  db.query(query, [emailVerified, userId], (err, result) => {
+    if (err) {
+      console.error('Error updating user status:', err);
+      return res.status(500).json({ error: 'Database error' });
+    }
+    
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    res.json({ success: true, message: 'User status updated successfully' });
+  });
+});
+
+// API endpoint to add a new user
+app.post('/api/users', (req, res) => {
+  const { firstName, lastName, email, password, role } = req.body;
+  
+  if (!firstName || !lastName || !email || !password) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+  
+  // Combine first and last name
+  const fullName = `${firstName} ${lastName}`;
+  
+  // Hash the password
+  const hashedPassword = hashPassword(password);
+  
+  // Determine which table to insert into based on role
+  let table = 'users';
+  let fieldsString = 'name, email, password, email_verified';
+  let valuesString = '?, ?, ?, ?';
+  let values = [fullName, email, hashedPassword, 1]; // Email verified by default
+  
+  if (role === 'admin') {
+    table = 'admins';
+    fieldsString = 'name, email, password, username';
+    valuesString = '?, ?, ?, ?';
+    // Generate username from email (before the @)
+    const username = email.split('@')[0];
+    values = [fullName, email, hashedPassword, username];
+  } else if (role === 'advisor') {
+    table = 'advisors';
+    fieldsString = 'name, email, password, username';
+    valuesString = '?, ?, ?, ?';
+    // Generate username from email (before the @)
+    const username = email.split('@')[0];
+    values = [fullName, email, hashedPassword, username];
+  }
+  
+  const query = `INSERT INTO ${table} (${fieldsString}) VALUES (${valuesString})`;
+  
+  db.query(query, values, (err, result) => {
+    if (err) {
+      console.error('Error adding new user:', err);
+      // Check for duplicate email
+      if (err.code === 'ER_DUP_ENTRY') {
+        return res.status(409).json({ error: 'Email already exists' });
+      }
+      return res.status(500).json({ error: 'Database error' });
+    }
+    
+    res.status(201).json({ 
+      success: true, 
+      message: 'User added successfully',
+      userId: result.insertId
+    });
+  });
+});
+
+// API endpoint to get security alerts (demo data - replace with real alerts in production)
+app.get('/api/security-alerts', (req, res) => {
+  // In a real application, you'd fetch actual security alerts from a database table
+  // For now, we'll return sample data
+  const securityAlerts = [
+    { id: 1, type: 'Failed Login Attempt', user: 'robert.b@example.com', time: '10:23 AM', location: 'Kiev, Ukraine', status: 'Open' },
+    { id: 2, type: 'Suspicious Activity', user: 'jane.smith@example.com', time: '09:45 AM', location: 'New York, USA', status: 'Investigating' },
+    { id: 3, type: 'Multiple Logins', user: 'david.m@example.com', time: '08:12 AM', location: 'London, UK', status: 'Resolved' },
+    { id: 4, type: 'Password Reset', user: 'emily.w@example.com', time: '07:56 AM', location: 'Toronto, Canada', status: 'Closed' },
+    { id: 5, type: 'API Key Misuse', user: 'james.t@example.com', time: '02:34 AM', location: 'Singapore', status: 'Open' }
+  ];
+  
+  res.json(securityAlerts);
+});
+
 // Start the server
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
