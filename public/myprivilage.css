@@ -8,7 +8,13 @@
 body {
     background-color: #f1f5f9;
 }
-
+.logo-space img {
+    width: 100px;
+    height: 50px;
+    object-fit: contain;
+    margin-top: -10px;
+    margin-left: -20px;
+}
 /* Top Navigation Styles */
 .top-nav {
     display: flex;
