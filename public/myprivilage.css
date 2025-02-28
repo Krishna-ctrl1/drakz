@@ -114,18 +114,20 @@ body {
     cursor: pointer;
     border-radius: 20%;
     background-color: white;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.0);
     display: flex;
     justify-content: center;
     align-items: center;
     transition: all 0.3s ease;
     z-index: 90;
-    left: 190px; /* Position it at the edge of sidebar */
-    top: 60px;
+    left: 240px; /* Position it at the edge of sidebar */
+    top: 62px;
 }
 
 .toggle-checkbox:checked ~ .container .toggle {
-    left: 66px; /* Position it at the edge of collapsed sidebar */
+    width: 30px;
+    top: 62px;
+    left: 60px; /* Position it at the edge of collapsed sidebar */
 }
 
 .toggle .common {
