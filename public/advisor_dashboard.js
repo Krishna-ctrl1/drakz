@@ -70,7 +70,17 @@ let clients = [
 ];
 // Function to save clients to localStorage
 function saveClients() {
-  localStorage.setItem("clients", JSON.stringify(clients));
+  try {
+    let clientData = JSON.stringify(clients);
+    if (clientData.length < 5000000) {  // Ensure it's under ~5MB
+        localStorage.setItem("clients", clientData);
+    } else {
+        console.warn("Data too large to store in localStorage, consider removing old data.");
+    }
+  } catch (e) {
+      console.error("Storage error:", e);
+  }
+
 }
 
 // Check if clients data exists in localStorage and load it
