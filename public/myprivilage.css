@@ -164,7 +164,6 @@ body {
 .toggle-checkbox:checked ~ .container .toggle .middle-line {
     opacity: 0;
 }
-
 /* Main Layout */
 .container {
     display: flex;
@@ -249,6 +248,7 @@ body {
     width: calc(100% - 64px);
     margin-left: 0;
 }
+
 
 /* Content Card Styles */
 .content-card {
