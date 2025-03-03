@@ -20,13 +20,7 @@
     "express-session": "^1.18.1",
     "firebase-admin": "^13.1.0",
     "mysql": "^2.18.1",
-<<<<<<< HEAD
     "mysql2": "^3.12.0"
-=======
-    "mysql2": "^3.12.0",
-    "nodemailer": "^6.10.0",
-    "twilio": "^5.4.5"
->>>>>>> 0183e0ddf8623ac9edfbb63713677099b4696dd4
   },
   "repository": {
     "type": "git",
