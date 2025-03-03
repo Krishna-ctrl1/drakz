@@ -61,6 +61,300 @@ async function loadUserData() {
     }
 }
 
+// Function to set form fields readonly state
+function setFormReadOnly(isReadOnly) {
+    // Update field selectors to match new HTML
+    document.getElementById('user-name').readOnly = isReadOnly;
+    document.getElementById('user-email').readOnly = isReadOnly;
+    
+    // Role and status are special cases
+    document.getElementById('user-role').disabled = isReadOnly;
+    document.getElementById('user-status').disabled = isReadOnly;
+    
+    // Password field handling
+    const passwordField = document.getElementById('user-password');
+    if (passwordField) passwordField.readOnly = isReadOnly;
+    
+    // Additional fields for standard users
+    const monthlyIncomeEl = document.getElementById('user-monthly-income');
+    const employmentStatusEl = document.getElementById('user-employment-status');
+    const financialGoalsEl = document.getElementById('user-financial-goals');
+    const riskToleranceEl = document.getElementById('user-risk-tolerance');
+    const aadhaarEl = document.getElementById('user-aadhaar');
+    const panEl = document.getElementById('user-pan');
+    const emailVerifiedEl = document.getElementById('email-verified');
+    
+    if (monthlyIncomeEl) monthlyIncomeEl.readOnly = isReadOnly;
+    if (employmentStatusEl) employmentStatusEl.disabled = isReadOnly;
+    if (financialGoalsEl) financialGoalsEl.readOnly = isReadOnly;
+    if (riskToleranceEl) riskToleranceEl.disabled = isReadOnly;
+    if (aadhaarEl) aadhaarEl.readOnly = isReadOnly;
+    if (panEl) panEl.readOnly = isReadOnly;
+    if (emailVerifiedEl) emailVerifiedEl.disabled = isReadOnly;
+    
+    // Update the save button visibility based on edit mode
+    document.getElementById('save-user-btn').style.display = isReadOnly ? 'none' : 'inline-block';
+}
+
+// Define manageUser function before it's called in renderUserTable
+function manageUser(userId, userRole) {
+    try {
+        console.log(`Managing user: ID=${userId}, Role=${userRole}`);
+        
+        // Determine which API endpoint to use
+        let apiEndpoint = '/api/users';
+        if (userRole === 'admin') {
+            apiEndpoint = '/api/admins';
+        } else if (userRole === 'advisor') {
+            apiEndpoint = '/api/advisors';
+        }
+        
+        // Fetch all users from the endpoint
+        fetch(apiEndpoint)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch users: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(users => {
+                // Find the specific user by ID
+                const user = users.find(u => u.id === userId);
+                
+                if (!user) {
+                    throw new Error(`User with ID ${userId} not found`);
+                }
+
+                console.log('API response:', users);
+                console.log('Found user:', user);
+                
+                // Check if user modal exists, create it if not
+                let userModal = document.getElementById('modify-user-modal');
+                if (!userModal) {
+                    console.warn('User modal not found, creating one');
+                    userModal = document.createElement('div');
+                    userModal.id = 'user-modal';
+                    userModal.className = 'modal';
+                    
+                    // Create modal content
+                    userModal.innerHTML = `
+                        <div class="modal-content">
+                            <span class="close-btn">&times;</span>
+                            <h2>Manage User</h2>
+                            <div id="user-form">
+                                <div class="form-group">
+                                    <label for="user-name">Name</label>
+                                    <input type="text" id="user-name">
+                                </div>
+                                <div class="form-group">
+                                    <label for="user-email">Email</label>
+                                    <input type="email" id="user-email">
+                                </div>
+                                <div class="form-group">
+                                    <label for="user-role">Role</label>
+                                    <select id="user-role">
+                                        <option value="standard">Standard</option>
+                                        <option value="admin">Admin</option>
+                                        <option value="advisor">Advisor</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="user-status">Status</label>
+                                    <select id="user-status">
+                                        <option value="active">Active</option>
+                                        <option value="pending">Pending</option>
+                                        <option value="suspended">Suspended</option>
+                                    </select>
+                                </div>
+                                <div id="additional-fields"></div>
+                                <div id="user-form-actions">
+                                    <button id="save-user-btn">Save Changes</button>
+                                    <button id="delete-user-btn">Delete User</button>
+                                    <button id="cancel-user-btn">Cancel</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    document.body.appendChild(userModal);
+                    
+                    // Add event listeners to the newly created buttons
+                    document.getElementById('save-user-btn').addEventListener('click', saveUserChanges);
+                    document.getElementById('delete-user-btn').addEventListener('click', deleteUser);
+                    document.getElementById('cancel-user-btn').addEventListener('click', closeUserModal);
+                    document.querySelector('.close-btn').addEventListener('click', closeUserModal);
+                    
+                    // Close modal when clicking outside
+                    userModal.addEventListener('click', function(event) {
+                        if (event.target === userModal) {
+                            userModal.style.display = 'none';
+                        }
+                    });
+                }
+                
+                // Show the modal first
+                userModal.style.display = 'flex';
+
+                setTimeout(() => {
+                    // Now populate the form after the modal is displayed
+                    populateUserForm(user, userRole, userId);
+                }, 50);
+                
+                // Give time for the browser to render the modal and its contents
+                requestAnimationFrame(() => {
+                    // Now populate the form after the modal is displayed
+                    populateUserForm(user, userRole, userId);
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching user details:', error);
+                alert('Error fetching user details: ' + error.message);
+            });
+    } catch (error) {
+        console.error('Error fetching user details:', error);
+        alert('Error fetching user details: ' + error.message);
+    }
+}
+
+// helper function to populate the user form
+
+function populateUserForm(user, userRole, userId) {
+    console.log('Populating form with user data:', user);
+    
+    // Check if user object is valid
+    if (!user || typeof user !== 'object') {
+        console.error('Invalid user data received:', user);
+        alert('Error: Invalid user data received');
+        return;
+    }
+
+    // Get references to form elements
+    const userForm = document.getElementById('user-form');
+    if (!userForm) {
+        throw new Error('Required DOM element #user-form not found');
+    }
+    
+    // Handle full name vs first/last name
+    if (user.name) {
+        // Database format (single name field)
+        document.getElementById('user-name').value = user.name || '';
+    } else if (user.firstName && user.lastName) {
+        // API response format (separate first/last name)
+        document.getElementById('user-name').value = `${user.firstName} ${user.lastName}`;
+    }
+    
+    document.getElementById('user-email').value = user.email || '';
+    
+    // Handle role selection based on the endpoint used
+    const roleSelect = document.getElementById('user-role');
+    roleSelect.value = user.role || 'standard';
+    
+    // Set status if available
+    const statusSelect = document.getElementById('user-status');
+    if (user.status) {
+        statusSelect.value = user.status;
+    } else {
+        // Default to active if no status is provided
+        statusSelect.value = 'active';
+    }
+    
+    // Set email verified checkbox if data exists
+    const emailVerifiedEl = document.getElementById('email-verified');
+    if (emailVerifiedEl) {
+        // Check both database format (email_verified) and possible API format (emailVerified)
+        const isVerified = user.email_verified !== undefined ? user.email_verified : 
+                         (user.emailVerified !== undefined ? user.emailVerified : false);
+        emailVerifiedEl.checked = isVerified;
+    }
+    
+    // Set employment status (check both database and API naming formats)
+    const employmentStatusEl = document.getElementById('user-employment-status');
+    if (employmentStatusEl) {
+        if (user.employment_status) {
+            employmentStatusEl.value = user.employment_status;
+        } else if (user.employmentStatus) {
+            employmentStatusEl.value = user.employmentStatus;
+        }
+    }
+    
+    // Set monthly income (check both database and API naming formats)
+    const monthlyIncomeEl = document.getElementById('user-monthly-income');
+    if (monthlyIncomeEl) {
+        if (user.monthly_income !== undefined) {
+            monthlyIncomeEl.value = user.monthly_income;
+        } else if (user.monthlyIncome !== undefined) {
+            monthlyIncomeEl.value = user.monthlyIncome;
+        }
+    }
+    
+    // Set financial goals (check both database and API naming formats)
+    const financialGoalsEl = document.getElementById('user-financial-goals');
+    if (financialGoalsEl) {
+        if (user.financial_goals) {
+            financialGoalsEl.value = user.financial_goals;
+        } else if (user.financialGoals) {
+            financialGoalsEl.value = user.financialGoals;
+        }
+    }
+    
+    // Set risk tolerance (check both database and API naming formats)
+    const riskToleranceEl = document.getElementById('user-risk-tolerance');
+    if (riskToleranceEl) {
+        if (user.risk_tolerance) {
+            riskToleranceEl.value = user.risk_tolerance;
+        } else if (user.riskTolerance) {
+            riskToleranceEl.value = user.riskTolerance;
+        }
+    }
+    
+    // Set identity docs if available
+    if (document.getElementById('user-aadhaar')) {
+        const aadhaarValue = user.aadhaar_number || user.aadhaarNumber || '';
+        document.getElementById('user-aadhaar').value = aadhaarValue;
+    }
+    
+    if (document.getElementById('user-pan')) {
+        const panValue = user.pan_number || user.panNumber || '';
+        document.getElementById('user-pan').value = panValue;
+    }
+    
+    // Create toggle button for edit mode if it doesn't already exist
+    if (!document.querySelector('.toggle-section')) {
+        const toggleSection = document.createElement('div');
+        toggleSection.className = 'form-group toggle-section';
+        toggleSection.innerHTML = `
+            <label class="toggle-label">Edit Mode</label>
+            <label class="switch">
+                <input type="checkbox" id="edit-mode-toggle">
+                <span class="slider round"></span>
+            </label>
+        `;
+        
+        // Insert toggle at the top of the form
+        userForm.insertBefore(toggleSection, userForm.firstChild);
+        
+        // Add event listener to the toggle
+        document.getElementById('edit-mode-toggle').addEventListener('change', function() {
+            setFormReadOnly(!this.checked);
+        });
+    }
+    
+    // Set all fields to readonly by default
+    setFormReadOnly(true);
+    
+    // Store the user ID and role for saving changes
+    document.getElementById('save-user-btn').setAttribute('data-id', userId);
+    document.getElementById('save-user-btn').setAttribute('data-role', userRole);
+    document.getElementById('delete-user-btn').setAttribute('data-id', userId);
+    document.getElementById('delete-user-btn').setAttribute('data-role', userRole);
+    
+    // Update modal title
+    const modalTitle = document.querySelector('#user-modal h2');
+    if (modalTitle) {
+        modalTitle.textContent = 'Manage User';
+    }
+}
+
 function renderUserTable(filtered = null) {
     const usersToRender = filtered || currentUsers;
     const startIndex = (currentPage - 1) * usersPerPage;
@@ -73,33 +367,24 @@ function renderUserTable(filtered = null) {
     paginatedUsers.forEach(user => {
         const row = document.createElement('tr');
         row.innerHTML = `
-            <td>${user.firstName} ${user.lastName}</td>
+            <td>${user.name || `${user.firstName || ''} ${user.lastName || ''}`}</td>
             <td>${user.email}</td>
             <td>${capitalizeFirstLetter(user.role)}</td>
             <td><span class="user-status status-${user.status.toLowerCase()}">${capitalizeFirstLetter(user.status)}</span></td>
             <td>${user.joinDate}</td>
             <td class="user-actions">
-                <button class="edit-user" data-id="${user.id}" data-role="${user.role}">Edit</button>
-                <button class="view-user" data-id="${user.id}" data-role="${user.role}">View</button>
+                <button class="manage-user" data-id="${user.id}" data-role="${user.role}">Manage User</button>
             </td>
         `;
         tableBody.appendChild(row);
     });
     
-    // Add event listeners to the new buttons
-    document.querySelectorAll('.edit-user').forEach(button => {
+    // Add event listener to the new manage-user button
+    document.querySelectorAll('.manage-user').forEach(button => {
         button.addEventListener('click', function() {
             const userId = parseInt(this.getAttribute('data-id'));
             const userRole = this.getAttribute('data-role');
-            editUser(userId, userRole);
-        });
-    });
-    
-    document.querySelectorAll('.view-user').forEach(button => {
-        button.addEventListener('click', function() {
-            const userId = parseInt(this.getAttribute('data-id'));
-            const userRole = this.getAttribute('data-role');
-            viewUser(userId, userRole);
+            manageUser(userId, userRole);
         });
     });
 }
@@ -168,112 +453,6 @@ function prevPage() {
     }
 }
 
-async function editUser(userId, userRole) {
-    try {
-        // Fetch detailed user data based on role
-        let apiEndpoint = '/api/users';
-        if (userRole === 'admin') {
-            apiEndpoint = '/api/admins';
-        } else if (userRole === 'advisor') {
-            apiEndpoint = '/api/advisors';
-        }
-        
-        const response = await fetch(`${apiEndpoint}/${userId}`);
-        if (!response.ok) {
-            throw new Error('Failed to fetch user details');
-        }
-        
-        const user = await response.json();
-        
-        // Fill the modal with user data
-        document.getElementById('user-first-name').value = user.firstName;
-        document.getElementById('user-last-name').value = user.lastName;
-        document.getElementById('user-email').value = user.email;
-        document.getElementById('user-role').value = user.role;
-        document.getElementById('user-status').value = user.status;
-        
-        // Add additional fields for standard users if available
-        if (userRole === 'standard' && user.monthlyIncome !== undefined) {
-            // Create or update additional fields container
-            let additionalFields = document.getElementById('additional-fields');
-            if (!additionalFields) {
-                additionalFields = document.createElement('div');
-                additionalFields.id = 'additional-fields';
-                document.getElementById('user-form').insertBefore(additionalFields, 
-                    document.getElementById('user-form-actions'));
-            }
-            
-            additionalFields.innerHTML = `
-                <div class="form-group">
-                    <label for="user-monthly-income">Monthly Income</label>
-                    <input type="number" id="user-monthly-income" value="${user.monthlyIncome || ''}">
-                </div>
-                <div class="form-group">
-                    <label for="user-employment-status">Employment Status</label>
-                    <input type="text" id="user-employment-status" value="${user.employmentStatus || ''}">
-                </div>
-                <div class="form-group">
-                    <label for="user-financial-goals">Financial Goals</label>
-                    <textarea id="user-financial-goals">${user.financialGoals || ''}</textarea>
-                </div>
-                <div class="form-group">
-                    <label for="user-risk-tolerance">Risk Tolerance</label>
-                    <select id="user-risk-tolerance">
-                        <option value="low" ${user.riskTolerance === 'low' ? 'selected' : ''}>Low</option>
-                        <option value="medium" ${user.riskTolerance === 'medium' ? 'selected' : ''}>Medium</option>
-                        <option value="high" ${user.riskTolerance === 'high' ? 'selected' : ''}>High</option>
-                    </select>
-                </div>
-            `;
-        } else {
-            // Remove additional fields if not a standard user
-            const additionalFields = document.getElementById('additional-fields');
-            if (additionalFields) {
-                additionalFields.remove();
-            }
-        }
-        
-        // Store the user ID and role for saving changes
-        document.getElementById('save-user-btn').setAttribute('data-id', userId);
-        document.getElementById('save-user-btn').setAttribute('data-role', userRole);
-        document.getElementById('delete-user-btn').setAttribute('data-id', userId);
-        document.getElementById('delete-user-btn').setAttribute('data-role', userRole);
-        
-        // Update modal title
-        document.querySelector('#user-modal h2').textContent = 'Edit User';
-        
-        // Show the modal
-        document.getElementById('user-modal').style.display = 'flex';
-    } catch (error) {
-        console.error('Error fetching user details:', error);
-        alert('Error fetching user details. Please try again later.');
-    }
-}
-
-function viewUser(userId, userRole) {
-    // Similar to editUser but make fields readonly
-    editUser(userId, userRole).then(() => {
-        // Make fields readonly
-        document.getElementById('user-first-name').readOnly = true;
-        document.getElementById('user-last-name').readOnly = true;
-        document.getElementById('user-email').readOnly = true;
-        document.getElementById('user-role').disabled = true;
-        document.getElementById('user-status').disabled = true;
-        
-        // Make additional fields readonly if they exist
-        const additionalFields = document.getElementById('additional-fields');
-        if (additionalFields) {
-            additionalFields.querySelectorAll('input, textarea, select').forEach(el => {
-                el.readOnly = true;
-                if (el.tagName === 'SELECT') el.disabled = true;
-            });
-        }
-        
-        // Update modal title
-        document.querySelector('#user-modal h2').textContent = 'User Details';
-    });
-}
-
 function showAddUserModal() {
     // Clear the form fields
     document.getElementById('user-first-name').value = '';
@@ -326,14 +505,19 @@ async function saveUserChanges() {
     const userId = document.getElementById('save-user-btn').getAttribute('data-id');
     const userRole = document.getElementById('save-user-btn').getAttribute('data-role') || document.getElementById('user-role').value;
     
-    // Basic user data
+    // Basic user data with updated field names
     const userData = {
-        firstName: document.getElementById('user-first-name').value,
-        lastName: document.getElementById('user-last-name').value,
+        name: document.getElementById('user-name').value,
         email: document.getElementById('user-email').value,
         role: document.getElementById('user-role').value,
         status: document.getElementById('user-status').value
     };
+    
+    // Get email verified status if element exists
+    const emailVerifiedEl = document.getElementById('email-verified');
+    if (emailVerifiedEl) {
+        userData.email_verified = emailVerifiedEl.checked;
+    }
     
     // Add password for new users
     if (userId === 'new') {
@@ -344,20 +528,23 @@ async function saveUserChanges() {
         }
     }
     
+    // Add identity documents
+    const aadhaarEl = document.getElementById('user-aadhaar');
+    const panEl = document.getElementById('user-pan');
+    if (aadhaarEl && aadhaarEl.value) userData.aadhaar_number = aadhaarEl.value;
+    if (panEl && panEl.value) userData.pan_number = panEl.value;
+    
     // Add additional fields for standard users
-    if (userData.role === 'standard') {
-        const additionalFields = document.getElementById('additional-fields');
-        if (additionalFields) {
-            const monthlyIncomeEl = document.getElementById('user-monthly-income');
-            const employmentStatusEl = document.getElementById('user-employment-status');
-            const financialGoalsEl = document.getElementById('user-financial-goals');
-            const riskToleranceEl = document.getElementById('user-risk-tolerance');
-            
-            if (monthlyIncomeEl) userData.monthlyIncome = monthlyIncomeEl.value;
-            if (employmentStatusEl) userData.employmentStatus = employmentStatusEl.value;
-            if (financialGoalsEl) userData.financialGoals = financialGoalsEl.value;
-            if (riskToleranceEl) userData.riskTolerance = riskToleranceEl.value;
-        }
+    if (userData.role === 'user' || userData.role === 'premium') {
+        const monthlyIncomeEl = document.getElementById('user-monthly-income');
+        const employmentStatusEl = document.getElementById('user-employment-status');
+        const financialGoalsEl = document.getElementById('user-financial-goals');
+        const riskToleranceEl = document.getElementById('user-risk-tolerance');
+        
+        if (monthlyIncomeEl) userData.monthly_income = monthlyIncomeEl.value;
+        if (employmentStatusEl) userData.employment_status = employmentStatusEl.value;
+        if (financialGoalsEl) userData.financial_goals = financialGoalsEl.value;
+        if (riskToleranceEl) userData.risk_tolerance = riskToleranceEl.value;
     }
     
     try {
@@ -372,10 +559,13 @@ async function saveUserChanges() {
             url = `/api/users/${userId}`;
             method = 'PUT';
             
+            // Map UI roles to API roles
+            let apiRole = 'standard';
+            if (userData.role === 'admin') apiRole = 'admin';
+            if (userData.role === 'advisor') apiRole = 'advisor';
+            
             // If role has changed, we need to handle it differently
-            if (userRole !== userData.role) {
-                // This would require special handling on the server
-                // as we'd need to transfer the user between tables
+            if (userRole !== apiRole) {
                 alert('Changing user roles is not supported in this version');
                 return;
             }
@@ -397,6 +587,9 @@ async function saveUserChanges() {
         // Close modal and refresh user data
         closeUserModal();
         await loadUserData();
+        
+        // Show success message
+        alert('User information updated successfully!');
         
     } catch (error) {
         console.error('Error saving user:', error);
@@ -444,6 +637,12 @@ function closeUserModal() {
     const passwordField = document.getElementById('password-field');
     if (passwordField) {
         passwordField.remove();
+    }
+    
+    // Remove toggle section if it exists
+    const toggleSection = document.querySelector('.toggle-section');
+    if (toggleSection) {
+        toggleSection.remove();
     }
 }
 
@@ -688,3 +887,18 @@ function hashPassword(password) {
     console.warn('Password hashing should be done on the server for security');
     return password;
 }
+
+// Add this JavaScript to your existing script
+document.addEventListener('DOMContentLoaded', function() {
+    // Get the close button element
+    const closeBtn = document.querySelector('.close-btn');
+    // Get the modal element
+    const modal = document.getElementById('modify-user-modal');
+    
+    // Add click event listener to close button
+    if (closeBtn && modal) {
+        closeBtn.addEventListener('click', function() {
+            modal.style.display = 'none';
+        });
+    }
+});

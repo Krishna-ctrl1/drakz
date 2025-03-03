@@ -6,6 +6,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     faqItems.forEach(item => {
         const question = item.querySelector('.faq-question');
+        const answer = item.querySelector('.faq-answer');
+        const toggleIcon = item.querySelector('.toggle-icon');
         
         question.addEventListener('click', () => {
             // Close all other items
@@ -17,6 +19,20 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Toggle the clicked item
             item.classList.toggle('active');
+            
+            // Toggle the plus/minus icon
+            if (toggleIcon) {
+                if (toggleIcon.textContent === '+') {
+                    toggleIcon.textContent = '−';
+                } else {
+                    toggleIcon.textContent = '+';
+                }
+            }
+            
+            // Toggle answer visibility if using separate classes
+            if (answer) {
+                answer.classList.toggle('active');
+            }
         });
     });
     
@@ -79,17 +95,91 @@ document.addEventListener('DOMContentLoaded', function() {
                 highlightField('terms');
             }
             
-            // If validation passes, submit the form (or show success message)
+            // If validation passes, submit the form
             if (isValid) {
-                // In a real implementation, you would send the data to your server here
-                // For this example, we'll just show a success message
-                showSuccessMessage();
-                contactForm.reset();
+                // Show loading state
+                const submitBtn = contactForm.querySelector('.submit-btn');
+                const originalBtnText = submitBtn.textContent;
+                submitBtn.textContent = 'Sending...';
+                submitBtn.disabled = true;
+                
+                // Prepare form data for server submission
+                const formData = {
+                    name: name,
+                    email: email,
+                    phone: phone,
+                    subject: subject,
+                    message: message,
+                    submission_date: new Date().toISOString()
+                };
+                
+                // Replace the existing fetch block (around line 125) with this improved version
+                // Replace the fetch API call section (around line 117) with this improved version
+            fetch('/api/save-contact-message', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => {
+                // Check for server errors (status code 500)
+                if (response.status === 500) {
+                    throw new Error('Server error: The database might be unavailable');
+                }
+                // Check for other non-OK responses
+                if (!response.ok) {
+                    throw new Error('Request failed with status: ' + response.status);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    showSuccessMessage();
+                    contactForm.reset();
+                } else {
+                    submitBtn.textContent = originalBtnText;
+                    submitBtn.disabled = false;
+                    alert('Error: ' + (data.message || 'Failed to save your message.'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                submitBtn.textContent = originalBtnText;
+                submitBtn.disabled = false;
+                
+                // Display a more specific error message
+                let errorMessage = 'An error occurred while sending your message.';
+                if (error.message.includes('database')) {
+                    errorMessage = 'Database connection error. Your message could not be saved at this time.';
+                } else if (error.message.includes('Server error')) {
+                    errorMessage = error.message;
+                }
+                
+                alert(errorMessage + ' Please try again later or contact support directly.');
+                
+                // Optionally, create a visible error message on the page
+                const formContainer = document.querySelector('.contact-form-container');
+                if (formContainer) {
+                    const errorElement = document.createElement('div');
+                    errorElement.className = 'error-message';
+                    errorElement.textContent = errorMessage;
+                    errorElement.style.color = '#e74c3c';
+                    errorElement.style.padding = '10px';
+                    errorElement.style.marginBottom = '20px';
+                    errorElement.style.backgroundColor = '#fde2e2';
+                    errorElement.style.borderRadius = '4px';
+                    
+                    formContainer.insertBefore(errorElement, contactForm);
+                }
+            });
             } else {
                 // Show error message
                 alert('Please correct the following errors:\n\n' + errorMessage);
             }
         });
+    } else {
+        console.error("Contact form not found with ID 'contact-form'");
     }
     
     // Helper functions
@@ -107,11 +197,13 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function highlightField(fieldId) {
         const field = document.getElementById(fieldId);
-        field.classList.add('error');
-        
-        field.addEventListener('input', function() {
-            field.classList.remove('error');
-        }, { once: true });
+        if (field) {
+            field.classList.add('error');
+            
+            field.addEventListener('input', function() {
+                field.classList.remove('error');
+            }, { once: true });
+        }
     }
     
     function showSuccessMessage() {
@@ -128,11 +220,13 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Replace form with success message
         const formContainer = document.querySelector('.contact-form-container');
-        formContainer.innerHTML = '';
-        formContainer.appendChild(successMessage);
-        
-        // Scroll to success message
-        successMessage.scrollIntoView({ behavior: 'smooth' });
+        if (formContainer) {
+            formContainer.innerHTML = '';
+            formContainer.appendChild(successMessage);
+            
+            // Scroll to success message
+            successMessage.scrollIntoView({ behavior: 'smooth' });
+        }
     }
     
     // Add CSS for form validation and success message
@@ -169,86 +263,15 @@ document.addEventListener('DOMContentLoaded', function() {
             color: #7f8c8d;
             font-size: 1.1rem;
         }
+        
+        .faq-answer.active {
+            display: block;
+        }
+        
+        .submit-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
     `;
     document.head.appendChild(style);
-    
-    // Initialize Google Maps when API is loaded
-    // This function would be called by the Google Maps API script
-    window.initMap = function() {
-        // Check if we're on a page with a map
-        const mapPlaceholder = document.querySelector('.map-placeholder');
-        if (mapPlaceholder) {
-            // Replace placeholder with actual map
-            const mapFrame = document.querySelector('.map-frame');
-            mapFrame.innerHTML = '';
-            
-            const map = new google.maps.Map(mapFrame, {
-                center: { lat: 12.9716, lng: 77.5946 }, // Bangalore coordinates
-                zoom: 15,
-                styles: [
-                    {
-                        "featureType": "water",
-                        "elementType": "geometry",
-                        "stylers": [
-                            {
-                                "color": "#e9e9e9"
-                            },
-                            {
-                                "lightness": 17
-                            }
-                        ]
-                    },
-                    {
-                        "featureType": "landscape",
-                        "elementType": "geometry",
-                        "stylers": [
-                            {
-                                "color": "#f5f5f5"
-                            },
-                            {
-                                "lightness": 20
-                            }
-                        ]
-                    }
-                    // Add more custom styles as needed
-                ]
-            });
-            
-            // Add a marker for the office location
-            const marker = new google.maps.Marker({
-                position: { lat: 12.9716, lng: 77.5946 },
-                map: map,
-                title: "DRAKZ Office",
-                animation: google.maps.Animation.DROP
-            });
-            
-            // Add info window
-            const infoWindow = new google.maps.InfoWindow({
-                content: `
-                    <div style="padding: 10px; max-width: 200px;">
-                        <h3 style="margin: 0 0 5px; color: #2c3e50; font-size: 16px;">DRAKZ Headquarters</h3>
-                        <p style="margin: 0; color: #7f8c8d; font-size: 14px;">
-                            Innovation Hub,<br>
-                            Tech Campus, Suite 203<br>
-                            Bangalore, Karnataka, India
-                        </p>
-                    </div>
-                `
-            });
-            
-            marker.addListener('click', function() {
-                infoWindow.open(map, marker);
-            });
-        }
-    };
-    
-    // To load Google Maps API, you would add the script tag with your API key when deploying
-    // Commented out since this would be added when the site is deployed
-    /*
-    const mapsScript = document.createElement('script');
-    mapsScript.src = 'https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap';
-    mapsScript.async = true;
-    mapsScript.defer = true;
-    document.body.appendChild(mapsScript);
-    */
 });

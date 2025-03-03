@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="admin-dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar Navigation -->
+        <div class="sidebar">
+            <div class="logo">
+                <div class="logo-circle">D</div>
+            </div>
+            <div class="nav-links">
+                <div class="nav-item" data-tab="user-management" onclick="window.location.href='admin-dashboard.html';">
+                    <i class="fas fa-users"></i>
+                    <span>User Management</span>
+                </div>
+                <div class="nav-item" data-tab="system-monitoring" onclick="window.location.href='system-monitoring.html';">
+                    <i class="fas fa-chart-line"></i>
+                    <span>System Monitoring</span>
+                </div>
+                <div class="nav-item" data-tab="content-moderation" onclick="window.location.href='content-mo.html';">
+                    <i class="fas fa-clipboard-check"></i>
+                    <span>Content Moderation</span>
+                </div>
+                <div class="nav-item active" data-tab="revenue-tracking">
+                    <i class="fas fa-dollar-sign"></i>
+                    <span>Revenue Tracking</span>
+                </div>
+                <div class="nav-item" data-tab="user-management" onclick="window.location.href='messages.html';">
+                    <i class="fas fa-users"></i>
+                    <span>Messages</span>
+                </div>
+                
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <header>
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search...">
+                </div>
+                <!-- <div class="header-buttons">
+                    <button class="btn btn-primary">Admin Dashboard</button>
+                    <button class="btn" onclick="window.location.href='messages.html'">Messages</button>
+                    <button class="btn">Settings</button>
+                </div> -->
+                <div class="profile">
+                    <div class="profile-circle">A</div>
+                </div>
+            </header>
+          
+            <!-- 4. Revenue & Subscription Tracking Tab -->
+            <div class="tab-content" id="revenue-tracking">
+                <div class="tab-header">
+                    <h1>Revenue & Subscription Tracking</h1>
+                    <div class="date-range">
+                        <label for="date-range-select">Time Period:</label>
+                        <select id="date-range-select">
+                            <option value="week">Last 7 days</option>
+                            <option value="month" selected>Last 30 days</option>
+                            <option value="quarter">Last 90 days</option>
+                            <option value="year">Last 12 months</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="stats-cards">
+                    <div class="stat-card">
+                        <div class="stat-title">Total Revenue</div>
+                        <div class="stat-value">$847,392</div>
+                        <div class="stat-change positive">+18.7% <span>vs last period</span></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">Premium Subscriptions</div>
+                        <div class="stat-value">5,742</div>
+                        <div class="stat-change positive">+11.3% <span>vs last period</span></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">Ad Revenue</div>
+                        <div class="stat-value">$68,347</div>
+                        <div class="stat-change positive">+7.2% <span>vs last period</span></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">Avg. Revenue Per User</div>
+                        <div class="stat-value">$67.89</div>
+                        <div class="stat-change positive">+5.1% <span>vs last period</span></div>
+                    </div>
+                </div>
+
+                <div class="charts-container">
+                    <div class="chart-card">
+                        <h3>Revenue Breakdown</h3>
+                        <div class="chart" id="revenue-breakdown-chart">
+                            <!-- Chart will be rendered here -->
+                            <div class="chart-placeholder">
+                                <div class="chart-pie"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Subscription Growth</h3>
+                        <div class="chart" id="subscription-growth-chart">
+                            <!-- Chart will be rendered here -->
+                            <div class="chart-placeholder">
+                                <div class="chart-line"></div>
+                                <div class="chart-line"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="revenue-report">
+                    <h3>Monthly Revenue Report</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Month</th>
+                                <th>Subscription Revenue</th>
+                                <th>Ad Revenue</th>
+                                <th>Other Revenue</th>
+                                <th>Total Revenue</th>
+                                <th>Growth</th>
+                            </tr>
+                        </thead>
+                        <tbody id="revenue-table-body">
+                            <!-- Revenue data will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- User Details Modal -->
+    <div class="modal" id="user-modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2>User Details</h2>
+            <div class="user-details">
+                <div class="user-image">
+                    <div class="profile-circle large">U</div>
+                </div>
+                <div class="user-info">
+                    <div class="form-group">
+                        <label>First Name</label>
+                        <input type="text" id="user-first-name">
+                    </div>
+                    <div class="form-group">
+                        <label>Last Name</label>
+                        <input type="text" id="user-last-name">
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="user-email">
+                    </div>
+                    <div class="form-group">
+                        <label>Role</label>
+                        <select id="user-role">
+                            <option value="standard">Standard</option>
+                            <option value="premium">Premium</option>
+                            <option value="advisor">Advisor</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select id="user-status">
+                            <option value="active">Active</option>
+                            <option value="suspended">Suspended</option>
+                            <option value="pending">Pending</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Join Date</label>
+                        <input type="text" id="user-join-date" disabled>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-danger" id="delete-user-btn">Delete User</button>
+                <button class="btn" id="cancel-user-btn">Cancel</button>
+                <button class="btn btn-primary" id="save-user-btn">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content Review Modal -->
+    <div class="modal" id="content-modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2>Content Review</h2>
+            <div class="content-preview">
+                <h3 id="content-title">Financial Planning in Your 30s</h3>
+                <div class="content-meta">
+                    <span id="content-author">By: John Smith</span>
+                    <span id="content-date">Submitted: 25 Feb 2025</span>
+                </div>
+                <div class="content-type" id="content-type">Blog Post</div>
+                <div class="content-body" id="content-body">
+                    <p>Content preview will appear here...</p>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-danger" id="reject-content-btn">Reject</button>
+                <button class="btn" id="cancel-content-btn">Close</button>
+                <button class="btn btn-primary" id="approve-content-btn">Approve</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="admin-dashboard.js"></script>
+</body>
+</html>

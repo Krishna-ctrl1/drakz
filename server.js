@@ -888,6 +888,176 @@ app.get('/api/security-alerts', (req, res) => {
   res.json(securityAlerts);
 });
 
+// API endpoint to save contact messages
+app.post('/api/save-contact-message', async (req, res) => {
+  try {
+    // Get data from request body
+    const { name, email, phone, subject, message, submission_date } = req.body;
+    
+    // Validate required fields
+    if (!name || !email || !subject || !message) {
+      return res.status(400).json({
+        success: false,
+        message: 'Missing required fields'
+      });
+    }
+    
+    // Format the date properly for MySQL
+    const formattedDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
+    
+    // Use your existing db connection
+    db.query(
+      `INSERT INTO contact_messages 
+       (name, email, phone, subject, message, submission_date) 
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [name, email, phone || null, subject, message, formattedDate],
+      (err, result) => {
+        if (err) {
+          console.error('Database error:', err);
+          return res.status(500).json({
+            success: false,
+            message: 'Database error while saving your message'
+          });
+        }
+        
+        if (result.affectedRows > 0) {
+          // Success response
+          return res.status(201).json({
+            success: true,
+            message: 'Message saved successfully',
+            id: result.insertId
+          });
+        } else {
+          return res.status(500).json({
+            success: false,
+            message: 'Failed to insert data'
+          });
+        }
+      }
+    );
+  } catch (error) {
+    console.error('Error saving contact message:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while saving your message'
+    });
+  }
+});
+
+// API endpoint to get all messages (for admin dashboard)
+app.get('/api/messages', async (req, res) => {
+  try {
+    // Using the existing db connection
+    db.query('SELECT * FROM contact_messages ORDER BY submission_date DESC', (error, results) => {
+      if (error) {
+        console.error('Error fetching messages:', error);
+        return res.status(500).json({
+          success: false,
+          message: 'An error occurred while fetching messages.'
+        });
+      }
+      
+      res.json({
+        success: true,
+        messages: results
+      });
+    });
+  } catch (error) {
+    console.error('Error fetching messages:', error);
+    res.status(500).json({
+      success: false,
+      message: 'An error occurred while fetching messages.'
+    });
+  }
+});
+
+// API endpoint to mark a message as read
+app.post('/api/messages/mark-read', async (req, res) => {
+  try {
+    const { id } = req.body;
+    
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: 'Message ID is required.'
+      });
+    }
+    
+    // Using the existing db connection
+    db.query(
+      'UPDATE contact_messages SET is_read = TRUE WHERE id = ?',
+      [id],
+      (error, result) => {
+        if (error) {
+          console.error('Error marking message as read:', error);
+          return res.status(500).json({
+            success: false,
+            message: 'An error occurred while marking the message as read.'
+          });
+        }
+        
+        if (result.affectedRows > 0) {
+          res.json({
+            success: true,
+            message: 'Message marked as read.'
+          });
+        } else {
+          res.status(404).json({
+            success: false,
+            message: 'Message not found or already marked as read.'
+          });
+        }
+      }
+    );
+  } catch (error) {
+    console.error('Error marking message as read:', error);
+    res.status(500).json({
+      success: false,
+      message: 'An error occurred while marking the message as read.'
+    });
+  }
+});
+
+// Add this route handler for replying to messages
+// In your server.js file, modify the reply endpoint:
+
+app.post('/api/messages/reply', async (req, res) => {
+  try {
+    const { id, to, subject, message } = req.body;
+    
+    if (!id || !to || !subject || !message) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Missing required fields' 
+      });
+    }
+    
+    // Send the email
+    const mailOptions = {
+      from: process.env.EMAIL_USER || 'your-email@gmail.com',
+      to: to,
+      subject: subject,
+      text: message
+    };
+    
+    // Send mail with defined transport object
+    await transporter.sendMail(mailOptions);
+    
+    // Update message status in database using promise interface
+    const promiseConnection = db.promise();
+    const query = "UPDATE contact_messages SET is_replied = true WHERE id = ?";
+    await promiseConnection.query(query, [id]);
+    
+    res.json({ success: true, message: 'Reply sent successfully' });
+  } catch (error) {
+    console.error('Error sending reply:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to send reply: ' + error.message 
+    });
+  }
+});
+
 // Start the server
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);

@@ -28,15 +28,13 @@
     background-color: var(--background-light);
   }
   
-  /* Header Styles */
-  /* Header Styles */
+/* Header Styles */
 #header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 20px 40px;
-  background-color: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+  background-color: rgba(255, 255, 255, 255);
   position: sticky;
   top: 0;
   z-index: 1000;
@@ -217,6 +215,7 @@
     overflow: hidden;
     border: 1px solid rgba(0, 0, 0, 0.05);
     height: 100%;
+    margin-top: 2rem;
   }
   
   .user-card:hover {

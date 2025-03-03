@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Messages</title>
+    <link rel="stylesheet" href="messages.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar Navigation -->
+        <div class="sidebar">
+            <div class="logo">
+                <div class="logo-circle">D</div>
+            </div>
+            <div class="nav-links">
+                <div class="nav-item" data-tab="user-management" onclick="window.location.href='admin-dashboard.html';">
+                    <i class="fas fa-users"></i>
+                    <span>User Management</span>
+                </div>                
+                <div class="nav-item" data-tab="system-monitoring" onclick="window.location.href='system-monitoring.html';">
+                    <i class="fas fa-chart-line"></i>
+                    <span>System Monitoring</span>
+                </div>
+                <div class="nav-item" data-tab="content-moderation" onclick="window.location.href='content-moderation.html';">
+                    <i class="fas fa-clipboard-check"></i>
+                    <span>Content Moderation</span>
+                </div>
+                <div class="nav-item" data-tab="revenue-tracking" onclick="window.location.href='revenue-tracking.html';">
+                    <i class="fas fa-dollar-sign"></i>
+                    <span>Revenue Tracking</span>
+                </div>
+                <div class="nav-item active" data-tab="messages">
+                    <i class="fas fa-envelope"></i>
+                    <span>Messages</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <header>
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search...">
+                </div>
+                <div class="profile">
+                    <div class="profile-circle">A</div>
+                </div>
+            </header>
+
+            <!-- Messages Tab -->
+            <div class="tab-content active" id="messages">
+                <div class="tab-header">
+                    <h1>Contact Messages</h1>
+                    <button id="showMessages" class="btn">Refresh Messages</button>
+                    <div class="filter-buttons">
+                        <button class="btn active" data-filter="all">All</button>
+                        <button class="btn" data-filter="unread">Unread</button>
+                        <button class="btn" data-filter="read">Read</button>
+                        <button class="btn" data-filter="replied">Replied</button>
+                    </div>
+                </div>
+
+                <div class="filters">
+                    <div class="filter-group">
+                        <select id="status-filter">
+                            <option value="all">All Status</option>
+                            <option value="unread">Unread</option>
+                            <option value="read">Read</option>
+                            <option value="replied">Replied</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <select id="date-filter">
+                            <option value="all">All Dates</option>
+                            <option value="today">Today</option>
+                            <option value="week">This Week</option>
+                            <option value="month">This Month</option>
+                        </select>
+                    </div>
+                    <div class="search-filter">
+                        <input type="text" placeholder="Search messages..." id="message-search">
+                    </div>
+                </div>
+
+                <div class="messages-list" id="messagesContainer">
+                    <table id="messagesTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Subject</th>
+                                <th>Message Preview</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="messagesTableBody">
+                            <!-- Messages will be loaded here -->
+                            <tr id="loadingIndicator">
+                                <td colspan="9" class="loading">Loading messages...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="pagination">
+                    <button id="prev-page">Previous</button>
+                    <span id="page-info">Page 1 of 5</span>
+                    <button id="next-page">Next</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for viewing full message -->
+    <div class="modal" id="messageModal">
+        <div class="modal-content">
+            <span class="close-btn close">&times;</span>
+            <h2 id="modalSubject"></h2>
+            <div class="message-details">
+                <div class="message-header">
+                    <div class="sender-info">
+                        <div class="info-group">
+                            <label>From:</label>
+                            <span id="modalName"></span>
+                        </div>
+                        <div class="info-group">
+                            <label>Email:</label>
+                            <span id="modalEmail"></span>
+                        </div>
+                        <div class="info-group">
+                            <label>Phone:</label>
+                            <span id="modalPhone"></span>
+                        </div>
+                        <div class="info-group">
+                            <label>Date:</label>
+                            <span id="modalDate"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="message-body">
+                    <h3>Message Content</h3>
+                    <div id="modalMessage"></div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-danger" id="delete-message-btn">Delete</button>
+                <button class="btn btn-primary" id="reply-message-btn">Reply</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reply Modal -->
+    <div class="modal" id="replyModal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2>Reply to Message</h2>
+            <div class="reply-form">
+                <div class="form-group">
+                    <label for="reply-to">To:</label>
+                    <input type="text" id="reply-to" disabled>
+                </div>
+                <div class="form-group">
+                    <label for="reply-subject">Subject:</label>
+                    <input type="text" id="reply-subject">
+                </div>
+                <div class="form-group">
+                    <label for="reply-message">Message:</label>
+                    <textarea id="reply-message" rows="6"></textarea>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn" id="cancel-reply-btn">Cancel</button>
+                <button class="btn btn-primary" id="send-reply-btn">Send Reply</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="messages.js"></script>
+</body>
+</html>
