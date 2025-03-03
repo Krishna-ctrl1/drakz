@@ -1,10 +1,4 @@
-.main-container {
-    display: flex; 
-    
-    
-     
 
-}
 .content {
     padding-top:100px;
     padding: 20px;
@@ -21,5 +15,11 @@
    transition : 0.3s;
    height:100vh;
    gap:15px;
+
+}.main-container {
+    display: flex; 
+    
+    
+     
 
 }
