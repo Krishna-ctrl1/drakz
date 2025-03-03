@@ -15,11 +15,11 @@
                 <div class="logo-circle">D</div>
             </div>
             <div class="nav-links">
-                <div class="nav-item active" data-tab="user-management">
+                <div class="nav-item" data-tab="user-management" onclick="window.location.href='admin-dashboard.html';">
                     <i class="fas fa-users"></i>
                     <span>User Management</span>
                 </div>
-                <div class="nav-item" data-tab="system-monitoring" onclick="window.location.href='system-monitoring.html';">
+                <div class="nav-item active" data-tab="system-monitoring">
                     <i class="fas fa-chart-line"></i>
                     <span>System Monitoring</span>
                 </div>
@@ -57,132 +57,82 @@
                 </div>
             </header>
 
-            <!-- 1. User Management Tab -->
-            <div class="tab-content active" id="user-management">
+            <!-- 2. System Monitoring Tab -->
+            <div class="tab-content" id="system-monitoring">
                 <div class="tab-header">
-                    <h1>User Management</h1>
-                    <!-- <button class="btn btn-primary" id="add-user-btn">Add New User</button> -->
+                    <h1>System Monitoring</h1>
+                    <button class="btn btn-primary" id="generate-report-btn">Generate Report</button>
                 </div>
 
-                <div class="filters">
-                    <div class="filter-group">
-                        <select id="role-filter">
-                            <option value="all">All Roles</option>
-                            <option value="standard">Standard</option>
-                            <option value="premium">Premium</option>
-                            <option value="advisor">Advisor</option>
-                            <option value="admin">Admin</option>
-                        </select>
+                <div class="stats-cards">
+                    <div class="stat-card">
+                        <div class="stat-title">Active Users</div>
+                        <div class="stat-value">12,483</div>
+                        <div class="stat-change positive">+12.4% <span>vs last month</span></div>
                     </div>
-                    <div class="filter-group">
-                        <select id="status-filter">
-                            <option value="all">All Status</option>
-                            <option value="active">Active</option>
-                            <option value="suspended">Suspended</option>
-                            <option value="pending">Pending</option>
-                        </select>
+                    <div class="stat-card">
+                        <div class="stat-title">New Sign-ups</div>
+                        <div class="stat-value">748</div>
+                        <div class="stat-change positive">+8.2% <span>vs last month</span></div>
                     </div>
-                    <div class="search-filter">
-                        <input type="text" placeholder="Search users..." id="user-search">
+                    <div class="stat-card">
+                        <div class="stat-title">Total Transactions</div>
+                        <div class="stat-value">$8.4M</div>
+                        <div class="stat-change positive">+15.7% <span>vs last month</span></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">Security Alerts</div>
+                        <div class="stat-value">24</div>
+                        <div class="stat-change negative">+6 <span>vs last month</span></div>
                     </div>
                 </div>
 
-                <div class="user-list">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>User</th>
-                                <th>Email</th>
-                                <th>Role</th>
-                                <th>Status</th>
-                                <th>Join Date</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="user-table-body">
-                            <!-- User rows will be populated by JavaScript -->
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="pagination">
-                    <button id="prev-page">Previous</button>
-                    <span id="page-info">Page 1 of 10</span>
-                    <button id="next-page">Next</button>
-                </div>
-
-                <div id="modify-user-modal" class="modify-modal">
-                    <div class="modify-modal-content">
-                        <span class="close-btn">&times;</span>
-                        <h2>Manage User</h2>
-                        <div id="user-form">
-                            <div class="form-group">
-                                <label for="user-name">Name</label>
-                                <input type="text" id="user-name">
+                <div class="charts-container">
+                    <div class="chart-card">
+                        <h3>User Engagement</h3>
+                        <div class="chart" id="engagement-chart">
+                            <!-- Chart will be rendered here -->
+                            <div class="chart-placeholder">
+                                <div class="chart-line"></div>
+                                <div class="chart-line"></div>
+                                <div class="chart-line"></div>
                             </div>
-                            <div class="form-group">
-                                <label for="user-email">Email</label>
-                                <input type="email" id="user-email">
-                            </div>
-                            <div class="form-group">
-                                <label for="user-role">Role</label>
-                                <select id="user-role">
-                                    <option value="standard">Standard</option>
-                                    <option value="admin">Admin</option>
-                                    <option value="advisor">Advisor</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="user-status">Status</label>
-                                <select id="user-status">
-                                    <option value="active">Active</option>
-                                    <option value="pending">Pending</option>
-                                    <option value="suspended">Suspended</option>
-                                </select>
-                            </div>
-                            
-                            <!-- Additional user details fields -->
-                            <div class="form-group">
-                                <label for="email-verified">Email Verified</label>
-                                <input type="checkbox" id="email-verified">
-                            </div>
-                            <div class="form-group">
-                                <label for="user-monthly-income">Monthly Income</label>
-                                <input type="text" id="user-monthly-income">
-                            </div>
-                            <div class="form-group">
-                                <label for="user-employment-status">Employment Status</label>
-                                <select id="user-employment-status">
-                                    <option value="Employed">Employed</option>
-                                    <option value="Self-employed">Self-employed</option>
-                                    <option value="Unemployed">Unemployed</option>
-                                    <option value="Student">Student</option>
-                                    <option value="Retired">Retired</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="user-financial-goals">Financial Goals</label>
-                                <textarea id="user-financial-goals" rows="3"></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label for="user-risk-tolerance">Risk Tolerance</label>
-                                <select id="user-risk-tolerance">
-                                    <option value="Low">Low</option>
-                                    <option value="Medium">Medium</option>
-                                    <option value="High">High</option>
-                                </select>
-                            </div>
-                            <div id="user-form-actions">
-                                <button id="save-user-btn">Save Changes</button>
-                                <button id="delete-user-btn">Delete User</button>
-                                <button id="cancel-user-btn">Cancel</button>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Financial Summary</h3>
+                        <div class="chart" id="financial-chart">
+                            <!-- Chart will be rendered here -->
+                            <div class="chart-placeholder">
+                                <div class="chart-bar"></div>
+                                <div class="chart-bar"></div>
+                                <div class="chart-bar"></div>
+                                <div class="chart-bar"></div>
                             </div>
                         </div>
                     </div>
                 </div>
-                    
-            </div>
 
+                <div class="security-alerts">
+                    <h3>Security Alerts</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Alert Type</th>
+                                <th>User</th>
+                                <th>Time</th>
+                                <th>Location</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="security-alerts-body">
+                            <!-- Security alerts will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
     <!-- Modals -->
     <!-- User Details Modal -->
     <div class="modal" id="user-modal">
