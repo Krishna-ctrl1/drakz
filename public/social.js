@@ -1,25 +1,45 @@
-// Facebook Login
-function handleFacebookLogin() {
-    alert("Facebook Login clicked. Add Facebook SDK to enable login.");
-  }
-  
-  // Google Login
-  function handleGoogleLogin() {
-    alert("Google Login clicked. Add Google API to enable login.");
-  }
-  
-  // Apple Login
-  function handleAppleLogin() {
-    alert("Apple Login clicked. Add Apple API to enable login.");
-  }
-  
-  // Attaching event listeners
-  document.addEventListener("DOMContentLoaded", function () {
-    const facebookBtn = document.getElementById("facebook-login");
-    const googleBtn = document.getElementById("google-login");
-    const appleBtn = document.getElementById("apple-login");
-  
-    if (facebookBtn) facebookBtn.addEventListener("click", handleFacebookLogin);
-    if (googleBtn) googleBtn.addEventListener("click", handleGoogleLogin);
-    if (appleBtn) appleBtn.addEventListener("click", handleAppleLogin);
+function handleCredentialResponse(response) {
+  console.log("Encoded JWT ID token: " + response.credential);
+
+  // Send the token to your backend for verification
+  fetch('/google-login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: response.credential })
+  })
+  .then(res => res.json())
+  .then(data => {
+      console.log('Login Success:', data);
+      window.location.href = 'signup.html'; // Redirect on success
+  })
+  .catch(error => {
+      console.error('Error during login:', error);
   });
+}
+
+// Initialize Google Sign-In
+function initGoogleSignIn() {
+  if (!window.google || !google.accounts) {
+      console.error("Google API not loaded.");
+      return;
+  }
+
+  google.accounts.id.initialize({
+      client_id: "1037396813768-4643uec933fpoqbce7lf7i73g4najnso.apps.googleusercontent.com",
+      callback: handleCredentialResponse
+  });
+
+  // Attach Google login to button click
+  document.querySelector(".google-login").addEventListener("click", () => {
+      google.accounts.id.prompt(); // Opens the Google Sign-In popup
+  });
+}
+
+// Ensure DOM is ready before running initGoogleSignIn
+document.addEventListener("DOMContentLoaded", () => {
+  if (window.google) {
+      initGoogleSignIn();
+  } else {
+      setTimeout(initGoogleSignIn, 1000); // Retry after a short delay if API isn't loaded
+  }
+});

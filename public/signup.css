@@ -1,144 +1,51 @@
-/* Existing styles with modifications */
 body {
   display: flex;
   justify-content: center;
   height: 100vh;
   align-items: center;
   background-image: url('./assets/images/sign_bg.png');
-  background-size: cover;
+  background-size: 110%;
   background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  padding-bottom: 5%;
+  overflow: hidden;
+}
 
+img {
+  width: 10%;
+  height: 10%;
 }
 
 .form {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 10px;
   background-color: #ffffff;
   padding: 30px;
+  padding-right: 50px;
   border-radius: 20px;
-  width: 480px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  width: 350px;
+  margin-top: -5vh;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
-.form-progress {
-  text-align: center;
-  margin-bottom: 20px;
-  color: #2d79f3;
-  font-weight: 500;
-  font-size: 0.9rem;
+::placeholder {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
-.form-step {
-  display: none;
+.form button {
+  align-self: flex-end;
 }
 
-.form-step.active {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
+.flex-column {
+  margin-top: 12px;
 }
 
-.hidden {
-  display: none;
-}
-
-/* Button Group Styles */
-.button-group {
-  display: flex;
-  gap: 15px;
-  margin-top: 25px;
-  width: 100%;
-}
-
-/* For steps that need both previous and next/submit buttons */
-.form-step[data-step="1"] .button-group,
-.form-step[data-step="2"] .button-group,
-.form-step[data-step="3"] .button-group {
-  justify-content: space-between; /* Spreads out buttons when there are two */
-}
-
-.button-signin,
-.button-prev,
-.button-next,
-.button-submit {
-  padding: 12px 25px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-weight: 500;
-  min-width: 120px; /* Ensures consistent button width */
-}
-
-.button-prev, .button-signin {
-  background: none;
-  border: 2px solid #ecedec;
+.flex-column > label {
   color: #151717;
-}
-
-.button-next,
-.button-submit {
-  background-color: #2d79f3;
-  border: 2px solid #2d79f3;
-  color: white;
-}
-
-.button-prev:hover, .button-signin:hover {
-  border-color: #2d79f3;
-  color: #2d79f3;
-}
-
-.button-next:hover,
-.button-submit:hover {
-  background-color: #1a5bbf;
-  transform: translateY(-1px);
-}
-
-/* Social Login Section Styles */
-.p.line {
-  margin: 25px 0 15px;
-  text-align: center;
-}
-
-.flex-row {
-  display: flex;
-  justify-content: center;
-  gap: 15px;
-}
-
-/* Rest of your existing CSS styles remain the same */
-
-body {
-  display: flex;
-  justify-content: center;
-  min-height: 100vh;
-  align-items: center;
-  background-image: url('./assets/images/sign_bg.png');
-  background-size: cover;
-  background-position: center;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, 
-              Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  padding: 20px;
-}
-
-.form {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  background-color: #ffffff;
-  padding: 30px;
-  border-radius: 20px;
-  width: 480px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-}
-
-.section-header {
-  font-size: 1.2rem;
-  color: #2d79f3;
   font-weight: 600;
-  margin: 15px 0 10px;
-  padding-bottom: 8px;
-  border-bottom: 2px solid #ecedec;
 }
 
 .inputForm {
@@ -150,25 +57,18 @@ body {
   transition: 0.2s ease-in-out;
   width: 100%;
   position: relative;
-}
-
-.inputForm select {
-  appearance: none;
-  background: transparent;
-}
-
-.inputForm svg {
-  position: absolute;
-  left: 15px;
-  z-index: 1;
+  padding-left: 10px;
+  padding-right: 10px;
 }
 
 .input {
   border: none;
+  border-radius: 10px;
   width: 100%;
   height: 100%;
-  padding: 0 15px 0 45px;
-  font-size: 0.95rem;
+  padding: 0 15px;
+  padding-left: 20px;
+  padding-right: 20px;
   background: transparent;
 }
 
@@ -177,210 +77,36 @@ body {
 }
 
 .inputForm:focus-within {
-  border-color: #2d79f3;
-  box-shadow: 0 0 5px rgba(45, 121, 243, 0.3);
+  border: 2px solid #2d79f3;
+  box-shadow: 0 0 5px rgba(45, 121, 243, 0.5);
 }
 
-/* Select dropdown styling */
-.inputForm select {
-  padding-right: 30px;
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-  background-size: 1em;
-}
-
-.checkbox-group,
-.radio-group {
+.flex-row {
   display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin: 10px 0;
-}
-
-.checkbox-group label,
-.radio-group label {
-  display: flex;
+  flex-direction: row;
   align-items: center;
-  gap: 8px;
-  color: #454545;
-  cursor: pointer;
-  font-size: 0.9rem;
-}
-
-input[type="checkbox"],
-input[type="radio"] {
-  width: 16px;
-  height: 16px;
-  accent-color: #2d79f3;
-}
-
-.terms {
-  margin: 15px 0;
-  font-size: 0.85rem;
-}
-
-.terms a {
-  color: #2d79f3;
-  text-decoration: none;
-  font-weight: 500;
-}
-
-.terms a:hover {
-  text-decoration: underline;
-}
-
-.button-submit {
-  margin: 25px 0 15px;
-  background-color: #151717;
-  transition: all 0.3s ease;
-}
-
-.button-submit:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
-
-/* Responsive Adjustments */
-@media (max-width: 520px) {
-  .form {
-    width: 100%;
-    padding: 25px;
-  }
-  
-  .inputForm {
-    height: 48px;
-  }
-  
-  .section-header {
-    font-size: 1.1rem;
-  }
-}
-
-/* Social Buttons */
-.btn {
-  border: 1px solid #ecedec;
-  transition: all 0.2s ease;
-}
-
-.btn:hover {
-  border-color: #2d79f3;
-  transform: translateY(-1px);
-}
-
-/* Add these to your existing CSS */
-/* Step Navigation */
-.form-step {
-  animation: fadeIn 0.3s ease;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateX(20px); }
-  to { opacity: 1; transform: translateX(0); }
-}
-
-.navigation-buttons {
-  margin-top: 2rem;
-  display: flex;
-  gap: 1rem;
+  gap: 10px;
   justify-content: space-between;
 }
 
-.button-submit[type="submit"] {
-  background-color: #2d79f3;
+.flex-row > div > label {
+  font-size: 14px;
+  color: black;
+  font-weight: 400;
 }
 
-.button-prev {
-  background-color: #f1f3f5;
-  color: #454545;
-}
-
-.button-prev:hover {
-  background-color: #e9ecef;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-
-/* Step Indicator */
-.step-indicator {
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
-
-.step-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background-color: #ecedec;
-  transition: 0.3s ease;
-}
-
-.step-dot.active {
-  background-color: #2d79f3;
-  transform: scale(1.2);
-}
-
-/* Error Messages */
-.error-message {
-  color: #dc3545;
-  font-size: 0.8rem;
-  margin-top: 5px;
-  display: none;
-}
-
-.inputForm.invalid {
-  border-color: #dc3545;
-}
-
-.inputForm.invalid + .error-message {
-  display: block;
-}
-
-
-
-/* Progress Dots - Moved to top */
-.progress-dots {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-bottom: 30px;
-  position: absolute;
-  top: -40px; /* Move dots above the form */
-  left: 0;
-  right: 0;
-}
-
-.dot {
-  width: 10px;
-  height: 10px;
-  background-color: #ccc;
-  border-radius: 50%;
-  transition: background-color 0.3s ease;
-}
-
-.dot.active {
-  background-color: #2d79f3;
-}
-
-/* Form container - Add positioning context */
-.form {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  background-color: #ffffff;
-  padding: 30px;
-  border-radius: 20px;
-  width: 480px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-  position: relative; /* Added for absolute positioning of dots */
-  margin-top: 40px; /* Make space for the dots */
+.span {
+  font-size: 14px;
+  margin-left: 5px;
+  color: #2d79f3;
+  font-weight: 500;
+  cursor: pointer;
 }
 
 /* Button Group Styles */
 .button-group {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   gap: 15px;
   margin-top: 25px;
   width: 100%;
@@ -388,14 +114,19 @@ input[type="radio"] {
 
 /* For steps that need both previous and next/submit buttons */
 .form-step[data-step="2"] .button-group,
-.form-step[data-step="3"] .button-group {
+.form-step[data-step="3"] .button-group,
+.form-step[data-step="4"] .button-group,
+.form-step[data-step="5"] .button-group {
   justify-content: space-between;
 }
 
 /* Base button styles */
 .button-prev,
 .button-next,
-.button-submit {
+.button-submit,
+.button-signin,
+.aadhaar,
+.pan {
   padding: 12px 25px;
   border-radius: 8px;
   cursor: pointer;
@@ -408,64 +139,255 @@ input[type="radio"] {
   justify-content: center;
 }
 
-.button-prev {
+.button-prev ,
+.button-signin{
   background: none;
   border: 2px solid #ecedec;
   color: #151717;
 }
 
 .button-next,
-.button-submit {
+.button-submit,
+.aadhaar,
+.pan {
   background-color: #2d79f3;
   border: 2px solid #2d79f3;
   color: white;
 }
 
-.button-prev:hover {
+.button-prev:hover,
+.button-signin:hover {
   border-color: #2d79f3;
   color: #2d79f3;
 }
 
 .button-next:hover,
-.button-submit:hover {
+.button-submit:hover,
+.aadhaar:hover,
+.pan:hover {
   background-color: #1a5bbf;
   transform: translateY(-1px);
 }
 
-/* Social Login Section Styles */
-.p.line {
-  margin: 25px 0 15px;
+.p {
   text-align: center;
+  color: black;
+  font-size: 14px;
+  margin: 5px 0;
 }
 
-.flex-row {
+.role-buttons {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  gap: 20px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* Error Messages */
+.error-message {
+  color: #dc3545;
+  font-size: 0.8rem;
+  margin-top: 5px;
+}
+
+.inputForm.invalid {
+  border-color: #dc3545;
+}
+
+/* Progress Dots */
+.progress-dots {
   display: flex;
   justify-content: center;
-  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #ddd;
+  margin: 0 5px;
+  transition: background-color 0.3s ease;
+}
+
+.dot.active {
+  background-color: #2d79f3;
+}
+
+/* Section Header */
+.section-header {
+  font-weight: 600;
+  font-size: 18px;
+  margin-bottom: 15px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid #eee;
+}
+
+/* Form Steps */
+.form-step {
+  transition: opacity 0.3s ease;
+}
+
+.form-step.hidden {
+  display: none;
+}
+
+/* Checkboxes and Radio Buttons */
+.checkbox-group, .radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.checkbox-group label, .radio-group label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.terms {
+  margin: 15px 0;
 }
 
 /* Responsive adjustments */
-@media (max-width: 520px) {
+@media (max-height: 800px) {
   .form {
-    margin-top: 50px; /* Slightly more space on mobile */
+    margin-top: -8vh; /* Move up more on smaller screens */
+  }
+}
+
+@media (max-height: 600px) {
+  body {
+    align-items: flex-start;
+    padding-top: 30px;
+    padding-bottom: 0;
   }
   
-  .progress-dots {
-    top: -35px;
+  .form {
+    margin-top: 0;
+    max-height: 85vh;
+    overflow-y: auto;
   }
 }
 
-.button-back {
-  background-color: #ccc;
-  color: #000;
-  text-decoration: none;
-  padding: 10px 15px;
-  border-radius: 5px;
-  display: inline-block;
-  text-align: center;
-  margin-left: 10px;
+@media (max-width: 400px) {
+  .form {
+    width: 90%;
+    padding: 20px 15px;
+  }
+  
+  .button-next, .button-prev {
+    padding: 0 15px;
+    font-size: 14px;
+  }
 }
 
-.button-back:hover {
-  background-color: #bbb;
+.google-login,
+  .apple-login {
+    width: 100%;
+    height: 50px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 500;
+    gap: 10px;
+    border: 1px solid #ededef;
+    background-color: white;
+    cursor: pointer;
+    transition: 0.2s ease-in-out;
+  }
+  
+  .google-login:hover,
+  .apple-login:hover {
+    border: 1px solid #2d79f3;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 520px) {
+    .form {
+      margin-top: 50px; /* Slightly more space on mobile */
+    }
+    
+    .progress-dots {
+      top: -35px;
+    }
+  }
+
+  .p.line {
+    margin: 25px 0 15px;
+    text-align: center;
+  }
+  
+  .flex-row {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+  }
+
+  /* Hide the number input incrementer/spinner */
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+/* For WebKit browsers (Chrome, Safari, Edge) */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.aadhaar-btn-grp,
+.pan-btn-grp {
+  margin-top: 20px;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+}
+
+
+.aadhaar-otp-verify-btn,
+.aadhaar-otp-send-btn,
+.pan-otp-send-btn,
+.pan-otp-verify-btn {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: #2d79f3;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 5px 8px;
+  border-radius: 5px;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.aadhaar-otp-verify-btn:hover,
+.aadhaar-otp-send-btn:hover,
+.pan-otp-send-btn:hover,
+.pan-otp-verify-btn:hover  {
+  background: rgba(45, 121, 243, 0.1);
+  color: #1a5bbf;
+}
+
+/* Adjust input padding for OTP buttons */
+.input {
+  padding-right: 70px !important;
+}
+
+/* Remove the old button group styles */
+.aadhaar-btn-grp {
+  display: none;
 }

@@ -8,8 +8,7 @@
     <link href="myprivilage.css" rel="stylesheet">
 </head>
 <body>
-
-     <!-- Top Navigation -->
+    <!-- Top Navigation -->
     <nav class="top-nav">
         <div class="nav-left">
             <div class="logo-space"></div>
@@ -31,14 +30,18 @@
             </div>
         </div>
     </nav>
-
-    <!-- Sidebar -->
+    
+    <!-- Toggle Button Structure (moved to sidebar) -->
+    <input type="checkbox" class="toggle-checkbox" id="sidebar-toggle">
+    
     <div class="container">
         <div class="sidebar">
-            <a href="dashboard.html" class="nav-item">
-                <i class="fas fa-home"></i>
-                Dashboard
-            </a>
+            <div class="dashboard-container">
+                <a href="dashboard.html" class="nav-item">
+                    <i class="fas fa-home"></i>
+                    Dashboard
+                </a>
+            </div>
             <a href="transactions.html" class="nav-item">
                 <i class="fas fa-exchange-alt"></i>
                 Transactions
@@ -67,12 +70,18 @@
                 <i class="fas fa-shield-alt"></i>
                 My Privileges
             </a>
-            <a href="settings.html" class="nav-item">
+            <a href="services.html" class="nav-item">
                 <i class="fas fa-cog"></i>
                 Settings
             </a>
         </div>
-
+        
+        <!-- Toggle moved here -->
+        <label for="sidebar-toggle" class="toggle">
+            <span class="top-line common"></span>
+            <span class="middle-line common"></span>
+            <span class="bottom-line common"></span>
+        </label>
         <!-- Main Content -->
         <div class="main-content">
             <div class="content-card">
@@ -173,7 +182,7 @@
     </div>
 
     <script src="myprivilage.js">
-   
-    </script>
-</body>
-</html>
+ 
+        </script>
+    </body>
+    </html>
