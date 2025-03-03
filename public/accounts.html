@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <link rel="stylesheet" href="styles-sidebar2.css">
-    <link rel="stylesheet" href="styles-header.css">
-    <link rel="stylesheet" href="styles-accounts.css">
+    <link rel="stylesheet" href="sidebar2.css">
+    <link rel="stylesheet" href="header.css">
+    <link rel="stylesheet" href="accounts.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
@@ -32,46 +32,24 @@
     
 <div class="main-container">
 
-    <!-- Sidebar -->
-    <div class="container">
-        <div class="sidebar">
-            <a href="dashboard.html" class="nav-item">
-                <i class="fas fa-home"></i>
-                Dashboard
+    <div class="sidebar" id="mySidebar">
+
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()"><img width="25" src="assets/icons/sidebar1.png"></a>   
+        
+        <ul class="sidebar-list">
+            <a href="dashboard.html"> 
+                <li ><i class="fas fa-home"></i> Dashboard</li> 
             </a>
-            <a href="transactions.html" class="nav-item">
-                <i class="fas fa-exchange-alt"></i>
-                Transactions
-            </a>
-            <a href="#" class="nav-item active">
-                <i class="fas fa-users"></i>
-                Accounts
-            </a>
-            <a href="investments.html" class="nav-item">
-                <i class="fas fa-chart-pie"></i>
-                Investments
-            </a>
-            <a href="credit_cards.html" class="nav-item">
-                <i class="fas fa-credit-card"></i>
-                Credit Cards
-            </a>
-            <a href="loans.html" class="nav-item">
-                <i class="fas fa-building"></i>
-                Loans
-            </a>
-            <a href="services.html" class="nav-item">
-                <i class="fas fa-cog"></i>
-                Services
-            </a>
-            <a href="My_privilege.html" class="nav-item">
-                <i class="fas fa-shield-alt"></i>
-                My Privileges
-            </a>
-            <a href="settings.html" class="nav-item">
-                <i class="fas fa-cog"></i>
-                Settings
-            </a>
-        </div>
+            <a href="accounts.html"><li class="active"><i class="fas fa-user"></i>  Accounts</li> </a>
+            <a href="investments.html"><li><i class="fas fa-chart-bar"></i> Investments</li></a>
+            <a href="credit_cards.html"><li><i class="fas fa-credit-card"></i> Credit Cards</li></a>
+            <a href="#"> <li><i class="fa-solid fa-blog"></i> Blog</li> </a>
+            <a href="services.html"><li><i class="fas fa-tools"></i>Services</li></a>
+            <a href="My_privilege.html"><li><i class="fas fa-gift"></i> My Privileges</li> </a>
+            <a href="settings.html" ><li><i class="fas fa-cog"></i> Settings</li></a>
+        </ul>
+
+    
     </div>
 
     <div class="content"id="main" >

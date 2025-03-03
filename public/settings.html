@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <link rel="stylesheet" href="styles-sidebar2.css">
-    <link rel="stylesheet" href="styles-header.css">
-    <link rel="stylesheet" href="styles-settings.css">
+    <link rel="stylesheet" href="sidebar2.css">
+    <link rel="stylesheet" href="header.css">
+    <link rel="stylesheet" href="settings.css">
 </head>
 <body>
     <header class="header">
@@ -31,27 +31,30 @@
     
     <div class="main-container">
 
-
-
-        
-
         <div class="sidebar" id="mySidebar">
 
-            <a href="javascript:void(0)" class="closebtn" onclick="closeNav()"><img width="25" src="sidebar1.png"></a>   
+            <a href="javascript:void(0)" class="closebtn" onclick="closeNav()"><img width="25" src="assets/icons/sidebar1.png"></a>   
             
             <ul class="sidebar-list">
-                <li class="active"><i class="fas fa-home"></i> <a href="dashboard.html"> Dashboard</a></li>
-                <li><i class="fas fa-user"></i> <a href="accounts.html"> Accounts</a></li>
-                <li><i class="fas fa-chart-bar"></i> <a href="investments.html">Investments</a></li>
-                <li><i class="fas fa-credit-card"></i> <a href="credit_cards.html">Credit Cards</a></li>
-                <li><i class="fa-solid fa-blog"></i> <a href="#">Blog</a></li>
-                <li><i class="fas fa-tools"></i> <a href="services.html">Services</a></li>
-                <li><i class="fas fa-gift"></i> <a href="My_privilege.html">My Privileges</a></li>
-                <li><i class="fas fa-cog"></i> <a href="settings.html">Settings</a></li>
+                <a href="dashboard.html"> 
+                    <li ><i class="fas fa-home"></i> Dashboard</li> 
+                </a>
+                <a href="accounts.html"><li><i class="fas fa-user"></i>  Accounts</li> </a>
+                <a href="investments.html"><li><i class="fas fa-chart-bar"></i> Investments</li></a>
+                <a href="credit_cards.html"><li><i class="fas fa-credit-card"></i> Credit Cards</li></a>
+                <a href="#"> <li><i class="fa-solid fa-blog"></i> Blog</li> </a>
+                <a href="services.html"><li><i class="fas fa-tools"></i>Services</li></a>
+                <a href="My_privilege.html"><li><i class="fas fa-gift"></i> My Privileges</li> </a>
+                <a href="#" ><li class="active"><i class="fas fa-cog"></i> Settings</li></a>
             </ul>
 
         
         </div>
+
+
+        
+
+        
 
         <div class="content" id="main">
             <div class="sidebar-open-div dashboard-item">   

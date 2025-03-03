@@ -5,54 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sidebar Menu</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <link rel="stylesheet" href="styles-sidebar2.css">
-    <link rel="stylesheet" href="styles-header.css">
-    <link rel="stylesheet" href="styles-dashboard.css">
+    <link rel="stylesheet" href="sidebar2.css">
+    <link rel="stylesheet" href="header.css">
+    <link rel="stylesheet" href="dashboard.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
-    <link rel="stylesheet" href="stylescard.css">
+    <link rel="stylesheet" href="dashboard_card.css">
 </head>
 <body>
 
-    <!-- Sidebar -->
-    <div class="container">
-        <div class="sidebar">
-            <a href="#" class="nav-item active">
-                <i class="fas fa-home"></i>
-                Dashboard
-            </a>
-            <a href="transactions.html" class="nav-item">
-                <i class="fas fa-exchange-alt"></i>
-                Transactions
-            </a>
-            <a href="accounts.html" class="nav-item">
-                <i class="fas fa-users"></i>
-                Accounts
-            </a>
-            <a href="investments.html" class="nav-item">
-                <i class="fas fa-chart-pie"></i>
-                Investments
-            </a>
-            <a href="credit_cards.html" class="nav-item">
-                <i class="fas fa-credit-card"></i>
-                Credit Cards
-            </a>
-            <a href="loans.html" class="nav-item">
-                <i class="fas fa-building"></i>
-                Loans
-            </a>
-            <a href="services.html" class="nav-item">
-                <i class="fas fa-cog"></i>
-                Services
-            </a>
-            <a href="My_privilege.html" class="nav-item">
-                <i class="fas fa-shield-alt"></i>
-                My Privileges
-            </a>
-            <a href="settings.html" class="nav-item">
-                <i class="fas fa-cog"></i>
-                Settings
-            </a>
+    <header class="header">
+        <div class="left">
+            <span class="logo">D R A K Z</span>
+            
         </div>
         <div class="search-bar">
             <i class="fas fa-search"></i>
@@ -76,17 +41,19 @@
 
         <div class="sidebar" id="mySidebar">
 
-            <a href="javascript:void(0)" class="closebtn" onclick="closeNav()"><img width="25" src="sidebar1.png"></a>   
+            <a href="javascript:void(0)" class="closebtn" onclick="closeNav()"><img width="25" src="assets/icons/sidebar1.png"></a>   
             
             <ul class="sidebar-list">
-                <li class="active"><i class="fas fa-home"></i><a href="#"> Dashboard</a></li>
-                <li><i class="fas fa-user"></i> <a href="accounts.html"> Accounts</a></li>
-                <li><i class="fas fa-chart-bar"></i> <a href="investments.html">Investments</a></li>
-                <li><i class="fas fa-credit-card"></i> <a href="#">Credit Cards</a></li>
-                <li><i class="fa-solid fa-blog"></i> <a href="#">Blog</a></li>
-                <li><i class="fas fa-tools"></i> <a href="services.html">Services</a></li>
-                <li><i class="fas fa-gift"></i> <a href="My_privilege.html">My Privileges</a></li>
-                <li><i class="fas fa-cog"></i> <a href="settings.html" >Settings</a></li>
+                <a href="#"> 
+                    <li class="active"><i class="fas fa-home"></i> Dashboard</li> 
+                </a>
+                <a href="accounts.html"><li><i class="fas fa-user"></i>  Accounts</li> </a>
+                <a href="investments.html"><li><i class="fas fa-chart-bar"></i> Investments</li></a>
+                <a href="credit_cards.html"><li><i class="fas fa-credit-card"></i> Credit Cards</li></a>
+                <a href="#"> <li><i class="fa-solid fa-blog"></i> Blog</li> </a>
+                <a href="services.html"><li><i class="fas fa-tools"></i>Services</li></a>
+                <a href="My_privilege.html"><li><i class="fas fa-gift"></i> My Privileges</li> </a>
+                <a href="settings.html" ><li><i class="fas fa-cog"></i> Settings</li></a>
             </ul>
 
         
@@ -194,7 +161,7 @@
                         <!-- Slide 1 -->
                         <div class="swiper-slide">
                             <div class="atm-card">
-                                <img src="assets/images/bank-iconn.png" alt="Bank Logo" class="bank-logo">
+                                <img src="cards/bank-iconn.png" alt="Bank Logo" class="bank-logo">
                                 <img src="https://cdn-icons-png.flaticon.com/128/9334/9334627.png" alt="Chip" class="chip">
                                 <div class="card-number">5241 9312 3456 7899</div>
                                 <div class="validity">
@@ -287,133 +254,7 @@
     </div>
 
     <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
-        <script src="script3.js"></script>
+    <script src="dashboard.js"></script>
 
-    <script>
-
-        
-
-        //search bar funtionality
-
-        function filterDashboard() {
-            let input = document.getElementById("searchInput").value.trim().toLowerCase();
-            let items = document.querySelectorAll(".dashboard-item");
-        
-            items.forEach(item => {
-                let text = item.textContent.trim().toLowerCase();
-                // Check if search input matches the dashboard item
-                if (text.includes(input)) {
-                    item.classList.remove("hidden");
-                } else {
-                    item.classList.add("hidden");
-                }
-            });
-        }
-        
-        //crredit score
-        
-            // Generate tick marks around the gauge
-        const ticksContainer = document.querySelector(".ticks");
-        for (let i = 0; i < 30; i++) {
-            const tick = document.createElement("div");
-            tick.classList.add("tick");
-            tick.style.transform = `rotate(${i * 12}deg)`;
-            ticksContainer.appendChild(tick);
-        }
-
-        function updateCreditScore(score) {
-            const minScore = 300;
-            const maxScore = 850;
-            
-            // Calculate percentage position
-            let position = ((score - minScore) / (maxScore - minScore)) * 100;
-            
-            document.querySelector(".credit-score-marker").style.left = `${position}%`;
-            document.querySelector(".credit-score-value").style.left = `${position - 2}%`;
-            document.querySelector(".credit-score-value").textContent = `${score}/850`;
-        }
-        
-            // Example: Update to 774 dynamically
-        updateCreditScore(670);
-
-        const expenseCtx = document.getElementById('expenseChartCanvas').getContext('2d');
-        new Chart(expenseCtx, {
-            type: 'pie',
-            data: {
-                labels: ["Leisure", "Utilities", "Savings", "Miscellaneous"],
-                datasets: [{
-                    data: [30, 15, 20, 35], // Values
-                    backgroundColor: [
-                        "#2c3e50",  // Dark Blue (Leisure)
-                        "#5d6981",  // Grayish Blue (Utilities)
-                        "#4a90e2",  // Light Blue (Savings)
-                        "#9bb1ff"   // Soft Blue (Miscellaneous)
-                    ],
-                    borderWidth: 2,
-                    borderColor: "#ffffff",
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        display: false // Hide legend, show text inside slices
-                    },
-                    tooltip: {
-                        enabled: true
-                    }
-                }
-            }
-        });
-
-        function openNav() {
-            document.getElementById("mySidebar").style.width = "170px";
-            document.getElementById("main").style.marginLeft = "170px";
-            document.getElementById("open-button").style.visibility = "hidden";
-           
-        }
-
-          
-          
-          /* Set the width of the sidebar to 0 and the left margin of the page content to 0 */
-        function closeNav() {
-            document.getElementById("mySidebar").style.width = "0";
-            document.getElementById("main").style.marginLeft = "0";
-            document.getElementById("open-button").style.visibility = "visible";
-            document.getElementsByClassName("video-preview").style.marginLeft = "170px;"
-        }
-
-
-        /*Video Library*/
-          
-            // Get all video thumbnails
-            const thumbnails = document.querySelectorAll('.video-thumbnail');
-            const videoModal = document.getElementById('video-modal');
-            const videoFrame = document.getElementById('video-frame');
-    
-            // Open video modal
-            thumbnails.forEach(thumbnail => {
-                thumbnail.addEventListener('click', function(event) {
-                    event.preventDefault(); // Prevent default anchor behavior
-                    const videoSrc = this.getAttribute('data-video');
-                    videoFrame.src = videoSrc;
-                    videoModal.style.display = 'block';
-                    // Disable scrolling
-                     document.body.style.overflow = 'hidden';
-                });
-            });
-    
-            // Close video modal and stop video
-            document.querySelector('.close-preview').addEventListener('click', function() {
-                videoModal.style.display = 'none';
-                videoFrame.src = ''; // Reset iframe src to stop video
-                document.body.style.overflow = 'auto';
-            });
-        
-        
-
-        
-    
-    </script>  
 </body>
 </html>
