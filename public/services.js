@@ -1,15 +1,11 @@
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize sidebar toggle
-    const sidebarToggle = document.getElementById('sidebar-toggle');
-    
-    // No additional JavaScript needed for the toggle functionality
-    // as it's mostly handled by CSS through the checkbox
+function openNav() {
+    document.getElementById("mySidebar").style.width = "180px";
+    document.querySelector(".content").style.marginLeft = "180px"; // Fixed targeting
+    document.getElementById("open-button").style.visibility = "hidden";
+}
 
-    // You can add any additional functionality for your services page here
-    
-    // For example, if you want to add an event to toggle the sidebar programmatically:
-    // const toggleButton = document.querySelector('.toggle');
-    // toggleButton.addEventListener('click', function() {
-    //     sidebarToggle.checked = !sidebarToggle.checked;
-    // });
-});
+function closeNav() {
+    document.getElementById("mySidebar").style.width = "0";
+    document.querySelector(".content").style.marginLeft = "0"; // Fixed targeting
+    document.getElementById("open-button").style.visibility = "visible";
+}
