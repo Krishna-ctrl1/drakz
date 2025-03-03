@@ -4,74 +4,357 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="settings.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="styles-sidebar2.css">
+    <link rel="stylesheet" href="styles-header.css">
+    <link rel="stylesheet" href="styles-settings.css">
 </head>
 <body>
-    <!-- Top Navigation -->
-    <nav class="top-nav">
-        <div class="nav-left">
-            <div class="logo-space"></div>
-            <div class="brand">My Privileges</div>
+    <header class="header">
+        <div class="left">
+            <span class="logo">D R A K Z</span>
+            
         </div>
-        <div class="nav-right">
-            <div class="search-container">
-                <i class="fas fa-search search-icon"></i>
-                <input type="text" class="search-input" placeholder="Search for something">
-            </div>
-            <div class="nav-icons">
-                <div class="icon-button">
-                    <i class="fas fa-cog"></i>
-                </div>
-                <div class="icon-button">
-                    <i class="fas fa-bell"></i>
-                </div>
-                <img src="/api/placeholder/32/32" alt="Profile" class="profile-image">
+        <div class="search-bar">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchInput" placeholder="Search for something" onkeyup="filterDashboard()">
+        </div>
+        <div class="icons">
+            <i class="fas fa-cog"></i>
+            <i class="fas fa-bell"></i>
+            <div class="profile">
+                <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="User">
             </div>
         </div>
-    </nav>
+        
+    </header>
+    
+    <div class="main-container">
 
-    <!-- Sidebar -->
-    <div class="container">
-        <div class="sidebar">
-            <a href="dashboard.html" class="nav-item">
-                <i class="fas fa-home"></i>
-                Dashboard
-            </a>
-            <a href="transactions.html" class="nav-item">
-                <i class="fas fa-exchange-alt"></i>
-                Transactions
-            </a>
-            <a href="accounts.html" class="nav-item">
-                <i class="fas fa-users"></i>
-                Accounts
-            </a>
-            <a href="investments.html" class="nav-item">
-                <i class="fas fa-chart-pie"></i>
-                Investments
-            </a>
-            <a href="credit_cards.html" class="nav-item">
-                <i class="fas fa-credit-card"></i>
-                Credit Cards
-            </a>
-            <a href="loans.html" class="nav-item">
-                <i class="fas fa-building"></i>
-                Loans
-            </a>
-            <a href="services.html" class="nav-item">
-                <i class="fas fa-cog"></i>
-                Services
-            </a>
-            <a href="My_privilege.html" class="nav-item">
-                <i class="fas fa-shield-alt"></i>
-                My Privileges
-            </a>
-            <a href="settings.html" class="nav-item active">
-                <i class="fas fa-cog"></i>
-                Settings
-            </a>
+
+
+        
+
+        <div class="sidebar" id="mySidebar">
+
+            <a href="javascript:void(0)" class="closebtn" onclick="closeNav()"><img width="25" src="sidebar1.png"></a>   
+            
+            <ul class="sidebar-list">
+                <li class="active"><i class="fas fa-home"></i> <a href="dashboard.html"> Dashboard</a></li>
+                <li><i class="fas fa-user"></i> <a href="accounts.html"> Accounts</a></li>
+                <li><i class="fas fa-chart-bar"></i> <a href="investments.html">Investments</a></li>
+                <li><i class="fas fa-credit-card"></i> <a href="credit_cards.html">Credit Cards</a></li>
+                <li><i class="fa-solid fa-blog"></i> <a href="#">Blog</a></li>
+                <li><i class="fas fa-tools"></i> <a href="services.html">Services</a></li>
+                <li><i class="fas fa-gift"></i> <a href="My_privilege.html">My Privileges</a></li>
+                <li><i class="fas fa-cog"></i> <a href="settings.html">Settings</a></li>
+            </ul>
+
+        
         </div>
+
+        <div class="content" id="main">
+            <div class="sidebar-open-div dashboard-item">   
+                <button class="openbtn" id="open-button" onclick="openNav()">&#9776; Open Sidebar</button>
+            </div>
+            <div class="container">
+                <div class="tabs">
+                    <div class="tab active" onclick="showTab('profile')">Profile</div>
+                    <div class="tab" onclick="showTab('preferences')">Preferences</div>
+                    <div class="tab" onclick="showTab('security')">Security</div>
+                </div>
+        
+                <div id="profile" class="tab-content active">
+                    <div class="profile-container">
+                        <img id="profile-pic" class="profile-pic" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Profile Picture">
+                        <input type="file" id="profile-img" accept="image/*" style="display:none" onchange="previewImage(event)">
+                        <i class="fa fa-pencil-alt edit-icon" onclick="document.getElementById('profile-img').click();"></i>
+                    </div>
+                    <div class="input-groups">
+                        <div class="left-inputgroup">
+                            <div class="input-group"><label>Name</label><input type="text" id="name"></div>
+                            <div class="input-group"><label>Email</label><input type="email" id="email"></div>
+                            <div class="input-group"><label>Mobile Number</label><input type="tel" id="mobile"></div>
+                            <div class="input-group"><label>DOB</label><input type="date" id="dob"></div>
+                        </div>
+                        <div class="right-inputgroup">
+                            <div class="input-group"><label>Permanent Address</label><input type="text" id="perm-address"></div>
+                            <div class="input-group"><label>Present Address</label><input type="text" id="pres-address"></div>
+                            <div class="input-group"><label>PIN Code</label><input type="text" id="pin"></div>
+                            <div class="input-group"><label>City</label><input type="text" id="city"></div>
+                
+                        </div>
+
+                    </div>
+                    
+                    
+                    <div class="input-group">
+                        <label>Country</label>
+                        <div id="country-box" class="country-box" onclick="editCountry()">
+                            <span id="country-text">Select Country</span>
+                            <i class="fas fa-pencil-alt"></i>
+                        </div>
+                        <select id="country-select" style="display: none;" onchange="saveCountry()"></select>
+                    </div>
+                    
+                    <button class="save-btn" onclick="saveProfile()">Save</button>
+                </div>
+        
+                <div id="preferences" class="tab-content">
+                    <div class="input-group"><label>Currency</label><input type="text" id="currency"></div>
+                    <div class="input-group"><label>Time Zone</label><input type="text" id="timezone"></div>
+                    
+                    <!-- Toggle Switches for Preferences -->
+                    <div class="input-group">
+                        <label>Send/Receive Digital Currency</label>
+                        <label class="switch">
+                            <input type="checkbox" id="digital-currency">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="input-group">
+                        <label>Receive Merchant Orders</label>
+                        <label class="switch">
+                            <input type="checkbox" id="merchant-orders">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="input-group">
+                        <label>Recommendations for My Account</label>
+                        <label class="switch">
+                            <input type="checkbox" id="account-recommendations">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    
+                    <button class="save-btn" onclick="savePreferences()">Save</button>
+                </div>
+        
+                <div id="security" class="tab-content">
+                    <div class="input-group"><label>Current Password</label><input type="password" id="current-password"></div>
+                    <div class="input-group"><label>New Password</label><input type="password" id="new-password"></div>
+                    
+                    <!-- Toggle Switch for Two-Factor Authentication -->
+                    <div class="input-group">
+                        <label>Two-Factor Authentication</label>
+                        <label class="switch">
+                            <input type="checkbox" id="two-factor-auth">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    
+                    <button class="save-btn" onclick="saveSecurity()">Save</button>
+                </div>
+            </div>
+        </div>
+
     </div>
-    <h1>Settings</h1>
+
+    <script>
+        //sidebar toggle
+        function openNav() {
+            document.getElementById("mySidebar").style.width = "170px";
+            document.getElementById("main").style.marginLeft = "170px";
+            document.getElementById("open-button").style.visibility = "hidden";
+           
+        }
+
+          
+          
+          /* Set the width of the sidebar to 0 and the left margin of the page content to 0 */
+        function closeNav() {
+            document.getElementById("mySidebar").style.width = "0";
+            document.getElementById("main").style.marginLeft = "0";
+            document.getElementById("open-button").style.visibility = "visible";
+            document.getElementsByClassName("video-preview").style.marginLeft = "170px;"
+        }
+        //settings
+        function showTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelector(`[onclick="showTab('${tab}')"]`).classList.add('active');
+            document.getElementById(tab).classList.add('active');
+        }
+
+        function previewImage(event) {
+            const reader = new FileReader();
+            reader.onload = function () {
+                const base64Image = reader.result; // Convert image to Base64
+                document.getElementById('profile-pic').src = base64Image;
+                localStorage.setItem("profileImage", base64Image); // Save Base64 to localStorage
+            };
+            reader.readAsDataURL(event.target.files[0]);
+        }
+        
+        // Load saved profile image on page load
+        document.addEventListener("DOMContentLoaded", function () {
+            const profileImage = localStorage.getItem("profileImage");
+            if (profileImage) {
+                document.getElementById("profile-pic").src = profileImage;
+            }
+        });
+
+        function validatePhoneNumber(phone) {
+            // Regex for a valid phone number (10 digits, optional country code)
+            const phoneRegex = /^\+?(\d{1,4})?[-.\s]?(\(?\d{1,4}\)?)?[-.\s]?\d{1,4}[-.\s]?\d{1,9}$/;
+            return phoneRegex.test(phone);
+        }
+
+        function validateEmail(email) {
+            // Regex for a valid email address
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+
+        function validatePinCode(pin) {
+            // Regex for a valid PIN code (6 digits)
+            const pinRegex = /^\d{6}$/;
+            return pinRegex.test(pin);
+        }
+
+        function saveProfile() {
+            const name = document.getElementById("name").value;
+            const email = document.getElementById("email").value;
+            const mobile = document.getElementById("mobile").value;
+            const dob = document.getElementById("dob").value;
+            const permAddress = document.getElementById("perm-address").value;
+            const presAddress = document.getElementById("pres-address").value;
+            const pin = document.getElementById("pin").value;
+            const city = document.getElementById("city").value;
+
+            // Validate fields
+            if (!name || !email || !mobile || !dob || !permAddress || !presAddress || !pin || !city) {
+                alert("❌ All fields are required!");
+                return;
+            }
+
+            if (!validatePhoneNumber(mobile)) {
+                alert("❌ Please enter a valid phone number!");
+                return;
+            }
+
+            if (!validateEmail(email)) {
+                alert("❌ Please enter a valid email address!");
+                return;
+            }
+
+            if (!validatePinCode(pin)) {
+                alert("❌ Please enter a valid 6-digit PIN code!");
+                return;
+            }
+
+            const profileData = {
+                name,
+                email,
+                mobile,
+                dob,
+                permAddress,
+                presAddress,
+                pin,
+                city,
+            };
+
+            localStorage.setItem("profileData", JSON.stringify(profileData));
+            alert("✅ Profile saved successfully!");
+        }
+
+        function savePreferences() {
+            const preferencesData = {
+                currency: document.getElementById("currency").value,
+                timezone: document.getElementById("timezone").value,
+                digitalCurrency: document.getElementById("digital-currency").checked,
+                merchantOrders: document.getElementById("merchant-orders").checked,
+                accountRecommendations: document.getElementById("account-recommendations").checked,
+            };
+
+            localStorage.setItem("preferencesData", JSON.stringify(preferencesData));
+            alert("✅ Preferences saved successfully!");
+        }
+
+        function saveSecurity() {
+            const securityData = {
+                currentPassword: document.getElementById("current-password").value,
+                newPassword: document.getElementById("new-password").value,
+                twoFactorAuth: document.getElementById("two-factor-auth").checked,
+            };
+
+            localStorage.setItem("securityData", JSON.stringify(securityData));
+            alert("✅ Security settings saved successfully!");
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            // Load Profile Data
+            const profileData = JSON.parse(localStorage.getItem("profileData"));
+            if (profileData) {
+                document.getElementById("name").value = profileData.name;
+                document.getElementById("email").value = profileData.email;
+                document.getElementById("mobile").value = profileData.mobile;
+                document.getElementById("dob").value = profileData.dob;
+                document.getElementById("perm-address").value = profileData.permAddress;
+                document.getElementById("pres-address").value = profileData.presAddress;
+                document.getElementById("pin").value = profileData.pin;
+                document.getElementById("city").value = profileData.city;
+            }
+
+            // Load Preferences Data
+            const preferencesData = JSON.parse(localStorage.getItem("preferencesData"));
+            if (preferencesData) {
+                document.getElementById("currency").value = preferencesData.currency;
+                document.getElementById("timezone").value = preferencesData.timezone;
+                document.getElementById("digital-currency").checked = preferencesData.digitalCurrency;
+                document.getElementById("merchant-orders").checked = preferencesData.merchantOrders;
+                document.getElementById("account-recommendations").checked = preferencesData.accountRecommendations;
+            }
+
+            // Load Security Data
+            const securityData = JSON.parse(localStorage.getItem("securityData"));
+            if (securityData) {
+                document.getElementById("current-password").value = securityData.currentPassword;
+                document.getElementById("new-password").value = securityData.newPassword;
+                document.getElementById("two-factor-auth").checked = securityData.twoFactorAuth;
+            }
+
+            // Load Country Data
+            const countrySelect = document.getElementById("country-select");
+            const countryText = document.getElementById("country-text");
+
+            fetch("https://restcountries.com/v3.1/all")
+                .then(res => res.json())
+                .then(data => {
+                    const countries = data.map(c => c.name.common).sort();
+                    countries.forEach(country => {
+                        let option = document.createElement("option");
+                        option.value = option.textContent = country;
+                        countrySelect.appendChild(option);
+                    });
+
+                    const savedCountry = localStorage.getItem("country");
+                    if (savedCountry) {
+                        countryText.textContent = savedCountry;
+                        countrySelect.value = savedCountry;
+                    }
+                });
+        });
+
+        function editCountry() {
+            document.getElementById("country-box").style.display = "none";
+            document.getElementById("country-select").style.display = "block";
+        }
+
+        function saveCountry() {
+            const countrySelect = document.getElementById("country-select");
+            const countryText = document.getElementById("country-text");
+
+            if (countrySelect.value) {
+                countryText.textContent = countrySelect.value;
+                localStorage.setItem("country", countrySelect.value);
+            }
+
+            document.getElementById("country-box").style.display = "flex";
+            document.getElementById("country-select").style.display = "none";
+        }
+    </script>
+
+        
 </body>
 </html>

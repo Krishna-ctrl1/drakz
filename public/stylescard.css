@@ -1,0 +1,266 @@
+        
+
+        .atm-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4), -10px 10px #aea7a7;
+        }
+
+        .chip, .visa-logo, .bank-logo {
+            position: absolute;
+        }
+
+        .chip {
+            top: 50px;
+            left: 30px;
+            width: 50px;
+        }
+
+        .bank-logo {
+            top: 20px;
+            right: 20px;
+            width: 130px;
+        }
+
+        .visa-logo {
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+        }
+
+        .card-number {
+            font-size: 1.2rem;
+            letter-spacing: 4px;
+            margin: 100px 0 0 10px;
+        }
+
+        .validity {
+            display: flex;
+            justify-content: space-between;
+            width: 170px;
+            margin-left: 10px;
+        }
+
+        .validity span {
+            font-size: 0.6rem;
+
+        }
+
+        .cardholder-name {
+            position: absolute;
+            bottom: 20px;
+            left: 30px;
+            font-size: 1rem;
+            letter-spacing: 2px;
+        }
+
+        .atm-cards-container {
+            max-width:1000px;
+            min-width:500px;
+            background-color: rgb(249, 249, 249);
+            position: relative; /* For positioning the form */
+            min-height:400px;
+            margin-bottom:30px;
+        }
+        .atm-cards-header
+        {
+            display:flex;
+            width:100%;
+            justify-content: space-between;
+            height:70px;
+            vertical-align: middle;
+        }
+
+        .atm-cards-container h3 {
+          
+            display: inline-block;
+            padding-left:40px;
+            padding-right:40px;
+            margin-top:25px;
+            
+        }
+        /* Swiper container styling */
+        .swiper-container {
+            width: 100%;
+            max-width: 500px; /* Slightly larger than card width to accommodate padding */
+            margin: 0 auto; /* Center the container */
+            
+            position: relative;
+            overflow: hidden; /* Ensure only one card is visible */
+        }
+        .atm-card {
+            width: 90%;
+            min-width: 340px;
+            max-width:350px;
+           
+            height: 230px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #232333, #141666);
+            color: white;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3), -7px 7px #dcdada;
+            position: relative;
+            font-family: 'Arial', sans-serif;
+            font-weight: 300;
+            margin: 40px;
+            margin-top:20px; /* Center the card */
+            display: inline-block;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .swiper-wrapper {
+            display: flex; /* Ensure slides are in a row */
+        }
+
+        .swiper-slide {
+            width: 100%; /* Each slide takes full width of the container */
+            flex-shrink: 0; /* Prevent slides from shrinking */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative; /* For positioning the delete button */
+        }
+
+        /* Pagination (Indicators) */
+        .swiper-pagination {
+            position: relative; /* Move pagination below the card */
+            margin-top: 20px;
+        }
+
+        .swiper-pagination-bullet {
+            background-color: #ab2f2f;
+            opacity: 0.5;
+            width: 10px;
+            height: 10px;
+            margin: 0 5px;
+        }
+
+        .swiper-pagination-bullet-active {
+            opacity: 1;
+        }
+
+        /* Navigation Arrows */
+        .swiper-button-next,
+        .swiper-button-prev {
+            color: #ab2f2f; /* Arrow color */
+            background-color: rgb(240, 240, 245); /* Background for arrows */
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .swiper-button-next::after,
+        .swiper-button-prev::after {
+            font-size: 20px; /* Arrow size */
+        }
+
+        .swiper-button-next {
+            right: 10px; /* Position outside the card */
+        }
+
+        .swiper-button-prev {
+            left: 10px; /* Position outside the card */
+        }
+
+       
+        /* Delete Button */
+        .delete-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            font-size: 16px;
+            cursor: pointer;
+            opacity: 0; /* Hidden by default */
+            transition: opacity 0.3s ease;
+        }
+
+        .swiper-slide:hover .delete-button {
+            opacity: 1; /* Show on hover */
+        }
+
+        /* Add Card Button */
+        .add-card-button {
+            display: inline-block;
+            margin: 20px 10px 20px 40px;
+            margin-right:20px;
+            padding: 9px;
+            background-color: #5a5c5a;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            width: 90px;
+        }
+
+        .add-card-button:hover {
+            background-color:#ab2f2f;
+        }
+
+        /* Form Styling */
+        .add-card-form {
+            display: none;
+            position: absolute; /* Change from absolute to fixed */
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            width: 300px;
+        }
+        
+
+        .add-card-form input {
+            width: 90%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .add-card-form button {
+            width: 90%;
+            padding: 10px;
+            background-color:#ab2f2f;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .add-card-form button:hover {
+            background-color: #921e1e;
+
+        }
+
+        /* Overlay */
+        .overlay {
+            display: none; /* Hidden by default */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+        .no-cards-message {
+            display: none; /* Hidden by default */
+            text-align: center;
+            font-size: 1.5rem;
+            color: #888;
+            margin-top: 100px;
+        }

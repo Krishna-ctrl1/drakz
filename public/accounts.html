@@ -4,32 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="accounts.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="styles-sidebar2.css">
+    <link rel="stylesheet" href="styles-header.css">
+    <link rel="stylesheet" href="styles-accounts.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <!-- Top Navigation -->
-    <nav class="top-nav">
-        <div class="nav-left">
-            <div class="logo-space"></div>
-            <div class="brand">My Privileges</div>
+    <header class="header">
+        <div class="left">
+            <span class="logo">D R A K Z</span>
+            
         </div>
-        <div class="nav-right">
-            <div class="search-container">
-                <i class="fas fa-search search-icon"></i>
-                <input type="text" class="search-input" placeholder="Search for something">
-            </div>
-            <div class="nav-icons">
-                <div class="icon-button">
-                    <i class="fas fa-cog"></i>
-                </div>
-                <div class="icon-button">
-                    <i class="fas fa-bell"></i>
-                </div>
-                <img src="/api/placeholder/32/32" alt="Profile" class="profile-image">
+        <div class="search-bar">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchInput" placeholder="Search for something" onkeyup="filterDashboard()">
+        </div>
+        <div class="icons">
+            <i class="fas fa-cog"></i>
+            <i class="fas fa-bell"></i>
+            <div class="profile">
+                <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="User">
             </div>
         </div>
-    </nav>
+        
+    </header>
+    
+<div class="main-container">
 
     <!-- Sidebar -->
     <div class="container">
@@ -72,6 +73,398 @@
             </a>
         </div>
     </div>
-    <h1>Accounts</h1>
+
+    <div class="content"id="main" >
+        <div class="sidebar-open-div ">   
+            <button class="openbtn" id="open-button" onclick="openNav()">&#9776; Open Sidebar</button>
+        </div>
+        <div class="left-content">
+           
+            <div class="cards-container account-item">
+                <div class="card income">
+                    <div class="icon">💰</div>
+                    <div class="title">Income</div>
+                    <div class="amount">$5,600</div>
+                </div>
+        
+                <div class="card expense account-item" >
+                    <div class="icon">🧾</div>
+                    <div class="title">Expense</div>
+                    <div class="amount">$3,460</div>
+                </div>
+        
+                <div class="card saving account-item">
+                    <div class="icon">🐖</div>
+                    <div class="title">Total Saving</div>
+                    <div class="amount">$7,920</div>
+                </div>
+            </div>
+        
+            <div class="chart-container account-item">
+                <h3>Weekly Activity</h3>
+                <canvas id="weeklyActivityChart" ></canvas>
+            </div>
+            
+            <div class="transactions-container account-item">
+                <div class="tabs">
+                    <div class="tab active" onclick="filterTransactions('all')">All Transactions</div>
+                    <div class="tab" onclick="filterTransactions('income')">Income</div>
+                    <div class="tab" onclick="filterTransactions('expense')">Expense</div>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Description</th>
+                            <th>Type</th>
+                            <th>Date</th>
+                            <th>Amount</th>
+                            <th>Receipt</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transaction-body">
+                    </tbody>
+                </table>         
+            </div>
+        </div>
+        
+
+        <div class="right-content">
+            <div class="loan-container account-item " id="loan-list">
+                <h2>User Loans</h2>
+                <div class="loan-card account-item" onclick="toggleDetails(1)">
+                    <h3>Personal Loan</h3>
+                    <p>Principal: $10,000 | Balance: $5,000</p>
+                    <p>Loan Taken On: December 19, 2020</p>
+                    <p class="status active">Active</p>
+                    <div class="details" id="details-1">
+                        <p>Interest Rate: 5%</p>
+                        <p>Loan Term: 5 Years</p>
+                        <p>EMI: $200/month</p>
+                        <p>Next Payment Due: December 19, 2025</p>
+                        <p>Total Paid: $5,000</p>
+                    </div>
+                </div>
+                <div class="loan-card account-item" onclick="toggleDetails(2)">
+                    <h3>Car Loan</h3>
+                    <p>Principal: $20,000 | Balance: $0</p>
+                    <p>Loan Taken On: March 10, 2018</p>
+                    <p class="status paid">Paid</p>
+                    <div class="details" id="details-2">
+                        <p>Interest Rate: 4.5%</p>
+                        <p>Loan Term: 3 Years</p>
+                        <p>EMI: $350/month</p>
+                        <p>Paid in Full</p>
+                    </div>
+                </div>
+                <div class="loan-card account-item" onclick="toggleDetails(3)">
+                    <h3>Home Loan</h3>
+                    <p>Principal: $150,000 | Balance: $100,000</p>
+                    <p>Loan Taken On: July 5, 2015</p>
+                    <p class="status overdue">Overdue</p>
+                    <div class="details" id="details-3">
+                        <p>Interest Rate: 3.8%</p>
+                        <p>Loan Term: 20 Years</p>
+                        <p>EMI: $800/month</p>
+                        <p>Next Payment Due: Feb 10, 2025</p>
+                        <p>Total Paid: $50,000</p>
+                        <p>Late Payment Fee Applied</p>
+                    </div>
+                </div>
+                <div class="loan-card account-item" onclick="toggleDetails(4)">
+                    <h3>Home Loan</h3>
+                    <p>Principal: $150,000 | Balance: $100,000</p>
+                    <p>Loan Taken On: July 5, 2015</p>
+                    <p class="status overdue">Overdue</p>
+                    <div class="details" id="details-4">
+                        <p>Interest Rate: 3.8%</p>
+                        <p>Loan Term: 20 Years</p>
+                        <p>EMI: $800/month</p>
+                        <p>Next Payment Due: Feb 10, 2025</p>
+                        <p>Total Paid: $50,000</p>
+                        <p>Late Payment Fee Applied</p>
+                    </div>
+                </div>
+                <div class="loan-card account-item" onclick="toggleDetails(5)">
+                    <h3>Home Loan</h3>
+                    <p>Principal: $150,000 | Balance: $100,000</p>
+                    <p>Loan Taken On: July 5, 2015</p>
+                    <p class="status overdue">Overdue</p>
+                    <div class="details" id="details-5">
+                        <p>Interest Rate: 3.8%</p>
+                        <p>Loan Term: 20 Years</p>
+                        <p>EMI: $800/month</p>
+                        <p>Next Payment Due: Feb 10, 2025</p>
+                        <p>Total Paid: $50,000</p>
+                        <p>Late Payment Fee Applied</p>
+                    </div>
+                </div>
+    
+            </div>
+            <div class="invoices account-item">
+                <h3>Invoices Sent</h3> 
+            <div class="invoice-list">
+                <!-- Invoice Item -->
+                <div class="invoice">
+                    <div class="icon apple">
+                        <img src="assets/icons/apple-logo.svg" alt="Apple Logo">
+                    </div>
+                    <div class="invoice-details">
+                        <p class="name">Apple Store</p>
+                        <p class="time">5h ago</p>
+                    </div>
+                    <p class="amount">$450</p>
+                </div>
+                <div class="invoice">
+                    <div class="icon user">
+                        <img src="assets/icons/user.svg" alt="User Icon">
+                    </div>
+                    <div class="invoice-details">
+                        <p class="name">Michael</p>
+                        <p class="time">2 days ago</p>
+                    </div>
+                    <p class="amount">$160</p>
+                </div>
+                <div class="invoice">
+                    <div class="icon playstation">
+                        <img src="assets/icons/playstation.png" alt="PlayStation Logo">
+                    </div>
+                    <div class="invoice-details">
+                        <p class="name">Playstation</p>
+                        <p class="time">5 days ago</p>
+                    </div>
+                    <p class="amount">$1085</p>
+                </div>
+                <div class="invoice">
+                    <div class="icon user">
+                        <img src="assets/icons/user.png" alt="User Icon">
+                    </div>
+                    <div class="invoice-details">
+                        <p class="name">William</p>
+                        <p class="time">10 days ago</p>
+                    </div>
+                    <p class="amount">$90</p>
+                </div>
+            </div>
+                  
+        </div>
+            
+        
+               
+            
+    </div>
+    </div>
+    <script>
+        //search bar
+        function filterDashboard() {
+            let input = document.getElementById("searchInput").value.trim().toLowerCase();
+            let items = document.querySelectorAll(".account-item");
+        
+            items.forEach(item => {
+                let text = item.textContent.trim().toLowerCase();
+                // Check if search input matches the dashboard item
+                if (text.includes(input)) {
+                    item.classList.remove("hidden");
+                } else {
+                    item.classList.add("hidden");
+                }
+            });
+        }
+        
+        //sidebar
+        function openNav() {
+            document.getElementById("mySidebar").style.width = "170px";
+            document.getElementById("main").style.marginLeft = "170px";
+            document.getElementById("open-button").style.visibility = "hidden";
+           
+          }
+
+          
+          
+          /* Set the width of the sidebar to 0 and the left margin of the page content to 0 */
+          function closeNav() {
+            document.getElementById("mySidebar").style.width = "0";
+            document.getElementById("main").style.marginLeft = "0";
+            document.getElementById("open-button").style.visibility = "visible";
+            document.getElementsByClassName("video-preview").style.marginLeft = "170px;"
+        }
+        //weekly expenses
+        let chartInstance;
+        function createChart() 
+        {
+            const ctx = document.getElementById('weeklyActivityChart').getContext('2d');
+            
+            if (chartInstance) {
+                chartInstance.destroy(); // Destroy previous instance to prevent duplicates
+            }
+            // Sample values: Can range from hundreds to crores
+            const depositValues = [500, 300, 250, 400, 100, 280, 320];
+            const withdrawValues = [500, 300, 300, 500, 200, 400, 450];
+
+            // Find the max value dynamically
+            const maxValue = Math.max(...depositValues, ...withdrawValues);
+
+            // Adjust Y-axis scale dynamically
+            let scaleMax, stepSize;
+            if (maxValue <= 1000) {
+                scaleMax = Math.ceil(maxValue / 100) * 100; // Round to nearest 100
+                stepSize = 100;
+            } else if (maxValue <= 10000) {
+                scaleMax = Math.ceil(maxValue / 1000) * 1000; // Round to nearest 1,000
+                stepSize = 1000;
+            } else if (maxValue <= 100000) {
+                scaleMax = Math.ceil(maxValue / 5000) * 5000; // Round to nearest 5,000
+                stepSize = 5000;
+            } else {
+                scaleMax = Math.ceil(maxValue / 100000) * 100000; // Round to nearest 1,00,000
+                stepSize = 100000;
+            }
+
+            chartInstance = new Chart(ctx, 
+            {
+                type: 'bar',
+                data: {
+                    labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+                    datasets: [
+                        {
+                            label: 'Deposit',
+                            data: depositValues,
+                            backgroundColor: 'skyblue',
+                            borderRadius: 100,
+                            barThickness: 20, // FIXED bar width
+                            maxBarThickness: 20
+                        },
+                        {
+                            label: 'Withdraw',
+                            data: withdrawValues,
+                            backgroundColor: 'darkblue',
+                            borderRadius: 100,
+                            barThickness: 20, // FIXED bar width
+                            maxBarThickness: 20
+                            
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                
+                    
+                    scales: {
+                        x: {
+                            categoryPercentage: 0.7,
+                            grid: { display: false }
+                            
+                            
+                        },
+                        y: {
+                            beginAtZero: true,
+                            max: scaleMax,
+                            ticks: {
+                                stepSize: stepSize,
+                                callback: function(value) {
+                                    return value.toLocaleString();
+                                }
+                            },
+                            grid: {
+                                drawBorder: false,
+                                color: "rgba(0, 0, 0, 0.1)" // Soft gridlines
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(tooltipItem) {
+                                    return tooltipItem.dataset.label + ': ' + tooltipItem.raw.toLocaleString();
+                                }
+                            }
+                        },
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                usePointStyle: true
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        createChart();
+
+        // Force re-render on window resize
+        window.addEventListener('resize', () => {
+            createChart(); 
+        });
+
+        //transactions
+        const transactions = [
+            { description: "Spotify Subscription", type: "Shopping", amount: -2500, date: "28 Jan, 12:30 AM" },
+            { description: "Freepik Sales", type: "Transfer", amount: 750, date: "25 Jan, 10:40 PM" },
+            { description: "Mobile Service", type: "Service", amount: -150, date: "20 Jan, 10:40 PM" },
+            { description: "Wilson", type: "Transfer", amount: -1050, date: "15 Jan, 03:29 PM" },
+            { description: "Emilly", type: "Transfer", amount: 840, date: "14 Jan, 10:40 PM" }
+        ];
+
+        function filterTransactions(type) {
+            const tbody = document.getElementById('transaction-body');
+            tbody.innerHTML = '';
+            
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelector(`.tab[onclick="filterTransactions('${type}')"]`).classList.add('active');
+            
+            const filtered = transactions.filter(tx => {
+                if (type === 'income') return tx.amount > 0;
+                if (type === 'expense') return tx.amount < 0;
+                return true;
+            });
+            
+            filtered.forEach(tx => {
+                const row = `<tr>
+                    <td>${tx.description}</td>
+                    <td>${tx.type}</td>
+                    <td>${tx.date}</td>
+                    <td class="amount ${tx.amount > 0 ? 'positive' : 'negative'}">${tx.amount > 0 ? '+' + tx.amount : tx.amount}</td>
+                    <td><button class="button">Download</button></td>
+                </tr>`;
+                tbody.innerHTML += row;
+            });
+        }
+
+        filterTransactions('all');
+
+
+        
+        function toggleDetails(id) {
+            const details = document.getElementById(`details-${id}`);
+            details.style.display = details.style.display === "none" ? "block" : "none";
+        }
+
+        //loans
+        // Function to toggle loan details
+        function toggleDetails(id) {
+            const details = document.getElementById(`details-${id}`);
+            if (details) {
+                details.style.display = details.style.display === "none" ? "block" : "none";
+            }
+        }
+
+        // Attach click event listeners to loan cards
+        document.addEventListener("DOMContentLoaded", function () {
+            const loanCards = document.querySelectorAll(".loan-card");
+        
+            loanCards.forEach(card => {
+                card.addEventListener("click", function () {
+                    const details = this.querySelector(".loan-details");
+        
+                    if (details) {
+                        details.classList.toggle("hidden"); // Toggle visibility
+                    }
+                });
+            });
+        });
+        
+    </script>
+    
 </body>
 </html>
