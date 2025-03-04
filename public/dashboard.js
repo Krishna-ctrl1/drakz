@@ -123,6 +123,27 @@ new Chart(expenseCtx, {
         document.body.style.overflow = 'auto';
     });
 
+        // Get the video row and arrows
+    const videoRow = document.querySelector('.video-row');
+    const leftArrow = document.querySelector('.left-arrow');
+    const rightArrow = document.querySelector('.right-arrow');
+
+    // Scroll left
+    leftArrow.addEventListener('click', () => {
+        videoRow.scrollBy({
+            left: -300, // Adjust scroll distance as needed
+            behavior: 'smooth'
+        });
+    });
+
+    // Scroll right
+    rightArrow.addEventListener('click', () => {
+        videoRow.scrollBy({
+            left: 300, // Adjust scroll distance as needed
+            behavior: 'smooth'
+        });
+    });
+
 
 
 
