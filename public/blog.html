@@ -3,24 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sidebar Menu</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <link rel="stylesheet" href="sidebar2.css">
-    <link rel="stylesheet" href="header.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
-    
+    <title>BLOG</title>
+    <link rel="stylesheet" href="blog.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
-
     <header class="header">
         <div class="left">
             <span class="logo">D R A K Z</span>
-            
         </div>
         <div class="search-bar">
             <i class="fas fa-search"></i>
-            <input type="text" id="searchInput" placeholder="Search for something" onkeyup="filterDashboard()">
+            <input type="text" placeholder="Search for something">
         </div>
         <div class="icons">
             <i class="fas fa-cog"></i>
@@ -29,41 +23,81 @@
                 <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="User">
             </div>
         </div>
-        
     </header>
-    
+
     <div class="main-container">
-
-
-
-        
-
         <div class="sidebar" id="mySidebar">
 
-            <a href="javascript:void(0)" class="closebtn" onclick="closeNav()"><img width="25" src="assets/icons/sidebar.png"></a>   
+            <a href="javascript:void(0)" class="closebtn" onclick="closeNav()"><img width="25" src="sidebar1.png"></a>   
             
             <ul class="sidebar-list">
-                <a href="dashboard.html"> 
-                    <li ><i class="fas fa-home"></i> Dashboard</li> 
-                </a>
-                <a href="accounts.html"><li><i class="fas fa-user"></i>  Accounts</li> </a>
-                <a href="investments.html"><li><i class="fas fa-chart-bar"></i> Investments</li></a>
-                <a href="credit_cards.html"><li ><i class="fas fa-credit-card"></i> Credit Cards</li></a>
-                <a href="#"> <li class="active"><i class="fa-solid fa-blog"></i> Blog</li> </a>
-                <a href="services.html"><li><i class="fas fa-tools"></i>Services</li></a>
-                <a href="My_privilege.html"><li><i class="fas fa-gift"></i> My Privileges</li> </a>
-                <a href="settings.html" ><li><i class="fas fa-cog"></i> Settings</li></a>
+                <li><i class="fas fa-home"></i> Dashboard</li>
+                <li><i class="fas fa-user"></i> <a href="#"> Accounts</a></li>
+                <li><i class="fas fa-chart-bar"></i> <a href="#">Investments</a></li>
+                <li><i class="fas fa-credit-card"></i> <a href="#">Credit Cards</a></li>
+                <li class="active"><i class="fas fa-solid fa-blog"></i> <a href="#">Blog</a></li>
+                <li><i class="fas fa-tools"></i> <a href="#">Services</a></li>
+                <li><i class="fas fa-gift"></i> <a href="#">My Privileges</a></li>
+                <li><i class="fas fa-cog"></i> <a href="#">Settings</a></li>
             </ul>
 
         
         </div>
-
-        <div class="content" id="main">
+        <div class="page" id="main">
             <div class="sidebar-open-div dashboard-item">   
-                <button class="openbtn" id="open-button" onclick="openNav()">&#9776;</button>
+                <button class="openbtn" id="open-button" onclick="openNav()">&#9776; Open Sidebar</button>
+            </div>
+            <div class="open">
+               <div class="container">
+                  <h1>Welcome to DRAKZ</h1>
+                  <p>Master your finances with AI-powered insights and cutting-edge tools.</p>
+                  <div>
+                    <button onclick="openForm()">Create your Blog</button>
+                    <button onclick="viewBlogs()">Read Blogs</button>
+                  </div>
+                </div>  
+                <div class="animation">
+                    <script src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs" type="module"></script>
+                    <dotlottie-player src="https://lottie.host/03526903-22e0-410e-ba05-172cfc452385/oxnJaHzT42.lottie" background="transparent" speed="1" style="width:100%; height:650px; " loop autoplay></dotlottie-player>
+                </div>
+            </div>
+            <div>
+             <!-- Search Bar -->
+             <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="Search blogs..." oninput="filterBlogs()" />
+             </div>
+        
+             <!-- Blogs Section -->
+             <div class="blogs-section" id="blogsSection">
+                <h2>Community Blogs</h2>
+                <div id="blogsList"></div>
+             </div>
+        
+             <!-- Form Container -->
+             <div class="blog-form-container" id="blogFormContainer">
+                <h2>Create a New Blog</h2>
+                <form id="blogForm">
+                    <!-- Blog Title -->
+                    <label for="blogTitle">Blog Title</label>
+                    <input type="text" id="blogTitle" placeholder="Enter your blog title" maxlength="50" required />
+                    <p id="titleCharCount">0/50</p>
+        
+                    <!-- Blog Content -->
+                    <label for="blogContent">Blog Content</label>
+                    <textarea id="blogContent" placeholder="Write your content here..." rows="10" maxlength="1000" required></textarea>
+                    <p id="contentCharCount">0/1000</p>
+        
+                    <!-- Author Name -->
+                    <p><strong>Author:</strong> <span id="authorName"></span></p>
+        
+                    <!-- Buttons -->
+                    <button type="submit">Publish Blog</button>
+                    <button type="button" onclick="closeForm()">Cancel</button>
+                </form>
+              </div>
             </div>
         </div>
     </div>
     <script src="blog.js"></script>
-    </body>
+</body>
 </html>
