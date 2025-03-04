@@ -54,7 +54,6 @@
         }
 
         .atm-cards-container {
-            max-width:1000px;
             min-width:500px;
             background-color: rgb(249, 249, 249);
             position: relative; /* For positioning the form */
