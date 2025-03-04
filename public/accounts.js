@@ -16,21 +16,27 @@ function filterDashboard() {
 
 //sidebar
 function openNav() {
-    document.getElementById("mySidebar").style.width = "170px";
-    document.getElementById("main").style.marginLeft = "170px";
-    document.getElementById("open-button").style.visibility = "hidden";
-   
-  }
+    const sidebar = document.getElementById("mySidebar");
+    const closeButton = document.getElementById("close-button");
 
-  
-  
-  /* Set the width of the sidebar to 0 and the left margin of the page content to 0 */
-  function closeNav() {
-    document.getElementById("mySidebar").style.width = "0";
-    document.getElementById("main").style.marginLeft = "0";
-    document.getElementById("open-button").style.visibility = "visible";
-    document.getElementsByClassName("video-preview").style.marginLeft = "170px;"
+    sidebar.style.width = "180px"; // Open sidebar to full width
+    document.getElementById("main").style.marginLeft = "180px"; // Adjust main content
+    closeButton.innerHTML = '<img width="25" src="assets/icons/sidebarclose.png">'; // Set close button image
+    closeButton.setAttribute("onclick", "closeNav()"); // Set close behavior
+    sidebar.classList.remove("icons-only"); // Ensure text is visible
 }
+
+function closeNav() {
+    const sidebar = document.getElementById("mySidebar");
+    const closeButton = document.getElementById("close-button");
+
+    sidebar.style.width = "60px"; // Set sidebar to icons-only mode
+    document.getElementById("main").style.marginLeft = "60px"; // Adjust main content
+    closeButton.innerHTML = '<img width="25" src="assets/icons/sidebaropen.png">'; // Set open button image
+    closeButton.setAttribute("onclick", "openNav()"); // Set open behavior
+    sidebar.classList.add("icons-only"); // Hide text
+}
+
 //weekly expenses
 let chartInstance;
 function createChart() 

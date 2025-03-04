@@ -94,8 +94,9 @@ border-radius: 50%;
 object-fit: cover;
 cursor: pointer;
 }
+/*sidebar*/
 .sidebar {
-    width: 170px;
+    width: 180px;
     height: 100vh;
     background: white;
     box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
@@ -121,13 +122,14 @@ cursor: pointer;
 
 .sidebar ul li {
     padding: 12px 20px;
-    margin-left:3px;
+    margin-left:10px;
+    margin-right:15px;
     display: flex;
     align-items: center;
     color: #555;
     cursor: pointer;
     transition: 0.3s ease;
-    height: 60px;
+    height: 50px;
     font-size: 14px;
     white-space: nowrap;
     overflow: hidden;
@@ -163,51 +165,24 @@ cursor: pointer;
 }
 
 .sidebar ul li.active {
-    color: #3b82f6;
+    color: #236dec;
     font-weight: bold;
     border-left: 3px solid #3b82f6;
     border-radius: 5px;
     border-width: 4px;
     padding-left: 14px;
+    background-color: rgba(102, 133, 227, 0.2);
 }
 
 .sidebar .closebtn
 {
     position:absolute;
     top : 0px;
-    left : 140px;
+    right:17px;
     font-size:35px;
-    color: #3b82f6;;
+    color: #3b82f6;
     height:32px;
 }
-
-.openbtn {
-    font-size: 14px;
-    cursor: pointer;
-    background-color:  #3b82f6;
-    color: white;
-    padding: 8px 10px;
-    border: none;
-    border-radius: 6%;
-    visibility: hidden;
-    top:90px;
-    transition : display 0.9s ease;
-    margin-left:20px;
-    margin-bottom:10px;
-
-    
-  }
-
-  .openbtn:hover {
-    background-color: #8aa6d3;
-    font-size:17px;
-
-  }
-
-  .sidebar-open-div
-  {
-    width:100%;
-  }
 
 
 /* Responsive Sidebar */
@@ -232,6 +207,27 @@ cursor: pointer;
        font-size: 10px;
     }
 }
+
+
+/* Hide text when icons-only class is applied */
+.sidebar.icons-only .sidebar-list li {
+    justify-content: center; /* Center icons */
+}
+
+.sidebar.icons-only .sidebar-list li span {
+    display: none; /* Hide text */
+}
+
+.sidebar.icons-only .sidebar-list li i {
+    margin-right: 0; /* Remove margin for icons */
+}
+
+/* Adjust sidebar width for icons-only mode */
+.sidebar.icons-only {
+    width: 60px !important; /* Narrower width for icons-only */
+}
+
+
 
 .content {
     margin-left: 130px;

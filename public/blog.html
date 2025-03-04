@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BLOG</title>
     <link rel="stylesheet" href="blog.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="sidebar2.css">
 </head>
 <body>
     <header class="header">
@@ -26,27 +27,44 @@
     </header>
 
     <div class="main-container">
-        <div class="sidebar" id="mySidebar">
 
-            <a href="javascript:void(0)" class="closebtn" onclick="closeNav()"><img width="25" src="sidebar1.png"></a>   
+        <div class="sidebar" id="mySidebar">
+            <!-- Close Button (visible when sidebar is open) -->
+            <a href="javascript:void(0)" class="closebtn" id="close-button" onclick="closeNav()">
+                <img width="25" src="assets/icons/sidebarclose.png">
+            </a>
+           
             
             <ul class="sidebar-list">
-                <li><i class="fas fa-home"></i> Dashboard</li>
-                <li><i class="fas fa-user"></i> <a href="#"> Accounts</a></li>
-                <li><i class="fas fa-chart-bar"></i> <a href="#">Investments</a></li>
-                <li><i class="fas fa-credit-card"></i> <a href="#">Credit Cards</a></li>
-                <li class="active"><i class="fas fa-solid fa-blog"></i> <a href="#">Blog</a></li>
-                <li><i class="fas fa-tools"></i> <a href="#">Services</a></li>
-                <li><i class="fas fa-gift"></i> <a href="#">My Privileges</a></li>
-                <li><i class="fas fa-cog"></i> <a href="#">Settings</a></li>
+                <a href="dashboard.html">
+                    <li ><i class="fas fa-home"></i> <span>Dashboard</span></li>
+                </a>
+                <a href="accounts.html">
+                    <li><i class="fas fa-user"></i> <span>Accounts</span></li>
+                </a>
+                <a href="investments.html">
+                    <li><i class="fas fa-chart-bar"></i> <span>Investments</span></li>
+                </a>
+                <a href="credit_cards.html">
+                    <li><i class="fas fa-credit-card"></i> <span>Credit Cards</span></li>
+                </a>
+                <a href="#">
+                    <li class="active"><i class="fa-solid fa-blog"></i> <span>Blog</span></li>
+                </a>
+                <a href="services.html">
+                    <li><i class="fas fa-tools"></i> <span>Services</span></li>
+                </a>
+                <a href="My_privilege.html">
+                    <li ><i class="fas fa-gift"></i> <span>My Privileges</span></li>
+                </a>
+                <a href="settings.html">
+                    <li><i class="fas fa-cog"></i> <span>Settings</span></li>
+                </a>
             </ul>
-
-        
         </div>
+        
         <div class="page" id="main">
-            <div class="sidebar-open-div dashboard-item">   
-                <button class="openbtn" id="open-button" onclick="openNav()">&#9776; Open Sidebar</button>
-            </div>
+            
             <div class="open">
                <div class="container">
                   <h1>Welcome to DRAKZ</h1>

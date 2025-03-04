@@ -87,37 +87,6 @@
     height:32px;
 }
 
-.openbtn {
-    font-size: 14px;
-    cursor: pointer;
-    background-color:  #3b7ce481;
-    color: white;
-    padding: 8px 10px;
-    border: none;
-    border-radius: 6%;
-    visibility: hidden;
-    top:90px;
-    transition : display 0.9s ease;
-    margin-left:0px;
-    margin-bottom:10px;
-    position: fixed;
-    transition: opacity 0.3s ease;
-    z-index: 5000; /* Ensures it's above other content */
-
-    
-  }
-
-  .openbtn:hover {
-    background-color: #8aa6d3;
-    font-size:17px;
-
-  }
-
-  .sidebar-open-div
-  {
-    width:100%;
-  }
-
 
 /* Responsive Sidebar */
 @media (max-height: 500px) {
@@ -140,6 +109,25 @@
     .sidebar ul li i {
        font-size: 10px;
     }
+}
+
+
+/* Hide text when icons-only class is applied */
+.sidebar.icons-only .sidebar-list li {
+    justify-content: center; /* Center icons */
+}
+
+.sidebar.icons-only .sidebar-list li span {
+    display: none; /* Hide text */
+}
+
+.sidebar.icons-only .sidebar-list li i {
+    margin-right: 0; /* Remove margin for icons */
+}
+
+/* Adjust sidebar width for icons-only mode */
+.sidebar.icons-only {
+    width: 60px !important; /* Narrower width for icons-only */
 }
 
 
