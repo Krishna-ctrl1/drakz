@@ -1,0 +1,25 @@
+
+.content {
+    padding-top:100px;
+    padding: 20px;
+    background: #eff0f6; /* Light background */
+    flex-grow: 1;
+    margin-left: 180px;
+    margin-top: 70px;
+    display:flex;
+    flex-wrap: wrap; /* Allows wrapping */
+    justify-content:space-evenly; /* Centers items */
+    align-items: start;
+    min-width: calc(100vw - 180px); /* Prevent horizontal scroll */
+    overflow-x: hidden; /* Prevent content from overflowing */
+   transition : 0.3s;
+   height:100vh;
+   gap:15px;
+
+}.main-container {
+    display: flex; 
+    
+    
+     
+
+}

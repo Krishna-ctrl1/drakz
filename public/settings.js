@@ -1,209 +1,254 @@
-//search bar
-function filterDashboard() {
-    let input = document.getElementById("searchInput").value.trim().toLowerCase();
-    let items = document.querySelectorAll(".account-item");
-
-    items.forEach(item => {
-        let text = item.textContent.trim().toLowerCase();
-        // Check if search input matches the dashboard item
-        if (text.includes(input)) {
-            item.classList.remove("hidden");
-        } else {
-            item.classList.add("hidden");
-        }
-    });
-}
-
-//sidebar
 function openNav() {
     document.getElementById("mySidebar").style.width = "170px";
     document.getElementById("main").style.marginLeft = "170px";
     document.getElementById("open-button").style.visibility = "hidden";
    
-  }
+}
 
   
   
   /* Set the width of the sidebar to 0 and the left margin of the page content to 0 */
-  function closeNav() {
+function closeNav() {
     document.getElementById("mySidebar").style.width = "0";
     document.getElementById("main").style.marginLeft = "0";
     document.getElementById("open-button").style.visibility = "visible";
     document.getElementsByClassName("video-preview").style.marginLeft = "170px;"
 }
-//weekly expenses
-let chartInstance;
-function createChart() 
-{
-    const ctx = document.getElementById('weeklyActivityChart').getContext('2d');
-    
-    if (chartInstance) {
-        chartInstance.destroy(); // Destroy previous instance to prevent duplicates
-    }
-    // Sample values: Can range from hundreds to crores
-    const depositValues = [500, 300, 250, 400, 100, 280, 320];
-    const withdrawValues = [500, 300, 300, 500, 200, 400, 450];
-
-    // Find the max value dynamically
-    const maxValue = Math.max(...depositValues, ...withdrawValues);
-
-    // Adjust Y-axis scale dynamically
-    let scaleMax, stepSize;
-    if (maxValue <= 1000) {
-        scaleMax = Math.ceil(maxValue / 100) * 100; // Round to nearest 100
-        stepSize = 100;
-    } else if (maxValue <= 10000) {
-        scaleMax = Math.ceil(maxValue / 1000) * 1000; // Round to nearest 1,000
-        stepSize = 1000;
-    } else if (maxValue <= 100000) {
-        scaleMax = Math.ceil(maxValue / 5000) * 5000; // Round to nearest 5,000
-        stepSize = 5000;
-    } else {
-        scaleMax = Math.ceil(maxValue / 100000) * 100000; // Round to nearest 1,00,000
-        stepSize = 100000;
-    }
-
-    chartInstance = new Chart(ctx, 
-    {
-        type: 'bar',
-        data: {
-            labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-            datasets: [
-                {
-                    label: 'Deposit',
-                    data: depositValues,
-                    backgroundColor: 'skyblue',
-                    borderRadius: 100,
-                    barThickness: 20, // FIXED bar width
-                    maxBarThickness: 20
-                },
-                {
-                    label: 'Withdraw',
-                    data: withdrawValues,
-                    backgroundColor: 'darkblue',
-                    borderRadius: 100,
-                    barThickness: 20, // FIXED bar width
-                    maxBarThickness: 20
-                    
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: true,
-        
-            
-            scales: {
-                x: {
-                    categoryPercentage: 0.7,
-                    grid: { display: false }
-                    
-                    
-                },
-                y: {
-                    beginAtZero: true,
-                    max: scaleMax,
-                    ticks: {
-                        stepSize: stepSize,
-                        callback: function(value) {
-                            return value.toLocaleString();
-                        }
-                    },
-                    grid: {
-                        drawBorder: false,
-                        color: "rgba(0, 0, 0, 0.1)" // Soft gridlines
-                    }
-                }
-            },
-            plugins: {
-                tooltip: {
-                    callbacks: {
-                        label: function(tooltipItem) {
-                            return tooltipItem.dataset.label + ': ' + tooltipItem.raw.toLocaleString();
-                        }
-                    }
-                },
-                legend: {
-                    position: 'top',
-                    labels: {
-                        usePointStyle: true
-                    }
-                }
-            }
-        }
-    });
+//settings
+function showTab(tab) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    document.querySelector(`[onclick="showTab('${tab}')"]`).classList.add('active');
+    document.getElementById(tab).classList.add('active');
 }
 
-createChart();
+function previewImage(event) {
+    const reader = new FileReader();
+    reader.onload = function () {
+        const base64Image = reader.result; // Convert image to Base64
+        document.getElementById('profile-pic').src = base64Image;
+        localStorage.setItem("profileImage", base64Image); // Save Base64 to localStorage
+    };
+    reader.readAsDataURL(event.target.files[0]);
+}
 
-// Force re-render on window resize
-window.addEventListener('resize', () => {
-    createChart(); 
+// Load saved profile image on page load
+document.addEventListener("DOMContentLoaded", function () {
+    const profileImage = localStorage.getItem("profileImage");
+    if (profileImage) {
+        document.getElementById("profile-pic").src = profileImage;
+    }
 });
 
-//transactions
-const transactions = [
-    { description: "Spotify Subscription", type: "Shopping", amount: -2500, date: "28 Jan, 12:30 AM" },
-    { description: "Freepik Sales", type: "Transfer", amount: 750, date: "25 Jan, 10:40 PM" },
-    { description: "Mobile Service", type: "Service", amount: -150, date: "20 Jan, 10:40 PM" },
-    { description: "Wilson", type: "Transfer", amount: -1050, date: "15 Jan, 03:29 PM" },
-    { description: "Emilly", type: "Transfer", amount: 840, date: "14 Jan, 10:40 PM" }
-];
-
-function filterTransactions(type) {
-    const tbody = document.getElementById('transaction-body');
-    tbody.innerHTML = '';
+function validatePhoneNumber(phone) {
+    // Regex for valid formatting
+    const phoneRegex = /^\+?(\d{1,4})?[-.\s]?(\(?\d{1,4}\)?)?[-.\s]?\d{1,4}[-.\s]?\d{4}$/;
     
-    document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-    document.querySelector(`.tab[onclick="filterTransactions('${type}')"]`).classList.add('active');
+    // Remove all non-digit characters
+    const digitsOnly = phone.replace(/\D/g, '');
     
-    const filtered = transactions.filter(tx => {
-        if (type === 'income') return tx.amount > 0;
-        if (type === 'expense') return tx.amount < 0;
-        return true;
-    });
-    
-    filtered.forEach(tx => {
-        const row = `<tr>
-            <td>${tx.description}</td>
-            <td>${tx.type}</td>
-            <td>${tx.date}</td>
-            <td class="amount ${tx.amount > 0 ? 'positive' : 'negative'}">${tx.amount > 0 ? '+' + tx.amount : tx.amount}</td>
-            <td><button class="button">Download</button></td>
-        </tr>`;
-        tbody.innerHTML += row;
-    });
+    // Check if the total number of digits is exactly 10
+    return phoneRegex.test(phone) && digitsOnly.length === 10;
 }
 
-filterTransactions('all');
-
-
-
-function toggleDetails(id) {
-    const details = document.getElementById(`details-${id}`);
-    details.style.display = details.style.display === "none" ? "block" : "none";
+function validateEmail(email) {
+    // Regex for a valid email address
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
 }
 
-//loans
-// Function to toggle loan details
-function toggleDetails(id) {
-    const details = document.getElementById(`details-${id}`);
-    if (details) {
-        details.style.display = details.style.display === "none" ? "block" : "none";
+function validatePinCode(pin) {
+    // Regex for a valid PIN code (6 digits)
+    const pinRegex = /^\d{6}$/;
+    return pinRegex.test(pin);
+}
+
+function saveProfile() {
+    const name = document.getElementById("name").value;
+    const email = document.getElementById("email").value;
+    const mobile = document.getElementById("mobile").value;
+    const dob = document.getElementById("dob").value;
+    const permAddress = document.getElementById("perm-address").value;
+    const presAddress = document.getElementById("pres-address").value;
+    const pin = document.getElementById("pin").value;
+    const city = document.getElementById("city").value;
+
+    document.querySelectorAll('.error-message').forEach(el => {
+        el.textContent = '';
+        el.style.display = 'none';
+    });
+
+    
+    let isValid = true;
+
+    // Validate fields
+    if (!name) {
+        displayError('name-error', '❌ Name is required!');
+        isValid = false;
+    }
+    if (!email) {
+        displayError('email-error', '❌ Email is required!');
+        isValid = false;
+    } else if (!validateEmail(email)) {
+        displayError('email-error', '❌ Please enter a valid email address!');
+        isValid = false;
+    }
+    if (!mobile) {
+        displayError('mobile-error', '❌ Mobile number is required!');
+        isValid = false;
+    } else if (!validatePhoneNumber(mobile)) {
+        displayError('mobile-error', '❌ Please enter a valid 10-digit phone number!');
+        isValid = false;
+    }
+    if (!dob) {
+        displayError('dob-error', '❌ Date of Birth is required!');
+        isValid = false;
+    }
+    if (!pin) {
+        displayError('pin-error', '❌ PIN code is required!');
+        isValid = false;
+    } else if (!validatePinCode(pin)) {
+        displayError('pin-error', '❌ Please enter a valid 6-digit PIN code!');
+        isValid = false;
+    }
+    if (!city) {
+        displayError('city-error', '❌ City is required!');
+        isValid = false;
+    }
+
+    if (!isValid) {
+        return; // Stop if validation fails
+    }
+
+    // Save profile data
+    const profileData = {
+        name,
+        email,
+        mobile,
+        dob,
+        permAddress,
+        presAddress,
+        pin,
+        city,
+    };
+
+    localStorage.setItem("profileData", JSON.stringify(profileData));
+    
+    localStorage.setItem("profileData", JSON.stringify(profileData));
+
+    // Display success message
+    const successMessage = document.getElementById('success-message');
+    successMessage.textContent = '✅ Profile saved successfully!';
+    successMessage.style.display = 'block';
+
+    // Hide success message after 3 seconds
+    setTimeout(() => {
+        successMessage.style.display = 'none';
+    }, 3000);
+}
+
+function displayError(elementId, message) {
+    const errorElement = document.getElementById(elementId);
+    if (errorElement) {
+        errorElement.textContent = message;
+        errorElement.style.display = 'block';
     }
 }
+    
 
-// Attach click event listeners to loan cards
+
+function savePreferences() {
+    const preferencesData = {
+        currency: document.getElementById("currency").value,
+        timezone: document.getElementById("timezone").value,
+        digitalCurrency: document.getElementById("digital-currency").checked,
+        merchantOrders: document.getElementById("merchant-orders").checked,
+        accountRecommendations: document.getElementById("account-recommendations").checked,
+    };
+
+    localStorage.setItem("preferencesData", JSON.stringify(preferencesData));
+    alert("✅ Preferences saved successfully!");
+}
+
+function saveSecurity() {
+    const securityData = {
+        currentPassword: document.getElementById("current-password").value,
+        newPassword: document.getElementById("new-password").value,
+        twoFactorAuth: document.getElementById("two-factor-auth").checked,
+    };
+
+    localStorage.setItem("securityData", JSON.stringify(securityData));
+    alert("✅ Security settings saved successfully!");
+}
+
 document.addEventListener("DOMContentLoaded", function () {
-    const loanCards = document.querySelectorAll(".loan-card");
+    // Load Profile Data
+    const profileData = JSON.parse(localStorage.getItem("profileData"));
+    if (profileData) {
+        document.getElementById("name").value = profileData.name;
+        document.getElementById("email").value = profileData.email;
+        document.getElementById("mobile").value = profileData.mobile;
+        document.getElementById("dob").value = profileData.dob;
+        document.getElementById("perm-address").value = profileData.permAddress;
+        document.getElementById("pres-address").value = profileData.presAddress;
+        document.getElementById("pin").value = profileData.pin;
+        document.getElementById("city").value = profileData.city;
+    }
 
-    loanCards.forEach(card => {
-        card.addEventListener("click", function () {
-            const details = this.querySelector(".loan-details");
+    // Load Preferences Data
+    const preferencesData = JSON.parse(localStorage.getItem("preferencesData"));
+    if (preferencesData) {
+        document.getElementById("currency").value = preferencesData.currency;
+        document.getElementById("timezone").value = preferencesData.timezone;
+        document.getElementById("digital-currency").checked = preferencesData.digitalCurrency;
+        document.getElementById("merchant-orders").checked = preferencesData.merchantOrders;
+        document.getElementById("account-recommendations").checked = preferencesData.accountRecommendations;
+    }
 
-            if (details) {
-                details.classList.toggle("hidden"); // Toggle visibility
+    // Load Security Data
+    const securityData = JSON.parse(localStorage.getItem("securityData"));
+    if (securityData) {
+        document.getElementById("current-password").value = securityData.currentPassword;
+        document.getElementById("new-password").value = securityData.newPassword;
+        document.getElementById("two-factor-auth").checked = securityData.twoFactorAuth;
+    }
+
+    // Load Country Data
+    const countrySelect = document.getElementById("country-select");
+    const countryText = document.getElementById("country-text");
+
+    fetch("https://restcountries.com/v3.1/all")
+        .then(res => res.json())
+        .then(data => {
+            const countries = data.map(c => c.name.common).sort();
+            countries.forEach(country => {
+                let option = document.createElement("option");
+                option.value = option.textContent = country;
+                countrySelect.appendChild(option);
+            });
+
+            const savedCountry = localStorage.getItem("country");
+            if (savedCountry) {
+                countryText.textContent = savedCountry;
+                countrySelect.value = savedCountry;
             }
         });
-    });
 });
+
+function editCountry() {
+    document.getElementById("country-box").style.display = "none";
+    document.getElementById("country-select").style.display = "block";
+}
+
+function saveCountry() {
+    const countrySelect = document.getElementById("country-select");
+    const countryText = document.getElementById("country-text");
+
+    if (countrySelect.value) {
+        countryText.textContent = countrySelect.value;
+        localStorage.setItem("country", countrySelect.value);
+    }
+
+    document.getElementById("country-box").style.display = "flex";
+    document.getElementById("country-select").style.display = "none";
+}

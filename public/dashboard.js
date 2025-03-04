@@ -312,7 +312,7 @@ function closeNav() {
             newSlide.classList.add('swiper-slide');
             newSlide.innerHTML = `
                 <div class="atm-card">
-                    <img src="cards/bank-iconn.png" alt="Bank Logo" class="assets/images/bank-logo">
+                    <img src="assets/images//bank-iconn.png" alt="Bank Logo" class="bank-logo">
                     <img src="https://cdn-icons-png.flaticon.com/128/9334/9334627.png" alt="Chip" class="chip">
                     <div class="card-number">${cardNumber}</div>
                     <div class="validity">

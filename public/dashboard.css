@@ -1,15 +1,16 @@
 .main-container {
     display: flex; 
     
+    
      
 
 }
 .content {
-    
+    padding-top:100px;
     padding: 20px;
     background: #eff0f6; /* Light background */
     flex-grow: 1;
-    margin-left: 170px;
+    margin-left: 180px;
     margin-top: 70px;
     display:flex;
     flex-wrap: wrap; /* Allows wrapping */
@@ -22,6 +23,7 @@
    gap:15px;
 
 }
+
 /* Video Library */
 
 
@@ -103,23 +105,7 @@
     border-radius: 10px;
 }
 
-@media (max-width: 800px) {
-   .video-preview
-   {
-    top: 330px;
-    left:55%;
-    max-width: 390px;
-    max-height: 300px;
-    min-width: 360px;
-    min-height: 250px;
-   }
 
-   .video-thumbnail
-   {
-    width : 300px;
-   }
-
-}
 
 /* Video inside preview */
 .video-preview iframe {
@@ -330,6 +316,76 @@
     top: 5px;
     transform-origin: 50% 95px;
 }
+
+@media (max-width: 800px) {
+    .video-preview
+    {
+     top: 280px;
+     left:59%;
+     max-width: 390px;
+     max-height: 300px;
+     min-width: 360px;
+     min-height: 250px;
+    }
+ 
+    .video-thumbnail
+    {
+     width : 300px;
+    }
+ 
+ }
+ @media (max-width: 1050px)  and (min-width:801px){
+    .video-preview
+    {
+     top: 330px;
+     left:60%;
+     max-width: 550px;
+     max-height: 400px;
+     min-width: 300px;
+     min-height: 250px;
+    }
+ 
+    .video-thumbnail
+    {
+     width : 450px;
+    }
+ 
+ }
+
+ @media (max-width: 1300px)  and (min-width:1051px){
+    .video-preview
+    {
+     top: 315px;
+     left:59%;
+     max-width: 650px;
+     max-height: 450px;
+     min-width: 300px;
+     min-height: 250px;
+    }
+ 
+    .video-thumbnail
+    {
+     width : 450px;
+    }
+ 
+ }
+ @media (min-width:1301px){
+    .video-preview
+    {
+     top: 340px;
+     left:56%;
+     max-width: 650px;
+     max-height: 450px;
+     min-width: 300px;
+     min-height: 250px;
+    }
+ 
+    .video-thumbnail
+    {
+     width : 450px;
+    }
+ 
+ }
 @media (max-width:830px) 
 {
     
@@ -350,12 +406,13 @@
     .atm-cards-container
     {
         width:100vh;
+        max-width:350px;
     }
     
     
  }
 
-@media (max-width:1200px) and (min-width :831px) {
+@media (max-width:1239px) and (min-width :831px) {
     .credit-score
     {
      width:48%;
@@ -382,7 +439,7 @@
 
     
  }
-@media (min-width:1200px) 
+@media (min-width:1240px) and (max-width:1363px)
 {
     .credit-score
     {
@@ -399,7 +456,7 @@
         display:flex;
         flex-direction: column;
         gap :20px;
-        max-width:450px;
+        max-width:490px;
     }
     .chat-container
     {
@@ -412,7 +469,7 @@
     }
     .atm-cards-container
     {
-        width:48%;
+        width:50%;
         max-width:600px;
        
         

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sidebar Menu</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="sidebar2.css">
+    <link rel="stylesheet" href="header.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
+    
+</head>
+<body>
+
+    <header class="header">
+        <div class="left">
+            <span class="logo">D R A K Z</span>
+            
+        </div>
+        <div class="search-bar">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchInput" placeholder="Search for something" onkeyup="filterDashboard()">
+        </div>
+        <div class="icons">
+            <i class="fas fa-cog"></i>
+            <i class="fas fa-bell"></i>
+            <div class="profile">
+                <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="User">
+            </div>
+        </div>
+        
+    </header>
+    
+    <div class="main-container">
+
+
+
+        
+
+        <div class="sidebar" id="mySidebar">
+
+            <a href="javascript:void(0)" class="closebtn" onclick="closeNav()"><img width="25" src="assets/icons/sidebar.png"></a>   
+            
+            <ul class="sidebar-list">
+                <a href="dashboard.html"> 
+                    <li ><i class="fas fa-home"></i> Dashboard</li> 
+                </a>
+                <a href="accounts.html"><li><i class="fas fa-user"></i>  Accounts</li> </a>
+                <a href="investments.html"><li><i class="fas fa-chart-bar"></i> Investments</li></a>
+                <a href="credit_cards.html"><li ><i class="fas fa-credit-card"></i> Credit Cards</li></a>
+                <a href="#"> <li class="active"><i class="fa-solid fa-blog"></i> Blog</li> </a>
+                <a href="services.html"><li><i class="fas fa-tools"></i>Services</li></a>
+                <a href="My_privilege.html"><li><i class="fas fa-gift"></i> My Privileges</li> </a>
+                <a href="settings.html" ><li><i class="fas fa-cog"></i> Settings</li></a>
+            </ul>
+
+        
+        </div>
+
+        <div class="content" id="main">
+            <div class="sidebar-open-div dashboard-item">   
+                <button class="openbtn" id="open-button" onclick="openNav()">&#9776;</button>
+            </div>
+        </div>
+    </div>
+    <script src="blog.js"></script>
+    </body>
+</html>
