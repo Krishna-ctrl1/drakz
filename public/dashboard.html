@@ -3,76 +3,258 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <title>Sidebar Menu</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="sidebar2.css">
+    <link rel="stylesheet" href="header.css">
     <link rel="stylesheet" href="dashboard.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
+    <link rel="stylesheet" href="dashboard_card.css">
 </head>
 <body>
-    <!-- Top Navigation -->
-    <nav class="top-nav">
-        <div class="nav-left">
-            <div class="logo-space"></div>
-            <div class="brand">My Privileges</div>
-        </div>
-        <div class="nav-right">
-            <div class="search-container">
-                <i class="fas fa-search search-icon"></i>
-                <input type="text" class="search-input" placeholder="Search for something">
-            </div>
-            <div class="nav-icons">
-                <div class="icon-button">
-                    <i class="fas fa-cog"></i>
-                </div>
-                <div class="icon-button">
-                    <i class="fas fa-bell"></i>
-                </div>
-                <img src="/api/placeholder/32/32" alt="Profile" class="profile-image">
-            </div>
-        </div>
-    </nav>
 
-    <!-- Sidebar -->
-    <div class="container">
-        <div class="sidebar">
-            <a href="dashboard.html" class="nav-item active">
-                <i class="fas fa-home"></i>
-                Dashboard
-            </a>
-            <a href="transactions.html" class="nav-item">
-                <i class="fas fa-exchange-alt"></i>
-                Transactions
-            </a>
-            <a href="accounts.html" class="nav-item">
-                <i class="fas fa-users"></i>
-                Accounts
-            </a>
-            <a href="investments.html" class="nav-item">
-                <i class="fas fa-chart-pie"></i>
-                Investments
-            </a>
-            <a href="credit_cards.html" class="nav-item">
-                <i class="fas fa-credit-card"></i>
-                Credit Cards
-            </a>
-            <a href="loans.html" class="nav-item">
-                <i class="fas fa-building"></i>
-                Loans
-            </a>
-            <a href="services.html" class="nav-item">
-                <i class="fas fa-cog"></i>
-                Services
-            </a>
-            <a href="My_privilege.html" class="nav-item">
-                <i class="fas fa-shield-alt"></i>
-                My Privileges
-            </a>
-            <a href="settings.html" class="nav-item">
-                <i class="fas fa-cog"></i>
-                Settings
-            </a>
+    <header class="header">
+        <div class="left">
+            <span class="logo">D R A K Z</span>
+            
         </div>
+        <div class="search-bar">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchInput" placeholder="Search for something" onkeyup="filterDashboard()">
+        </div>
+        <div class="icons">
+            <i class="fas fa-cog"></i>
+            <i class="fas fa-bell"></i>
+            <div class="profile">
+                <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="User">
+            </div>
+        </div>
+        
+    </header>
+    
+    <div class="main-container">
+
+
+
+        
+
+        <div class="sidebar" id="mySidebar">
+
+            <a href="javascript:void(0)" class="closebtn" onclick="closeNav()"><img width="25" src="assets/icons/sidebar1.png"></a>   
+            
+            <ul class="sidebar-list">
+                <a href="#"> 
+                    <li class="active"><i class="fas fa-home"></i> Dashboard</li> 
+                </a>
+                <a href="accounts.html"><li><i class="fas fa-user"></i>  Accounts</li> </a>
+                <a href="investments.html"><li><i class="fas fa-chart-bar"></i> Investments</li></a>
+                <a href="credit_cards.html"><li><i class="fas fa-credit-card"></i> Credit Cards</li></a>
+                <a href="#"> <li><i class="fa-solid fa-blog"></i> Blog</li> </a>
+                <a href="services.html"><li><i class="fas fa-tools"></i>Services</li></a>
+                <a href="My_privilege.html"><li><i class="fas fa-gift"></i> My Privileges</li> </a>
+                <a href="settings.html" ><li><i class="fas fa-cog"></i> Settings</li></a>
+            </ul>
+
+        
+        </div>
+
+        <div class="content" id="main">
+            <div class="sidebar-open-div dashboard-item">   
+                <button class="openbtn" id="open-button" onclick="openNav()">&#9776; Open Sidebar</button>
+            </div>
+        
+            <div class="video-library dashboard-item">
+                <h3>Video Library </h3>
+                
+        
+                <!-- Scrollable Video Row -->
+                <div class="video-row">
+                    <a href="#" class="video-thumbnail " data-video="https://www.youtube.com/embed/ouvbeb2wSGA?autoplay=1">
+                        <img src="https://img.youtube.com/vi/ouvbeb2wSGA/hqdefault.jpg"  alt="Video 1">
+                    </a>
+                    
+                    <a href="#" class="video-thumbnail" data-video="https://www.youtube.com/embed/iCzBVWdNOeE?autoplay=1">
+                        <img src="https://img.youtube.com/vi/iCzBVWdNOeE/hqdefault.jpg" alt="Video 2">
+                    </a>
+                    
+                    <a href="#" class="video-thumbnail" data-video="https://www.youtube.com/embed/57kzsve3h0U?autoplay=1">
+                        <img src="https://img.youtube.com/vi/57kzsve3h0U/hqdefault.jpg" alt="Video 3">
+                    </a>
+                    
+                    <a href="#video3" class="video-thumbnail" data-video="https://www.youtube.com/embed/b7MeUxcHQCs?autoplay=1">
+                        <img src="https://img.youtube.com/vi/b7MeUxcHQCs/hqdefault.jpg" alt="Video 3">
+                    </a>
+                    <a href="#video4" class="video-thumbnail" data-video="https://www.youtube.com/embed/5pYeoZaoWrA?autoplay=1">
+                        <img src="https://img.youtube.com/vi/5pYeoZaoWrA/hqdefault.jpg" alt="Video 1">
+                    </a>
+                    <a href="#video5" class="video-thumbnail" data-video="https://www.youtube.com/embed/qu47ulGpHDo?autoplay=1">
+                        <img src="https://img.youtube.com/vi/qu47ulGpHDo/hqdefault.jpg" alt="Video 2">
+                    </a>
+                </div>
+
+                
+
+        
+            <div class="video-preview" id="video-modal">
+                <a href="#" class="close-preview">&times;</a>
+                <iframe id="video-frame" src="" allowfullscreen></iframe>
+            </div>
+        
+
+
+
+            </div>
+
+        
+            
+
+            <div class="credit-score dashboard-item">
+                <div class="credit-score-header" > <b>Credit Score</b></div>
+                <div class="gauge-container">
+                    <div class="ticks"></div>
+                    <div class="gauge-ring">
+                        <div class="gauge-value">670</div>
+                        <div class="gauge-change">
+                            <span class="arrow">&#9660;</span>
+                            <span>20</span>                    
+                        </div>
+                    </div>
+                </div>
+                <div class="credit-score-container">
+                    <div class="credit-score-bar">
+                        <div class="credit-score-marker" style="left: 78.8%;"></div>
+                        <span class="credit-score-value" style="left: 78.8%;">670/850</span>
+                    </div>
+                    <div class="credit-score-labels">
+                        <span>300</span>
+                        <span>485</span>
+                        <span>670</span>
+                        <span>850</span>
+                        
+                    </div>
+                    <div class="good">
+                        <span class="credit-score-status">GOOD</span>
+                    </div>
+                </div>   
+                
+            </div>
+
+            <div class="chart-box dashboard-item">
+                <h2>Expense Distribution</h2>
+                <canvas id="expenseChartCanvas"></canvas>
+                <div class="legend" id="chartLegend"></div> <!-- Legend container -->
+            </div>
+
+
+            
+            <div class="atm-cards-container">
+                <div class="atm-cards-header">
+                    <h3>My Cards</h3>
+                    <!-- Add Card Button -->
+                    <button class="add-card-button" onclick="showForm()">Add Card</button>
+                </div>
+                
+                <!-- Swiper Container -->
+                <div class="swiper-container">
+                    <div class="swiper-wrapper">
+                        <!-- Slide 1 -->
+                        <div class="swiper-slide">
+                            <div class="atm-card">
+                                <img src="cards/bank-iconn.png" alt="Bank Logo" class="assets/images/bank-logo">
+                                <img src="https://cdn-icons-png.flaticon.com/128/9334/9334627.png" alt="Chip" class="chip">
+                                <div class="card-number">5241 9312 3456 7899</div>
+                                <div class="validity">
+                                    <div><span>VALID FROM</span><br><strong>11/22</strong></div>
+                                    <div><span>VALID THRU</span><br><strong>10/29</strong></div>
+                                </div>
+                                <div class="cardholder-name">ROHIT KHANNA</div>
+                                <img src="https://cdn-icons-png.flaticon.com/128/5968/5968299.png" alt="VISA Logo" class="visa-logo">
+                                <button class="delete-button" onclick="deleteCard(this)">×</button>
+                            </div>
+                        </div>
+        
+                        <!-- Slide 2 -->
+                        <div class="swiper-slide">
+                            <div class="atm-card">
+                                <img src="cards/bank-iconn.png" alt="Bank Logo" class="assets/images/bank-logo">
+                                <img src="https://cdn-icons-png.flaticon.com/128/9334/9334627.png" alt="Chip" class="chip">
+                                <div class="card-number">1234 5678 9012 3456</div>
+                                <div class="validity">
+                                    <div><span>VALID FROM</span><br><strong>01/23</strong></div>
+                                    <div><span>VALID THRU</span><br><strong>12/30</strong></div>
+                                </div>
+                                <div class="cardholder-name">JANE DOE</div>
+                                <img src="https://cdn-icons-png.flaticon.com/128/5968/5968299.png" alt="VISA Logo" class="visa-logo">
+                                <button class="delete-button" onclick="deleteCard(this)">×</button>
+                            </div>
+                        </div>
+                    </div>
+
+                     <!-- No Cards Message -->
+                    <div id="noCardsMessage" class="no-cards-message">No Cards</div>
+
+        
+                    <!-- Pagination (Indicators) -->
+                    <div class="swiper-pagination"></div>
+        
+                    <!-- Navigation Arrows -->
+                    <div class="swiper-button-next"></div>
+                    <div class="swiper-button-prev"></div>
+                </div>
+        
+                <!-- Add Card Form -->
+                <div class="overlay" id="overlay"></div>
+                <div class="add-card-form" id="addCardForm">
+                    <h3>Add New Card</h3>
+                    <input type="text" id="cardNumber" placeholder="Card Number" required maxlength="19" oninput="formatCardNumber(this)">
+                    <input type="text" id="cardName" placeholder="Name on Card" required>
+                    <input type="text" id="validFrom" placeholder="Valid From (MM/YY)" required maxlength="5" oninput="formatDate(this)">
+                    <input type="text" id="validThru" placeholder="Valid Thru (MM/YY)" required maxlength="5" oninput="formatDate(this)">
+                    <button type="button" onclick="addCard()">Add Card</button>
+                </div>
+            </div>
+
+            <div class="total-holding-card-container"> 
+                <div class="card dashboard-item">
+                    <div class="title">Total Holding</div>
+                    <div class="amount">$ 12,304.11</div>
+                    <div class="return">
+                        <i class="fas fa-chart-line"></i>
+                        <span class="return-text">+3.5% ($532)</span>
+                    </div>
+                    <div class="buttons">
+                        <button class="btn"><span>6M</span></button>
+                        <button class="btn"><i class="fas fa-chevron-down"></i></button>
+                    </div>
+                </div>
+                <div class="chat-container dashboard-item">
+                    <div class="chat-buttons">
+                        <button class="chat-button">🤔 What is WappGPT?</button>
+                        <button class="chat-button">💰 Pricing</button>
+                        <button class="chat-button">📜 FAQs</button>
+                    </div>
+                    <div class="chat-input">
+                        <input type="text" placeholder="1. Type your message here...">
+                        <button class="send-btn">➤</button>
+                    </div>
+                </div>
+            </div>
+
+            
+
+        </div>
+
+
+
+        
+
+        
+
     </div>
-    <h1>User Dashboard</h1>
+
+    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+    <script src="dashboard.js"></script>
 
 </body>
 </html>

@@ -124,7 +124,9 @@ img {
 .button-prev,
 .button-next,
 .button-submit,
-.button-signin {
+.button-signin,
+.aadhaar,
+.pan {
   padding: 12px 25px;
   border-radius: 8px;
   cursor: pointer;
@@ -145,7 +147,9 @@ img {
 }
 
 .button-next,
-.button-submit {
+.button-submit,
+.aadhaar,
+.pan {
   background-color: #2d79f3;
   border: 2px solid #2d79f3;
   color: white;
@@ -158,7 +162,9 @@ img {
 }
 
 .button-next:hover,
-.button-submit:hover {
+.button-submit:hover,
+.aadhaar:hover,
+.pan:hover {
   background-color: #1a5bbf;
   transform: translateY(-1px);
 }
@@ -337,4 +343,51 @@ input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
+}
+
+.aadhaar-btn-grp,
+.pan-btn-grp {
+  margin-top: 20px;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+}
+
+
+.aadhaar-otp-verify-btn,
+.aadhaar-otp-send-btn,
+.pan-otp-send-btn,
+.pan-otp-verify-btn {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: #2d79f3;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 5px 8px;
+  border-radius: 5px;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.aadhaar-otp-verify-btn:hover,
+.aadhaar-otp-send-btn:hover,
+.pan-otp-send-btn:hover,
+.pan-otp-verify-btn:hover  {
+  background: rgba(45, 121, 243, 0.1);
+  color: #1a5bbf;
+}
+
+/* Adjust input padding for OTP buttons */
+.input {
+  padding-right: 70px !important;
+}
+
+/* Remove the old button group styles */
+.aadhaar-btn-grp {
+  display: none;
 }

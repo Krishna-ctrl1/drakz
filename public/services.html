@@ -5,14 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Banking Dashboard</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-   <link href="services.css" rel="stylesheet" >
+    <link href="services.css" rel="stylesheet">
 </head>
 <body>
     <!-- Top Navigation -->
     <nav class="top-nav">
         <div class="nav-left">
-            <div class="logo-space"></div>
-            <div class="brand">Servicce</div>
+            <div class="logo-space">
+                <img src="logo.png" alt="logo img">
+            </div>
+            <div class="brand">Service</div>
         </div>
         <div class="nav-right">
             <div class="search-container">
@@ -30,48 +32,59 @@
             </div>
         </div>
     </nav>
-
-
+    
+    <!-- Toggle Button Structure (moved to sidebar) -->
+    <input type="checkbox" class="toggle-checkbox" id="sidebar-toggle">
+    
     <div class="container">
         <div class="sidebar">
-            <a href="dashboard.html" class="nav-item">
-                <i class="fas fa-home"></i>
-                Dashboard
-            </a>
+            <div class="dashboard-container">
+                <a href="dashboard.html" class="nav-item">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+            </div>
             <a href="transactions.html" class="nav-item">
                 <i class="fas fa-exchange-alt"></i>
-                Transactions
+                <span>Transactions</span>
             </a>
             <a href="accounts.html" class="nav-item">
                 <i class="fas fa-users"></i>
-                Accounts
+                <span>Accounts</span>
             </a>
             <a href="investments.html" class="nav-item">
                 <i class="fas fa-chart-pie"></i>
-                Investments
+                <span>Investments</span>
             </a>
             <a href="credit_cards.html" class="nav-item">
                 <i class="fas fa-credit-card"></i>
-                Credit Cards
+                <span>Credit Cards</span>
             </a>
             <a href="loans.html" class="nav-item">
                 <i class="fas fa-building"></i>
-                Loans
+                <span>Loans</span>
             </a>
             <a href="services.html" class="nav-item active">
                 <i class="fas fa-cog"></i>
-                Services
+                <span>Services</span>
             </a>
             <a href="My_privilege.html" class="nav-item">
                 <i class="fas fa-shield-alt"></i>
-                My Privileges
+                <span>My Privileges</span>
             </a>
             <a href="settings.html" class="nav-item">
                 <i class="fas fa-cog"></i>
-                Settings
+                <span>Settings</span>
             </a>
         </div>
-
+        
+        <!-- Toggle moved here -->
+        <label for="sidebar-toggle" class="toggle">
+            <span class="top-line common"></span>
+            <span class="middle-line common"></span>
+            <span class="bottom-line common"></span>
+        </label>
+        
         <!-- Main Content -->
         <div class="main-content">
             <!-- Service Cards -->
@@ -169,5 +182,7 @@
             </div>
         </div>
     </div>
+
+    <script src="services.js"></script>
 </body>
 </html>

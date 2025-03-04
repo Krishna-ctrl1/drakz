@@ -4,6 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Signup - FinAssist</title>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="signup.js"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <meta name="google-signin-client_id" content="1037396813768-4643uec933fpoqbce7lf7i73g4najnso.apps.googleusercontent.com">
   <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline' https://apis.google.com https://www.gstatic.com;">
@@ -157,12 +161,13 @@
       <div class="section-header">Aadhaar Verification</div>
 
       <div class="flex-column">
-       <label>Aadhaar Number</label>
+        <label>Aadhaar Number</label>
         <div class="inputForm">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm0 22c-5.514 0-10-4.486-10-10s4.486-10 10-10 10 4.486 10 10-4.486 10-10 10zm4.5-14.5h-9v9h9v-9zm-1 1h-7v7h7v-7z"/></svg>
           <input type="number" class="input" name="aadhaar" required 
-             placeholder="1234 5678 9012" pattern="\d{12}" 
-             title="12-digit Aadhaar number" maxlength="12">
+              placeholder="1234 5678 9012" pattern="\d{12}" 
+              title="12-digit Aadhaar number" maxlength="12">
+          <button type="button" class="aadhaar-otp-send-btn">Send OTP</button>
         </div>
       </div>
 
@@ -173,12 +178,13 @@
           <input type="number" class="input" name="aadhaar_otp" required 
                 placeholder="Enter 6-digit OTP" pattern="\d{6}" 
                 title="6-digit OTP" maxlength="6">
+          <button type="button" class="aadhaar-otp-verify-btn">Verify OTP</button>
         </div>
       </div>
 
       <div class="button-group">
         <button type="button" class="button-prev">← Previous</button>
-        <button type="button" class="button-next">Next →</button>
+        <button type="button" class="button-next aadhaar-next">Next →</button>
       </div>
     </div>
 
@@ -193,7 +199,8 @@
       <input type="text" class="input" name="pan" required 
              placeholder="ABCDE1234F" pattern="[A-Z]{5}[0-9]{4}[A-Z]{1}" 
              title="10-character PAN number">
-    </div>
+      <button type="button" class="pan-otp-send-btn">Send OTP</button>
+    </div>  
   </div>
 
   <div class="flex-column">
@@ -203,8 +210,10 @@
       <input type="number" class="input" name="pan_otp" required 
              placeholder="Enter 6-digit OTP" pattern="\d{6}" 
              title="6-digit OTP" maxlength="6">
+        <button type="button" class="pan-otp-verify-btn">Verify OTP</button>
     </div>
   </div>
+
 
   <div class="button-group">
     <button type="button" class="button-prev">← Previous</button>
@@ -212,5 +221,6 @@
   </form>
 
   <script src="./signup.js"></script>
+  <script src="../server.js"></script>
 </body>
 </html>

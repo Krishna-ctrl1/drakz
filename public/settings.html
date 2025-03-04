@@ -4,74 +4,158 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="sidebar2.css">
+    <link rel="stylesheet" href="header.css">
     <link rel="stylesheet" href="settings.css">
 </head>
 <body>
-    <!-- Top Navigation -->
-    <nav class="top-nav">
-        <div class="nav-left">
-            <div class="logo-space"></div>
-            <div class="brand">My Privileges</div>
+    <header class="header">
+        <div class="left">
+            <span class="logo">D R A K Z</span>
+            
         </div>
-        <div class="nav-right">
-            <div class="search-container">
-                <i class="fas fa-search search-icon"></i>
-                <input type="text" class="search-input" placeholder="Search for something">
-            </div>
-            <div class="nav-icons">
-                <div class="icon-button">
-                    <i class="fas fa-cog"></i>
-                </div>
-                <div class="icon-button">
-                    <i class="fas fa-bell"></i>
-                </div>
-                <img src="/api/placeholder/32/32" alt="Profile" class="profile-image">
+        <div class="search-bar">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchInput" placeholder="Search for something" onkeyup="filterDashboard()">
+        </div>
+        <div class="icons">
+            <i class="fas fa-cog"></i>
+            <i class="fas fa-bell"></i>
+            <div class="profile">
+                <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="User">
             </div>
         </div>
-    </nav>
+        
+    </header>
+    
+    <div class="main-container">
 
-    <!-- Sidebar -->
-    <div class="container">
-        <div class="sidebar">
-            <a href="dashboard.html" class="nav-item">
-                <i class="fas fa-home"></i>
-                Dashboard
-            </a>
-            <a href="transactions.html" class="nav-item">
-                <i class="fas fa-exchange-alt"></i>
-                Transactions
-            </a>
-            <a href="accounts.html" class="nav-item">
-                <i class="fas fa-users"></i>
-                Accounts
-            </a>
-            <a href="investments.html" class="nav-item">
-                <i class="fas fa-chart-pie"></i>
-                Investments
-            </a>
-            <a href="credit_cards.html" class="nav-item">
-                <i class="fas fa-credit-card"></i>
-                Credit Cards
-            </a>
-            <a href="loans.html" class="nav-item">
-                <i class="fas fa-building"></i>
-                Loans
-            </a>
-            <a href="services.html" class="nav-item">
-                <i class="fas fa-cog"></i>
-                Services
-            </a>
-            <a href="My_privilege.html" class="nav-item">
-                <i class="fas fa-shield-alt"></i>
-                My Privileges
-            </a>
-            <a href="settings.html" class="nav-item active">
-                <i class="fas fa-cog"></i>
-                Settings
-            </a>
+        <div class="sidebar" id="mySidebar">
+
+            <a href="javascript:void(0)" class="closebtn" onclick="closeNav()"><img width="25" src="assets/icons/sidebar1.png"></a>   
+            
+            <ul class="sidebar-list">
+                <a href="dashboard.html"> 
+                    <li ><i class="fas fa-home"></i> Dashboard</li> 
+                </a>
+                <a href="accounts.html"><li><i class="fas fa-user"></i>  Accounts</li> </a>
+                <a href="investments.html"><li><i class="fas fa-chart-bar"></i> Investments</li></a>
+                <a href="credit_cards.html"><li><i class="fas fa-credit-card"></i> Credit Cards</li></a>
+                <a href="#"> <li><i class="fa-solid fa-blog"></i> Blog</li> </a>
+                <a href="services.html"><li><i class="fas fa-tools"></i>Services</li></a>
+                <a href="My_privilege.html"><li><i class="fas fa-gift"></i> My Privileges</li> </a>
+                <a href="#" ><li class="active"><i class="fas fa-cog"></i> Settings</li></a>
+            </ul>
+
+        
         </div>
+
+
+        
+
+        
+
+        <div class="content" id="main">
+            <div class="sidebar-open-div dashboard-item">   
+                <button class="openbtn" id="open-button" onclick="openNav()">&#9776; Open Sidebar</button>
+            </div>
+            <div class="container">
+                <div class="tabs">
+                    <div class="tab active" onclick="showTab('profile')">Profile</div>
+                    <div class="tab" onclick="showTab('preferences')">Preferences</div>
+                    <div class="tab" onclick="showTab('security')">Security</div>
+                </div>
+        
+                <div id="profile" class="tab-content active">
+                    <div class="profile-container">
+                        <img id="profile-pic" class="profile-pic" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Profile Picture">
+                        <input type="file" id="profile-img" accept="image/*" style="display:none" onchange="previewImage(event)">
+                        <i class="fa fa-pencil-alt edit-icon" onclick="document.getElementById('profile-img').click();"></i>
+                    </div>
+                    <div class="input-groups">
+                        <div class="left-inputgroup">
+                            <div class="input-group"><label>Name</label><input type="text" id="name"></div>
+                            <div class="input-group"><label>Email</label><input type="email" id="email"></div>
+                            <div class="input-group"><label>Mobile Number</label><input type="tel" id="mobile"></div>
+                            <div class="input-group"><label>DOB</label><input type="date" id="dob"></div>
+                        </div>
+                        <div class="right-inputgroup">
+                            <div class="input-group"><label>Permanent Address</label><input type="text" id="perm-address"></div>
+                            <div class="input-group"><label>Present Address</label><input type="text" id="pres-address"></div>
+                            <div class="input-group"><label>PIN Code</label><input type="text" id="pin"></div>
+                            <div class="input-group"><label>City</label><input type="text" id="city"></div>
+                
+                        </div>
+
+                    </div>
+                    
+                    
+                    <div class="input-group">
+                        <label>Country</label>
+                        <div id="country-box" class="country-box" onclick="editCountry()">
+                            <span id="country-text">Select Country</span>
+                            <i class="fas fa-pencil-alt"></i>
+                        </div>
+                        <select id="country-select" style="display: none;" onchange="saveCountry()"></select>
+                    </div>
+                    
+                    <button class="save-btn" onclick="saveProfile()">Save</button>
+                </div>
+        
+                <div id="preferences" class="tab-content">
+                    <div class="input-group"><label>Currency</label><input type="text" id="currency"></div>
+                    <div class="input-group"><label>Time Zone</label><input type="text" id="timezone"></div>
+                    
+                    <!-- Toggle Switches for Preferences -->
+                    <div class="input-group">
+                        <label>Send/Receive Digital Currency</label>
+                        <label class="switch">
+                            <input type="checkbox" id="digital-currency">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="input-group">
+                        <label>Receive Merchant Orders</label>
+                        <label class="switch">
+                            <input type="checkbox" id="merchant-orders">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="input-group">
+                        <label>Recommendations for My Account</label>
+                        <label class="switch">
+                            <input type="checkbox" id="account-recommendations">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    
+                    <button class="save-btn" onclick="savePreferences()">Save</button>
+                </div>
+        
+                <div id="security" class="tab-content">
+                    <div class="input-group"><label>Current Password</label><input type="password" id="current-password"></div>
+                    <div class="input-group"><label>New Password</label><input type="password" id="new-password"></div>
+                    
+                    <!-- Toggle Switch for Two-Factor Authentication -->
+                    <div class="input-group">
+                        <label>Two-Factor Authentication</label>
+                        <label class="switch">
+                            <input type="checkbox" id="two-factor-auth">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    
+                    <button class="save-btn" onclick="saveSecurity()">Save</button>
+                </div>
+            </div>
+        </div>
+
     </div>
-    <h1>Settings</h1>
+ 
+    <script src="settings.js"> </script>
+       
+
+        
 </body>
 </html>

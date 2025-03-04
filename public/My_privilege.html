@@ -8,8 +8,7 @@
     <link href="myprivilage.css" rel="stylesheet">
 </head>
 <body>
-
-     <!-- Top Navigation -->
+    <!-- Top Navigation -->
     <nav class="top-nav">
         <div class="nav-left">
             <div class="logo-space"></div>
@@ -31,48 +30,58 @@
             </div>
         </div>
     </nav>
-
-    <!-- Sidebar -->
+    
+    <!-- Toggle Button Structure (moved to sidebar) -->
+    <input type="checkbox" class="toggle-checkbox" id="sidebar-toggle">
+    
     <div class="container">
         <div class="sidebar">
-            <a href="dashboard.html" class="nav-item">
-                <i class="fas fa-home"></i>
-                Dashboard
-            </a>
+            <div class="dashboard-container">
+                <a href="dashboard.html" class="nav-item">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+            </div>
             <a href="transactions.html" class="nav-item">
                 <i class="fas fa-exchange-alt"></i>
-                Transactions
+                <span>Transactions</span>
             </a>
             <a href="accounts.html" class="nav-item">
                 <i class="fas fa-users"></i>
-                Accounts
+                <span>Accounts</span>
             </a>
             <a href="investments.html" class="nav-item">
                 <i class="fas fa-chart-pie"></i>
-                Investments
+                <span>Investments</span>
             </a>
             <a href="credit_cards.html" class="nav-item">
                 <i class="fas fa-credit-card"></i>
-                Credit Cards
+                <span>Credit Cards</span>
             </a>
             <a href="loans.html" class="nav-item">
                 <i class="fas fa-building"></i>
-                Loans
+                <span>Loans</span>
             </a>
             <a href="services.html" class="nav-item">
                 <i class="fas fa-cog"></i>
-                Services
+                <span>Services</span>
             </a>
             <a href="My_privilege.html" class="nav-item active">
                 <i class="fas fa-shield-alt"></i>
-                My Privileges
+                <span>My Privileges</span>
             </a>
-            <a href="settings.html" class="nav-item">
+            <a href="services.html" class="nav-item">
                 <i class="fas fa-cog"></i>
-                Settings
+                <span>Settings</span>
             </a>
         </div>
-
+        
+        <!-- Toggle moved here -->
+        <label for="sidebar-toggle" class="toggle">
+            <span class="top-line common"></span>
+            <span class="middle-line common"></span>
+            <span class="bottom-line common"></span>
+        </label>
         <!-- Main Content -->
         <div class="main-content">
             <div class="content-card">
@@ -83,97 +92,95 @@
                     <div class="tab" data-tab="updates">Updates</div>
                 </div>
 
-                <!-- Property Search -->
-                <div class="property-search">
-                    <div class="search-container">
-                        <i class="fas fa-search search-icon"></i>
-                        <input type="text" class="property-search-input" placeholder="Search your property">
-                    </div>
-                </div>
-
-                <!-- Content Area -->
-                <div class="content-area">
-                    <!-- Assets Tab -->
-                    <div class="tab-content active" id="assets">
-                        <div class="properties-grid">
-                            <div class="property-list">
-                                <h3>Your properties</h3>
-                                <div class="property-card">
-                                    <h4>Sunset Villa</h4>
-                                    <p>Value: $750,000</p>
-                                    <p>Location: 123 Sunset Boulevard</p>
-                                    <span class="status-badge status-active">Active</span>
-                                </div>
-                                <div class="property-card">
-                                    <h4>Downtown Apartment</h4>
-                                    <p>Value: $450,000</p>
-                                    <p>Location: 456 Main Street</p>
-                                    <span class="status-badge status-pending">Pending</span>
-                                </div>
-                            </div>
-                            <div class="property-image">
-                                <div class="building-placeholder"></div>
-                            </div>
+                    <!-- Property Search -->
+                    <div class="property-search">
+                        <div class="search-container">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" class="property-search-input" placeholder="Search your property">
                         </div>
                     </div>
 
-                    <!-- Documents Tab -->
-                    <div class="tab-content" id="documents">
-                        <div class="document-grid">
-                            <div class="document-card">
-                                <h4>Property Deed - Sunset Villa</h4>
-                                <p>Document ID: DEED-2024-001</p>
-                                <p>Last Updated: Feb 15, 2024</p>
-                                <p>Status: <span class="status-badge status-active">Verified</span></p>
-                            </div>
-                            <div class="document-card">
-                                <h4>Insurance Policy</h4>
-                                <p>Policy Number: INS-2024-089</p>
-                                <p>Renewal Date: Dec 31, 2024</p>
-                                <p>Status: <span class="status-badge status-active">Active</span></p>
-                            </div>
-                            <div class="document-card">
-                                <h4>Tax Assessment</h4>
-                                <p>Reference: TAX-2024-456</p>
-                                <p>Assessment Date: Jan 1, 2024</p>
-                                <p>Status: <span class="status-badge status-pending">Under Review</span></p>
+                    <!-- Content Area -->
+                    <div class="content-area">
+                        <!-- Assets Tab -->
+                        <div class="tab-content active" id="assets">
+                            <div class="properties-grid">
+                                <div class="property-list">
+                                    <h3>Your properties</h3>
+                                    <div class="property-card">
+                                        <h4>Sunset Villa</h4>
+                                        <p>Value: $750,000</p>
+                                        <p>Location: 123 Sunset Boulevard</p>
+                                        <span class="status-badge status-active">Active</span>
+                                    </div>
+                                    <div class="property-card">
+                                        <h4>Downtown Apartment</h4>
+                                        <p>Value: $450,000</p>
+                                        <p>Location: 456 Main Street</p>
+                                        <span class="status-badge status-pending">Pending</span>
+                                    </div>
+                                </div>
+                                <div class="property-image">
+                                    <div class="building-placeholder"></div>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Updates Tab -->
-                    <div class="tab-content" id="updates">
-                        <div class="updates-list">
-                            <div class="update-card">
-                                <div class="update-header">
-                                    <span class="update-title">Property Value Update</span>
-                                    <span class="update-date">Feb 16, 2024</span>
+                        <!-- Documents Tab -->
+                        <div class="tab-content" id="documents">
+                            <div class="document-grid">
+                                <div class="document-card">
+                                    <h4>Property Deed - Sunset Villa</h4>
+                                    <p>Document ID: DEED-2024-001</p>
+                                    <p>Last Updated: Feb 15, 2024</p>
+                                    <p>Status: <span class="status-badge status-active">Verified</span></p>
                                 </div>
-                                <p>Sunset Villa property value has increased by 5.2% based on recent market analysis.</p>
+                                <div class="document-card">
+                                    <h4>Insurance Policy</h4>
+                                    <p>Policy Number: INS-2024-089</p>
+                                    <p>Renewal Date: Dec 31, 2024</p>
+                                    <p>Status: <span class="status-badge status-active">Active</span></p>
+                                </div>
+                                <div class="document-card">
+                                    <h4>Tax Assessment</h4>
+                                    <p>Reference: TAX-2024-456</p>
+                                    <p>Assessment Date: Jan 1, 2024</p>
+                                    <p>Status: <span class="status-badge status-pending">Under Review</span></p>
+                                </div>
                             </div>
-                            <div class="update-card">
-                                <div class="update-header">
-                                    <span class="update-title">Insurance Renewal Notice</span>
-                                    <span class="update-date">Feb 14, 2024</span>
+                        </div>
+
+                        <!-- Updates Tab -->
+                        <div class="tab-content" id="updates">
+                            <div class="updates-list">
+                                <div class="update-card">
+                                    <div class="update-header">
+                                        <span class="update-title">Property Value Update</span>
+                                        <span class="update-date">Feb 16, 2024</span>
+                                    </div>
+                                    <p>Sunset Villa property value has increased by 5.2% based on recent market analysis.</p>
                                 </div>
-                                <p>Your property insurance for Downtown Apartment is due for renewal in 45 days.</p>
-                            </div>
-                            <div class="update-card">
-                                <div class="update-header">
-                                    <span class="update-title">Maintenance Schedule</span>
-                                    <span class="update-date">Feb 12, 2024</span>
+                                <div class="update-card">
+                                    <div class="update-header">
+                                        <span class="update-title">Insurance Renewal Notice</span>
+                                        <span class="update-date">Feb 14, 2024</span>
+                                    </div>
+                                    <p>Your property insurance for Downtown Apartment is due for renewal in 45 days.</p>
                                 </div>
-                                <p>Annual property inspection scheduled for March 1, 2024. Please ensure property access.</p>
+                                <div class="update-card">
+                                    <div class="update-header">
+                                        <span class="update-title">Maintenance Schedule</span>
+                                        <span class="update-date">Feb 12, 2024</span>
+                                    </div>
+                                    <p>Annual property inspection scheduled for March 1, 2024. Please ensure property access.</p>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <script src="myprivilage.js">
-   
-    </script>
+    <script src="myprivilage.js"></script>
 </body>
 </html>
