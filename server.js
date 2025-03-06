@@ -1333,6 +1333,253 @@ app.use((err, req, res, next) => {
   res.status(500).send("Server error");
 });
 
+// Add these API routes to your server.js file
+
+// API route to fetch user profile data
+app.get("/api/user/profile", (req, res) => {
+  // Check if user is logged in
+  if (!req.session.userId) {
+    return res.status(401).json({
+      status: "error",
+      message: "Unauthorized - Please log in",
+    });
+  }
+
+  const query =
+    "SELECT id, name, email, monthly_income, employment_status, financial_goals, risk_tolerance, aadhaar_number, pan_number, created_at FROM users WHERE id = ?";
+
+  db.query(query, [req.session.userId], (err, results) => {
+    if (err) {
+      console.error("Database error fetching user profile:", err);
+      return res.status(500).json({
+        status: "error",
+        message: "Internal server error",
+      });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({
+        status: "error",
+        message: "User not found",
+      });
+    }
+
+    // Return user profile data (excluding password)
+    res.json({
+      status: "success",
+      data: results[0],
+    });
+  });
+});
+
+// API route to fetch user holdings
+app.get("/api/user/holdings", (req, res) => {
+  if (!req.session.userId) {
+    return res.status(401).json({
+      status: "error",
+      message: "Unauthorized - Please log in",
+    });
+  }
+
+  const query =
+    "SELECT total_balance, savings_account_balance, income, expense, last_updated FROM user_holdings WHERE user_id = ?";
+
+  db.query(query, [req.session.userId], (err, results) => {
+    if (err) {
+      console.error("Database error fetching user holdings:", err);
+      return res.status(500).json({
+        status: "error",
+        message: "Internal server error",
+      });
+    }
+
+    if (results.length === 0) {
+      // If no holding records found, return defaults
+      return res.json({
+        status: "success",
+        data: {
+          total_balance: 0,
+          savings_account_balance: 0,
+          income: 0,
+          expense: 0,
+          last_updated: new Date(),
+        },
+      });
+    }
+
+    res.json({
+      status: "success",
+      data: results[0],
+    });
+  });
+});
+
+// API route to fetch user loans
+app.get("/api/user/loans", (req, res) => {
+  if (!req.session.userId) {
+    return res.status(401).json({
+      status: "error",
+      message: "Unauthorized - Please log in",
+    });
+  }
+
+  const query =
+    "SELECT id, loan_type, principal_amount, remaining_balance, interest_rate, loan_term, emi_amount, loan_taken_on, next_payment_due, total_paid, status FROM user_loans WHERE user_id = ?";
+
+  db.query(query, [req.session.userId], (err, results) => {
+    if (err) {
+      console.error("Database error fetching user loans:", err);
+      return res.status(500).json({
+        status: "error",
+        message: "Internal server error",
+      });
+    }
+
+    res.json({
+      status: "success",
+      data: results,
+    });
+  });
+});
+
+// API route to fetch user transactions
+app.get("/api/user/transactions", (req, res) => {
+  if (!req.session.userId) {
+    return res.status(401).json({
+      status: "error",
+      message: "Unauthorized - Please log in",
+    });
+  }
+
+  // Get limit from query parameter or use default
+  const limit = req.query.limit || 10;
+
+  const query =
+    "SELECT id, description, type, transaction_datetime, amount, created_at FROM user_transactions WHERE user_id = ? ORDER BY transaction_datetime DESC LIMIT ?";
+
+  db.query(query, [req.session.userId, parseInt(limit)], (err, results) => {
+    if (err) {
+      console.error("Database error fetching user transactions:", err);
+      return res.status(500).json({
+        status: "error",
+        message: "Internal server error",
+      });
+    }
+
+    res.json({
+      status: "success",
+      data: results,
+    });
+  });
+});
+
+const isAuthenticated = (req, res, next) => {
+  if (req.session && req.session.userId) {
+    return next();
+  }
+  return res
+    .status(401)
+    .json({ status: "error", message: "Not authenticated" });
+};
+
+app.get("/api/user/weekly-activity", isAuthenticated, (req, res) => {
+  const userId = req.session.userId;
+  console.log("Processing weekly activity request for user:", userId);
+
+  // Get current week's date range (Sunday to Saturday)
+  const today = new Date();
+  const startOfWeek = new Date(today);
+  startOfWeek.setDate(today.getDate() - today.getDay()); // Start from Sunday
+  startOfWeek.setHours(0, 0, 0, 0); // Set to beginning of day
+
+  const endOfWeek = new Date(startOfWeek);
+  endOfWeek.setDate(startOfWeek.getDate() + 6); // End on Saturday
+  endOfWeek.setHours(23, 59, 59, 999); // Set to end of day
+
+  // Format dates for SQL
+  const formatSqlDate = (date) => {
+    return date.toISOString().slice(0, 19).replace("T", " ");
+  };
+
+  const startDate = formatSqlDate(startOfWeek);
+  const endDate = formatSqlDate(endOfWeek);
+
+  console.log("Week date range:", startDate, "to", endDate);
+
+  // Query to get daily deposit and withdrawal totals for the week
+  const query = `
+    SELECT 
+      DATE(transaction_datetime) as date,
+      SUM(CASE WHEN amount > 0 THEN amount ELSE 0 END) as deposit_total,
+      SUM(CASE WHEN amount < 0 THEN ABS(amount) ELSE 0 END) as withdraw_total
+    FROM 
+      user_transactions
+    WHERE 
+      user_id = ? AND
+      transaction_datetime BETWEEN ? AND ?
+    GROUP BY 
+      DATE(transaction_datetime)
+    ORDER BY 
+      date
+  `;
+
+  db.query(query, [userId, startDate, endDate], (err, results) => {
+    if (err) {
+      console.error("Database error:", err);
+      return res.json({ status: "error", message: "Database error" });
+    }
+
+    console.log("Raw database results:", results);
+
+    // Initialize arrays for the whole week (Sunday to Saturday)
+    const depositValues = [0, 0, 0, 0, 0, 0, 0];
+    const withdrawValues = [0, 0, 0, 0, 0, 0, 0];
+    const weekDates = [];
+
+    // Generate dates for the week
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(startOfWeek);
+      date.setDate(startOfWeek.getDate() + i);
+      weekDates.push(formatSqlDate(date).split(" ")[0]); // Just get the date part
+    }
+
+    // Map results to the correct day of the week
+    results.forEach((row) => {
+      const rowDate = new Date(row.date);
+      // Sunday is 0, Monday is 1, etc.
+      const dayOfWeek = rowDate.getDay();
+
+      depositValues[dayOfWeek] = parseFloat(row.deposit_total);
+      withdrawValues[dayOfWeek] = parseFloat(row.withdraw_total);
+    });
+
+    console.log("Processed deposit values:", depositValues);
+    console.log("Processed withdraw values:", withdrawValues);
+
+    // Check if there's any data for the week
+    const hasTransactions =
+      depositValues.some((val) => val > 0) ||
+      withdrawValues.some((val) => val > 0);
+
+    if (!hasTransactions) {
+      console.log(
+        "No transactions found, adding test data for visualization purposes"
+      );
+      // If you want to send test data, you can do so here
+    }
+
+    // Send actual data from database, not test data
+    res.json({
+      status: "success",
+      data: {
+        weekDates,
+        depositValues,
+        withdrawValues,
+      },
+    });
+  });
+});
+
 // Start the server
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
