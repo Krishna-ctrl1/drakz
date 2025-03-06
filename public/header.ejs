@@ -1,0 +1,12 @@
+<!-- For About Us Page -->
+<div id="header">
+    <a href="/">
+        <img src="./assets/images/logo.png" alt="Logo" id="logo">
+    </a>
+    
+    <div id="nav-buttons">
+        <button class="nav-btn <%= activePage === 'features' ? 'active' : '' %>" onclick="window.location.href='/features.html'">Features</button>
+        <button class="nav-btn <%= activePage === 'about' ? 'active' : '' %>" onclick="window.location.href='/about'" <%= activePage === 'about' ? 'style="background-color: #3498db; color: white;"' : '' %>>About</button>
+        <button class="nav-btn <%= activePage === 'contact' ? 'active' : '' %>" onclick="window.location.href='/contact_us.html'">Contact Us</button>
+    </div>
+</div>

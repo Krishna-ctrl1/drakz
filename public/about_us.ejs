@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>About Us - DRAKZ</title>
+    <link rel="stylesheet" href="/about_us.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Caveat&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <%- include('header', {activePage: 'about'}) %>
+
+    <div id="about-container">
+      <h1 class="section-title">About DRAKZ</h1>
+
+      <div class="about-section">
+        <p class="about-text">
+          DRAKZ ("Digital Revenue and Asset Keeper Zone") is an innovative,
+          cutting-edge financial tool symbolizing a "dragon safeguarding
+          treasure." The platform is designed to revolutionize personal and
+          business financial management by providing robust features for revenue
+          tracking, asset management, and secure data handling. With its
+          seamless integration of advanced analytics, intuitive dashboards, and
+          AI-powered insights, DRAKZ offers a comprehensive solution for
+          managing financial resources efficiently.
+        </p>
+
+        <h2 class="section-subtitle">Our Mission</h2>
+        <p class="about-text">
+          At DRAKZ, we're committed to empowering individuals and businesses
+          with the tools they need to take control of their financial future. We
+          believe that financial literacy and proper asset management are key
+          pillars of long-term financial success.
+        </p>
+
+        <h2 class="section-subtitle">Main Objectives</h2>
+        <ul class="objectives-list">
+          <% objectives.forEach(objective => { %>
+          <li><%= objective %></li>
+          <% }); %>
+        </ul>
+
+        <h2 class="section-subtitle">Key Features</h2>
+        <ul class="features-list">
+          <% features.forEach(feature => { %>
+          <li>
+            <strong><%= feature.title %>:</strong> <%= feature.description %>
+          </li>
+          <% }); %>
+        </ul>
+      </div>
+
+      <h2 class="section-subtitle">Our Team</h2>
+      <div class="team-container">
+        <% teamMembers.forEach(member => { %>
+        <div class="team-member">
+          <div class="member-img"></div>
+          <div class="member-name"><%= member.name %></div>
+          <div class="member-role"><%= member.role %></div>
+          <div class="member-contribution">
+            <ul>
+              <% member.contributions.forEach(contribution => { %>
+              <li><%= contribution %></li>
+              <% }); %>
+            </ul>
+          </div>
+        </div>
+        <% }); %>
+      </div>
+
+      <div class="btn-container">
+        <button class="back-btn" onclick="window.location.href='/'">
+          Back to Home
+        </button>
+      </div>
+    </div>
+
+    <%- include('footer') %>
+    <script src="/about_us.js"></script>
+  </body>
+</html>

@@ -4,12 +4,16 @@ const bodyParser = require("body-parser");
 const path = require("path");
 const cors = require("cors");
 const crypto = require("crypto");
-const nodemailer = require("nodemailer"); // Add nodemailer for email
-
+const nodemailer = require("nodemailer");
 const session = require("express-session");
 require("dotenv").config();
 
+// Initialize express app first
 const app = express();
+
+// Then configure it
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'public'));
 app.use(cors());
 app.use(bodyParser.json());
 const port = 4000;
@@ -103,9 +107,7 @@ async function verifyOTP(email, submittedOTP, sessionOTP) {
 }
 
 // Route definitions (unchanged)
-app.get("/start_page", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "start_page.html"));
-});
+
 
 app.get("/admin-login", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "admin-login.html"));
@@ -129,6 +131,93 @@ app.get("/advisor-dashboard", (req, res) => {
 
 app.get("/dashboard", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "dashboard.html"));
+});
+
+// About Us page route
+app.get('/about', (req, res) => {
+  // Data that will be passed to the EJS template
+  const data = {
+    objectives: [
+      "Enabling users to manage and track all their financial activities (such as assets, liabilities, loans, investments, credit scores, and expenses) all in one place.",
+      "Improving Financial Literacy by offering a broad range of educational content leading to increased investments in financial markets and reduced debt-traps, providing long-term financial security and tackling the root cause of poverty.",
+      "Facilitating Personalized Financial Planning by allowing users to input and guiding them towards personal short-term and long-term financial goals."
+    ],
+    features: [
+      {
+        title: "User Dashboard",
+        description: "Comprehensive financial data overview including assets, liabilities, income, expenses, and investments with interactive charts."
+      },
+      {
+        title: "AI Chatbot",
+        description: "Get instant answers to your financial queries and personalized advice."
+      },
+      {
+        title: "Financial Education",
+        description: "Access a library of video courses and resources to improve your financial literacy."
+      },
+      {
+        title: "Reminders and Alerts",
+        description: "Never miss a payment deadline with our smart alert system for EMIs, bills, loan due dates, and more."
+      },
+      {
+        title: "Community Blogs",
+        description: "Share and learn financial tips from our growing community of users."
+      }
+    ],
+    teamMembers: [
+      {
+        name: "Krishna",
+        role: "Technical Lead",
+        contributions: [
+          "ChatBot functionality",
+          "Implementation of Chart.js",
+          "Smart Tax Management",
+          "Recommendation Model"
+        ]
+      },
+      {
+        name: "Deepthi",
+        role: "Data Visualization Specialist",
+        contributions: [
+          "Chart.js visualizations",
+          "Time series data functionalities",
+          "Engaging animations",
+          "Database Management"
+        ]
+      },
+      {
+        name: "Ragamaie",
+        role: "Database Administrator",
+        contributions: [
+          "Database design and management",
+          "Creation of videos and blogs",
+          "Project documentation",
+          "Project promotion"
+        ]
+      },
+      {
+        name: "Zulqarnain",
+        role: "UI/UX Designer",
+        contributions: [
+          "Designing the UI/UX",
+          "Implementation of EJS for templating",
+          "Database optimization",
+          "Reminder Alert functionality"
+        ]
+      },
+      {
+        name: "Abhinay", 
+        role: "Creative Designer",
+        contributions: [
+          "Designing creative assets and layouts",
+          "Utilization of EJS for dynamic content rendering",
+          "Frontend development"
+        ]
+      }
+    ]
+  };
+  
+  res.render('about_us', data);
 });
 
 // Login handlers (unchanged)
