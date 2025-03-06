@@ -1,159 +1,162 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Advisor Dashboard</title>
-  <link
+    <meta charset="UTF-8">
+    <title>Advisor Dashboard</title>
+    <link
     rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
-    integrity="sha512-l5Rf5sxIgPTPNsB9GuI50f1lPOJbWRHbIkUFz1+bHXoIV0Wg9gKr+7H5plEaI+0Dkk/r3j2ARZf62An8T5qRzA=="
+    integrity="sha512-l5Rf5sxIgPTPNsB9GuI50f1lPOJbWRHbIkUFz1+bHXoIv0Wg9gKr+7H5plEaI+0Dkk/r3j2ARZf62An8T5qRzA=="
     crossorigin="anonymous"
     referrerpolicy="no-referrer"
-  />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="advisor_dashboard.css">
+    />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="advisor_dashboard.css">
 </head>
 <body>
-  <header>
-    <div class="search-container">
-      <i class="fa fa-search"></i>
-      <input type="text" placeholder="Search...">
+    <header>
+        <div class="search-container">
+            <i class="fa fa-search"></i>
+            <input type="text" placeholder="Search...">
+        </div>
+        <nav>
+            <a href="#" class="active">Your Clients</a>
+            <a href="advisor-video.html">Videos | Live</a>
+            <a href="update.html">Updates</a>
+        </nav>
+        <div class="header-right">
+            <div class="user-icon">
+                <img src="assets/images/logo.png" alt="User Icon">
+            </div>
+        </div>
+    </header>
+    <div class="main">
+        <aside>
+            <h2>Your Clients</h2>
+            <ul class="client-list" id="clientList">
+                <!-- Client items will be populated dynamically -->
+            </ul>
+            <div class="add-client">
+                <button id="openAddClientDialog" class="add-client-btn">
+                    <i class="fa fa-plus"></i> Add New Client
+                </button>
+            </div>
+        </aside>
+        <div class="content">
+            <section class="client-info" id="clientInfo">
+                <div class="client-photo">
+                    <img src="https://via.placeholder.com/120" alt="Client Photo" id="clientPhoto">
+                </div>
+                <div class="client-details">
+                    <input type="text" placeholder="First Name" id="clientFirstName" readonly>
+                    <input type="text" placeholder="Last Name" id="clientLastName" readonly>
+                    <input type="email" placeholder="Email" id="clientEmail" readonly>
+                    <input type="text" placeholder="Phone" id="clientPhone" readonly>
+                    <input type="text" placeholder="Country" id="clientCountry" readonly>
+                    <input type="text" placeholder="Postal Code" id="clientPostalCode" readonly>
+                </div>
+                <button id="deleteClientBtn" class="delete-client-btn">Delete Client</button>
+            </section>
+            <section class="stocks" id="stocksSection">
+                <div class="stocks-header">
+                    <h3 id="clientStocksTitle">Client Stocks &amp; Investments</h3>
+                    <a href="#" id="seeAllLink" style="text-decoration: none; color: var(--blue-primary); font-weight: 500;">See All</a>
+                </div>
+                <div class="stocks-grid" id="stocksGrid">
+                    <!-- Stocks/Investments will be loaded here dynamically -->
+                </div>
+            </section>
+            <section class="chatbox">
+                <div class="chat-container">
+                    <input type="text" id="chat-input" placeholder="Type your message here...">
+                    <button class="send-button">Send</button>
+                </div>
+            </section>
+        </div>
     </div>
-    <nav>
-      <a href="#" class="active">Your Clients</a>
-      <a href="advisor-video.html">Videos | Live</a>
-      <a href="update.html">Updates</a>
-    </nav>
-    <div class="header-right">
-      <div class="user-icon">
-        <img src="assets/images/logo.png" alt="User Icon">
-      </div>
+    <!-- Modal for adding a new client -->
+    <div id="addClientModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h3 class="modal-title">Add New Client</h3>
+            <form id="clientForm" onsubmit="return false;">
+                <!-- Photo Upload -->
+                <div class="photo-upload">
+                    <div class="photo-preview" id="photoPreview">
+                        <i class="fas fa-camera"></i>
+                        <span>Add Photo</span>
+                    </div>
+                    <input type="file" id="clientPhotoInput" accept="image/*" hidden>
+                </div>
+                <!-- Personal Details -->
+                <div class="form-group">
+                    <label for="newClientFirstName">First Name <span class="required">*</span></label>
+                    <input type="text" id="newClientFirstName" required pattern=".{3,}">
+                    <span class="error-message">First name must be at least 3 characters</span>
+                </div>
+                <div class="form-group">
+                    <label for="newClientLastName">Last Name <span class="required">*</span></label>
+                    <input type="text" id="newClientLastName" required pattern=".{3,}">
+                    <span class="error-message">Last name must be at least 3 characters</span>
+                </div>
+                <div class="form-group">
+                    <label for="newClientEmail">Email <span class="required">*</span></label>
+                    <input type="email" id="newClientEmail" required>
+                    <span class="error-message">Valid email required</span>
+                </div>
+                <div class="form-group">
+                    <label for="newClientPhone">Phone <span class="required">*</span></label>
+                    <input type="tel" id="newClientPhone" required pattern="[0-9]{10}">
+                    <span class="error-message">10-digit number required</span>
+                </div>
+                <div class="form-group">
+                    <label for="newClientCountry">Country <span class="required">*</span></label>
+                    <select id="newClientCountry" required>
+                        <option value="">Select Country</option>
+                    </select>
+                    <span class="error-message">Country is required</span>
+                </div>
+                <div class="form-group">
+                    <label for="newClientPostalCode">Postal Code <span class="required">*</span></label>
+                    <input type="text" id="newClientPostalCode" required pattern="[0-9A-Za-z\s\-]{4,}">
+                    <span class="error-message">Postal Code required (min 4 characters)</span>
+                </div>
+                <!-- Optional Stocks -->
+                <div class="form-group">
+                    <label>Stocks (Optional)</label>
+                    <div id="stocksContainer">
+                        <!-- Dynamic stock inputs will be added here -->
+                    </div>
+                    <button type="button" id="addStockBtn" class="add-dynamic-btn"><i class="fas fa-plus"></i> Add Stock</button>
+                </div>
+                <!-- Optional Investments -->
+                <div class="form-group">
+                    <label>Investments (Optional)</label>
+                    <div id="investmentsContainer">
+                        <!-- Dynamic investment inputs will be added here -->
+                    </div>
+                    <button type="button" id="addInvestmentBtn" class="add-dynamic-btn"><i class="fas fa-plus"></i> Add Investment</button>
+                </div>
+                <!-- Form Actions -->
+                <div class="form-actions">
+                    <button type="button" class="cancel-btn" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="add-client-btn">
+                        <i class="fas fa-plus"></i> Add Client
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
-  </header>
 
-  <div class="main">
-    <aside>
-      <h2>Your Clients</h2>
-      <ul class="client-list" id="clientList">
-        <!-- Client items will be populated dynamically -->
-      </ul>
-      <div class="add-client">
-        <button id="openAddClientDialog" class="add-client-btn">
-          <i class="fa fa-plus"></i> Add New Client
-        </button>
-      </div>
-    </aside>
+    <script>
+      try {
+          window.initialClients = JSON.parse('{{ client_data_as_json | safe }}') || [];
+      } catch(e) {
+          window.initialClients = [];
+          console.error('Failed to parse clients:', e);
+      }
+  </script>
 
-    <div class="content">
-      <section class="client-info" id="clientInfo">
-        <div class="client-photo">
-          <img src="https://via.placeholder.com/120" alt="Client Photo" id="clientPhoto">
-        </div>
-        <div class="client-details">
-          <input type="text" placeholder="First Name" id="clientFirstName" readonly>
-          <input type="text" placeholder="Last Name" id="clientLastName" readonly>
-          <input type="email" placeholder="Email" id="clientEmail" readonly>
-          <input type="text" placeholder="Phone" id="clientPhone" readonly>
-          <input type="text" placeholder="Country" id="clientCountry" readonly>
-          <input type="text" placeholder="Postal Code" id="clientPostalCode" readonly>
-        </div>
-        <button id="deleteClientBtn" class="delete-client-btn">Delete Client</button>
-      </section>
-
-      <section class="stocks" id="stocksSection">
-        <div class="stocks-header">
-          <h3 id="clientStocksTitle">Client Stocks &amp; Investments</h3>
-          <a href="#" id="seeAllLink" style="text-decoration: none; color: var(--blue-primary); font-weight: 500;">See All</a>
-        </div>
-        <div class="stocks-grid" id="stocksGrid">
-          <!-- Stocks/Investments will be loaded here dynamically -->
-        </div>
-      </section>
-
-      <section class="chatbox">
-        <div class="chat-container">
-          <input type="text" id="chat-input" placeholder="Type your message here...">
-          <button class="send-button">Send</button>
-        </div>
-      </section>
-    </div>
-  </div>
-
-  <!-- Modal for adding a new client -->
-  <div id="addClientModal" class="modal">
-    <div class="modal-content">
-      <span class="close-modal">&times;</span>
-      <h3 class="modal-title">Add New Client</h3>
-      <form id="clientForm" onsubmit="return false;">
-        <!-- Photo Upload -->
-        <div class="photo-upload">
-          <div class="photo-preview" id="photoPreview">
-            <i class="fas fa-camera"></i>
-            <span>Add Photo</span>
-          </div>
-          <input type="file" id="clientPhotoInput" accept="image/*" hidden>
-        </div>
-        <!-- Personal Details -->
-        <div class="form-group">
-          <label for="newClientFirstName">First Name <span class="required">*</span></label>
-          <input type="text" id="newClientFirstName" required pattern=".{3,}">
-          <span class="error-message">First name must be at least 3 characters</span>
-        </div>
-        <div class="form-group">
-          <label for="newClientLastName">Last Name <span class="required">*</span></label>
-          <input type="text" id="newClientLastName" required pattern=".{3,}">
-          <span class="error-message">Last name must be at least 3 characters</span>
-        </div>
-        <div class="form-group">
-          <label for="newClientEmail">Email <span class="required">*</span></label>
-          <input type="email" id="newClientEmail" required>
-          <span class="error-message">Valid email required</span>
-        </div>
-        <div class="form-group">
-          <label for="newClientPhone">Phone <span class="required">*</span></label>
-          <input type="tel" id="newClientPhone" required pattern="[0-9]{10}">
-          <span class="error-message">10-digit number required</span>
-        </div>
-        <div class="form-group">
-          <label for="newClientCountry">Country <span class="required">*</span></label>
-          <!-- The options are populated dynamically via JS -->
-          <select id="newClientCountry" required>
-            <option value="">Select Country</option>
-          </select>
-          <span class="error-message">Country is required</span>
-        </div>
-        <div class="form-group">
-          <label for="newClientPostalCode">Postal Code <span class="required">*</span></label>
-          <input type="text" id="newClientPostalCode" required pattern="[0-9A-Za-z\s\-]{4,}">
-          <span class="error-message">Postal Code required (min 4 characters)</span>
-        </div>
-        <!-- Optional Stocks -->
-        <div class="form-group">
-          <label>Stocks (Optional)</label>
-          <div id="stocksContainer">
-            <!-- Dynamic stock inputs will be added here -->
-          </div>
-          <button type="button" id="addStockBtn" class="add-dynamic-btn"><i class="fas fa-plus"></i> Add Stock</button>
-        </div>
-        <!-- Optional Investments -->
-        <div class="form-group">
-          <label>Investments (Optional)</label>
-          <div id="investmentsContainer">
-            <!-- Dynamic investment inputs will be added here -->
-          </div>
-          <button type="button" id="addInvestmentBtn" class="add-dynamic-btn"><i class="fas fa-plus"></i> Add Investment</button>
-        </div>
-        <!-- Form Actions -->
-        <div class="form-actions">
-          <button type="button" class="cancel-btn" onclick="closeModal()">Cancel</button>
-          <button type="submit" class="add-client-btn" onclick="addNewClient()">
-            <i class="fas fa-plus"></i> Add Client
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <script src="advisor_dashboard.js"></script>
+    <script src="advisor_dashboard.js"></script>
 </body>
 </html>

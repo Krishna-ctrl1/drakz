@@ -1,265 +1,327 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dashboard</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <link rel="stylesheet" href="sidebar2.css">
-    <link rel="stylesheet" href="header.css">
-    <link rel="stylesheet" href="dashboard.css">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    />
+    <link rel="stylesheet" href="sidebar2.css" />
+    <link rel="stylesheet" href="header.css" />
+    <link rel="stylesheet" href="dashboard.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
-    <link rel="stylesheet" href="dashboard_card.css">
-</head>
-<body>
-
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/swiper/swiper-bundle.min.css"
+    />
+    <link rel="stylesheet" href="dashboard_card.css" />
+  </head>
+  <body>
     <header class="header">
-        <div class="left">
-            <span class="logo">D R A K Z</span>
-            
+      <div class="left">
+        <span class="logo">D R A K Z</span>
+      </div>
+      <div class="search-bar">
+        <i class="fas fa-search"></i>
+        <input
+          type="text"
+          id="searchInput"
+          placeholder="Search for something"
+          onkeyup="filterDashboard()"
+        />
+      </div>
+      <div class="icons">
+        <i class="fas fa-cog"></i>
+        <i class="fas fa-bell"></i>
+        <div class="profile">
+          <img
+            src="https://randomuser.me/api/portraits/women/44.jpg"
+            alt="User"
+          />
         </div>
-        <div class="search-bar">
-            <i class="fas fa-search"></i>
-            <input type="text" id="searchInput" placeholder="Search for something" onkeyup="filterDashboard()">
-        </div>
-        <div class="icons">
-            <i class="fas fa-cog"></i>
-            <i class="fas fa-bell"></i>
-            <div class="profile">
-                <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="User">
-            </div>
-        </div>
-        
+      </div>
     </header>
-    
+
     <div class="main-container">
+      <div class="sidebar" id="mySidebar">
+        <!-- Close Button (visible when sidebar is open) -->
+        <a
+          href="javascript:void(0)"
+          class="closebtn"
+          id="close-button"
+          onclick="closeNav()"
+        >
+          <img width="25" src="assets/icons/sidebarclose.png" />
+        </a>
 
-        <div class="sidebar" id="mySidebar">
-            <!-- Close Button (visible when sidebar is open) -->
-            <a href="javascript:void(0)" class="closebtn" id="close-button" onclick="closeNav()">
-                <img width="25" src="assets/icons/sidebarclose.png">
+        <ul class="sidebar-list">
+          <a href="#">
+            <li class="active">
+              <i class="fas fa-home"></i> <span>Dashboard</span>
+            </li>
+          </a>
+          <a href="accounts.html">
+            <li><i class="fas fa-user"></i> <span>Accounts</span></li>
+          </a>
+          <a href="investments.html">
+            <li>
+              <i class="fa-solid fa-chart-column"></i> <span>Investments</span>
+            </li>
+          </a>
+          <a href="credit_cards.html">
+            <li>
+              <i class="fas fa-credit-card"></i> <span>Credit Cards</span>
+            </li>
+          </a>
+          <a href="blog.html">
+            <li><i class="fa-solid fa-blog"></i> <span>Blog</span></li>
+          </a>
+          <a href="services.html">
+            <li><i class="fas fa-tools"></i> <span>Services</span></li>
+          </a>
+          <a href="My_privilege.html">
+            <li><i class="fas fa-gift"></i> <span>My Privileges</span></li>
+          </a>
+          <a href="settings.html">
+            <li><i class="fas fa-cog"></i> <span>Settings</span></li>
+          </a>
+        </ul>
+      </div>
+
+      <!-- Main Content -->
+      <div class="content" id="main">
+        <div class="video-library dashboard-item">
+          <h3>Video Library</h3>
+
+          <div class="navigation-arrows">
+            <button class="nav-arrow left-arrow">&larr;</button>
+            <button class="nav-arrow right-arrow">&rarr;</button>
+          </div>
+
+          <!-- Scrollable Video Row -->
+          <div class="video-row">
+            <a
+              href="#"
+              class="video-thumbnail"
+              data-video="https://www.youtube.com/embed/ouvbeb2wSGA?autoplay=1"
+            >
+              <img
+                src="https://img.youtube.com/vi/ouvbeb2wSGA/hqdefault.jpg"
+                alt="Video 1"
+              />
             </a>
-           
-            
-            <ul class="sidebar-list">
-                <a href="#">
-                    <li class="active"><i class="fas fa-home"></i> <span>Dashboard</span></li>
-                </a>
-                <a href="accounts.html">
-                    <li><i class="fas fa-user"></i> <span>Accounts</span></li>
-                </a>
-                <a href="investments.html">
-                    <li><i class="fa-solid fa-chart-column"></i> <span>Investments</span></li>
-                </a>
-                <a href="credit_cards.html">
-                    <li><i class="fas fa-credit-card"></i> <span>Credit Cards</span></li>
-                </a>
-                <a href="blog.html">
-                    <li><i class="fa-solid fa-blog"></i> <span>Blog</span></li>
-                </a>
-                <a href="services.html">
-                    <li><i class="fas fa-tools"></i> <span>Services</span></li>
-                </a>
-                <a href="My_privilege.html">
-                    <li ><i class="fas fa-gift"></i> <span>My Privileges</span></li>
-                </a>
-                <a href="settings.html">
-                    <li><i class="fas fa-cog"></i> <span>Settings</span></li>
-                </a>
-            </ul>
+
+            <a
+              href="#"
+              class="video-thumbnail"
+              data-video="https://www.youtube.com/embed/iCzBVWdNOeE?autoplay=1"
+            >
+              <img
+                src="https://img.youtube.com/vi/iCzBVWdNOeE/hqdefault.jpg"
+                alt="Video 2"
+              />
+            </a>
+
+            <a
+              href="#"
+              class="video-thumbnail"
+              data-video="https://www.youtube.com/embed/57kzsve3h0U?autoplay=1"
+            >
+              <img
+                src="https://img.youtube.com/vi/57kzsve3h0U/hqdefault.jpg"
+                alt="Video 3"
+              />
+            </a>
+
+            <a
+              href="#video3"
+              class="video-thumbnail"
+              data-video="https://www.youtube.com/embed/b7MeUxcHQCs?autoplay=1"
+            >
+              <img
+                src="https://img.youtube.com/vi/b7MeUxcHQCs/hqdefault.jpg"
+                alt="Video 3"
+              />
+            </a>
+            <a
+              href="#video4"
+              class="video-thumbnail"
+              data-video="https://www.youtube.com/embed/5pYeoZaoWrA?autoplay=1"
+            >
+              <img
+                src="https://img.youtube.com/vi/5pYeoZaoWrA/hqdefault.jpg"
+                alt="Video 1"
+              />
+            </a>
+            <a
+              href="#video5"
+              class="video-thumbnail"
+              data-video="https://www.youtube.com/embed/qu47ulGpHDo?autoplay=1"
+            >
+              <img
+                src="https://img.youtube.com/vi/qu47ulGpHDo/hqdefault.jpg"
+                alt="Video 2"
+              />
+            </a>
+          </div>
+
+          <div class="video-preview" id="video-modal">
+            <a href="#" class="close-preview">&times;</a>
+            <iframe id="video-frame" src="" allowfullscreen></iframe>
+          </div>
         </div>
-    
-        <!-- Main Content -->
-        <div class="content" id="main">
-           
-        
-            <div class="video-library dashboard-item">
-                <h3>Video Library </h3>
-
-                <div class="navigation-arrows">
-                    <button class="nav-arrow left-arrow">&larr;</button>
-                    <button class="nav-arrow right-arrow">&rarr;</button>
-                </div>
-                
-        
-                <!-- Scrollable Video Row -->
-                <div class="video-row">
-                    <a href="#" class="video-thumbnail " data-video="https://www.youtube.com/embed/ouvbeb2wSGA?autoplay=1">
-                        <img src="https://img.youtube.com/vi/ouvbeb2wSGA/hqdefault.jpg"  alt="Video 1">
-                    </a>
-                    
-                    <a href="#" class="video-thumbnail" data-video="https://www.youtube.com/embed/iCzBVWdNOeE?autoplay=1">
-                        <img src="https://img.youtube.com/vi/iCzBVWdNOeE/hqdefault.jpg" alt="Video 2">
-                    </a>
-                    
-                    <a href="#" class="video-thumbnail" data-video="https://www.youtube.com/embed/57kzsve3h0U?autoplay=1">
-                        <img src="https://img.youtube.com/vi/57kzsve3h0U/hqdefault.jpg" alt="Video 3">
-                    </a>
-                    
-                    <a href="#video3" class="video-thumbnail" data-video="https://www.youtube.com/embed/b7MeUxcHQCs?autoplay=1">
-                        <img src="https://img.youtube.com/vi/b7MeUxcHQCs/hqdefault.jpg" alt="Video 3">
-                    </a>
-                    <a href="#video4" class="video-thumbnail" data-video="https://www.youtube.com/embed/5pYeoZaoWrA?autoplay=1">
-                        <img src="https://img.youtube.com/vi/5pYeoZaoWrA/hqdefault.jpg" alt="Video 1">
-                    </a>
-                    <a href="#video5" class="video-thumbnail" data-video="https://www.youtube.com/embed/qu47ulGpHDo?autoplay=1">
-                        <img src="https://img.youtube.com/vi/qu47ulGpHDo/hqdefault.jpg" alt="Video 2">
-                    </a>
-                </div>
-
-                
-
-        
-            <div class="video-preview" id="video-modal">
-                <a href="#" class="close-preview">&times;</a>
-                <iframe id="video-frame" src="" allowfullscreen></iframe>
+        <div class="credit-score dashboard-item">
+          <div class="credit-score-header"><b>Credit Score</b></div>
+          <div class="gauge-container">
+            <div class="ticks"></div>
+            <div class="gauge-ring">
+              <div class="gauge-value">670</div>
+              <div class="gauge-change">
+                <span class="arrow">&#9660;</span>
+                <span>20</span>
+              </div>
             </div>
-        
-
-
-
+          </div>
+          <div class="credit-score-container">
+            <div class="credit-score-bar">
+              <div class="credit-score-marker" style="left: 78.8%"></div>
+              <span class="credit-score-value" style="left: 78.8%"
+                >670/850</span
+              >
             </div>
-
-        
-            
-
-            <div class="credit-score dashboard-item">
-                <div class="credit-score-header" > <b>Credit Score</b></div>
-                <div class="gauge-container">
-                    <div class="ticks"></div>
-                    <div class="gauge-ring">
-                        <div class="gauge-value">670</div>
-                        <div class="gauge-change">
-                            <span class="arrow">&#9660;</span>
-                            <span>20</span>                    
-                        </div>
-                    </div>
-                </div>
-                <div class="credit-score-container">
-                    <div class="credit-score-bar">
-                        <div class="credit-score-marker" style="left: 78.8%;"></div>
-                        <span class="credit-score-value" style="left: 78.8%;">670/850</span>
-                    </div>
-                    <div class="credit-score-labels">
-                        <span>300</span>
-                        <span>485</span>
-                        <span>670</span>
-                        <span>850</span>
-                        
-                    </div>
-                    <div class="good">
-                        <span class="credit-score-status">GOOD</span>
-                    </div>
-                </div>   
-                
+            <div class="credit-score-labels">
+              <span>300</span>
+              <span>485</span>
+              <span>670</span>
+              <span>850</span>
             </div>
-
-            <div class="chart-box dashboard-item">
-                <h2>Expense Distribution</h2>
-                <canvas id="expenseChartCanvas"></canvas>
-                <div class="legend" id="chartLegend"></div> <!-- Legend container -->
+            <div class="good">
+              <span class="credit-score-status">GOOD</span>
             </div>
-
-
-            
-            <div class="atm-cards-container">
-                <div class="atm-cards-header">
-                    <h3>My Cards</h3>
-                    <!-- Add Card Button -->
-                    <button class="add-card-button" onclick="showForm()">Add Card</button>
-                </div>
-                
-                <!-- Swiper Container -->
-                <div class="swiper-container">
-                    <div class="swiper-wrapper">
-                        <!-- Slide 1 -->
-                        <div class="swiper-slide">
-                            <div class="atm-card">
-                                <img src="assets/images/bank-iconn.png" alt="Bank-Logo" class="bank-logo">
-                                <img src="https://cdn-icons-png.flaticon.com/128/9334/9334627.png" alt="Chip" class="chip">
-                                <div class="card-number">5241 9312 3456 7899</div>
-                                <div class="validity">
-                                    <div><span>VALID FROM</span><br><strong>11/22</strong></div>
-                                    <div><span>VALID THRU</span><br><strong>10/29</strong></div>
-                                </div>
-                                <div class="cardholder-name">ROHIT KHANNA</div>
-                                <img src="https://cdn-icons-png.flaticon.com/128/5968/5968299.png" alt="VISA Logo" class="visa-logo">
-                                <button class="delete-button" onclick="deleteCard(this)">×</button>
-                            </div>
-                        </div>
-        
-                        <!-- Slide 2 -->
-                        <div class="swiper-slide">
-                            <div class="atm-card">
-                                <img src="assets/images/bank-iconn.png" alt="Bank Logo" class="bank-logo">
-                                <img src="https://cdn-icons-png.flaticon.com/128/9334/9334627.png" alt="Chip" class="chip">
-                                <div class="card-number">1234 5678 9012 3456</div>
-                                <div class="validity">
-                                    <div><span>VALID FROM</span><br><strong>01/23</strong></div>
-                                    <div><span>VALID THRU</span><br><strong>12/30</strong></div>
-                                </div>
-                                <div class="cardholder-name">JANE DOE</div>
-                                <img src="https://cdn-icons-png.flaticon.com/128/5968/5968299.png" alt="VISA Logo" class="visa-logo">
-                                <button class="delete-button" onclick="deleteCard(this)">×</button>
-                            </div>
-                        </div>
-                    </div>
-
-                     <!-- No Cards Message -->
-                    <div id="noCardsMessage" class="no-cards-message">No Cards</div>
-
-        
-                    <!-- Pagination (Indicators) -->
-                    <div class="swiper-pagination"></div>
-        
-                    <!-- Navigation Arrows -->
-                    <div class="swiper-button-next"></div>
-                    <div class="swiper-button-prev"></div>
-                </div>
-        
-                <!-- Add Card Form -->
-                <div class="overlay" id="overlay"></div>
-                <div class="add-card-form" id="addCardForm">
-                    <h3>Add New Card</h3>
-                    <input type="text" id="cardNumber" placeholder="Card Number" required maxlength="19" oninput="formatCardNumber(this)">
-                    <input type="text" id="cardName" placeholder="Name on Card" required>
-                    <input type="text" id="validFrom" placeholder="Valid From (MM/YY)" required maxlength="5" oninput="formatDate(this)">
-                    <input type="text" id="validThru" placeholder="Valid Thru (MM/YY)" required maxlength="5" oninput="formatDate(this)">
-                    <button type="button" onclick="addCard()">Add Card</button>
-                </div>
-            </div>
-
-            <div class="total-holding-card-container"> 
-                
-                    <div class="title">Total Holding</div>
-                    <div class="amount">$ 12,304.11</div>
-                    <div class="return">
-                        <i class="fas fa-chart-line"></i>
-                        <span class="return-text">+3.5% ($532)</span>
-                    </div>
-                    <div class="buttons">
-                        <button class="btn"><span>6M</span></button>
-                        <button class="btn"><i class="fas fa-chevron-down"></i></button>
-                    </div>
-                
-                
-            </div>
-
-            
-
+          </div>
         </div>
 
+        <div class="chart-box dashboard-item">
+          <h2>Expense Distribution</h2>
+          <canvas id="expenseChartCanvas"></canvas>
+          <div class="legend" id="chartLegend"></div>
+          <!-- Legend container -->
+        </div>
 
+        <div class="atm-cards-container">
+          <div class="atm-cards-header">
+            <h3>My Cards</h3>
+            <!-- Add Card Button -->
+            <button class="add-card-button" onclick="showForm()">
+              Add Card
+            </button>
+          </div>
 
-        
+          <!-- Swiper Container -->
+          <div class="swiper-container">
+            <div class="swiper-wrapper">
+              <!-- Slide 1 -->
+              <div class="swiper-slide">
+                <div class="atm-card">
+                  <img
+                    src="assets/images/bank-iconn.png"
+                    alt="Bank Logo"
+                    class="bank-logo"
+                  />
+                  <img
+                    src="https://cdn-icons-png.flaticon.com/128/9334/9334627.png"
+                    alt="Chip"
+                    class="chip"
+                  />
+                  <div class="card-number">1234 5678 9012 3456</div>
+                  <div class="validity">
+                    <div>
+                      <span>VALID FROM</span><br /><strong>01/23</strong>
+                    </div>
+                    <div>
+                      <span>VALID THRU</span><br /><strong>12/30</strong>
+                    </div>
+                  </div>
+                  <div class="cardholder-name">JANE DOE</div>
+                  <img
+                    src="https://cdn-icons-png.flaticon.com/128/5968/5968299.png"
+                    alt="VISA Logo"
+                    class="visa-logo"
+                  />
+                  <button class="delete-button" onclick="deleteCard(this)">
+                    ×
+                  </button>
+                </div>
+              </div>
+            </div>
 
-        
+            <!-- No Cards Message -->
+            <div id="noCardsMessage" class="no-cards-message">No Cards</div>
 
+            <!-- Pagination (Indicators) -->
+            <div class="swiper-pagination"></div>
+
+            <!-- Navigation Arrows -->
+            <div class="swiper-button-next"></div>
+            <div class="swiper-button-prev"></div>
+          </div>
+
+          <!-- Add Card Form -->
+          <div class="overlay" id="overlay"></div>
+          <div class="add-card-form" id="addCardForm">
+            <h3>Add New Card</h3>
+            <input
+              type="text"
+              id="cardNumber"
+              placeholder="Card Number"
+              required
+              maxlength="19"
+              oninput="formatCardNumber(this)"
+            />
+            <input
+              type="text"
+              id="cardName"
+              placeholder="Name on Card"
+              required
+            />
+            <input
+              type="text"
+              id="validFrom"
+              placeholder="Valid From (MM/YY)"
+              required
+              maxlength="5"
+              oninput="formatDate(this)"
+            />
+            <input
+              type="text"
+              id="validThru"
+              placeholder="Valid Thru (MM/YY)"
+              required
+              maxlength="5"
+              oninput="formatDate(this)"
+            />
+            <button type="button" onclick="addCard()">Add Card</button>
+          </div>
+        </div>
+
+        <div class="total-holding-card-container">
+          <div class="title">Total Holding</div>
+          <div class="amount">$ 12,304.11</div>
+          <div class="return">
+            <i class="fas fa-chart-line"></i>
+            <span class="return-text">+3.5% ($532)</span>
+          </div>
+          <div class="buttons">
+            <button class="btn"><span>6M</span></button>
+            <button class="btn"><i class="fas fa-chevron-down"></i></button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
     <script src="dashboard.js"></script>
-
-</body>
+  </body>
 </html>
