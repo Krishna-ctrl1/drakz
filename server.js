@@ -1669,6 +1669,31 @@ app.get("/api/user/weekly-activity", isAuthenticated, (req, res) => {
   });
 });
 
+// API end-poimt to get user_investments
+app.get('/api/user-investments', (req, res) => {
+  // Check if user is logged in
+  if (!req.session.userId) {
+    return res.status(401).json({ error: 'Not authenticated' });
+  }
+
+  // Query to get user investments
+  const query = `
+    SELECT * FROM user_investments 
+    WHERE user_id = ?
+  `;
+
+  // Execute the query with the user ID from the session
+  db.query(query, [req.session.userId], (err, results) => {
+    if (err) {
+      console.error('Error fetching user investments:', err);
+      return res.status(500).json({ error: 'Database error' });
+    }
+
+    // Send the investment data as JSON
+    res.json(results);
+  });
+});
+
 // Start the server
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
