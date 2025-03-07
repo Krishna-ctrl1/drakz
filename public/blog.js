@@ -33,7 +33,14 @@ function closeForm() {
     console.log('closeForm() called'); // Debugging
     const formContainer = document.getElementById('blogFormContainer');
     if (formContainer) {
-        formContainer.style.display = 'none';
+        // Reset the form fields
+        document.getElementById('blogTitle').value = '';
+        document.getElementById('blogContent').value = '';
+        document.getElementById('titleCharCount').textContent = '0/50';
+        document.getElementById('contentCharCount').textContent = '0/1000';
+
+        // Optionally, scroll to the top or another section
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
         console.error('blogFormContainer not found');
     }
