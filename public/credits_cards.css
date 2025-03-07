@@ -1,571 +1,643 @@
-.main-container {
-    display: flex; 
-    
-    
-     
-
-}
-.content {
-    padding-top:100px;
-    padding: 20px;
-    background: #eff0f6; /* Light background */
-    flex-grow: 1;
-    margin-left: 180px;
-    margin-top: 70px;
-    display:flex;
-    flex-wrap: wrap; /* Allows wrapping */
-    justify-content:space-evenly; /* Centers items */
-    align-items: start;
-    min-width: calc(100vw - 180px); /* Prevent horizontal scroll */
-    overflow-x: hidden; /* Prevent content from overflowing */
-   transition : 0.3s;
-   height:100vh;
-   gap:15px;
-
-}
-
 body {
     font-family: Arial, sans-serif;
-    }
-   .card-section{
+}
+
+.card-section {
     max-width: 900px;
-     border-style:solid;
-    }
-.card-header
-{
-display: flex;
-justify-content: space-between;
-align-items: center;
-padding: 10px 20px;
+    border-style: solid;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
 
 }
-.swiper
-#mycards{
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    height:auto;
-    width:90%;
+
+/* .swiper */
+#mycards {
+    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
+    height: auto;
+    width: 100%;
     border-radius: 15px;
-    text-align:center;  
+    text-align: center;
     padding-top: 0;
-   margin-right: 20px;
+    margin-right: 20px;
+    /* padding:20px; */
+    min-width: 350px;
+
 }
-#mycards h2{
-    text-align:left;
+
+#mycards h2 {
+    text-align: left;
     padding-left: 20px;
+    margin-top: 0;
 }
+
 .card {
-width: 80%px;
-min-width: 350px;
-height: 230px;
-border-radius: 10px;
-background: linear-gradient(135deg, #232333, #141666);
-color: white;
-padding: 20px;
-position: relative;
-font-family: 'Arial', sans-serif;
-font-weight: 300;
-margin:20px;
-display: inline-block;
-cursor: pointer;
+    width: 80%px;
+    min-width: 350px;
+    height: 230px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #232333, #141666);
+    color: white;
+    padding: 20px;
+    position: relative;
+    font-family: 'Arial', sans-serif;
+    font-weight: 300;
+    margin: 20px;
+    display: inline-block;
+    cursor: pointer;
 
 }
 
-.chip, .visa-logo, .bank-logo {
-position: absolute;
+.chip,
+.visa-logo,
+.bank-logo {
+    position: absolute;
 }
 
 .chip {
-top: 50px;
-left: 20px;
-width: 60px;
+    top: 50px;
+    left: 20px;
+    width: 60px;
 }
 
 .bank-logo {
-top: 20px;
-right: 20px;
-width: 120px;
+    top: 20px;
+    right: 20px;
+    width: 120px;
 }
 
 .visa-logo {
-bottom: 20px;
-right: 20px;
-width: 60px;
+    bottom: 20px;
+    right: 20px;
+    width: 60px;
 }
 
 .card-number {
-font-size: 1em;
-letter-spacing: 4px;
-margin: 100px 0 0px 10px;
+    font-size: 1em;
+    letter-spacing: 4px;
+    margin: 100px 0 0px 10px;
 }
 
 .validity {
-display: flex;
-justify-content: space-between;
-width: 170px;
-margin-left: 10px;   
+    display: flex;
+    justify-content: space-between;
+    width: 170px;
+    margin-left: 10px;
 }
 
 .validity span {
-font-size: 0.5em;
+    font-size: 0.5em;
 }
 
 .cardholder-name {
-position: absolute;
-margin: 100px 0 10px 10px;
-bottom: 2px;
-left: 20px;
-font-size: 0.8em;
-letter-spacing: 2px;
+    position: absolute;
+    margin: 100px 0 10px 10px;
+    bottom: 2px;
+    left: 20px;
+    font-size: 0.8em;
+    letter-spacing: 2px;
 }
- #cardlist{ width:100%;
-           min-width:600px;
-           box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-           padding:10px;
-           }
- #cardlist div img{
-    height:40px;
-    width:40px;
- }
- .listdetails{
-    margin:20px;
-    display:flex;
+
+#cardlist {
+    width: 100%;
+    min-width: 500px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    border-radius: 15px;
+}
+
+#cardlist div img {
+    height: 40px;
+    width: 40px;
+}
+
+.listdetails {
+    margin: 20px;
+    display: flex;
     flex-direction: row;
-    padding:10px;
+    padding: 10px;
     align-items: center;
     border-radius: 10px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     margin-bottom: 10px;
     justify-content: space-between;
     width: 100%;
-    margin-left:0;
- }
+    margin-left: 0;
+}
 
- .listdetails h4 {
- margin: 0;
- font-size: 1rem;
+.listdetails h4 {
+    margin: 0;
+    font-size: 1rem;
 }
 
 .listdetails p {
-margin: 2px 0;
-color: gray;
-font-size: 1rem;
-  }
- #Cardstatistics{
+    margin: 2px 0;
+    color: gray;
+    font-size: 1rem;
+}
+
+#Cardstatistics {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    height:auto;
-    width:80%;
+    height: auto;
+    width: 100%;
     border-radius: 15px;
-    text-align:center;  
+    text-align: center;
     padding-top: 0;
-   margin-right: 20px;
- }
+    margin-right: 20px;
+}
+
 .chart-container {
-        width: 100%;
-        background: white;
-        padding: 40px;
-        border-radius: 10px;
-        text-align: center;
-      
-    }
-    
-.addcard{
-   margin:10px;
-    align-items: center;
+    width: 90%;
+    background: white;
+    padding: 40px;
     border-radius: 10px;
+    text-align: center;
+
+}
+
+.addcard {
+    margin: 10px;
+    align-items: center;
+    border-radius: 15px;
     margin-bottom: 10px;
     justify-content: space-between;
-    gap:15px;
-    width:700px;
-    padding:10px;
+    gap: 15px;
+    width: 100%;
+    padding: 10px;
     padding-bottom: 15px;
-  }
-#addnewcard{
+}
+
+#addnewcard {
     margin-bottom: 0;
-    height:auto;
+    height: auto;
+    padding: 10px;
+    padding-bottom: 0;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    padding: 0px;
+    width: 100%;
+    border-radius: 15px;
+    margin-right: 0;
+}
+
+#cardlist {
+    margin-bottom: 0;
+    height: auto;
     padding-bottom: 0;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
-#addnewcard p {
-margin: 2px 0;
-color: gray;
-font-size: 14;
-margin:10px;
+
+#addnewcard h2 {
+    padding: 10px;
 }
+
 .form-group {
-width: 100%;
+    width: 100%;
 }
 
 label {
-font-size: 15px;
-display: block;
-margin-bottom: 5px;
+    font-size: 15px;
+    display: block;
+    margin-bottom: 5px;
 }
 
-input, select {
-width: 90%;
-padding: 10px;
-border: 1px solid #ddd;
-border-radius: 5px;
-font-size: 14px;
+input,
+select {
+    width: 90%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
 }
+
 .btn {
-background: blue;
-color: white;
-border: none;
-padding: 10px;
-border-radius: 5px;
-font-size: 16px;
-cursor: pointer;
-margin-top: 10px;
+    background: blue;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 10px;
 }
-.align{
-display:flex;
-justify-content: space-between;
+
+.align {
+    display: flex;
+    justify-content: space-between;
 }
 
 * {
-margin: 0;
-padding: 0;
-box-sizing: border-box;
-font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
 }
-.sec{
-    display:flex;
+
+.content {
+    margin-left: 170px;
+    padding: 20px;
+    margin-top: 70px;
+}
+
+.sec {
+    display: flex;
     flex-direction: row;
     justify-content: space-between;
-    gap:10px;
-    margin-top:10px;
+    gap: 10px;
+    margin-top: 10px;
+    margin-right: 0;
+}
+
+section {
+    height: 350px;
+    width: 100%px;
+}
+
+.no-cards-message {
+    text-align: center;
+    font-size: 1.5rem;
+    color: #888;
+    margin-top: 100px;
+}
+
+.organizer {
+    display: flex;
+    flex-direction: row;
+}
+
+.organizer label {
+    font-size: 15px;
+    display: inline;
+    margin-bottom: 5px;
+}
+
+.organizer input,
+select {
+    width: 50%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+    display: inline;
+}
+
+/* opq*/
+
+.atm-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4), -10px 10px #aea7a7;
+}
+
+.chip,
+.visa-logo,
+.bank-logo {
+    position: absolute;
+}
+
+.chip {
+    top: 50px;
+    left: 30px;
+    width: 50px;
+}
+
+.bank-logo {
+    top: 20px;
+    right: 20px;
+    width: 130px;
+}
+
+.visa-logo {
+    bottom: 20px;
+    right: 20px;
+    width: 60px;
+}
+
+.card-number {
+    font-size: 1.2rem;
+    letter-spacing: 4px;
+    margin: 100px 0 0 10px;
+}
+
+.validity {
+    display: flex;
+    justify-content: space-between;
+    width: 170px;
+    margin-left: 10px;
+}
+
+.validity span {
+    font-size: 0.8rem;
+}
+
+.cardholder-name {
+    position: absolute;
+    bottom: 20px;
+    left: 30px;
+    font-size: 1rem;
+    letter-spacing: 2px;
+}
+
+.atm-cards-container {
+    max-width: 500px;
+    /**/
+    background-color: white;
+    position: relative;
+    /* For positioning the form */
+    min-height: 350px;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.atm-cards-header {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    height: 70px;
+    vertical-align: middle;
+}
+
+.atm-cards-container h3 {
+
+    display: inline-block;
+    padding-left: 40px;
+    padding-right: 40px;
+    margin-top: 25px;
+
+}
+
+/* Swiper container styling */
+.swiper-container {
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+    /* Center the container */
+
+    position: relative;
+    overflow: hidden;
+    /* Ensure only one card is visible */
+}
+
+
+.swiper-wrapper {
+    display: flex;
+    /* Ensure slides are in a row */
+}
+
+.swiper-slide {
+    width: 100%;
+    /* Each slide takes full width of the container */
+    /* flex-shrink: 0;  */
+    /* Prevent slides from shrinking */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    /* For positioning the delete button */
+}
+
+/* Pagination (Indicators) */
+.swiper-pagination {
+    position: relative;
+    /* Move pagination below the card */
+    margin-top: 20px;
+}
+
+.swiper-pagination-bullet {
+    background-color: #ab2f2f;
+    opacity: 0.5;
+    width: 10px;
+    height: 10px;
+    margin: 0 5px;
+}
+
+.swiper-pagination-bullet-active {
+    opacity: 1;
+}
+
+/* Navigation Arrows */
+.swiper-button-next,
+.swiper-button-prev {
+    color: #ab2f2f;
+    /* Arrow color */
+    background-color: rgb(240, 240, 245);
+    /* Background for arrows */
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.swiper-button-next::after,
+.swiper-button-prev::after {
+    font-size: 20px;
+    /* Arrow size */
+}
+
+.swiper-button-next {
+    right: 10px;
+    /* Position outside the card */
+}
+
+.swiper-button-prev {
+    left: 10px;
+    /* Position outside the card */
+}
+
+
+/* Delete Button */
+.delete-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    font-size: 16px;
+    cursor: pointer;
+    opacity: 0;
+    /* Hidden by default */
+    transition: opacity 0.3s ease;
+}
+
+.swiper-slide:hover .delete-button {
+    opacity: 1;
+    /* Show on hover */
+}
+
+
+
+/* Overlay */
+.overlay {
+    display: none;
+    /* Hidden by default */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+}
+
+.no-cards-message {
+    /* display: none; */
+    text-align: center;
+    font-size: 1.5rem;
+    color: #888;
+    margin-top: 100px;
+}
+
+#cardDetailsDialog {
+    display: none;
+    /* Hide by default */
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    /* Adjusted for smaller screens */
+    max-width: 500px;
+    /* Maximum width for larger screens */
+    height: auto;
+    /* Height adjusts to content */
+    padding: 20px;
+    border: 1px solid black;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    background-color: white;
+    z-index: 1000;
+    text-align: left;
+   
+    
+   
+}
+
+#cardDetailsDialog[open] {
+    display: block;
+    /* Show when the dialog is open */
+}
+
+#cardDetailsDialog::backdrop {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+#cardDetailsDialog h2 {
+    color:
+        /* #3b82f6; */
+        black;
+    margin-bottom: 20px;
+    /* Add space below the heading */
+   
+    ;
+}
+
+#cardDetailsDialog p {
+    margin: 10px 0;
+    /* Add space between paragraphs */
+    font-size: 16px;
+    /* Increase font size for readability */
+    color: #333;
+    /* Darker text for better contrast */
+}
+
+#cardDetailsDialog button {
+    margin-top: 20px;
+    /* Add space above buttons */
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    /* Adjust button font size */
+    transition: background-color 0.3s ease;
+    /* Smooth hover effect */
+}
+
+#cardDetailsDialog button:hover {
+    opacity: 0.9;
+    /* Slight fade on hover */
+}
+
+#deleteCardButton {
+    background-color: blue;
+    color: white;
+}
+
+#deleteCardButton:hover {
+    background-color:darkblue;
+    /* Darker red on hover */
+}
+
+#closeDialogButton {
+    background-color: #ccc;
+    color: #333;
+    margin-left: 10px;
+    /* Space between buttons */
+}
+
+#closeDialogButton:hover {
+    background-color: #999;
+    /* Darker gray on hover */
+}
+
+/* Responsive Adjustments */
+@media (max-width: 800px) {
+    #cardDetailsDialog {
+        width: 95%;
+        padding: 15px;
     }
-    section{
-    height:350px;
-    width:100%px;
+
+    #cardDetailsDialog h2 {
+        font-size: 20px;
     }
-    .no-cards-message {
-        text-align: center;
-        font-size: 1.5rem;
-        color: #888;
-        margin-top: 100px;
-    }
-    .organizer{
-        display:flex;
-        flex-direction: row;
-    }
-    .organizer label{
-        font-size: 15px;
-        display: inline;
-        margin-bottom: 5px;
-        }
-        
-     .organizer input, select {
-        width: 50%;
-        padding: 10px;
-        border: 1px solid #ddd;
-        border-radius: 5px;
+
+    #cardDetailsDialog p {
         font-size: 14px;
-        display:inline;
-        }
-    /* opq*/
-    
-            .atm-card:hover {
-                transform: translateY(-5px);
-                box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4), -10px 10px #aea7a7;
-            }
-    
-            .chip, .visa-logo, .bank-logo {
-                position: absolute;
-            }
-    
-            .chip {
-                top: 50px;
-                left: 30px;
-                width: 50px;
-            }
-    
-            .bank-logo {
-                top: 20px;
-                right: 20px;
-                width: 130px;
-            }
-    
-            .visa-logo {
-                bottom: 20px;
-                right: 20px;
-                width: 60px;
-            }
-    
-            .card-number {
-                font-size: 1.2rem;
-                letter-spacing: 4px;
-                margin: 100px 0 0 10px;
-            }
-    
-            .validity {
-                display: flex;
-                justify-content: space-between;
-                width: 170px;
-                margin-left: 10px;
-            }
-    
-            .validity span {
-                font-size: 0.8rem;
-            }
-    
-            .cardholder-name {
-                position: absolute;
-                bottom: 20px;
-                left: 30px;
-                font-size: 1rem;
-                letter-spacing: 2px;
-            }
-    
-            .atm-cards-container {
-                max-width:500px;
-                background-color: rgb(240, 240, 245);
-                position: relative; /* For positioning the form */
-                min-height:400px;
-            }
-            .atm-cards-header
-            {
-                display:flex;
-                width:100%;
-                justify-content: space-between;
-                height:70px;
-                vertical-align: middle;
-            }
-    
-            .atm-cards-container h3 {
-              
-                display: inline-block;
-                padding-left:40px;
-                padding-right:40px;
-                margin-top:25px;
-                
-            }
-            /* Swiper container styling */
-            .swiper-container {
-                width: 100%;
-                max-width: 500px; /* Slightly larger than card width to accommodate padding */
-                margin: 0 auto; /* Center the container */
-                
-                position: relative;
-                overflow: hidden; /* Ensure only one card is visible */
-            }
-            .atm-card {
-                width: 90%;
-                min-width: 300px;
-                max-width: 320px;
-                height: 200px;
-                border-radius: 10px;
-                background: linear-gradient(135deg, #232333, #141666);
-                color: white;
-                padding: 20px;
-                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3), -7px 7px #dcdada;
-                position: relative;
-                font-family: 'Arial', sans-serif;
-                font-weight: 300;
-                margin: 40px;
-                margin-top:20px; /* Center the card */
-                display: inline-block;
-                cursor: pointer;
-                transition: transform 0.3s ease, box-shadow 0.3s ease;
-            }
-            .swiper-wrapper {
-                display: flex; /* Ensure slides are in a row */
-            }
-    
-            .swiper-slide {
-                width: 100%; /* Each slide takes full width of the container */
-                flex-shrink: 0; /* Prevent slides from shrinking */
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                position: relative; /* For positioning the delete button */
-            }
-    
-            /* Pagination (Indicators) */
-            .swiper-pagination {
-                position: relative; /* Move pagination below the card */
-                margin-top: 20px;
-            }
-    
-            .swiper-pagination-bullet {
-                background-color: #ab2f2f;
-                opacity: 0.5;
-                width: 10px;
-                height: 10px;
-                margin: 0 5px;
-            }
-    
-            .swiper-pagination-bullet-active {
-                opacity: 1;
-            }
-    
-            /* Navigation Arrows */
-            .swiper-button-next,
-            .swiper-button-prev {
-                color: #ab2f2f; /* Arrow color */
-                background-color: rgb(240, 240, 245); /* Background for arrows */
-                width: 40px;
-                height: 40px;
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-    
-            .swiper-button-next::after,
-            .swiper-button-prev::after {
-                font-size: 20px; /* Arrow size */
-            }
-    
-            .swiper-button-next {
-                right: 10px; /* Position outside the card */
-            }
-    
-            .swiper-button-prev {
-                left: 10px; /* Position outside the card */
-            }
-    
-           
-            /* Delete Button */
-            .delete-button {
-                position: absolute;
-                top: 10px;
-                right: 10px;
-                background-color: #ff4d4d;
-                color: white;
-                border: none;
-                border-radius: 50%;
-                width: 30px;
-                height: 30px;
-                font-size: 16px;
-                cursor: pointer;
-                opacity: 0; /* Hidden by default */
-                transition: opacity 0.3s ease;
-            }
-    
-            .swiper-slide:hover .delete-button {
-                opacity: 1; /* Show on hover */
-            }
-    
-            /* Add Card Button */
-            .add-card-button {
-                display: inline-block;
-                margin: 20px 10px 20px 40px;
-                margin-right:20px;
-                padding: 9px;
-                background-color: #5a5c5a;
-                color: white;
-                border: none;
-                border-radius: 5px;
-                cursor: pointer;
-                font-size: 12px;
-                width: 90px;
-            }
-    
-            .add-card-button:hover {
-                background-color: #45a049;
-            }
-    
-            /* Form Styling */
-            .add-card-form {
-                display: none;
-                position: absolute; /* Change from absolute to fixed */
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background-color: white;
-                padding: 20px;
-                border-radius: 10px;
-                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-                z-index: 1000;
-                width: 300px;
-            }
-            
-    
-            .add-card-form input {
-                width: 90%;
-                padding: 10px;
-                margin: 10px 0;
-                border: 1px solid #ccc;
-                border-radius: 5px;
-                font-size: 14px;
-            }
-    
-            .add-card-form button {
-                width: 90%;
-                padding: 10px;
-                background-color: #4CAF50;
-                color: white;
-                border: none;
-                border-radius: 5px;
-                cursor: pointer;
-                font-size: 16px;
-            }
-    
-            .add-card-form button:hover {
-                background-color: #45a049;
-            }
-    
-            /* Overlay */
-            .overlay {
-                display: none; /* Hidden by default */
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background-color: rgba(0, 0, 0, 0.5);
-                z-index: 999;
-            }
-            .no-cards-message {
-                display: none; /* Hidden by default */
-                text-align: center;
-                font-size: 1.5rem;
-                color: #888;
-                margin-top: 100px;
-            }
-            #cardDetailsDialog {
-                display: none; /* Hide by default */
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                width: 70%;
-                height:50%;
-                padding: 20px;
-                border: 1px solid #ccc;
-                border-radius: 10px;
-                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-                background-color: white;
-                z-index: 1000;
-            }
-            
-            #cardDetailsDialog[open] {
-                display: block; /* Show when the dialog is open */
-            }
-            
-            #cardDetailsDialog::backdrop {
-                background-color: rgba(0, 0, 0, 0.5);
-            }
-            
-            #cardDetailsDialog button {
-                margin-top: 10px;
-                padding: 10px 20px;
-                border: none;
-                border-radius: 5px;
-                cursor: pointer;
-            }
-            #cardDetailsDialog h2 {
-                color: #3b82f6;
-            }
-    
-            #deleteCardButton {
-                background-color: #ff4d4d;
-                color: white;
-            }
-            
-            #closeDialogButton {
-                background-color: #ccc;
-                color: #333;
-            }
+    }
+
+    #cardDetailsDialog button {
+        padding: 8px 16px;
+        font-size: 12px;
+    }
+}
+
+.error {
+    color: red;
+    /* Set text color to red */
+    font-size: 14px;
+    /* Adjust font size */
+    margin-top: 5px;
+    /* Add spacing between input and error message */
+    display: block;
+    /* Ensure error messages are displayed as block elements */
+}
+
+#closeDialogButton {
+    background-color: #ccc;
+    color: #333;
+}
+
+@media(max-width:1190px) {
+    .sec {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .content {
+        margin-left: 200px;
+        padding: 20px;
+        margin-top: 70px;
+        margin-right: 40px;
+    }
+
+}
