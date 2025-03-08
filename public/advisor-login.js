@@ -72,7 +72,7 @@ document.addEventListener("DOMContentLoaded", function () {
       // If client-side validation passes, send AJAX request
       const formData = new FormData(loginForm);
 
-      fetch("/login", {
+      fetch("/advisor-login", {
         method: "POST",
         body: new URLSearchParams(formData),
         headers: {

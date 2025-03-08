@@ -12,8 +12,8 @@ require("dotenv").config();
 const app = express();
 
 // Then configure it
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'public'));
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "public"));
 app.use(cors());
 app.use(bodyParser.json());
 const port = 4000;
@@ -108,7 +108,6 @@ async function verifyOTP(email, submittedOTP, sessionOTP) {
 
 // Route definitions (unchanged)
 
-
 app.get("/admin-login", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "admin-login.html"));
 });
@@ -134,35 +133,40 @@ app.get("/dashboard", (req, res) => {
 });
 
 // About Us page route
-app.get('/about', (req, res) => {
+app.get("/about", (req, res) => {
   // Data that will be passed to the EJS template
   const data = {
     objectives: [
       "Enabling users to manage and track all their financial activities (such as assets, liabilities, loans, investments, credit scores, and expenses) all in one place.",
       "Improving Financial Literacy by offering a broad range of educational content leading to increased investments in financial markets and reduced debt-traps, providing long-term financial security and tackling the root cause of poverty.",
-      "Facilitating Personalized Financial Planning by allowing users to input and guiding them towards personal short-term and long-term financial goals."
+      "Facilitating Personalized Financial Planning by allowing users to input and guiding them towards personal short-term and long-term financial goals.",
     ],
     features: [
       {
         title: "User Dashboard",
-        description: "Comprehensive financial data overview including assets, liabilities, income, expenses, and investments with interactive charts."
+        description:
+          "Comprehensive financial data overview including assets, liabilities, income, expenses, and investments with interactive charts.",
       },
       {
         title: "AI Chatbot",
-        description: "Get instant answers to your financial queries and personalized advice."
+        description:
+          "Get instant answers to your financial queries and personalized advice.",
       },
       {
         title: "Financial Education",
-        description: "Access a library of video courses and resources to improve your financial literacy."
+        description:
+          "Access a library of video courses and resources to improve your financial literacy.",
       },
       {
         title: "Reminders and Alerts",
-        description: "Never miss a payment deadline with our smart alert system for EMIs, bills, loan due dates, and more."
+        description:
+          "Never miss a payment deadline with our smart alert system for EMIs, bills, loan due dates, and more.",
       },
       {
         title: "Community Blogs",
-        description: "Share and learn financial tips from our growing community of users."
-      }
+        description:
+          "Share and learn financial tips from our growing community of users.",
+      },
     ],
     teamMembers: [
       {
@@ -172,8 +176,8 @@ app.get('/about', (req, res) => {
           "ChatBot functionality",
           "Implementation of Chart.js",
           "Smart Tax Management",
-          "Recommendation Model"
-        ]
+          "Recommendation Model",
+        ],
       },
       {
         name: "Deepthi",
@@ -182,8 +186,8 @@ app.get('/about', (req, res) => {
           "Chart.js visualizations",
           "Time series data functionalities",
           "Engaging animations",
-          "Database Management"
-        ]
+          "Database Management",
+        ],
       },
       {
         name: "Ragamaie",
@@ -192,8 +196,8 @@ app.get('/about', (req, res) => {
           "Database design and management",
           "Creation of videos and blogs",
           "Project documentation",
-          "Project promotion"
-        ]
+          "Project promotion",
+        ],
       },
       {
         name: "Zulqarnain",
@@ -202,22 +206,22 @@ app.get('/about', (req, res) => {
           "Designing the UI/UX",
           "Implementation of EJS for templating",
           "Database optimization",
-          "Reminder Alert functionality"
-        ]
+          "Reminder Alert functionality",
+        ],
       },
       {
-        name: "Abhinay", 
+        name: "Abhinay",
         role: "Creative Designer",
         contributions: [
           "Designing creative assets and layouts",
           "Utilization of EJS for dynamic content rendering",
-          "Frontend development"
-        ]
-      }
-    ]
+          "Frontend development",
+        ],
+      },
+    ],
   };
-  
-  res.render('about_us', data);
+
+  res.render("about_us", data);
 });
 
 // Login handlers (unchanged)
@@ -305,10 +309,12 @@ app.post("/login", (req, res) => {
       });
     }
 
-    // User found, redirect to dashboard
+    // User found, set session and redirect to dashboard
     req.session.userId = results[0].id;
     console.log("Login successful for user:", email);
     console.log("User Id: ", req.session.userId);
+
+    // For AJAX requests, redirect will be handled by the client
     res.redirect("/dashboard");
   });
 });
@@ -1670,10 +1676,10 @@ app.get("/api/user/weekly-activity", isAuthenticated, (req, res) => {
 });
 
 // API end-poimt to get user_investments
-app.get('/api/user-investments', (req, res) => {
+app.get("/api/user-investments", (req, res) => {
   // Check if user is logged in
   if (!req.session.userId) {
-    return res.status(401).json({ error: 'Not authenticated' });
+    return res.status(401).json({ error: "Not authenticated" });
   }
 
   // Query to get user investments
@@ -1685,8 +1691,8 @@ app.get('/api/user-investments', (req, res) => {
   // Execute the query with the user ID from the session
   db.query(query, [req.session.userId], (err, results) => {
     if (err) {
-      console.error('Error fetching user investments:', err);
-      return res.status(500).json({ error: 'Database error' });
+      console.error("Error fetching user investments:", err);
+      return res.status(500).json({ error: "Database error" });
     }
 
     // Send the investment data as JSON
