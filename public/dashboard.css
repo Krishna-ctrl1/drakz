@@ -38,6 +38,9 @@
     overflow: hidden; /* Ensures only the library scrolls */
     background-color: rgb(251, 251, 251);
     margin-bottom:20px;
+    border-radius: 20px;
+    
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
 }
 
 .video-library h3 {
@@ -215,7 +218,7 @@
     align-items: center;
     flex-direction: column;
     width: 450px;
-    
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); /* Added shadow for depth */    
     height: auto;
     background-color: rgb(251, 251, 251);
     padding-left: 20px;
@@ -226,6 +229,7 @@
    /* border-radius: 10px; */
     box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
    
+    border-radius: 15px;
 
 }
 
@@ -238,10 +242,17 @@
 }
 .credit-score-container {
     width: 80%;
-    margin: 20px auto;
+    margin: 35.5px auto;
     text-align: center;
     position: relative;
+    background-color: rgb(251, 251, 251);
+        
     
+    
+}
+.credit-score:hover {
+    transform: translateY(-5px); /* Slight lift on hover */
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3); /* Enhanced shadow on hover */
 }
 
 .credit-score-bar {
@@ -356,240 +367,11 @@
     transform-origin: 50% 95px;
 }
 
-@media (max-width: 800px) {
-    .video-preview
-    {
-     top: 280px;
-     left:59%;
-     max-width: 390px;
-     max-height: 300px;
-     min-width: 360px;
-     min-height: 250px;
-    }
- 
-    .video-thumbnail
-    {
-     width : 300px;
-    }
- 
- }
- @media (max-width: 1050px)  and (min-width:801px){
-    .video-preview
-    {
-     top: 330px;
-     left:60%;
-     max-width: 550px;
-     max-height: 400px;
-     min-width: 300px;
-     min-height: 250px;
-    }
- 
-    .video-thumbnail
-    {
-     width : 450px;
-    }
-    .left-arrow
-
-    {
-        top:180px;
-    }
-    .right-arrow
-    {
-        top:180px;
-    }
- 
- }
-
- @media (max-width: 1300px)  and (min-width:1051px){
-    .video-preview
-    {
-     top: 315px;
-     left:59%;
-     max-width: 650px;
-     max-height: 450px;
-     min-width: 300px;
-     min-height: 250px;
-    }
- 
-    .video-thumbnail
-    {
-     width : 450px;
-    }
-
-    .left-arrow
-    {
-        top:180px;
-    }
-    .right-arrow
-    {
-        top:180px;
-    }
- 
- }
- @media (min-width:1301px){
-    .video-preview
-    {
-     top: 340px;
-     left:56%;
-     max-width: 650px;
-     max-height: 450px;
-     min-width: 300px;
-     min-height: 250px;
-    }
- 
-    .video-thumbnail
-    {
-     width : 450px;
-    }
-    .left-arrow
-    {
-        top:180px;
-    }
-    .right-arrow
-    {
-        top:180px;
-    }
- 
- }
-@media (max-width:890px) 
-{
-    
-    .chart-box
-    {
-        width:100vw;
-    }
-    .credit-score
-    {
-        width: 100vw;
-    }
-    .total-holding-card-container
-    
-    {
-        width:100vw ;
-    }
-    .atm-cards-container
-    {
-        width:100vw !important;
-
-    }
-    
-    
- }
-
-@media (max-width:1239px) and (min-width :891px) {
-    .credit-score
-    {
-     width:49%;
-    }
-    .chart-box
-    {
-        width:48%;
-        height:383px;
-    }
-    .atm-cards-container
-    {
-        width:100vw;
-    }
-    .total-holding-card-container
-    
-    {
-        width: 100vw;
-        
-        
-        
-        
-    }
-    
-    
-
-    
- }
-@media (min-width:1240px) and (max-width:1363px)
-{
-    .credit-score
-    {
-     width:48%;
-    }
-    .chart-box
-    {
-        width:49%;
-    }
-    .total-holding-card-container
-    {
-        width:48%;
-        height:350px;
-        display: flex;
-        flex-direction: column; /* Stack items vertically */
-        align-items: center; /* Center items horizontally */
-        justify-content: center
-    }
-    .atm-cards-container
-    {
-        width:47%;
-        max-width:600px;
-        
-       
-        
-
-    }
-    
- }
-@media (min-width:1364px) 
-{
-    
-    .credit-score
-    {
-     width:49%;
-    }
-    .chart-box
-    {
-        width:48%;
-    }
-    .total-holding-card-container
-    {
-        width:48%;
-        
-        display:flex;
-        flex-direction: column;
-        height:350px;
-        justify-content: center;
-        align-items: center;
-        margin-top: 40px;
-        margin-bottom:40px;
-    }
-  
-    .atm-cards-container
-    {
-        width:49%;
-        max-width:850px;
-       
-        
-
-    }
-    
-}
-/* @media (width:1598px)
-{
-    .credit-score
-    {
-     width:
-    }
-    .chart-box
-    {
-        width:48%
-    }
-    .total-holding-card-container
-    {
-        display:flex;
-        flex-direction: row;
-        gap:25px;
-    }
-} */
-
 
 /*Expense Distribution */
 .chart-box {
 
+    
     display:flex;
     justify-content: center;
     align-items: center;
@@ -606,6 +388,13 @@
     padding-right: 30px;;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     margin-bottom:20px;
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); /* Added shadow for depth */
+}
+
+.chart-box:hover {
+    transform: translateY(-5px); /* Slight lift on hover */
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3); /* Enhanced shadow on hover */
 }
 
 .chart-box h2 {
@@ -631,8 +420,15 @@
     margin-bottom:10px;
     min-width:180px;
     min-height:180px;
-    max-width: 250px;
-    max-height:250px;
+    max-width: 280px;
+    max-height:280px;
+}
+
+#chartLegend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
 }
 
 
@@ -911,9 +707,7 @@
 } */
 
 /* search */
-.dashboard-item:hover {
-    background: #dfe6e9;
-}
+
 .card:hover
 {
     background: #dfe6e9;
@@ -926,3 +720,233 @@
 .hidden {
     display: none  !important;
 }
+
+
+@media (max-width: 800px) {
+    .video-preview
+    {
+     top: 280px;
+     left:59%;
+     max-width: 390px;
+     max-height: 300px;
+     min-width: 360px;
+     min-height: 250px;
+    }
+ 
+    .video-thumbnail
+    {
+     width : 300px;
+    }
+ 
+ }
+ @media (max-width: 1050px)  and (min-width:801px){
+    .video-preview
+    {
+     top: 330px;
+     left:60%;
+     max-width: 550px;
+     max-height: 400px;
+     min-width: 300px;
+     min-height: 250px;
+    }
+ 
+    .video-thumbnail
+    {
+     width : 450px;
+    }
+    .left-arrow
+
+    {
+        top:180px;
+    }
+    .right-arrow
+    {
+        top:180px;
+    }
+ 
+ }
+
+ @media (max-width: 1300px)  and (min-width:1051px){
+    .video-preview
+    {
+     top: 315px;
+     left:59%;
+     max-width: 650px;
+     max-height: 450px;
+     min-width: 300px;
+     min-height: 250px;
+    }
+ 
+    .video-thumbnail
+    {
+     width : 450px;
+    }
+
+    .left-arrow
+    {
+        top:180px;
+    }
+    .right-arrow
+    {
+        top:180px;
+    }
+ 
+ }
+ @media (min-width:1301px){
+    .video-preview
+    {
+     top: 340px;
+     left:56%;
+     max-width: 650px;
+     max-height: 450px;
+     min-width: 300px;
+     min-height: 250px;
+    }
+ 
+    .video-thumbnail
+    {
+     width : 450px;
+    }
+    .left-arrow
+    {
+        top:180px;
+    }
+    .right-arrow
+    {
+        top:180px;
+    }
+ 
+ }
+@media (max-width:890px) 
+{
+    
+    .chart-box
+    {
+        width:100vw;
+    }
+    .credit-score
+    {
+        width: 100vw;
+    }
+    .total-holding-card-container
+    
+    {
+        width:100vw ;
+    }
+    .atm-cards-container
+    {
+        width:100vw !important;
+
+    }
+    
+    
+ }
+
+@media (max-width:1239px) and (min-width :891px) {
+    .credit-score
+    {
+     width:49%;
+    }
+    .chart-box
+    {
+        width:48%;
+        height:415.5px;
+    }
+    .atm-cards-container
+    {
+        width:100vw;
+    }
+    .total-holding-card-container
+    
+    {
+        width: 100vw;
+        
+        
+        
+        
+    }
+    
+    
+
+    
+ }
+@media (min-width:1240px) and (max-width:1363px)
+{
+    .credit-score
+    {
+     width:48%;
+    }
+    .chart-box
+    {
+        width:49%;
+    }
+    .total-holding-card-container
+    {
+        width:48%;
+        height:350px;
+        display: flex;
+        flex-direction: column; /* Stack items vertically */
+        align-items: center; /* Center items horizontally */
+        justify-content: center
+    }
+    .atm-cards-container
+    {
+        width:47%;
+        max-width:600px;
+       
+        
+
+    }
+    
+ }
+@media (min-width:1364px) 
+{
+    
+    .credit-score
+    {
+     width:49%;
+    }
+    .chart-box
+    {
+        width:48%;
+    }
+    .total-holding-card-container
+    {
+        width:48%;
+        
+        display:flex;
+        flex-direction: column;
+        height:350px;
+        justify-content: center;
+        align-items: center;
+        margin-top: 40px;
+        margin-bottom:40px;
+    }
+  
+    .atm-cards-container
+    {
+        width:49%;
+        max-width:850px;
+       
+        
+
+    }
+    
+}
+/* @media (width:1598px)
+{
+    .credit-score
+    {
+     width:
+    }
+    .chart-box
+    {
+        width:48%
+    }
+    .total-holding-card-container
+    {
+        display:flex;
+        flex-direction: row;
+        gap:25px;
+    }
+} */

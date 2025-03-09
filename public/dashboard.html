@@ -289,8 +289,10 @@
 
           <!-- Add Card Form -->
           <div class="overlay" id="overlay"></div>
+          
           <div class="add-card-form" id="addCardForm">
-            <h3>Add New Card</h3>
+            <img  class="form-bg" src="assets/images/3bg.jpg">
+            <div class="form-heading"><h3>Add New Card</h3></div>
             <input
               type="text"
               id="cardNumber"
@@ -305,6 +307,28 @@
               placeholder="Name on Card"
               required
             />
+            <div class="bank-input-container">
+              <input
+                type="text"
+                id="bankName"
+                placeholder="Bank"
+                list="bankList"
+                required
+              />
+              <datalist id="bankList">
+                <option value="State Bank of India">
+                <option value="HDFC Bank">
+                <option value="ICICI Bank">
+                <option value="Axis Bank">
+                <option value="Kotak Mahindra Bank">
+                <option value="Punjab National Bank">
+                <option value="Bank of Baroda">
+                <option value="Canara Bank">
+                <option value="Union Bank of India">
+                <option value="IndusInd Bank">
+              </datalist>
+            </div>
+          
             <input
               type="text"
               id="validFrom"
@@ -321,7 +345,9 @@
               maxlength="5"
               oninput="formatDate(this)"
             />
-            <button type="button" onclick="addCard()">Add Card</button>
+            <div class="button-div">
+              <button type="button" onclick="addCard()">Add Card</button>
+            </div>
           </div>
         </div>
 
