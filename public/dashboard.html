@@ -17,6 +17,7 @@
       href="https://unpkg.com/swiper/swiper-bundle.min.css"
     />
     <link rel="stylesheet" href="dashboard_card.css" />
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   </head>
   <body>
     <header class="header">
@@ -33,6 +34,24 @@
         />
       </div>
       <div class="icons">
+        <button
+          id="premiumButton"
+          class="premium-btn"
+          style="
+            display: none;
+            background-color: #ffd700;
+            color: #333;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-right: 10px;
+          "
+          onclick="upgradeToPremium()"
+        >
+          Upgrade to Premium
+        </button>
         <i class="fas fa-cog"></i>
         <i class="fas fa-bell"></i>
         <div class="profile">

@@ -6,6 +6,7 @@ const cors = require("cors");
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
 const session = require("express-session");
+const Razorpay = require("razorpay");
 require("dotenv").config();
 
 // Initialize express app first
@@ -107,6 +108,11 @@ async function verifyOTP(email, submittedOTP, sessionOTP) {
 }
 
 // Route definitions (unchanged)
+
+app.get("/", (req, res) => {
+  res.redirect("/start_page.html");
+});
+
 
 app.get("/admin-login", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "admin-login.html"));
@@ -1027,7 +1033,7 @@ app.post("/api/users", (req, res) => {
   });
 });
 
-// API endpoint to get security alerts (demo data - replace with real alerts in production)
+// API endpoint to get security alerts
 app.get("/api/security-alerts", (req, res) => {
   // In a real application, you'd fetch actual security alerts from a database table
   // For now, we'll return sample data
@@ -1321,7 +1327,6 @@ app.get("/api/dashboard", (req, res) => {
 });
 
 // Credit card API endpoint
-// Add this endpoint to your server.js file
 
 app.post("/api/credit-cards", (req, res) => {
   console.log("Credit card addition request received:", req.body);
@@ -1699,6 +1704,457 @@ app.get("/api/user-investments", (req, res) => {
     res.json(results);
   });
 });
+
+// Premium upgrade endpoint
+app.post("/api/upgrade-to-premium", (req, res) => {
+  // Ensure the user is logged in
+  const userId = req.session.userId;
+
+  if (!userId) {
+    return res
+      .status(401)
+      .json({ success: false, error: "Unauthorized. Please log in." });
+  }
+
+  // Begin transaction
+  db.beginTransaction((err) => {
+    if (err) {
+      console.error("Transaction error:", err);
+      return res.status(500).json({ success: false, error: "Database error" });
+    }
+
+    // 1. Update the user's premium status
+    db.query(
+      "UPDATE users SET is_premium = 1 WHERE id = ?",
+      [userId],
+      (err, result) => {
+        if (err) {
+          return db.rollback(() => {
+            console.error("Database error:", err);
+            res.status(500).json({ success: false, error: "Database error" });
+          });
+        }
+
+        if (result.affectedRows === 0) {
+          return db.rollback(() => {
+            res.status(404).json({ success: false, error: "User not found" });
+          });
+        }
+
+        // 2. Find an advisor with fewer than 5 clients
+        db.query(
+          `SELECT a.id, a.name, a.email, COUNT(ca.id) as client_count 
+           FROM advisors a 
+           LEFT JOIN client_advisors ca ON a.id = ca.advisor_id 
+           GROUP BY a.id 
+           HAVING client_count < 5 
+           ORDER BY client_count ASC 
+           LIMIT 1`,
+          (err, advisors) => {
+            if (err) {
+              return db.rollback(() => {
+                console.error("Database error:", err);
+                res
+                  .status(500)
+                  .json({ success: false, error: "Database error" });
+              });
+            }
+
+            // If no advisor is available
+            if (!advisors || advisors.length === 0) {
+              return db.commit((err) => {
+                if (err) {
+                  return db.rollback(() => {
+                    console.error("Commit error:", err);
+                    res
+                      .status(500)
+                      .json({ success: false, error: "Database error" });
+                  });
+                }
+
+                // Success but no advisor available
+                res.json({ success: true });
+              });
+            }
+
+            const advisor = advisors[0];
+
+            // 3. Assign the advisor to the user
+            db.query(
+              "INSERT INTO client_advisors (advisor_id, user_id) VALUES (?, ?)",
+              [advisor.id, userId],
+              (err, result) => {
+                if (err) {
+                  return db.rollback(() => {
+                    console.error("Database error:", err);
+                    res
+                      .status(500)
+                      .json({ success: false, error: "Database error" });
+                  });
+                }
+
+                // 4. Get user email for sending confirmation
+                db.query(
+                  "SELECT name, email FROM users WHERE id = ?",
+                  [userId],
+                  (err, users) => {
+                    if (err) {
+                      return db.rollback(() => {
+                        console.error("Database error:", err);
+                        res
+                          .status(500)
+                          .json({ success: false, error: "Database error" });
+                      });
+                    }
+
+                    const user = users[0];
+
+                    // 5. Commit the transaction
+                    db.commit((err) => {
+                      if (err) {
+                        return db.rollback(() => {
+                          console.error("Commit error:", err);
+                          res
+                            .status(500)
+                            .json({ success: false, error: "Database error" });
+                        });
+                      }
+
+                      // 6. Send confirmation email
+                      sendConfirmationEmail(user, advisor);
+
+                      // 7. Return success with advisor details
+                      res.json({
+                        success: true,
+                        advisor: {
+                          name: advisor.name,
+                          email: advisor.email,
+                        },
+                      });
+                    });
+                  }
+                );
+              }
+            );
+          }
+        );
+      }
+    );
+  });
+});
+
+// Function to send confirmation email
+function sendConfirmationEmail(user, advisor) {
+  // You would integrate with your email service here (e.g., Nodemailer, SendGrid, etc.)
+  // This is a placeholder function
+  console.log(`Sending confirmation email to ${user.email}`);
+
+  const mailOptions = {
+    from: 'drakz.fintech@gmail.com',
+    to: user.email,
+    subject: 'Welcome to DRAKZ Premium!',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <div style="background-color: #ffd700; padding: 20px; text-align: center;">
+          <h1 style="color: #333; margin: 0;">DRAKZ Premium</h1>
+        </div>
+        <div style="padding: 20px;">
+          <h2>Welcome to Premium, ${user.name}!</h2>
+          <p>Your payment has been successfully processed, and you now have access to all premium features.</p>
+  
+          <div style="background-color: #f9f9f9; padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="margin-top: 0;">Your Personal Financial Advisor</h3>
+            <p><strong>Name:</strong> ${advisor.name}</p>
+            <p><strong>Email:</strong> ${advisor.email}</p>
+            <p>Your advisor will contact you within 24 hours to schedule your first consultation.</p>
+          </div>
+  
+          <p>As a premium member, you now have access to:</p>
+          <ul>
+            <li>Full access to our financial video library</li>
+            <li>Personal financial advisor services</li>
+            <li>Advanced analytics and insights</li>
+            <li>Priority alerts for market changes</li>
+          </ul>
+  
+          <p>If you have any questions, please don't hesitate to contact our support team.</p>
+  
+          <div style="text-align: center; margin-top: 30px;">
+            <a href="https://drakz.com/dashboard" style="background-color: #ffd700; color: #333; text-decoration: none; padding: 10px 20px; border-radius: 4px; font-weight: bold;">Go to Dashboard</a>
+          </div>
+        </div>
+        <div style="background-color: #333; color: white; padding: 20px; text-align: center; font-size: 12px;">
+          <p>&copy; 2025 DRAKZ. All rights reserved.</p>
+        </div>
+      </div>
+    `
+  };
+
+  transporter.sendMail(mailOptions, function(error, info){
+    if (error) {
+      console.log('Email error:', error);
+    } else {
+      console.log('Email sent: ' + info.response);
+    }
+  });
+}
+
+// // Initialize Razorpay with your credentials
+// const razorpay = new Razorpay({
+//   key_id: process.env.RAZORPAY_KEY_ID || "rzp_test_your_key_id",
+//   key_secret: process.env.RAZORPAY_KEY_SECRET || "your_key_secret",
+// });
+
+// // Create Razorpay order endpoint
+// app.post("/api/create-razorpay-order", (req, res) => {
+//   // Ensure the user is logged in
+//   const userId = req.session.userId;
+
+//   if (!userId) {
+//     return res
+//       .status(401)
+//       .json({ success: false, error: "Unauthorized. Please log in." });
+//   }
+
+//   // Set amount for premium subscription (e.g., ₹5000 = 500000 paise)
+//   const amount = 500000; // Adjust according to your pricing
+
+//   // Create Razorpay order
+//   const options = {
+//     amount,
+//     currency: "INR",
+//     receipt: `order_${Date.now()}_${userId}`,
+//     payment_capture: 1,
+//   };
+
+//   razorpay.orders.create(options, (err, order) => {
+//     if (err) {
+//       console.error("Razorpay order creation error:", err);
+//       return res
+//         .status(500)
+//         .json({ success: false, error: "Failed to create payment order" });
+//     }
+
+//     res.json({
+//       id: order.id,
+//       amount: order.amount,
+//       currency: order.currency,
+//     });
+//   });
+// });
+
+// // Verify Razorpay payment and upgrade to premium
+// app.post("/api/verify-razorpay-payment", (req, res) => {
+//   // Get payment verification details
+//   const { razorpay_payment_id, razorpay_order_id, razorpay_signature } =
+//     req.body;
+
+//   // Ensure the user is logged in
+//   const userId = req.session.userId;
+
+//   if (!userId) {
+//     return res
+//       .status(401)
+//       .json({ success: false, error: "Unauthorized. Please log in." });
+//   }
+
+//   // Validate input
+//   if (!razorpay_payment_id || !razorpay_order_id || !razorpay_signature) {
+//     return res.status(400).json({
+//       success: false,
+//       error: "Missing payment verification parameters",
+//     });
+//   }
+
+//   // Verify signature
+//   const generatedSignature = crypto
+//     .createHmac("sha256", razorpay.key_secret)
+//     .update(razorpay_order_id + "|" + razorpay_payment_id)
+//     .digest("hex");
+
+//   if (generatedSignature !== razorpay_signature) {
+//     return res.status(400).json({
+//       success: false,
+//       error: "Invalid payment signature",
+//     });
+//   }
+
+//   // Payment signature is valid, now verify payment status
+//   razorpay.payments.fetch(razorpay_payment_id, (err, payment) => {
+//     if (err) {
+//       console.error("Razorpay payment fetch error:", err);
+//       return res
+//         .status(500)
+//         .json({ success: false, error: "Failed to verify payment" });
+//     }
+
+//     if (payment.status !== "captured") {
+//       return res.status(400).json({
+//         success: false,
+//         error: "Payment not completed",
+//       });
+//     }
+
+//     // Payment verified, now upgrade the user to premium
+//     // Begin transaction
+//     db.beginTransaction((err) => {
+//       if (err) {
+//         console.error("Transaction error:", err);
+//         return res
+//           .status(500)
+//           .json({ success: false, error: "Database error" });
+//       }
+
+//       // 1. Update the user's premium status
+//       db.query(
+//         "UPDATE users SET is_premium = 1 WHERE id = ?",
+//         [userId],
+//         (err, result) => {
+//           if (err) {
+//             return db.rollback(() => {
+//               console.error("Database error:", err);
+//               res.status(500).json({ success: false, error: "Database error" });
+//             });
+//           }
+
+//           if (result.affectedRows === 0) {
+//             return db.rollback(() => {
+//               res.status(404).json({ success: false, error: "User not found" });
+//             });
+//           }
+
+//           // 2. Record payment in your database
+//           db.query(
+//             "INSERT INTO payments (user_id, payment_id, order_id, amount, status) VALUES (?, ?, ?, ?, ?)",
+//             [
+//               userId,
+//               razorpay_payment_id,
+//               razorpay_order_id,
+//               payment.amount / 100,
+//               payment.status,
+//             ],
+//             (err, result) => {
+//               if (err) {
+//                 return db.rollback(() => {
+//                   console.error("Database error:", err);
+//                   res
+//                     .status(500)
+//                     .json({ success: false, error: "Database error" });
+//                 });
+//               }
+
+//               // 3. Find an advisor with fewer than 5 clients
+//               db.query(
+//                 `SELECT a.id, a.name, a.email, COUNT(ca.id) as client_count 
+//                  FROM advisors a 
+//                  LEFT JOIN client_advisors ca ON a.id = ca.advisor_id 
+//                  GROUP BY a.id 
+//                  HAVING client_count < 5 
+//                  ORDER BY client_count ASC 
+//                  LIMIT 1`,
+//                 (err, advisors) => {
+//                   if (err) {
+//                     return db.rollback(() => {
+//                       console.error("Database error:", err);
+//                       res
+//                         .status(500)
+//                         .json({ success: false, error: "Database error" });
+//                     });
+//                   }
+
+//                   // If no advisor is available
+//                   if (!advisors || advisors.length === 0) {
+//                     return db.commit((err) => {
+//                       if (err) {
+//                         return db.rollback(() => {
+//                           console.error("Commit error:", err);
+//                           res
+//                             .status(500)
+//                             .json({ success: false, error: "Database error" });
+//                         });
+//                       }
+
+//                       // Success but no advisor available
+//                       res.json({ success: true });
+//                     });
+//                   }
+
+//                   const advisor = advisors[0];
+
+//                   // 4. Assign the advisor to the user
+//                   db.query(
+//                     "INSERT INTO client_advisors (advisor_id, user_id) VALUES (?, ?)",
+//                     [advisor.id, userId],
+//                     (err, result) => {
+//                       if (err) {
+//                         return db.rollback(() => {
+//                           console.error("Database error:", err);
+//                           res
+//                             .status(500)
+//                             .json({ success: false, error: "Database error" });
+//                         });
+//                       }
+
+//                       // 5. Get user email for sending confirmation
+//                       db.query(
+//                         "SELECT name, email FROM users WHERE id = ?",
+//                         [userId],
+//                         (err, users) => {
+//                           if (err) {
+//                             return db.rollback(() => {
+//                               console.error("Database error:", err);
+//                               res
+//                                 .status(500)
+//                                 .json({
+//                                   success: false,
+//                                   error: "Database error",
+//                                 });
+//                             });
+//                           }
+
+//                           const user = users[0];
+
+//                           // 6. Commit the transaction
+//                           db.commit((err) => {
+//                             if (err) {
+//                               return db.rollback(() => {
+//                                 console.error("Commit error:", err);
+//                                 res
+//                                   .status(500)
+//                                   .json({
+//                                     success: false,
+//                                     error: "Database error",
+//                                   });
+//                               });
+//                             }
+
+//                             // 7. Send confirmation email
+//                             sendConfirmationEmail(user, advisor);
+
+//                             // 8. Return success with advisor details
+//                             res.json({
+//                               success: true,
+//                               advisor: {
+//                                 name: advisor.name,
+//                                 email: advisor.email,
+//                               },
+//                             });
+//                           });
+//                         }
+//                       );
+//                     }
+//                   );
+//                 }
+//               );
+//             }
+//           );
+//         }
+//       );
+//     });
+//   });
+// });
+
+// Un-comment the above code when you have the RazorPay API Key. Also check dashboard.js
 
 // Start the server
 app.listen(port, () => {

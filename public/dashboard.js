@@ -665,31 +665,31 @@ function addCard() {
 
 // Helper function to convert MM/YY to YYYY-MM-DD
 function convertToISODate(mmYY) {
-    try {
-      if (!mmYY || mmYY.length !== 5 || mmYY.charAt(2) !== '/') {
-        console.error('Invalid date format', mmYY);
-        return null;
-      }
-      
-      const month = mmYY.substring(0, 2);
-      const year = '20' + mmYY.substring(3, 5);
-      
-      // Validate month and year
-      const monthNum = parseInt(month, 10);
-      const yearNum = parseInt(year, 10);
-      
-      if (isNaN(monthNum) || monthNum < 1 || monthNum > 12 || isNaN(yearNum)) {
-        console.error('Invalid month or year', month, year);
-        return null;
-      }
-      
-      // For valid_from, use the first day of the month
-      return `${year}-${month}-01`;
-    } catch (err) {
-      console.error('Date conversion error:', err);
+  try {
+    if (!mmYY || mmYY.length !== 5 || mmYY.charAt(2) !== "/") {
+      console.error("Invalid date format", mmYY);
       return null;
     }
+
+    const month = mmYY.substring(0, 2);
+    const year = "20" + mmYY.substring(3, 5);
+
+    // Validate month and year
+    const monthNum = parseInt(month, 10);
+    const yearNum = parseInt(year, 10);
+
+    if (isNaN(monthNum) || monthNum < 1 || monthNum > 12 || isNaN(yearNum)) {
+      console.error("Invalid month or year", month, year);
+      return null;
+    }
+
+    // For valid_from, use the first day of the month
+    return `${year}-${month}-01`;
+  } catch (err) {
+    console.error("Date conversion error:", err);
+    return null;
   }
+}
 
 // Format card number as it's entered (add spaces)
 function formatCardNumber(input) {
@@ -1013,3 +1013,586 @@ document.head.insertAdjacentHTML(
     </style>
   `
 );
+
+// Function to check premium status and show/hide button
+function checkPremiumStatus() {
+  fetch("/api/dashboard")
+    .then((response) => response.json())
+    .then((data) => {
+      const isPremium = data.user.is_premium === 1;
+      const premiumButton = document.getElementById("premiumButton");
+
+      // Show button only for non-premium users
+      if (!isPremium) {
+        premiumButton.style.display = "inline-block";
+      } else {
+        premiumButton.style.display = "none";
+      }
+    })
+    .catch((error) => console.error("Error fetching user data:", error));
+}
+
+// Check premium status when page loads
+document.addEventListener("DOMContentLoaded", checkPremiumStatus);
+
+// Function to handle premium upgrade
+function upgradeToPremium() {
+  // Show the premium features modal
+  showPremiumModal();
+}
+
+// Function to show the premium features modal
+function showPremiumModal() {
+  // Create the modal overlay if it doesn't exist yet
+  let modalOverlay = document.querySelector(".modal-overlay");
+
+  if (!modalOverlay) {
+    modalOverlay = document.createElement("div");
+    modalOverlay.className = "modal-overlay";
+    modalOverlay.style.cssText =
+      "position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center; z-index: 1000;";
+    document.body.appendChild(modalOverlay);
+  } else {
+    // Clear the existing content
+    modalOverlay.innerHTML = "";
+  }
+
+  // Create the modal content
+  const modalContent = document.createElement("div");
+  modalContent.className = "modal-content";
+  modalContent.style.cssText =
+    "background-color: white; border-radius: 8px; padding: 30px; max-width: 600px; width: 90%; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);";
+
+  // Modal header and content
+  modalContent.innerHTML = `
+    <div class="modal-header" style="margin-bottom: 20px; text-align: center;">
+      <h2 style="color: #333; margin-bottom: 5px;">Upgrade to Premium</h2>
+      <p style="color: #666; margin-top: 0;">Unlock the full potential of your financial journey</p>
+    </div>
+    
+    <div class="modal-body" style="margin-bottom: 25px;">
+      <h3 style="color: #333; margin-bottom: 15px;">Premium Benefits:</h3>
+      
+      <div class="feature" style="display: flex; margin-bottom: 15px; align-items: flex-start;">
+        <div style="background-color: #ffd700; border-radius: 50%; min-width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; margin-right: 15px;">
+          <i class="fas fa-video" style="color: #333;"></i>
+        </div>
+        <div>
+          <h4 style="margin: 0 0 5px 0;">Full Access to Financial Video Library</h4>
+          <p style="margin: 0; color: #666;">Unlimited access to our extensive collection of educational videos covering all aspects of personal finance.</p>
+        </div>
+      </div>
+      
+      <div class="feature" style="display: flex; margin-bottom: 15px; align-items: flex-start;">
+        <div style="background-color: #ffd700; border-radius: 50%; min-width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; margin-right: 15px;">
+          <i class="fas fa-user-tie" style="color: #333;"></i>
+        </div>
+        <div>
+          <h4 style="margin: 0 0 5px 0;">Personal Financial Advisor</h4>
+          <p style="margin: 0; color: #666;">Get paired with a dedicated advisor to manage your stocks, investments, and financial strategy.</p>
+        </div>
+      </div>
+      
+      <div class="feature" style="display: flex; margin-bottom: 15px; align-items: flex-start;">
+        <div style="background-color: #ffd700; border-radius: 50%; min-width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; margin-right: 15px;">
+          <i class="fas fa-chart-line" style="color: #333;"></i>
+        </div>
+        <div>
+          <h4 style="margin: 0 0 5px 0;">Advanced Analytics</h4>
+          <p style="margin: 0; color: #666;">Access detailed insights and predictions to optimize your investment portfolio.</p>
+        </div>
+      </div>
+      
+      <div class="feature" style="display: flex; margin-bottom: 15px; align-items: flex-start;">
+        <div style="background-color: #ffd700; border-radius: 50%; min-width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; margin-right: 15px;">
+          <i class="fas fa-bell" style="color: #333;"></i>
+        </div>
+        <div>
+          <h4 style="margin: 0 0 5px 0;">Priority Alerts</h4>
+          <p style="margin: 0; color: #666;">Receive real-time notifications about market changes and investment opportunities.</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="modal-footer" style="text-align: center;">
+      <button id="proceedToPayment" style="background-color: #ffd700; color: #333; border: none; padding: 12px 24px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 16px;">Proceed to Payment</button>
+      <button id="closeModal" style="background-color: transparent; color: #666; border: none; padding: 12px 24px; cursor: pointer; font-size: 16px;">Close</button>
+    </div>
+  `;
+
+  // Add the modal to the page
+  modalOverlay.appendChild(modalContent);
+
+  // Handle closing the modal
+  document.getElementById("closeModal").addEventListener("click", function () {
+    closeModal(modalOverlay);
+  });
+
+  // Handle clicking outside the modal to close
+  modalOverlay.addEventListener("click", function (e) {
+    if (e.target === modalOverlay) {
+      closeModal(modalOverlay);
+    }
+  });
+
+  // Handle proceed to payment button
+  document
+    .getElementById("proceedToPayment")
+    .addEventListener("click", function () {
+      showPaymentModal(modalOverlay);
+    });
+}
+
+// Function to close the modal
+function closeModal(modalOverlay) {
+  if (modalOverlay && document.body.contains(modalOverlay)) {
+    document.body.removeChild(modalOverlay);
+  }
+}
+
+// Function to show the payment modal
+function showPaymentModal(modalOverlay) {
+  console.log("Modal overlay received:", modalOverlay);
+  // Clear existing content
+  modalOverlay.innerHTML = "";
+
+  // Create the modal content
+  const modalContent = document.createElement("div");
+  modalContent.className = "modal-content";
+  modalContent.style.cssText =
+    "background-color: white; border-radius: 8px; padding: 30px; max-width: 600px; width: 90%; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);";
+
+  // Add payment form content
+  modalContent.innerHTML = `
+    <div class="modal-header" style="margin-bottom: 20px; text-align: center;">
+      <h2 style="color: #333; margin-bottom: 5px;">Payment Details</h2>
+      <p style="color: #666; margin-top: 0;">Secure checkout powered by our payment gateway</p>
+    </div>
+    
+    <div class="modal-body" style="margin-bottom: 25px;">
+      <div style="background-color: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+          <span style="font-weight: bold;">Premium Membership (Annual)</span>
+          <span>₹1</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; border-top: 1px solid #ddd; padding-top: 10px; font-weight: bold;">
+          <span>Total</span>
+          <span>₹1</span>
+        </div>
+      </div>
+      
+      <form id="paymentForm">
+        <div style="margin-bottom: 15px;">
+          <label for="cardName" style="display: block; margin-bottom: 5px; font-weight: bold;">Name on Card</label>
+          <input type="text" id="cardName" placeholder="John Doe" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;" required>
+        </div>
+        
+        <div style="margin-bottom: 15px;">
+          <label for="cardNumber" style="display: block; margin-bottom: 5px; font-weight: bold;">Card Number</label>
+          <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;" required maxlength="19" inputmode="numeric">
+        </div>
+        
+        <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+          <div style="flex: 1;">
+            <label for="expiryDate" style="display: block; margin-bottom: 5px; font-weight: bold;">Expiry Date</label>
+            <input type="text" id="expiryDate" placeholder="MM/YY" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;" required maxlength="5" inputmode="numeric">
+          </div>
+          <div style="flex: 1;">
+            <label for="cvv" style="display: block; margin-bottom: 5px; font-weight: bold;">CVV</label>
+            <input type="text" id="cvv" placeholder="123" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;" required maxlength="3" inputmode="numeric">
+          </div>
+        </div>
+      </form>
+    </div>
+    
+    <div class="modal-footer" style="text-align: center;">
+      <button id="completePayment" style="background-color: #ffd700; color: #333; border: none; padding: 12px 24px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 16px;">Complete Payment</button>
+      <button id="backToFeatures" style="background-color: transparent; color: #666; border: none; padding: 12px 24px; cursor: pointer; font-size: 16px;">Back</button>
+    </div>
+  `;
+
+  // Add the modal to the page
+  modalOverlay.appendChild(modalContent);
+
+  // Create a custom implementation of the formatCardNumber function directly in this function
+  // instead of relying on the external function that might not be working as expected
+  const cardNumberInput = document.getElementById("cardNumber");
+  cardNumberInput.addEventListener("input", function (e) {
+    // Custom inline implementation of card formatting
+    let value = this.value.replace(/\s+/g, ""); // Remove all spaces
+    if (value.length > 0) {
+      // Re-add spaces after every 4 characters
+      value = value.match(/.{1,4}/g).join(" ");
+    }
+    // Only update if the value is different to prevent cursor issues
+    if (this.value !== value) {
+      this.value = value;
+    }
+  });
+
+  // Apply formatting to expiry date input
+  const expiryDateInput = document.getElementById("expiryDate");
+  expiryDateInput.addEventListener("input", function (e) {
+    // Custom inline implementation of date formatting
+    let value = this.value.replace(/\D/g, ""); // Remove non-digits
+    if (value.length > 2) {
+      // Format as MM/YY
+      value = value.substring(0, 2) + "/" + value.substring(2, 4);
+    }
+    this.value = value;
+  });
+
+  // Handle back button
+  document
+    .getElementById("backToFeatures")
+    .addEventListener("click", function () {
+      showPremiumModal(); // This will clear and rebuild the modal
+    });
+
+  // Handle payment submission
+  document
+    .getElementById("completePayment")
+    .addEventListener("click", function () {
+      console.log("Payment button clicked");
+
+      // Get all input elements directly from the form to ensure correct context
+      const form = document.getElementById("paymentForm");
+      const cardNumberInput = form.querySelector("#cardNumber");
+      const cardNameInput = form.querySelector("#cardName");
+      const expiryDateInput = form.querySelector("#expiryDate");
+      const cvvInput = form.querySelector("#cvv");
+
+      // Debug - log actual DOM values to see what the browser sees
+      console.log(
+        "Card Number DOM Value:",
+        cardNumberInput ? cardNumberInput.value : null
+      );
+      console.log(
+        "Card Name DOM Value:",
+        cardNameInput ? cardNameInput.value : null
+      );
+
+      // Force read the values directly from the elements
+      const cardNumber = cardNumberInput ? cardNumberInput.value.trim() : "";
+      const cardName = cardNameInput ? cardNameInput.value.trim() : "";
+      const expiryDate = expiryDateInput ? expiryDateInput.value.trim() : "";
+      const cvv = cvvInput ? cvvInput.value.trim() : "";
+
+      // Debug - log the trimmed values
+      console.log("Card Number Trimmed:", cardNumber);
+      console.log("Card Name Trimmed:", cardName);
+
+      let isValid = true;
+
+      // Reset any previous error styling
+      if (cardNumberInput) cardNumberInput.style.borderColor = "#ddd";
+      if (cardNameInput) cardNameInput.style.borderColor = "#ddd";
+      if (expiryDateInput) expiryDateInput.style.borderColor = "#ddd";
+      if (cvvInput) cvvInput.style.borderColor = "#ddd";
+
+      // Validation with improved messaging
+      if (!cardNumber) {
+        console.error("Card number is empty!");
+        if (cardNumberInput) cardNumberInput.style.borderColor = "red";
+        isValid = false;
+      } else if (!validateCardNumber(cardNumber)) {
+        console.error("Card number validation failed!");
+        if (cardNumberInput) cardNumberInput.style.borderColor = "red";
+        isValid = false;
+      }
+
+      if (!cardName) {
+        console.error("Card name is empty!");
+        if (cardNameInput) cardNameInput.style.borderColor = "red";
+        isValid = false;
+      } else if (!validateCardHolderName(cardName)) {
+        console.error("Card name validation failed!");
+        if (cardNameInput) cardNameInput.style.borderColor = "red";
+        isValid = false;
+      }
+
+      // Validate expiry date format
+      if (!expiryDate || !validateDateFormat(expiryDate)) {
+        if (expiryDateInput) expiryDateInput.style.borderColor = "red";
+        isValid = false;
+      } else if (!isFutureDate(expiryDate)) {
+        // Check if date is in the future
+        if (expiryDateInput) expiryDateInput.style.borderColor = "red";
+        isValid = false;
+      }
+
+      if (isValid) {
+        processPayment(modalOverlay);
+      }
+    });
+
+  // Add an event delegation approach as a fallback
+  modalContent.addEventListener("input", function (e) {
+    if (e.target.id === "cardNumber") {
+      // Another attempt at card formatting using a different technique
+      let value = e.target.value.replace(/\s+/g, "");
+      if (value.length > 0) {
+        // Format with spaces after every 4 digits
+        value = value.replace(/(\d{4})(?=\d)/g, "$1 ");
+      }
+      e.target.value = value;
+    } else if (e.target.id === "expiryDate") {
+      let value = e.target.value.replace(/\D/g, "");
+      if (value.length > 2) {
+        value = value.substring(0, 2) + "/" + value.substring(2, 4);
+      }
+      e.target.value = value;
+    }
+  });
+}
+
+// // Function to process the payment with Razorpay
+// function processPayment(modalOverlay) {
+//   // Show loading state
+//   const completePaymentBtn = document.getElementById("completePayment");
+//   completePaymentBtn.innerHTML = "Processing...";
+//   completePaymentBtn.disabled = true;
+
+//   // Create Razorpay order through your server
+//   fetch('/api/create-razorpay-order', {
+//     method: 'POST',
+//     headers: {
+//       'Content-Type': 'application/json',
+//     },
+//     // You can add additional details if needed
+//     body: JSON.stringify({})
+//   })
+//   .then(response => {
+//     if (!response.ok) {
+//       throw new Error('Failed to create order');
+//     }
+//     return response.json();
+//   })
+//   .then(orderData => {
+//     // Initialize Razorpay payment
+//     const options = {
+//       key: 'YOUR_RAZORPAY_KEY_ID', // Replace with your actual Razorpay key ID
+//       amount: orderData.amount,
+//       currency: orderData.currency,
+//       name: 'Your Company Name',
+//       description: 'Premium Subscription',
+//       order_id: orderData.id,
+//       image: '/your-logo.png',
+//       prefill: {
+//         name: document.getElementById("cardName")?.value || '',
+//         email: '', // Add user email if available
+//         contact: '' // Add user phone if available
+//       },
+//       theme: {
+//         color: '#3399cc'
+//       },
+//       handler: function(response) {
+//         // Send payment verification to your server
+//         verifyPayment(response, modalOverlay);
+//       },
+//       modal: {
+//         ondismiss: function() {
+//           // Reset button when modal is closed without payment
+//           completePaymentBtn.innerHTML = "Complete Payment";
+//           completePaymentBtn.disabled = false;
+//         }
+//       }
+//     };
+
+//     const razorpayInstance = new Razorpay(options);
+//     razorpayInstance.open();
+//   })
+//   .catch(error => {
+//     console.error('Error:', error);
+//     alert('Unable to process payment. Please try again.');
+//     completePaymentBtn.innerHTML = "Complete Payment";
+//     completePaymentBtn.disabled = false;
+//   });
+// }
+
+// // Function to verify payment with server
+// function verifyPayment(paymentResponse, modalOverlay) {
+//   // Show verifying message
+//   const completePaymentBtn = document.getElementById("completePayment");
+//   completePaymentBtn.innerHTML = "Verifying...";
+
+//   // Send payment details to server for verification
+//   fetch('/api/verify-razorpay-payment', {
+//     method: 'POST',
+//     headers: {
+//       'Content-Type': 'application/json',
+//     },
+//     body: JSON.stringify({
+//       razorpay_payment_id: paymentResponse.razorpay_payment_id,
+//       razorpay_order_id: paymentResponse.razorpay_order_id,
+//       razorpay_signature: paymentResponse.razorpay_signature
+//     })
+//   })
+//   .then(response => {
+//     if (!response.ok) {
+//       throw new Error('Payment verification failed');
+//     }
+//     return response.json();
+//   })
+//   .then(data => {
+//     if (data.success) {
+//       // Update UI to show premium status
+//       updateUserToPremium(modalOverlay);
+
+//       // If an advisor was assigned, show advisor details
+//       if (data.advisor) {
+//         showAdvisorAssigned(data.advisor);
+//       }
+//     } else {
+//       throw new Error(data.error || 'Payment verification failed');
+//     }
+//   })
+//   .catch(error => {
+//     console.error('Error:', error);
+//     alert('Payment verification failed. Please contact support.');
+//     completePaymentBtn.innerHTML = "Complete Payment";
+//     completePaymentBtn.disabled = false;
+//   });
+// }
+
+// Un-comment the above oode when you have the RazorPay API Key. Also remove the below function "processPayment" after un-commenting
+// the above code. also check server.js.
+
+function processPayment(modalOverlay) {
+  console.log("Processing payment, overlay:", modalOverlay);
+  // Show loading state
+  const completePaymentBtn = document.getElementById("completePayment");
+  completePaymentBtn.innerHTML = "Processing...";
+  completePaymentBtn.disabled = true;
+
+  // Instead of creating a Razorpay order, directly call your premium upgrade endpoint
+  fetch("/api/upgrade-to-premium", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({}),
+  })
+    .then((response) => {
+      console.log("Response status:", response.status);
+      if (!response.ok) {
+        throw new Error("Failed to upgrade to premium");
+      }
+      return response.json();
+    })
+    .then((data) => {
+      console.log("Success data:", data);
+      if (data.success) {
+        // Handle successful premium upgrade
+        updateUserToPremium(modalOverlay);
+
+        // If an advisor was assigned, show advisor details
+        if (data.advisor) {
+          showSuccessModal(modalOverlay, data.advisor);
+        } else {
+          showSuccessModal(modalOverlay);
+        }
+      } else {
+        throw new Error(data.error || "Premium upgrade failed");
+      }
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+      alert("Unable to complete premium upgrade. Please try again.");
+      completePaymentBtn.innerHTML = "Complete Payment";
+      completePaymentBtn.disabled = false;
+    });
+}
+
+// Function to show advisor assigned notification
+function showAdvisorAssigned(advisor) {
+  const advisorInfo = document.createElement("div");
+  advisorInfo.className = "advisor-info";
+  advisorInfo.innerHTML = `
+    <h3>Your Financial Advisor</h3>
+    <p>You've been assigned to: <strong>${advisor.name}</strong></p>
+    <p>Contact: <a href="mailto:${advisor.email}">${advisor.email}</a></p>
+    <p>They will reach out to you within 24 hours.</p>
+  `;
+
+  // Add this element to your dashboard
+  const dashboardContent =
+    document.querySelector(".dashboard-content") || document.body;
+  dashboardContent.appendChild(advisorInfo);
+}
+
+// Function to update UI after successful premium upgrade
+function updateUserToPremium(modalOverlay) {
+  // Close the modal if it exists
+  if (modalOverlay) {
+    modalOverlay.style.display = "none";
+  }
+
+  // Update UI elements to reflect premium status
+  const premiumBadge = document.createElement("div");
+  premiumBadge.className = "premium-badge";
+  premiumBadge.innerHTML = "⭐ Premium";
+
+  // Add badge to user profile section
+  const userProfile = document.querySelector(".user-profile") || document.body;
+  userProfile.appendChild(premiumBadge);
+
+  // Enable premium features
+  const premiumFeatures = document.querySelectorAll(".premium-feature");
+  premiumFeatures.forEach((feature) => {
+    feature.classList.remove("disabled");
+    feature.querySelector(".locked-icon")?.remove();
+  });
+
+  // Show success message
+  alert("Congratulations! You are now a premium member.");
+}
+
+// Function to show success modal with advisor details
+function showSuccessModal(modalOverlay, advisor = null) {
+  // Clear existing content
+  modalOverlay.innerHTML = "";
+
+  // Create success modal content
+  const modalContent = document.createElement("div");
+  modalContent.className = "modal-content";
+  modalContent.style.cssText =
+    "background-color: white; border-radius: 8px; padding: 30px; max-width: 500px; width: 90%; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);";
+
+  // Prepare advisor details HTML if available
+  let advisorHTML = "";
+  if (advisor) {
+    advisorHTML = `
+      <div style="background-color: #f9f9f9; padding: 15px; border-radius: 8px; margin: 20px 0; text-align: left;">
+        <h3 style="margin-top: 0; color: #333;">Your Personal Financial Advisor</h3>
+        <p><strong>Name:</strong> ${advisor.name}</p>
+        <p><strong>Email:</strong> ${advisor.email}</p>
+        <p style="margin-bottom: 0;">Your advisor will contact you within 24 hours to schedule your first consultation.</p>
+      </div>
+    `;
+  }
+
+  modalContent.innerHTML = `
+    <div style="color: #4CAF50; font-size: 60px; margin-bottom: 20px;">
+      <i class="fas fa-check-circle"></i>
+    </div>
+    <h2 style="color: #333; margin-bottom: 10px;">Payment Successful!</h2>
+    <p style="color: #666; margin-bottom: ${
+      advisor ? "0" : "20px"
+    };">You are now a Premium member with access to all features.</p>
+    ${advisorHTML}
+    <p style="color: #666; font-size: 14px; margin-bottom: 20px;">A confirmation email has been sent to your registered email address.</p>
+    <button id="closeSuccessModal" style="background-color: #ffd700; color: #333; border: none; padding: 12px 24px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 16px;">Continue to Dashboard</button>
+  `;
+
+  modalOverlay.appendChild(modalContent);
+
+  // Close button event listener
+  document
+    .getElementById("closeSuccessModal")
+    .addEventListener("click", function () {
+      closeModal(modalOverlay);
+      // Refresh the page to reflect premium status
+      window.location.reload();
+    });
+}
