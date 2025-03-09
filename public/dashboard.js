@@ -866,12 +866,12 @@ function displayExpenseDistribution(expenses) {
 
   // Define colors for each category
   const colors = [
-    "#FF6384", // Red
-    "#36A2EB", // Blue
-    "#FFCE56", // Yellow
+    "#4a6b97", // Red
+    "rgb(101, 79, 113)", // Blue
+    "rgb(222, 132, 132)", // Yellow
     "#4BC0C0", // Teal
     "#9966FF", // Purple
-    "#FF9F40", // Orange
+    "rgb(177, 169, 123)", // Orange
     "#C9CBCF", // Gray
   ];
 
@@ -889,6 +889,9 @@ function displayExpenseDistribution(expenses) {
           data: amounts,
           backgroundColor: colors.slice(0, categories.length),
           borderWidth: 1,
+          borderColor: "#fff", // White border for clean look
+          borderWidth: 2,
+          hoverOffset: 5, // Add hover effect
         },
       ],
     },
@@ -911,6 +914,7 @@ function displayExpenseDistribution(expenses) {
           },
         },
       },
+      
     },
   });
 
