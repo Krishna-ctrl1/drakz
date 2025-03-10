@@ -113,7 +113,6 @@ app.get("/", (req, res) => {
   res.redirect("/start_page.html");
 });
 
-
 app.get("/admin-login", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "admin-login.html"));
 });
@@ -131,6 +130,9 @@ app.get("/admin-dashboard", (req, res) => {
 });
 
 app.get("/advisor-dashboard", (req, res) => {
+  if (!req.session.advisorId) {
+    return res.redirect("/login");
+  }
   res.sendFile(path.join(__dirname, "public", "advisor-dashboard.html"));
 });
 
@@ -276,6 +278,10 @@ app.post("/advisor-login", (req, res) => {
     }
 
     if (results.length > 0) {
+      // Store advisor ID in the session
+      req.session.advisorId = results[0].id;
+      req.session.advisorEmail = email;
+
       console.log("Advisor login successful for:", email);
       res.redirect("/advisor-dashboard");
     } else {
@@ -1219,9 +1225,7 @@ app.post("/api/messages/mark-read", async (req, res) => {
   }
 });
 
-// Add this route handler for replying to messages
-// In your server.js file, modify the reply endpoint:
-
+// API end-point for replying to messages
 app.post("/api/messages/reply", async (req, res) => {
   try {
     const { id, to, subject, message } = req.body;
@@ -1327,7 +1331,6 @@ app.get("/api/dashboard", (req, res) => {
 });
 
 // Credit card API endpoint
-
 app.post("/api/credit-cards", (req, res) => {
   console.log("Credit card addition request received:", req.body);
 
@@ -1432,8 +1435,6 @@ app.use((err, req, res, next) => {
   // Otherwise return HTML
   res.status(500).send("Server error");
 });
-
-// Add these API routes to your server.js file
 
 // API route to fetch user profile data
 app.get("/api/user/profile", (req, res) => {
@@ -1850,9 +1851,9 @@ function sendConfirmationEmail(user, advisor) {
   console.log(`Sending confirmation email to ${user.email}`);
 
   const mailOptions = {
-    from: 'drakz.fintech@gmail.com',
+    from: "drakz.fintech@gmail.com",
     to: user.email,
-    subject: 'Welcome to DRAKZ Premium!',
+    subject: "Welcome to DRAKZ Premium!",
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="background-color: #ffd700; padding: 20px; text-align: center;">
@@ -1887,14 +1888,14 @@ function sendConfirmationEmail(user, advisor) {
           <p>&copy; 2025 DRAKZ. All rights reserved.</p>
         </div>
       </div>
-    `
+    `,
   };
 
-  transporter.sendMail(mailOptions, function(error, info){
+  transporter.sendMail(mailOptions, function (error, info) {
     if (error) {
-      console.log('Email error:', error);
+      console.log("Email error:", error);
     } else {
-      console.log('Email sent: ' + info.response);
+      console.log("Email sent: " + info.response);
     }
   });
 }
@@ -2045,12 +2046,12 @@ function sendConfirmationEmail(user, advisor) {
 
 //               // 3. Find an advisor with fewer than 5 clients
 //               db.query(
-//                 `SELECT a.id, a.name, a.email, COUNT(ca.id) as client_count 
-//                  FROM advisors a 
-//                  LEFT JOIN client_advisors ca ON a.id = ca.advisor_id 
-//                  GROUP BY a.id 
-//                  HAVING client_count < 5 
-//                  ORDER BY client_count ASC 
+//                 `SELECT a.id, a.name, a.email, COUNT(ca.id) as client_count
+//                  FROM advisors a
+//                  LEFT JOIN client_advisors ca ON a.id = ca.advisor_id
+//                  GROUP BY a.id
+//                  HAVING client_count < 5
+//                  ORDER BY client_count ASC
 //                  LIMIT 1`,
 //                 (err, advisors) => {
 //                   if (err) {
@@ -2155,6 +2156,172 @@ function sendConfirmationEmail(user, advisor) {
 // });
 
 // Un-comment the above code when you have the RazorPay API Key. Also check dashboard.js
+
+// API endpoint to get advisor's clients
+app.get("/api/advisor-clients", (req, res) => {
+  if (!req.session.advisorId) {
+    return res.status(401).json({ error: "Not authenticated" });
+  }
+
+  const advisorId = req.session.advisorId;
+  const query = `
+    SELECT ca.user_id, u.name, u.email 
+    FROM client_advisors ca
+    JOIN users u ON ca.user_id = u.id
+    WHERE ca.advisor_id = ?
+  `;
+
+  db.query(query, [advisorId], (err, results) => {
+    if (err) {
+      console.error("Error fetching clients:", err);
+      return res.status(500).json({ error: "Database error" });
+    }
+
+    console.log(`Clients for advisor ID ${advisorId}:`, results);
+    res.json({ clients: results });
+  });
+});
+
+// API endpoint to get detailed client information
+app.get("/api/client-details/:userId", (req, res) => {
+  if (!req.session.advisorId) {
+    return res.status(401).json({ error: "Not authenticated" });
+  }
+
+  const advisorId = req.session.advisorId;
+  const userId = req.params.userId;
+
+  // First verify that this client is assigned to this advisor
+  const verifyQuery = `
+    SELECT * FROM client_advisors 
+    WHERE advisor_id = ? AND user_id = ?
+  `;
+
+  db.query(verifyQuery, [advisorId, userId], (err, results) => {
+    if (err) {
+      console.error("Error verifying client-advisor relationship:", err);
+      return res.status(500).json({ error: "Database error" });
+    }
+
+    if (results.length === 0) {
+      return res
+        .status(403)
+        .json({ error: "Not authorized to view this client" });
+    }
+
+    // Once verified, get the client details from both tables
+    const clientQuery = `
+      SELECT u.id, u.name, u.email, ud.phone, ud.country, ud.postal_code
+      FROM users u
+      LEFT JOIN user_details ud ON u.id = ud.user_id
+      WHERE u.id = ?
+    `;
+
+    db.query(clientQuery, [userId], (err, clientResults) => {
+      if (err) {
+        console.error("Error fetching client details:", err);
+        return res.status(500).json({ error: "Database error" });
+      }
+
+      if (clientResults.length === 0) {
+        return res.status(404).json({ error: "Client not found" });
+      }
+
+      // Parse the client name into first and last name
+      const fullName = clientResults[0].name || "";
+      const nameParts = fullName.split(" ");
+      const firstName = nameParts[0] || "";
+      const lastName = nameParts.slice(1).join(" ") || "";
+
+      // Create response object with all required fields
+      const clientDetails = {
+        id: clientResults[0].id,
+        firstName: firstName,
+        lastName: lastName,
+        email: clientResults[0].email || "",
+        phone: clientResults[0].phone || "",
+        country: clientResults[0].country || "",
+        postalCode: clientResults[0].postal_code || "",
+      };
+
+      console.log(`Details for client ID ${userId}:`, clientDetails);
+      res.json({ client: clientDetails });
+    });
+  });
+});
+
+// API endpoint to get user's stocks and investments
+app.get("/api/client-investments/:userId", (req, res) => {
+  if (!req.session.advisorId) {
+    return res.status(401).json({ error: "Not authenticated" });
+  }
+
+  const advisorId = req.session.advisorId;
+  const userId = req.params.userId;
+
+  // First verify that this client is assigned to this advisor
+  const verifyQuery = `
+    SELECT * FROM client_advisors 
+    WHERE advisor_id = ? AND user_id = ?
+  `;
+
+  db.query(verifyQuery, [advisorId, userId], (err, results) => {
+    if (err) {
+      console.error("Error verifying client-advisor relationship:", err);
+      return res.status(500).json({ error: "Database error" });
+    }
+
+    if (results.length === 0) {
+      return res
+        .status(403)
+        .json({ error: "Not authorized to view this client's investments" });
+    }
+
+    // Get stocks and investments in parallel using Promise.all
+    Promise.all([
+      // Get stocks
+      new Promise((resolve, reject) => {
+        const stocksQuery =
+          "SELECT symbol, price FROM user_stocks WHERE user_id = ?";
+        db.query(stocksQuery, [userId], (err, stocks) => {
+          if (err) {
+            console.error("Error fetching stocks:", err);
+            reject(err);
+          } else {
+            resolve(stocks);
+          }
+        });
+      }),
+      // Get investments
+      new Promise((resolve, reject) => {
+        const investmentsQuery =
+          "SELECT symbol, price FROM user_investments WHERE user_id = ?";
+        db.query(investmentsQuery, [userId], (err, investments) => {
+          if (err) {
+            console.error("Error fetching investments:", err);
+            reject(err);
+          } else {
+            resolve(investments);
+          }
+        });
+      }),
+    ])
+      .then(([stocks, investments]) => {
+        // Combine stocks and investments into a single array
+        const combinedInvestments = [...stocks, ...investments];
+
+        console.log(
+          `Combined investments for user ID ${userId}:`,
+          combinedInvestments
+        );
+        res.json({ investments: combinedInvestments });
+      })
+      .catch((error) => {
+        console.error("Error fetching investment data:", error);
+        res.status(500).json({ error: "Database error" });
+      });
+  });
+});
 
 // Start the server
 app.listen(port, () => {

@@ -1,310 +1,13 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded", () => {
   // Fallback placeholder image
-  const PLACEHOLDER_IMAGE = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120" fill="%23cccccc"><rect width="100%" height="100%" /><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="white" font-size="20">No Image</text></svg>';
-
-  // DOM Elements
-  const clientListEl = document.getElementById("clientList");
-  const clientPhotoEl = document.getElementById("clientPhoto");
-  const clientFirstNameEl = document.getElementById("clientFirstName");
-  const clientLastNameEl = document.getElementById("clientLastName");
-  const clientEmailEl = document.getElementById("clientEmail");
-  const clientPhoneEl = document.getElementById("clientPhone");
-  const clientCountryEl = document.getElementById("clientCountry");
-  const clientPostalCodeEl = document.getElementById("clientPostalCode");
-  const clientStocksTitleEl = document.getElementById("clientStocksTitle");
-  const stocksGridEl = document.getElementById("stocksGrid");
-  const seeAllLink = document.getElementById("seeAllLink");
-  const deleteClientBtn = document.getElementById("deleteClientBtn");
-  const sendButton = document.querySelector('.send-button');
-  const photoPreview = document.getElementById('photoPreview');
-  const clientPhotoInput = document.getElementById('clientPhotoInput');
-  const openAddClientDialog = document.getElementById("openAddClientDialog");
-  const addClientModal = document.getElementById("addClientModal");
-  const closeModalBtn = document.querySelector(".close-modal");
-  const searchInput = document.querySelector('.search-container input');
-  const stocksContainer = document.getElementById("stocksContainer");
-  const addStockBtn = document.getElementById("addStockBtn");
-  const investmentsContainer = document.getElementById("investmentsContainer");
-  const addInvestmentBtn = document.getElementById("addInvestmentBtn");
-  const countrySelect = document.getElementById("newClientCountry");
-  const clientForm = document.getElementById('clientForm');
-
-  // Simple array of country names
-  const countries = [
-    "United States", "Canada", "United Kingdom", "Australia", "Germany", "France", "Japan", 
-    "China", "India", "Brazil", "Mexico", "South Africa", "Russia", "New Zealand", 
-    // ... (rest of the country list from previous code)
-  ];
-
-  // Default postal codes mapping
-  const defaultPostalCodes = {
-    "United States": "12345",
-    "Canada": "K1A 0B1",
-    "United Kingdom": "SW1A 1AA",
-    "Australia": "2000"
-  };
-
-  // Improved client data parsing
-  let clients = window.initialClients || [];
-
-  clients = clients.map(client => ({
-    ...client,
-    photo: client.photo || PLACEHOLDER_IMAGE
-  }));
-
-  console.log('Loaded clients:', clients);
-
-  function populateCountryDropdown() {
-    const countrySelect = document.getElementById("newClientCountry");
-    if (countrySelect) {
-        const countries = [
-            "United States", "Canada", "United Kingdom", "Australia", 
-            "Germany", "France", "Japan", "China", "India"
-        ];
-
-        countries.forEach(country => {
-            const option = document.createElement("option");
-            option.value = country;
-            option.textContent = country;
-            countrySelect.appendChild(option);
-        });
-    }
-}
-
-  // Populate client list
-  function populateClientList() {
-    if (!clientListEl) {
-      console.error('Client list element not found');
-      return;
-    }
-
-    clientListEl.innerHTML = "";
-    
-    if (clients.length === 0) {
-      console.warn('No clients to display');
-      return;
-    }
-
-    clients.forEach((client, index) => {
-      const li = document.createElement("li");
-      li.setAttribute("data-index", index);
-      li.innerHTML = `
-        <img src="${client.photo}" alt="${client.firstName} ${client.lastName}">
-        <span>${client.firstName} ${client.lastName}</span>
-      `;
-      li.addEventListener("click", () => loadClientData(index));
-      clientListEl.appendChild(li);
-    });
-  }
-
-  // Load client data
-  function loadClientData(index) {
-    if (index < 0 || index >= clients.length) return;
-
-    const c = clients[index];
-    
-    if (clientPhotoEl) clientPhotoEl.src = c.photo || PLACEHOLDER_IMAGE;
-    if (clientFirstNameEl) clientFirstNameEl.value = c.firstName;
-    if (clientLastNameEl) clientLastNameEl.value = c.lastName;
-    if (clientEmailEl) clientEmailEl.value = c.email;
-    if (clientPhoneEl) clientPhoneEl.value = c.phone;
-    if (clientCountryEl) clientCountryEl.value = c.country;
-    if (clientPostalCodeEl) clientPostalCodeEl.value = c.postalCode;
-    
-    if (clientStocksTitleEl) {
-      clientStocksTitleEl.textContent = `${c.firstName}'s Stocks & Investments`;
-    }
-    
-    // Display investments
-    if (stocksGridEl) {
-      stocksGridEl.innerHTML = "";
-      const allInvestments = (c.stocks || []).concat(c.investments || []);
-      
-      allInvestments.slice(0, 3).forEach(inv => {
-        const itemDiv = document.createElement("div");
-        itemDiv.className = "stock-item";
-        
-        if (inv.symbol) {
-          itemDiv.innerHTML = `
-            <div class="stock-logo">
-              <img src="https://via.placeholder.com/40?text=${inv.symbol}" alt="${inv.symbol}">
-            </div>
-            <div>
-              <div><strong>${inv.symbol}</strong></div>
-              <div class="investment-type">Stock</div>
-              <div>${inv.price}</div>
-            </div>
-          `;
-        } else {
-          itemDiv.innerHTML = `
-            <div class="stock-logo">
-              <i class="fas fa-briefcase"></i>
-            </div>
-            <div>
-              <div><strong>${inv.type}</strong></div>
-              <div class="investment-type">Investment</div>
-              <div>${inv.value}</div>
-            </div>
-          `;
-        }
-        
-        stocksGridEl.appendChild(itemDiv);
-      });
-    }
-  }
-
-  // Initialize dashboard
-  function initializeDashboard() {
-    populateCountryDropdown();
-    populateClientList();
-    
-    // Automatically load first client if exists
-    if (clients.length > 0) {
-      loadClientData(0);
-    }
-  }
-
-  // Call initialization
-  initializeDashboard();
-
-  // Ensure clients is an array
-  clients = Array.isArray(clients) ? clients : [];
-
-  console.log('Final loaded clients:', clients);
-
-  // Country change event listener
-  function setupCountryChangeListener() {
-    if (countrySelect) {
-      countrySelect.addEventListener("change", function() {
-        const selected = this.value;
-        const postalInput = document.getElementById("newClientPostalCode");
-        if (postalInput) {
-          postalInput.value = defaultPostalCodes[selected] || "00000";
-        }
-      });
-    }
-  }
-
-  // Reset form function
-  function resetForm() {
-    if (clientForm) {
-      clientForm.reset();
-      
-      // Reset photo preview
-      if (photoPreview) {
-        photoPreview.innerHTML = `<i class="fas fa-camera"></i><span>Add Photo</span>`;
-      }
-      
-      // Clear dynamic stock and investment rows
-      if (stocksContainer) stocksContainer.innerHTML = "";
-      if (investmentsContainer) investmentsContainer.innerHTML = "";
-    }
-  }
-
-  // Clear client info when no clients exist
-  function clearClientInfo() {
-    if (clientPhotoEl) clientPhotoEl.src = PLACEHOLDER_IMAGE;
-    if (clientFirstNameEl) clientFirstNameEl.value = "";
-    if (clientLastNameEl) clientLastNameEl.value = "";
-    if (clientEmailEl) clientEmailEl.value = "";
-    if (clientPhoneEl) clientPhoneEl.value = "";
-    if (clientCountryEl) clientCountryEl.value = "";
-    if (clientPostalCodeEl) clientPostalCodeEl.value = "";
-    if (stocksGridEl) stocksGridEl.innerHTML = "";
-  }
-
-  // Save clients to server
-  function saveClients() {
-    try {
-      fetch('/update-clients', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(clients)
-      })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Failed to save clients');
-        }
-        console.log('Clients saved successfully');
-      })
-      .catch(error => {
-        console.error('Error saving clients:', error);
-      });
-    } catch (e) {
-      console.error("Error preparing client data:", e);
-    }
-  }
-
-  // Add new client
-  function addNewClient() {
-    const newClient = {
-      firstName: document.getElementById('newClientFirstName').value.trim(),
-      lastName: document.getElementById('newClientLastName').value.trim(),
-      email: document.getElementById('newClientEmail').value.trim(),
-      phone: document.getElementById('newClientPhone').value.trim(),
-      country: document.getElementById('newClientCountry').value,
-      postalCode: document.getElementById('newClientPostalCode').value.trim(),
-      photo: photoPreview.querySelector('img') ? photoPreview.querySelector('img').src : PLACEHOLDER_IMAGE,
-      stocks: [],
-      investments: []
-    };
-
-    // Get dynamic stocks
-    document.querySelectorAll("#stocksContainer .dynamic-input-row").forEach(row => {
-      const symbol = row.querySelector(".stock-symbol").value.trim();
-      const price = row.querySelector(".stock-price").value.trim();
-      if (symbol && price) {
-        newClient.stocks.push({ 
-          symbol, 
-          price, 
-          logo: `https://via.placeholder.com/40?text=${symbol}` 
-        });
-      }
-    });
-
-    // Get dynamic investments
-    document.querySelectorAll("#investmentsContainer .dynamic-input-row").forEach(row => {
-      const type = row.querySelector(".invest-type").value.trim();
-      const value = row.querySelector(".invest-value").value.trim();
-      if (type && value) {
-        newClient.investments.push({ type, value });
-      }
-    });
-
-    // Send new client to the server
-    fetch('/add-client', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(newClient)
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Failed to add client');
-      }
-      return response.json();
-    })
-    .then(addedClient => {
-      clients.push(addedClient);
-      populateClientList();
-      resetForm();
-      closeModal();
-      loadClientData(clients.length - 1);
-    })
-    .catch(error => {
-      console.error('Error adding client:', error);
-      alert('Failed to add client. Please try again.');
-    });
-  }
+  const PLACEHOLDER_IMAGE =
+    'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120" fill="%23cccccc"><rect width="100%" height="100%" /><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="white" font-size="20">No Image</text></svg>';
 
   // Toggle investments view
   function toggleInvestments(index) {
     const c = clients[index];
     const allInvestments = c.stocks.concat(c.investments);
-    
+
     if (!c.showAll) {
       displayInvestments(allInvestments);
       seeAllLink.textContent = "Show Less";
@@ -312,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
       displayInvestments(allInvestments.slice(0, 3));
       seeAllLink.textContent = "See All";
     }
-    
+
     c.showAll = !c.showAll;
   }
 
@@ -320,35 +23,35 @@ document.addEventListener('DOMContentLoaded', () => {
   function setupEventListeners() {
     // Delete client
     if (deleteClientBtn) {
-      deleteClientBtn.addEventListener("click", function() {
+      deleteClientBtn.addEventListener("click", function () {
         if (confirm("Are you sure you want to delete this client?")) {
           const clientToDelete = clients[currentClientIndex];
-          
-          fetch('/delete-client', {
-            method: 'POST',
+
+          fetch("/delete-client", {
+            method: "POST",
             headers: {
-              'Content-Type': 'application/json',
+              "Content-Type": "application/json",
             },
-            body: JSON.stringify({ clientId: clientToDelete.id })
+            body: JSON.stringify({ clientId: clientToDelete.id }),
           })
-          .then(response => {
-            if (!response.ok) {
-              throw new Error('Failed to delete client');
-            }
-            
-            clients.splice(currentClientIndex, 1);
-            populateClientList();
-            
-            if (clients.length > 0) {
-              loadClientData(0);
-            } else {
-              clearClientInfo();
-            }
-          })
-          .catch(error => {
-            console.error('Error deleting client:', error);
-            alert('Failed to delete client. Please try again.');
-          });
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error("Failed to delete client");
+              }
+
+              clients.splice(currentClientIndex, 1);
+              populateClientList();
+
+              if (clients.length > 0) {
+                loadClientData(0);
+              } else {
+                clearClientInfo();
+              }
+            })
+            .catch((error) => {
+              console.error("Error deleting client:", error);
+              alert("Failed to delete client. Please try again.");
+            });
         }
       });
     }
@@ -356,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Send email functionality
     if (sendButton) {
       sendButton.addEventListener("click", () => {
-        const messageInput = document.getElementById('chat-input');
+        const messageInput = document.getElementById("chat-input");
         const message = messageInput.value.trim();
         const clientEmail = clientEmailEl.value.trim();
 
@@ -378,111 +81,42 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    // Modal controls
-    if (openAddClientDialog) {
-      openAddClientDialog.addEventListener("click", openModal);
-    }
-
-    if (closeModalBtn) {
-      closeModalBtn.addEventListener("click", closeModal);
-    }
-
-    // Close modal if clicked outside
-    window.addEventListener("click", (e) => {
-      if (e.target == addClientModal) {
-        closeModal();
-      }
-    });
-
-    // Photo upload
-    if (photoPreview && clientPhotoInput) {
-      photoPreview.addEventListener("click", () => clientPhotoInput.click());
-      
-      clientPhotoInput.addEventListener("change", function(e) {
-        const file = e.target.files[0];
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = function(e) {
-            photoPreview.innerHTML = `<img src="${e.target.result}" alt="Preview" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
-          }
-          reader.readAsDataURL(file);
-        }
-      });
-    }
-
-    // Dynamic stock input rows
-    if (addStockBtn && stocksContainer) {
-      addStockBtn.addEventListener("click", () => {
-        const stockRow = document.createElement("div");
-        stockRow.className = "dynamic-input-row";
-        stockRow.innerHTML = `
-          <input type="text" placeholder="Stock Symbol" class="stock-symbol" style="width:45%;" />
-          <input type="text" placeholder="Price" class="stock-price" style="width:45%;" />
-        `;
-        stocksContainer.appendChild(stockRow);
-      });
-    }
-
-    // Dynamic investment input rows
-    if (addInvestmentBtn && investmentsContainer) {
-      addInvestmentBtn.addEventListener("click", () => {
-        const investRow = document.createElement("div");
-        investRow.className = "dynamic-input-row";
-        investRow.innerHTML = `
-          <input type="text" placeholder="Investment Type" class="invest-type" style="width:45%;" />
-          <input type="text" placeholder="Value" class="invest-value" style="width:45%;" />
-        `;
-        investmentsContainer.appendChild(investRow);
-      });
-    }
-
     // Search functionality
     if (searchInput) {
-      searchInput.addEventListener('input', function() {
+      searchInput.addEventListener("input", function () {
         const filter = this.value.toLowerCase();
-        const liItems = document.querySelectorAll('.client-list li');
-        liItems.forEach(li => {
+        const liItems = document.querySelectorAll(".client-list li");
+        liItems.forEach((li) => {
           const name = li.textContent.toLowerCase();
-          li.style.display = name.includes(filter) ? 'flex' : 'none';
+          li.style.display = name.includes(filter) ? "flex" : "none";
         });
       });
     }
 
     // Form validation and submission
     if (clientForm) {
-      clientForm.addEventListener('submit', function(e) {
+      clientForm.addEventListener("submit", function (e) {
         e.preventDefault();
-        const inputs = Array.from(clientForm.elements).filter(el => el.tagName === 'INPUT' || el.tagName === 'SELECT');
+        const inputs = Array.from(clientForm.elements).filter(
+          (el) => el.tagName === "INPUT" || el.tagName === "SELECT"
+        );
         let isValid = true;
-        
-        inputs.forEach(input => {
+
+        inputs.forEach((input) => {
           if (!input.checkValidity()) {
             isValid = false;
             if (input.nextElementSibling) {
-              input.nextElementSibling.style.display = 'block';
+              input.nextElementSibling.style.display = "block";
             }
           } else {
             if (input.nextElementSibling) {
-              input.nextElementSibling.style.display = 'none';
+              input.nextElementSibling.style.display = "none";
             }
           }
         });
-        
+
         if (isValid) addNewClient();
       });
-    }
-  }
-
-  // Modal control functions
-  function openModal() {
-    if (addClientModal) {
-      addClientModal.style.display = "flex";
-    }
-  }
-
-  function closeModal() {
-    if (addClientModal) {
-      addClientModal.style.display = "none";
     }
   }
 
@@ -492,7 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupCountryChangeListener();
     setupEventListeners();
     populateClientList();
-    
+
     // Automatically load first client if exists
     if (clients.length > 0) {
       loadClientData(0);
@@ -502,3 +136,295 @@ document.addEventListener('DOMContentLoaded', () => {
   // Call initialization
   initializeDashboard();
 });
+
+document.addEventListener("DOMContentLoaded", function () {
+  // Fetch the advisor's clients when the dashboard loads
+  fetchAdvisorClients();
+
+  // Add event listeners or other initialization here
+  const refreshButton = document.getElementById("refresh-clients");
+  if (refreshButton) {
+    refreshButton.addEventListener("click", fetchAdvisorClients);
+  }
+});
+
+// Function to fetch advisor's clients from the server
+function fetchAdvisorClients() {
+  fetch("/api/advisor-clients")
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      return response.json();
+    })
+    .then((data) => {
+      console.log("Clients for this advisor:", data.clients);
+
+      // Update the sidebar with client names
+      updateClientSidebar(data.clients);
+    })
+    .catch((error) => {
+      console.error("Error fetching advisor clients:", error);
+      // Show error message in the sidebar
+      const clientList = document.getElementById("clientList");
+      if (clientList) {
+        clientList.innerHTML = '<li class="error">Error loading clients</li>';
+      }
+    });
+}
+
+// Function to update the sidebar with client names
+function updateClientSidebar(clients) {
+  const clientList = document.getElementById("clientList");
+  if (!clientList) return;
+
+  if (clients.length === 0) {
+    clientList.innerHTML = "<li>No clients assigned</li>";
+    return;
+  }
+
+  // Create list items for each client
+  const clientListHTML = clients
+    .map(
+      (client) => `
+    <li class="client-item" data-userid="${client.user_id}">
+      <a href="#" class="client-link">${client.name || "Unnamed Client"}</a>
+    </li>
+  `
+    )
+    .join("");
+
+  clientList.innerHTML = clientListHTML;
+
+  // Add event listeners to the client links
+  document.querySelectorAll(".client-link").forEach((link) => {
+    link.addEventListener("click", function (e) {
+      e.preventDefault();
+      const userId = this.parentElement.getAttribute("data-userid");
+
+      // Highlight the selected client
+      document.querySelectorAll(".client-item").forEach((item) => {
+        item.classList.remove("active");
+      });
+      this.parentElement.classList.add("active");
+
+      // Clear existing details
+      clearClientDetails();
+
+      // Show loading state
+      showLoadingState();
+
+      // Fetch and display the client's details
+      fetchClientDetails(userId);
+    });
+  });
+}
+
+// Add these functions to your advisor-dashboard.js file
+
+// Enhance the fetchClientDetails function to also fetch investments
+function fetchClientDetails(userId) {
+  // First fetch basic client details
+  fetch(`/api/client-details/${userId}`)
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      return response.json();
+    })
+    .then((data) => {
+      console.log(`Details for client ID ${userId}:`, data.client);
+
+      // Populate the client details form
+      displayClientDetails(data.client);
+
+      // Then fetch investments data
+      return fetchClientInvestments(userId);
+    })
+    .catch((error) => {
+      console.error("Error fetching client details:", error);
+      // Show error message in the client details area
+      const errorMessage = document.createElement("p");
+      errorMessage.className = "error-message";
+      errorMessage.textContent =
+        "Error loading client details. Please try again.";
+
+      const detailsContainer = document.querySelector(".client-details");
+      clearClientDetails();
+      if (detailsContainer) {
+        detailsContainer.appendChild(errorMessage);
+      }
+    });
+}
+
+/// Function to fetch client investments
+function fetchClientInvestments(userId) {
+  // Show loading state in investments section
+  const stocksGrid = document.getElementById("stocksGrid");
+  if (stocksGrid) {
+    stocksGrid.innerHTML =
+      '<div class="loading-indicator">Loading investments data...</div>';
+  }
+
+  fetch(`/api/client-investments/${userId}`)
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      return response.json();
+    })
+    .then((data) => {
+      console.log(`Investments for client ID ${userId}:`, data);
+
+      // Display the combined investments
+      displayInvestments(data.investments);
+    })
+    .catch((error) => {
+      console.error("Error fetching investment data:", error);
+
+      // Show error message in the investments section
+      if (stocksGrid) {
+        stocksGrid.innerHTML =
+          '<div class="error-message">Error loading investment data. Please try again.</div>';
+      }
+    });
+}
+
+// Function to display combined investments
+function displayInvestments(investments) {
+  const stocksGrid = document.getElementById("stocksGrid");
+  if (!stocksGrid) return;
+
+  // Clear the grid
+  stocksGrid.innerHTML = "";
+
+  // Check if there are any investments
+  if (investments.length === 0) {
+    stocksGrid.innerHTML = "<div>No investments found for this client.</div>";
+    return;
+  }
+
+  // Create a container for the investments
+  const container = document.createElement("div");
+  container.style.display = "flex";
+  container.style.flexWrap = "wrap";
+  container.style.gap = "10px";
+
+  investments.forEach((investment) => {
+    const card = document.createElement("div");
+    card.style.border = "1px solid #ccc";
+    card.style.borderRadius = "4px";
+    card.style.padding = "10px";
+    card.style.width = "100px";
+    card.style.textAlign = "center";
+
+    const symbolElement = document.createElement("h4");
+    symbolElement.textContent = investment.symbol;
+    symbolElement.style.margin = "0 0 5px 0";
+
+    const priceElement = document.createElement("p");
+    priceElement.textContent = `$${parseFloat(investment.price).toFixed(2)}`;
+    priceElement.style.margin = "0";
+
+    card.appendChild(symbolElement);
+    card.appendChild(priceElement);
+
+    container.appendChild(card);
+  });
+
+  stocksGrid.appendChild(container);
+}
+
+// Helper function to create investment card
+function createInvestmentCard(symbol, price, type) {
+  const card = document.createElement("div");
+  card.className = `investment-card ${type}-card`;
+
+  const symbolElement = document.createElement("h4");
+  symbolElement.textContent = symbol;
+
+  const priceElement = document.createElement("p");
+  priceElement.textContent = `$${parseFloat(price).toFixed(2)}`;
+
+  const typeElement = document.createElement("span");
+  typeElement.className = "investment-type";
+  typeElement.textContent = type === "stock" ? "Stock" : "Investment";
+
+  card.appendChild(symbolElement);
+  card.appendChild(priceElement);
+  card.appendChild(typeElement);
+
+  return card;
+}
+
+// Enhance the clearClientDetails function to also clear investments
+function clearClientDetails() {
+  document.getElementById("clientFirstName").value = "";
+  document.getElementById("clientLastName").value = "";
+  document.getElementById("clientEmail").value = "";
+  document.getElementById("clientPhone").value = "";
+  document.getElementById("clientCountry").value = "";
+  document.getElementById("clientPostalCode").value = "";
+
+  // Clear investments grid
+  const stocksGrid = document.getElementById("stocksGrid");
+  if (stocksGrid) {
+    stocksGrid.innerHTML = "";
+  }
+
+  // Remove any error messages
+  const errorMessages = document.querySelectorAll(".error-message");
+  errorMessages.forEach((msg) => msg.remove());
+}
+
+// Function to display client details in the form
+function displayClientDetails(client) {
+  // Remove loading state
+  hideLoadingState();
+
+  // Set form field values
+  document.getElementById("clientFirstName").value = client.firstName || "";
+  document.getElementById("clientLastName").value = client.lastName || "";
+  document.getElementById("clientEmail").value = client.email || "";
+  document.getElementById("clientPhone").value = client.phone || "";
+  document.getElementById("clientCountry").value = client.country || "";
+  document.getElementById("clientPostalCode").value = client.postalCode || "";
+
+  // Make the details section visible if it was hidden
+  const detailsContainer = document.querySelector(".client-details");
+  if (detailsContainer) {
+    detailsContainer.style.display = "block";
+  }
+}
+
+// Function to clear client details form
+function clearClientDetails() {
+  document.getElementById("clientFirstName").value = "";
+  document.getElementById("clientLastName").value = "";
+  document.getElementById("clientEmail").value = "";
+  document.getElementById("clientPhone").value = "";
+  document.getElementById("clientCountry").value = "";
+  document.getElementById("clientPostalCode").value = "";
+
+  // Remove any error messages
+  const errorMessages = document.querySelectorAll(".error-message");
+  errorMessages.forEach((msg) => msg.remove());
+}
+
+// Function to show loading state
+function showLoadingState() {
+  const detailsContainer = document.querySelector(".client-details");
+  if (detailsContainer) {
+    const loadingIndicator = document.createElement("div");
+    loadingIndicator.className = "loading-indicator";
+    loadingIndicator.textContent = "Loading client details...";
+
+    detailsContainer.appendChild(loadingIndicator);
+  }
+}
+
+// Function to hide loading state
+function hideLoadingState() {
+  const loadingIndicators = document.querySelectorAll(".loading-indicator");
+  loadingIndicators.forEach((indicator) => indicator.remove());
+}

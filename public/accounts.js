@@ -285,8 +285,6 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 
-// accounts.js
-
 // Function to fetch user profile data
 function getUserProfile() {
   fetch("/api/user/profile")
@@ -361,14 +359,6 @@ function getUserTransactions(limit = 10) {
     .catch((error) => {
       console.error("Error fetching user transactions:", error);
     });
-}
-
-// Display functions for updating the UI (implement these based on your UI structure)
-function displayUserProfile(data) {
-  // Example implementation:
-  // document.getElementById('user-name').textContent = data.name;
-  // document.getElementById('user-email').textContent = data.email;
-  // etc.
 }
 
 // Update the displayUserHoldings function to target specific HTML elements
