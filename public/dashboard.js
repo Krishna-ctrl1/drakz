@@ -202,7 +202,6 @@ function formatCardNumber(input) {
 }
 
 // Function to format date (MM/YY)
-// Function to format date (MM/YY)
 function formatDate(input) {
   let value = input.value.replace(/\D/g, ""); // Remove non-numeric characters
   let cursorPosition = input.selectionStart; // Save cursor position before formatting
@@ -293,6 +292,7 @@ function addCard() {
   const cardName = document.getElementById("cardName").value;
   const validFrom = document.getElementById("validFrom").value;
   const validThru = document.getElementById("validThru").value;
+  const bankName = document.getElementById("bankName").value;
 
   // Validate card number
   if (!validateCardNumber(cardNumber)) {
@@ -362,6 +362,7 @@ function addCard() {
   document.getElementById("cardName").value = "";
   document.getElementById("validFrom").value = "";
   document.getElementById("validThru").value = "";
+  document.getElementById("bankName").value = "";
 
   updatePaginationVisibility();
   updateNoCardsMessage(); // Update the "No Cards" message
@@ -615,6 +616,7 @@ function addCard() {
   const cardName = document.getElementById("cardName").value;
   const validFrom = document.getElementById("validFrom").value;
   const validThru = document.getElementById("validThru").value;
+  const bankName = document.getElementById("bankName").value;
 
   // Convert MM/YY to database format (YYYY-MM-DD)
   const validFromDate = convertToISODate(validFrom);
@@ -626,8 +628,8 @@ function addCard() {
     cardholder_name: cardName,
     valid_from: validFromDate,
     valid_thru: validThruDate,
-    bank_name: "Example Bank", // Default or get from form
-    card_type: "VISA", // Default or detect from card number
+    bank_name: bankName,
+    card_type: determineCardType(cardNumber),
   };
 
   // Send POST request to add card
@@ -655,12 +657,70 @@ function addCard() {
       document.getElementById("cardName").value = "";
       document.getElementById("validFrom").value = "";
       document.getElementById("validThru").value = "";
+      document.getElementById("bankName").value = "";
       // Refresh the dashboard data
       fetchDashboardData();
     })
     .catch((error) => {
       console.error("Error adding card:", error);
     });
+}
+
+// Helper function to get card_type
+function determineCardType(cardNumber) {
+  // Remove spaces and non-numeric characters
+  const cleanNumber = cardNumber.replace(/\D/g, "");
+
+  // Check for common card types based on their pattern
+  // Visa: Starts with 4
+  if (/^4/.test(cleanNumber)) {
+    return "Visa";
+  }
+
+  // Mastercard: Starts with 51-55 or 2221-2720
+  if (
+    /^5[1-5]/.test(cleanNumber) ||
+    /^(222[1-9]|22[3-9]\d|2[3-6]\d\d|27[0-1]\d|2720)/.test(cleanNumber)
+  ) {
+    return "Mastercard";
+  }
+
+  // American Express: Starts with 34 or 37
+  if (/^3[47]/.test(cleanNumber)) {
+    return "American Express";
+  }
+
+  // Discover: Starts with 6011, 622126-622925, 644-649, or 65
+  if (
+    /^(6011|65|64[4-9]|622(12[6-9]|1[3-9]\d|[2-8]\d\d|9[0-1]\d|92[0-5]))/.test(
+      cleanNumber
+    )
+  ) {
+    return "Discover";
+  }
+
+  // JCB: Starts with 35
+  if (/^35/.test(cleanNumber)) {
+    return "JCB";
+  }
+
+  // Diners Club: Starts with 300-305, 36, or 38-39
+  if (/^(30[0-5]|36|38|39)/.test(cleanNumber)) {
+    return "Diners Club";
+  }
+
+  // Maestro: Starts with 5018, 5020, 5038, 5893, 6304, 6759, 6761, 6762, 6763
+  if (/^(5018|5020|5038|5893|6304|6759|676[1-3])/.test(cleanNumber)) {
+    return "Maestro";
+  }
+
+  // RuPay: Starts with 60, 6521, 6522
+  if (/^(60|6521|6522)/.test(cleanNumber)) {
+    return "RuPay";
+  }
+
+  // Default to "Unknown" if no patterns match
+  return "Unknown";
 }
 
 // Helper function to convert MM/YY to YYYY-MM-DD
@@ -914,7 +974,6 @@ function displayExpenseDistribution(expenses) {
           },
         },
       },
-      
     },
   });
 
