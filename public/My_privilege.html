@@ -5,16 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Privileges</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="myprivilage.css" rel="stylesheet">
-    <link rel="stylesheet" href="header.css">
-    <link rel="stylesheet" href="sidebar2.css">
+   <link rel="stylesheet" href="myprivilage.css">
 </head>
 <body>
     <!-- Top Navigation -->
     <header class="header">
         <div class="left">
             <span class="logo">D R A K Z</span>
-            
         </div>
         <div class="search-bar">
             <i class="fas fa-search"></i>
@@ -29,7 +26,6 @@
         </div>
     </header>
     
-    
     <div class="main-container">
         <div class="sidebar" id="mySidebar">
             <!-- Close Button (visible when sidebar is open) -->
@@ -37,16 +33,15 @@
                 <img width="25" src="assets/icons/sidebarclose.png">
             </a>
            
-            
             <ul class="sidebar-list">
                 <a href="dashboard.html">
-                    <li ><i class="fas fa-home"></i> <span>Dashboard</span></li>
+                    <li><i class="fas fa-home"></i> <span>Dashboard</span></li>
                 </a>
                 <a href="accounts.html">
                     <li><i class="fas fa-user"></i> <span>Accounts</span></li>
                 </a>
                 <a href="investments.html">
-                    <li><i class="fa-solid fa-chart-column"></i></i> <span>Investments</span></li>
+                    <li><i class="fa-solid fa-chart-column"></i> <span>Investments</span></li>
                 </a>
                 <a href="credit_cards.html">
                     <li><i class="fas fa-credit-card"></i> <span>Credit Cards</span></li>
@@ -66,110 +61,176 @@
             </ul>
         </div>
     
-        
-        <!-- Toggle moved here -->
-        
         <!-- Main Content -->
         <div class="content" id="main">
-           
-        
-            <div class="content-card">
-                <!-- Tabs -->
-                <div class="tabs">
-                    <div class="tab active" data-tab="assets">Your Assets</div>
-                    <div class="tab" data-tab="documents">Document Info</div>
-                    <div class="tab" data-tab="updates">Updates</div>
+            <!-- Properties Section -->
+            <div class="asset-box">
+                <div class="section-header">
+                    <h2>Your Properties</h2>
+                    <button class="add-property-btn" id="addPropertyBtn">
+                        <i class="fas fa-plus"></i> Add Property
+                    </button>
                 </div>
-
-                    <!-- Property Search -->
-                    <div class="property-search">
-                        <div class="search-container">
-                            <i class="fas fa-search search-icon"></i>
-                            <input type="text" class="property-search-input" placeholder="Search your property">
+                <div class="property-grid" id="propertyGrid">
+                    <!-- Property Card 1 -->
+                    <div class="property-card">
+                        <div class="property-image">
+                            <img src="/api/placeholder/300/180" alt="Sunset Villa">
+                        </div>
+                        <div class="property-details">
+                            <h4>Sunset Villa</h4>
+                            <p>Value: $750,000</p>
+                            <p>Location: 123 Sunset Boulevard</p>
+                        </div>
+                        <div class="property-actions">
+                            <button class="action-btn edit-btn" onclick="editProperty('property1')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="action-btn delete-btn" onclick="deleteProperty('property1')">
+                                <i class="fas fa-trash"></i>
+                            </button>
                         </div>
                     </div>
-
-                    <!-- Content Area -->
-                    <div class="content-area">
-                        <!-- Assets Tab -->
-                        <div class="tab-content active" id="assets">
-                            <div class="properties-grid">
-                                <div class="property-list">
-                                    <h3>Your properties</h3>
-                                    <div class="property-card">
-                                        <h4>Sunset Villa</h4>
-                                        <p>Value: $750,000</p>
-                                        <p>Location: 123 Sunset Boulevard</p>
-                                        <span class="status-badge status-active">Active</span>
-                                    </div>
-                                    <div class="property-card">
-                                        <h4>Downtown Apartment</h4>
-                                        <p>Value: $450,000</p>
-                                        <p>Location: 456 Main Street</p>
-                                        <span class="status-badge status-pending">Pending</span>
-                                    </div>
-                                </div>
-                                <div class="property-image">
-                                    <div class="building-placeholder"></div>
-                                </div>
-                            </div>
+                    
+                    <!-- Property Card 2 -->
+                    <div class="property-card">
+                        <div class="property-image">
+                            <img src="/api/placeholder/300/180" alt="Downtown Apartment">
                         </div>
-
-                        <!-- Documents Tab -->
-                        <div class="tab-content" id="documents">
-                            <div class="document-grid">
-                                <div class="document-card">
-                                    <h4>Property Deed - Sunset Villa</h4>
-                                    <p>Document ID: DEED-2024-001</p>
-                                    <p>Last Updated: Feb 15, 2024</p>
-                                    <p>Status: <span class="status-badge status-active">Verified</span></p>
-                                </div>
-                                <div class="document-card">
-                                    <h4>Insurance Policy</h4>
-                                    <p>Policy Number: INS-2024-089</p>
-                                    <p>Renewal Date: Dec 31, 2024</p>
-                                    <p>Status: <span class="status-badge status-active">Active</span></p>
-                                </div>
-                                <div class="document-card">
-                                    <h4>Tax Assessment</h4>
-                                    <p>Reference: TAX-2024-456</p>
-                                    <p>Assessment Date: Jan 1, 2024</p>
-                                    <p>Status: <span class="status-badge status-pending">Under Review</span></p>
-                                </div>
-                            </div>
+                        <div class="property-details">
+                            <h4>Downtown Apartment</h4>
+                            <p>Value: $450,000</p>
+                            <p>Location: 456 Main Street</p>
+                
                         </div>
+                        <div class="property-actions">
+                            <button class="action-btn edit-btn" onclick="editProperty('property2')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="action-btn delete-btn" onclick="deleteProperty('property2')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-                        <!-- Updates Tab -->
-                        <div class="tab-content" id="updates">
-                            <div class="updates-list">
-                                <div class="update-card">
-                                    <div class="update-header">
-                                        <span class="update-title">Property Value Update</span>
-                                        <span class="update-date">Feb 16, 2024</span>
-                                    </div>
-                                    <p>Sunset Villa property value has increased by 5.2% based on recent market analysis.</p>
-                                </div>
-                                <div class="update-card">
-                                    <div class="update-header">
-                                        <span class="update-title">Insurance Renewal Notice</span>
-                                        <span class="update-date">Feb 14, 2024</span>
-                                    </div>
-                                    <p>Your property insurance for Downtown Apartment is due for renewal in 45 days.</p>
-                                </div>
-                                <div class="update-card">
-                                    <div class="update-header">
-                                        <span class="update-title">Maintenance Schedule</span>
-                                        <span class="update-date">Feb 12, 2024</span>
-                                    </div>
-                                    <p>Annual property inspection scheduled for March 1, 2024. Please ensure property access.</p>
-                                </div>
-                            </div>
+            <!-- Insurance Policies Section -->
+            <div class="asset-box">
+                <div class="section-header">
+                    <h2>Insurance Policies</h2>
+                </div>
+                <div class="policy-list">
+                    <div class="policy-card">
+                        <h4>Home Insurance</h4>
+                        <p>Policy Number: HM-2024-089</p>
+                        <p>Property: Sunset Villa</p>
+                        <p>Coverage: $800,000</p>
+                        <p>Renewal Date: Dec 31, 2024</p>
+                    </div>
+                    <div class="policy-card">
+                        <h4>Property Insurance</h4>
+                        <p>Policy Number: PR-2024-102</p>
+                        <p>Property: Downtown Apartment</p>
+                        <p>Coverage: $500,000</p>
+                        <p>Renewal Date: Mar 15, 2025</p>
+                    </div>
+                    <div class="policy-card">
+                        <h4>Mortgage Insurance</h4>
+                        <p>Policy Number: MI-2023-045</p>
+                        <p>Property: Sunset Villa</p>
+                        <p>Coverage: $400,000</p>
+                        <p>Renewal Date: Aug 22, 2024</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Precious Metals Section with Date of Purchase Added -->
+            <div class="asset-box">
+                <div class="section-header">
+                    <h2>Precious Metal Assets</h2>
+                </div>
+                <div class="metals-list">
+                    <div class="metal-card">
+                        <div class="metal-icon gold">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                        <div class="metal-details">
+                            <h4>Gold</h4>
+                            <p>Amount: 250g</p>
+                            <p>Value: $15,750</p>
+                            <p>Storage: Bank Vault</p>
+                            <p>Date of Purchase: June 15, 2023</p>
+                        </div>
+                    </div>
+                    <div class="metal-card">
+                        <div class="metal-icon silver">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                        <div class="metal-details">
+                            <h4>Silver</h4>
+                            <p>Amount: 5kg</p>
+                            <p>Value: $4,200</p>
+                            <p>Storage: Home Safe</p>
+                            <p>Date of Purchase: October 3, 2023</p>
+                        </div>
+                    </div>
+                    <div class="metal-card">
+                        <div class="metal-icon platinum">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                        <div class="metal-details">
+                            <h4>Platinum</h4>
+                            <p>Amount: 50g</p>
+                            <p>Value: $1,850</p>
+                            <p>Storage: Bank Vault</p>
+                            <p>Date of Purchase: February 22, 2024</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-    <script src="myprivilage.js"></script>
+    <!-- Property Form Modal -->
+    <div id="propertyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Add New Property</h3>
+                <span class="close-modal" onclick="closeModal()">&times;</span>
+            </div>
+            <form id="propertyForm">
+                <input type="hidden" id="propertyId" value="">
+                <div class="form-group">
+                    <label for="propertyName">Property Name</label>
+                    <input type="text" id="propertyName" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="propertyValue">Value ($)</label>
+                    <input type="number" id="propertyValue" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="propertyLocation">Location</label>
+                    <input type="text" id="propertyLocation" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="propertyImage">Property Image</label>
+                    <div class="file-input-container">
+                        <span class="file-input-label">Select Image</span>
+                        <input type="file" id="propertyImage" class="file-input" accept="image/*">
+                    </div>
+                    <div class="selected-file" id="selectedFileName">No file selected</div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Property</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="myprivilage.js">
+       
+    </script>
 </body>
 </html>
