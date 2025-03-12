@@ -119,8 +119,27 @@
                 </div>
         
                 <div id="preferences" class="tab-content">
-                    <div class="input-group"><label>Currency</label><input type="text" id="currency"></div>
-                    <div class="input-group"><label>Time Zone</label><input type="text" id="timezone"></div>
+                    <div class="input-group">
+                        <label>Currency</label>
+                        <div class="dropdown-container">
+                            <input type="text" id="currency" readonly onclick="toggleDropdown('currency-dropdown')">
+                            <i class="fas fa-chevron-down dropdown-icon" onclick="toggleDropdown('currency-dropdown')"></i>
+                            <ul id="currency-dropdown" class="dropdown-menu">
+                                <!-- Will be populated by JavaScript -->
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Time Zone</label>
+                        <div class="dropdown-container">
+                            <input type="text" id="timezone" readonly onclick="toggleDropdown('timezone-dropdown')">
+                            <i class="fas fa-chevron-down dropdown-icon" onclick="toggleDropdown('timezone-dropdown')"></i>
+                            <ul id="timezone-dropdown" class="dropdown-menu">
+                                <!-- Will be populated by JavaScript -->
+                            </ul>
+                        </div>
+                    </div>
                     
                     <!-- Toggle Switches for Preferences -->
                     <div class="input-group">
@@ -146,22 +165,6 @@
                     </div>
                     
                     <button class="save-btn" onclick="savePreferences()">Save</button>
-                </div>
-        
-                <div id="security" class="tab-content">
-                    <div class="input-group"><label>Current Password</label><input type="password" id="current-password"></div>
-                    <div class="input-group"><label>New Password</label><input type="password" id="new-password"></div>
-                    
-                    <!-- Toggle Switch for Two-Factor Authentication -->
-                    <div class="input-group">
-                        <label>Two-Factor Authentication</label>
-                        <label class="switch">
-                            <input type="checkbox" id="two-factor-auth">
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                    
-                    <button class="save-btn" onclick="saveSecurity()">Save</button>
                 </div>
             </div>
         </div>

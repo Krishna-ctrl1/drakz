@@ -19,6 +19,7 @@ function closeNav() {
     closeButton.setAttribute("onclick", "openNav()"); // Set open behavior
     sidebar.classList.add("icons-only"); // Hide text
 }
+
 //settings
 function showTab(tab) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -139,8 +140,6 @@ function saveProfile() {
 
     localStorage.setItem("profileData", JSON.stringify(profileData));
     
-    localStorage.setItem("profileData", JSON.stringify(profileData));
-
     // Display success message
     const successMessage = document.getElementById('success-message');
     successMessage.textContent = '✅ Profile saved successfully!';
@@ -160,7 +159,19 @@ function displayError(elementId, message) {
     }
 }
     
+function toggleDropdown(id) {
+    const dropdown = document.getElementById(id);
+    if (dropdown.style.display === "block") {
+        dropdown.style.display = "none";
+    } else {
+        dropdown.style.display = "block";
+    }
+}
 
+function selectOption(dropdownId, inputId, value) {
+    document.getElementById(inputId).value = value;
+    document.getElementById(dropdownId).style.display = "none";
+}
 
 function savePreferences() {
     const preferencesData = {
@@ -238,6 +249,50 @@ document.addEventListener("DOMContentLoaded", function () {
                 countrySelect.value = savedCountry;
             }
         });
+        
+    // Initialize currency dropdown
+    const currencies = [
+        "USD - US Dollar", 
+        "EUR - Euro", 
+        "GBP - British Pound", 
+        "JPY - Japanese Yen", 
+        "AUD - Australian Dollar", 
+        "CAD - Canadian Dollar", 
+        "CHF - Swiss Franc", 
+        "CNY - Chinese Yuan", 
+        "INR - Indian Rupee", 
+        "SGD - Singapore Dollar"
+    ];
+    
+    let currencyDropdown = document.getElementById("currency-dropdown");
+    currencies.forEach(currency => {
+        let li = document.createElement("li");
+        li.textContent = currency;
+        li.onclick = function() {
+            selectOption('currency-dropdown', 'currency', currency);
+        };
+        currencyDropdown.appendChild(li);
+    });
+    
+    // Initialize timezone dropdown
+    const timezones = [
+        "UTC-12:00", "UTC-11:00", "UTC-10:00", "UTC-09:00", "UTC-08:00", 
+        "UTC-07:00", "UTC-06:00", "UTC-05:00", "UTC-04:00", "UTC-03:00", 
+        "UTC-02:00", "UTC-01:00", "UTC+00:00", "UTC+01:00", "UTC+02:00",
+        "UTC+03:00", "UTC+04:00", "UTC+05:00", "UTC+05:30", "UTC+06:00",
+        "UTC+07:00", "UTC+08:00", "UTC+09:00", "UTC+10:00", "UTC+11:00",
+        "UTC+12:00", "UTC+13:00", "UTC+14:00"
+    ];
+    
+    let timezoneDropdown = document.getElementById("timezone-dropdown");
+    timezones.forEach(timezone => {
+        let li = document.createElement("li");
+        li.textContent = timezone;
+        li.onclick = function() {
+            selectOption('timezone-dropdown', 'timezone', timezone);
+        };
+        timezoneDropdown.appendChild(li);
+    });
 });
 
 function editCountry() {
