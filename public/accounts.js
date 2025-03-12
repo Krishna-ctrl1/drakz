@@ -197,30 +197,6 @@ const transactions = [
     amount: -2500,
     date: "28 Jan, 12:30 AM",
   },
-  {
-    description: "Freepik Sales",
-    type: "Transfer",
-    amount: 750,
-    date: "25 Jan, 10:40 PM",
-  },
-  {
-    description: "Mobile Service",
-    type: "Service",
-    amount: -150,
-    date: "20 Jan, 10:40 PM",
-  },
-  {
-    description: "Wilson",
-    type: "Transfer",
-    amount: -1050,
-    date: "15 Jan, 03:29 PM",
-  },
-  {
-    description: "Emilly",
-    type: "Transfer",
-    amount: 840,
-    date: "14 Jan, 10:40 PM",
-  },
 ];
 
 function filterTransactions(type) {
@@ -261,7 +237,6 @@ function toggleDetails(id) {
   details.style.display = details.style.display === "none" ? "block" : "none";
 }
 
-//loans
 // Function to toggle loan details
 function toggleDetails(id) {
   const details = document.getElementById(`details-${id}`);
@@ -672,3 +647,91 @@ function initAccountPage() {
 
 // Call this function when the page loads
 document.addEventListener("DOMContentLoaded", initAccountPage);
+
+// Wait for the DOM to be fully loaded
+document.addEventListener("DOMContentLoaded", function () {
+  // Check if we're on the accounts page (containing invoices)
+  if (document.querySelector(".invoice-container")) {
+    fetchInvoices();
+  }
+});
+
+// Function to fetch invoices from the server
+async function fetchInvoices() {
+  try {
+    const response = await fetch("/api/invoices");
+
+    // Check if the request was successful
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Failed to fetch invoices");
+    }
+
+    const data = await response.json();
+
+    if (data.status === "success") {
+      renderInvoices(data.data);
+    } else {
+      showError("Error loading invoices");
+    }
+  } catch (error) {
+    console.error("Error fetching invoices:", error);
+    showError(error.message);
+  }
+}
+
+// Function to render invoices in the DOM
+function renderInvoices(invoices) {
+  const container = document.querySelector(".invoice-container");
+
+  // Clear existing content
+  container.innerHTML = "";
+
+  if (invoices.length === 0) {
+    container.innerHTML = '<p class="no-invoices">No invoices found</p>';
+    return;
+  }
+
+  // Create and append invoice elements
+  invoices.forEach((invoice) => {
+    const invoiceElement = document.createElement("div");
+    invoiceElement.className = "invoice";
+    invoiceElement.innerHTML = `
+      <p class="name">${escapeHTML(invoice.storeName)}</p>
+      <p class="time">${escapeHTML(invoice.timeAgo)}</p>
+      <p class="amount">$${formatAmount(invoice.amount)}</p>
+    `;
+
+    // Add click event if you want to show invoice details
+    invoiceElement.addEventListener("click", () => {
+      showInvoiceDetails(invoice.id);
+    });
+
+    container.appendChild(invoiceElement);
+  });
+}
+
+// Helper function to format the amount
+function formatAmount(amount) {
+  return parseFloat(amount).toFixed(2);
+}
+
+// Helper function to escape HTML to prevent XSS
+function escapeHTML(str) {
+  const div = document.createElement("div");
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+// Function to show invoice details (if needed)
+function showInvoiceDetails(invoiceId) {
+  // You could fetch and display detailed invoice information here
+  console.log(`Showing details for invoice ${invoiceId}`);
+  // Implement as needed
+}
+
+// Function to show error messages
+function showError(message) {
+  const container = document.querySelector(".invoice-container");
+  container.innerHTML = `<p class="error-message">${escapeHTML(message)}</p>`;
+}

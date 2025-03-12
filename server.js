@@ -1334,8 +1334,6 @@ app.get("/api/dashboard", (req, res) => {
 app.post("/api/credit-cards", (req, res) => {
   console.log("Credit card addition request received:", req.body);
 
-  console.log("Credit card addition request received:", req.body);
-
   if (!req.session || !req.session.userId) {
     return res
       .status(401)
@@ -1582,6 +1580,68 @@ const isAuthenticated = (req, res, next) => {
     .status(401)
     .json({ status: "error", message: "Not authenticated" });
 };
+
+// API route to get user invoices
+app.get("/api/invoices", (req, res) => {
+  // Check if user is logged in
+  if (!req.session.userId) {
+    return res.status(401).json({
+      status: "error",
+      message: "Not authenticated",
+    });
+  }
+
+  const userId = req.session.userId;
+  const query = `
+    SELECT id, store_name, amount, transaction_time 
+    FROM invoices 
+    WHERE user_id = ? 
+    ORDER BY transaction_time DESC
+  `;
+
+  db.query(query, [userId], (err, results) => {
+    if (err) {
+      console.error("Error fetching invoices:", err);
+      return res.status(500).json({
+        status: "error",
+        message: "Internal server error",
+      });
+    }
+
+    // Format the results
+    const invoices = results.map((invoice) => {
+      return {
+        id: invoice.id,
+        storeName: invoice.store_name,
+        amount: invoice.amount,
+        // Format the timestamp into a human-readable time ago format
+        timeAgo: formatTimeAgo(invoice.transaction_time),
+      };
+    });
+
+    res.json({
+      status: "success",
+      data: invoices,
+    });
+  });
+});
+
+// Helper function to format time ago
+function formatTimeAgo(timestamp) {
+  const now = new Date();
+  const past = new Date(timestamp);
+  const diffInMs = now - past;
+
+  const seconds = Math.floor(diffInMs / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+
+  if (days > 0) return `${days}d ago`;
+  if (hours > 0) return `${hours}h ago`;
+  if (minutes > 0) return `${minutes}m ago`;
+  return `${seconds}s ago`;
+}
 
 app.get("/api/user/weekly-activity", isAuthenticated, (req, res) => {
   const userId = req.session.userId;
@@ -2193,7 +2253,7 @@ app.get("/api/client-details/:userId", (req, res) => {
 
   // First verify that this client is assigned to this advisor
   const verifyQuery = `
-    SELECT * FROM client_advisors 
+    SELECT * FROM client_advisors
     WHERE advisor_id = ? AND user_id = ?
   `;
 
@@ -2209,7 +2269,7 @@ app.get("/api/client-details/:userId", (req, res) => {
         .json({ error: "Not authorized to view this client" });
     }
 
-    // Once verified, get the client details from both tables
+    // Once verified, get the client details from users and user_details tables
     const clientQuery = `
       SELECT u.id, u.name, u.email, ud.phone, ud.country, ud.postal_code
       FROM users u
@@ -2233,7 +2293,7 @@ app.get("/api/client-details/:userId", (req, res) => {
       const firstName = nameParts[0] || "";
       const lastName = nameParts.slice(1).join(" ") || "";
 
-      // Create response object with all required fields
+      // Create response object with basic client details
       const clientDetails = {
         id: clientResults[0].id,
         firstName: firstName,
@@ -2242,12 +2302,63 @@ app.get("/api/client-details/:userId", (req, res) => {
         phone: clientResults[0].phone || "",
         country: clientResults[0].country || "",
         postalCode: clientResults[0].postal_code || "",
+        imagePath: null, // Default to null if no image found
       };
 
-      console.log(`Details for client ID ${userId}:`, clientDetails);
-      res.json({ client: clientDetails });
+      // Now get the client's image from the images table
+      const imageQuery = `
+        SELECT image_path 
+        FROM images 
+        WHERE user_id = ? 
+        ORDER BY uploaded_at DESC 
+        LIMIT 1
+      `;
+
+      db.query(imageQuery, [userId], (err, imageResults) => {
+        if (err) {
+          console.error("Error fetching client image:", err);
+          // Continue with the response even if image fetch fails
+        } else if (imageResults.length > 0) {
+          // Add the image path to the client details
+          clientDetails.imagePath = imageResults[0].image_path;
+        }
+
+        console.log(`Details for client ID ${userId}:`, clientDetails);
+        res.json({ client: clientDetails });
+      });
     });
   });
+});
+
+const fs = require("fs");
+
+app.get("/api/images", (req, res) => {
+  const imagePath = req.query.path;
+
+  // Security check - make sure the path is valid and doesn't contain ".."
+  if (!imagePath || imagePath.includes("..")) {
+    return res.status(400).send("Invalid image path");
+  }
+
+  // Check if file exists
+  if (fs.existsSync(imagePath)) {
+    // Get MIME type based on file extension
+    const ext = path.extname(imagePath).toLowerCase();
+    const mimeTypes = {
+      ".png": "image/png",
+      ".jpg": "image/jpeg",
+      ".jpeg": "image/jpeg",
+      ".gif": "image/gif",
+    };
+
+    res.setHeader("Content-Type", mimeTypes[ext] || "application/octet-stream");
+
+    // Stream the file to the response
+    const fileStream = fs.createReadStream(imagePath);
+    fileStream.pipe(res);
+  } else {
+    res.status(404).send("Image not found");
+  }
 });
 
 // API endpoint to get user's stocks and investments

@@ -138,116 +138,20 @@
                         <p>Total Paid: $5,000</p>
                     </div>
                 </div>
-                <div class="loan-card account-item" onclick="toggleDetails(2)">
-                    <h3>Car Loan</h3>
-                    <p>Principal: $20,000 | Balance: $0</p>
-                    <p>Loan Taken On: March 10, 2018</p>
-                    <p class="status paid">Paid</p>
-                    <div class="details" id="details-2">
-                        <p>Interest Rate: 4.5%</p>
-                        <p>Loan Term: 3 Years</p>
-                        <p>EMI: $350/month</p>
-                        <p>Paid in Full</p>
-                    </div>
-                </div>
-                <div class="loan-card account-item" onclick="toggleDetails(3)">
-                    <h3>Home Loan</h3>
-                    <p>Principal: $150,000 | Balance: $100,000</p>
-                    <p>Loan Taken On: July 5, 2015</p>
-                    <p class="status overdue">Overdue</p>
-                    <div class="details" id="details-3">
-                        <p>Interest Rate: 3.8%</p>
-                        <p>Loan Term: 20 Years</p>
-                        <p>EMI: $800/month</p>
-                        <p>Next Payment Due: Feb 10, 2025</p>
-                        <p>Total Paid: $50,000</p>
-                        <p>Late Payment Fee Applied</p>
-                    </div>
-                </div>
-                <div class="loan-card account-item" onclick="toggleDetails(4)">
-                    <h3>Home Loan</h3>
-                    <p>Principal: $150,000 | Balance: $100,000</p>
-                    <p>Loan Taken On: July 5, 2015</p>
-                    <p class="status overdue">Overdue</p>
-                    <div class="details" id="details-4">
-                        <p>Interest Rate: 3.8%</p>
-                        <p>Loan Term: 20 Years</p>
-                        <p>EMI: $800/month</p>
-                        <p>Next Payment Due: Feb 10, 2025</p>
-                        <p>Total Paid: $50,000</p>
-                        <p>Late Payment Fee Applied</p>
-                    </div>
-                </div>
-                <div class="loan-card account-item" onclick="toggleDetails(5)">
-                    <h3>Home Loan</h3>
-                    <p>Principal: $150,000 | Balance: $100,000</p>
-                    <p>Loan Taken On: July 5, 2015</p>
-                    <p class="status overdue">Overdue</p>
-                    <div class="details" id="details-5">
-                        <p>Interest Rate: 3.8%</p>
-                        <p>Loan Term: 20 Years</p>
-                        <p>EMI: $800/month</p>
-                        <p>Next Payment Due: Feb 10, 2025</p>
-                        <p>Total Paid: $50,000</p>
-                        <p>Late Payment Fee Applied</p>
-                    </div>
-                </div>
             </div>
 
             <div class="invoices account-item">
-                <h3>Invoices Sent</h3> 
+                <h3>Invoices</h3> 
             <div class="invoice-list">
                 <!-- Invoice Item -->
-                <div class="invoice">
-                    <div class="icon apple">
-                        <img src="assets/icons/apple-logo.svg" alt="Apple Logo">
-                    </div>
-                    <div class="invoice-details">
-                        <p class="name">Apple Store</p>
-                        <p class="time">5h ago</p>
-                    </div>
-                    <p class="amount">$450</p>
-                </div>
-                <div class="invoice">
-                    <div class="icon user">
-                        <img src="assets/icons/user.svg" alt="User Icon">
-                    </div>
-                    <div class="invoice-details">
-                        <p class="name">Michael</p>
-                        <p class="time">2 days ago</p>
-                    </div>
-                    <p class="amount">$160</p>
-                </div>
-                <div class="invoice">
-                    <div class="icon playstation">
-                        <img src="assets/icons/playstation.png" alt="PlayStation Logo">
-                    </div>
-                    <div class="invoice-details">
-                        <p class="name">Playstation</p>
-                        <p class="time">5 days ago</p>
-                    </div>
-                    <p class="amount">$1085</p>
-                </div>
-                <div class="invoice">
-                    <div class="icon user">
-                        <img src="assets/icons/user.png" alt="User Icon">
-                    </div>
-                    <div class="invoice-details">
-                        <p class="name">William</p>
-                        <p class="time">10 days ago</p>
-                    </div>
-                    <p class="amount">$90</p>
-                </div>
-            </div>
-                  
+                <div class="invoice-container">
+                    <!-- Invoices will be dynamically inserted here -->
+                    <div class="loading">Loading invoices...</div>
+                  </div>
+            </div>    
         </div>
-            
-        
-               
-            
     </div>
     </div>
     <script src="accounts.js">  </script>
-   
 </body>
 </html>
