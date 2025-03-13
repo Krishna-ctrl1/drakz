@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Services</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="services.css" rel="stylesheet">
-    <link rel="stylesheet" href="header.css">
     <link rel="stylesheet" href="sidebar2.css">
+    <link rel="stylesheet" href="header.css">
+    <link rel="stylesheet" href="services.css">
 </head>
 <body>
     <!-- Top Navigation -->
@@ -30,8 +30,6 @@
         
     </header>
     
-    <!-- Toggle Button Structure (moved to sidebar) -->
-    
     <div class="main-container">
         <div class="sidebar" id="mySidebar">
             <!-- Close Button (visible when sidebar is open) -->
@@ -39,10 +37,9 @@
                 <img width="25" src="assets/icons/sidebarclose.png">
             </a>
            
-            
             <ul class="sidebar-list">
                 <a href="dashboard.html">
-                    <li ><i class="fas fa-home"></i> <span>Dashboard</span></li>
+                    <li><i class="fas fa-home"></i> <span>Dashboard</span></li>
                 </a>
                 <a href="accounts.html">
                     <li><i class="fas fa-user"></i> <span>Accounts</span></li>
@@ -60,7 +57,7 @@
                     <li class="active"><i class="fas fa-tools"></i> <span>Services</span></li>
                 </a>
                 <a href="My_privilege.html">
-                    <li  ><i class="fas fa-gift"></i> <span>My Privileges</span></li>
+                    <li><i class="fas fa-gift"></i> <span>My Privileges</span></li>
                 </a>
                 <a href="settings.html">
                     <li><i class="fas fa-cog"></i> <span>Settings</span></li>
@@ -68,38 +65,40 @@
             </ul>
         </div>
     
-
-        
         <!-- Main Content -->
         <div class="content" id="main">
-            
+            <!-- Moved heading to top -->
+             <div class="heading">
+            <h2 class="services-heading">Need any service</h2>
+        </div>
             <div class="service-cards">
-                <div class="service-card">
+                <div class="service-card" onclick="showServiceDetails('bill-pay')">
                     <div class="service-icon blue">
-                        <i class="fas fa-shield-alt"></i>
+                        <i class="fas fa-file-invoice-dollar"></i>
                     </div>
-                    <h3>Life Insurance</h3>
-                    <p>Unlimited protection</p>
+                    <h3>Bill Pay</h3>
+                    <p>Pay your bills online</p>
                 </div>
-                <div class="service-card">
+                <div class="service-card" onclick="showServiceDetails('merchant-services')">
                     <div class="service-icon yellow">
-                        <i class="fas fa-shopping-bag"></i>
+                        <i class="fas fa-store"></i>
                     </div>
-                    <h3>Shopping</h3>
-                    <p>Buy. Think. Grow.</p>
+                    <h3>Merchant Services</h3>
+                    <p>Payment solutions for businesses</p>
                 </div>
-                <div class="service-card">
+                <div class="service-card" onclick="showServiceDetails('treasury-services')">
                     <div class="service-icon green">
-                        <i class="fas fa-lock"></i>
+                        <i class="fas fa-landmark"></i>
                     </div>
-                    <h3>Safety</h3>
-                    <p>We are your allies</p>
+                    <h3>Treasury Services</h3>
+                    <p>Cash management solutions</p>
                 </div>
             </div>
 
             <!-- Services List -->
             <div class="services-list">
-                <h2>Bank Services List</h2>
+                <h2 class="services-heading">Your Bank Services</h2>
+                <!-- Removed "Bank Services List" heading -->
                 
                 <!-- Service Items -->
                 <div class="service-item">
@@ -108,18 +107,18 @@
                     </div>
                     <div class="service-details">
                         <div class="service-info">
-                            <h3>Business loans</h3>
-                            <p>It is a long established</p>
+                            <h3>Your Loans</h3>
+                            <p>View your active loans</p>
                         </div>
                         <div class="service-info">
-                            <p>Lorem ipsum</p>
-                            <p>Many publishing</p>
+                            <p>Home Loan: $240,000</p>
+                            <p>Next payment: 04/15/2025</p>
                         </div>
                         <div class="service-info">
-                            <p>Lorem ipsum</p>
-                            <p>Many publishing</p>
+                            <p>Auto Loan: $18,500</p>
+                            <p>Next payment: 03/28/2025</p>
                         </div>
-                        <a href="#" class="view-details">View Details</a>
+                        <a href="#" class="view-details" onclick="showUserLoanDetails()">View Details</a>
                     </div>
                 </div>
 
@@ -129,18 +128,18 @@
                     </div>
                     <div class="service-details">
                         <div class="service-info">
-                            <h3>Checking accounts</h3>
-                            <p>It is a long established</p>
+                            <h3>Account Receipts</h3>
+                            <p>Your transaction history</p>
                         </div>
                         <div class="service-info">
-                            <p>Lorem ipsum</p>
-                            <p>Many publishing</p>
+                            <p>Recent transactions: 24</p>
+                            <p>Last month: 86 transactions</p>
                         </div>
                         <div class="service-info">
-                            <p>Lorem ipsum</p>
-                            <p>Many publishing</p>
+                            <p>Statements: 6 available</p>
+                            <p>Last statement: 03/01/2025</p>
                         </div>
-                        <a href="#" class="view-details">View Details</a>
+                        <a href="#" class="view-details" onclick="showAccountReceipts()">View Details</a>
                     </div>
                 </div>
 
@@ -150,23 +149,324 @@
                     </div>
                     <div class="service-details">
                         <div class="service-info">
-                            <h3>Savings accounts</h3>
-                            <p>It is a long established</p>
+                            <h3>Your Savings</h3>
+                            <p>Track your savings goals</p>
                         </div>
                         <div class="service-info">
-                            <p>Lorem ipsum</p>
-                            <p>Many publishing</p>
+                            <p>Balance: $12,345.67</p>
+                            <p>Interest rate: 2.85%</p>
                         </div>
                         <div class="service-info">
-                            <p>Lorem ipsum</p>
-                            <p>Many publishing</p>
+                            <p>Goal progress: 68%</p>
+                            <p>Next milestone: $15,000</p>
                         </div>
-                        <a href="#" class="view-details">View Details</a>
+                        <a href="#" class="view-details" onclick="showSavingsDetails()">View Details</a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Modal for service details -->
+    <div id="serviceModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <div id="serviceModalContent"></div>
+        </div>
+    </div>
+
     <script src="services.js"></script>
+    <script>
+        // User-specific details functions
+        function showUserLoanDetails() {
+            const modal = document.getElementById('serviceModal');
+            const modalContent = document.getElementById('serviceModalContent');
+            
+            // Create content for user loan details
+            let content = `
+                <h2 class="service-detail-title">Your Loan Details</h2>
+                <div class="user-loan-details">
+                    <div class="loan-item">
+                        <h3>Home Loan</h3>
+                        <div class="loan-details-grid">
+                            <div class="loan-detail">
+                                <span class="detail-label">Principal Amount:</span>
+                                <span class="detail-value">$240,000</span>
+                            </div>
+                            <div class="loan-detail">
+                                <span class="detail-label">Current Balance:</span>
+                                <span class="detail-value">$198,562.34</span>
+                            </div>
+                            <div class="loan-detail">
+                                <span class="detail-label">Interest Rate:</span>
+                                <span class="detail-value">3.75%</span>
+                            </div>
+                            <div class="loan-detail">
+                                <span class="detail-label">Monthly Payment:</span>
+                                <span class="detail-value">$1,245.67</span>
+                            </div>
+                            <div class="loan-detail">
+                                <span class="detail-label">Next Payment Date:</span>
+                                <span class="detail-value">April 15, 2025</span>
+                            </div>
+                            <div class="loan-detail">
+                                <span class="detail-label">Loan Term:</span>
+                                <span class="detail-value">30 years</span>
+                            </div>
+                            <div class="loan-detail">
+                                <span class="detail-label">Start Date:</span>
+                                <span class="detail-value">June 10, 2020</span>
+                            </div>
+                            <div class="loan-detail">
+                                <span class="detail-label">Maturity Date:</span>
+                                <span class="detail-value">June 10, 2050</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="loan-item">
+                        <h3>Auto Loan</h3>
+                        <div class="loan-details-grid">
+                            <div class="loan-detail">
+                                <span class="detail-label">Principal Amount:</span>
+                                <span class="detail-value">$18,500</span>
+                            </div>
+                            <div class="loan-detail">
+                                <span class="detail-label">Current Balance:</span>
+                                <span class="detail-value">$14,328.76</span>
+                            </div>
+                            <div class="loan-detail">
+                                <span class="detail-label">Interest Rate:</span>
+                                <span class="detail-value">4.25%</span>
+                            </div>
+                            <div class="loan-detail">
+                                <span class="detail-label">Monthly Payment:</span>
+                                <span class="detail-value">$345.82</span>
+                            </div>
+                            <div class="loan-detail">
+                                <span class="detail-label">Next Payment Date:</span>
+                                <span class="detail-value">March 28, 2025</span>
+                            </div>
+                            <div class="loan-detail">
+                                <span class="detail-label">Loan Term:</span>
+                                <span class="detail-value">5 years</span>
+                            </div>
+                            <div class="loan-detail">
+                                <span class="detail-label">Start Date:</span>
+                                <span class="detail-value">August 15, 2023</span>
+                            </div>
+                            <div class="loan-detail">
+                                <span class="detail-label">Maturity Date:</span>
+                                <span class="detail-value">August 15, 2028</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="service-action">
+                    <button class="action-button">Make a Payment</button>
+                </div>
+            `;
+            
+            modalContent.innerHTML = content;
+            modal.style.display = 'block';
+        }
+        
+        function showAccountReceipts() {
+            const modal = document.getElementById('serviceModal');
+            const modalContent = document.getElementById('serviceModalContent');
+            
+            // Create content for account receipts
+            let content = `
+                <h2 class="service-detail-title">Your Account Receipts</h2>
+                <div class="transaction-history">
+                    <div class="account-summary">
+                        <h3>Account Summary</h3>
+                        <div class="summary-details">
+                            <div class="summary-item">
+                                <span class="summary-label">Account Number:</span>
+                                <span class="summary-value">****4567</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Current Balance:</span>
+                                <span class="summary-value">$3,892.54</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Available Balance:</span>
+                                <span class="summary-value">$3,842.54</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h3>Recent Transactions</h3>
+                    <table class="transaction-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Description</th>
+                                <th>Amount</th>
+                                <th>Balance</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>03/12/2025</td>
+                                <td>Grocery Store Purchase</td>
+                                <td class="amount-negative">-$78.45</td>
+                                <td>$3,892.54</td>
+                            </tr>
+                            <tr>
+                                <td>03/10/2025</td>
+                                <td>Direct Deposit - Employer</td>
+                                <td class="amount-positive">+$1,850.00</td>
+                                <td>$3,971.99</td>
+                            </tr>
+                            <tr>
+                                <td>03/08/2025</td>
+                                <td>Online Shopping</td>
+                                <td class="amount-negative">-$125.67</td>
+                                <td>$2,121.99</td>
+                            </tr>
+                            <tr>
+                                <td>03/05/2025</td>
+                                <td>Utility Bill Payment</td>
+                                <td class="amount-negative">-$154.32</td>
+                                <td>$2,247.66</td>
+                            </tr>
+                            <tr>
+                                <td>03/03/2025</td>
+                                <td>Restaurant Purchase</td>
+                                <td class="amount-negative">-$42.85</td>
+                                <td>$2,401.98</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="statement-links">
+                        <h3>Available Statements</h3>
+                        <ul class="statements-list">
+                            <li><a href="#">March 2025 Statement</a></li>
+                            <li><a href="#">February 2025 Statement</a></li>
+                            <li><a href="#">January 2025 Statement</a></li>
+                            <li><a href="#">December 2024 Statement</a></li>
+                            <li><a href="#">November 2024 Statement</a></li>
+                            <li><a href="#">October 2024 Statement</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="service-action">
+                    <button class="action-button">Download All Statements</button>
+                </div>
+            `;
+            
+            modalContent.innerHTML = content;
+            modal.style.display = 'block';
+        }
+        
+        function showSavingsDetails() {
+            const modal = document.getElementById('serviceModal');
+            const modalContent = document.getElementById('serviceModalContent');
+            
+            // Create content for savings details
+            let content = `
+                <h2 class="service-detail-title">Your Savings Details</h2>
+                <div class="savings-details">
+                    <div class="savings-summary">
+                        <h3>Savings Account Summary</h3>
+                        <div class="summary-details">
+                            <div class="summary-item">
+                                <span class="summary-label">Account Number:</span>
+                                <span class="summary-value">****7890</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Current Balance:</span>
+                                <span class="summary-value">$12,345.67</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Interest Rate:</span>
+                                <span class="summary-value">2.85% APY</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Interest Earned This Year:</span>
+                                <span class="summary-value">$87.43</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="savings-goals">
+                        <h3>Your Savings Goals</h3>
+                        <div class="goal-item">
+                            <div class="goal-info">
+                                <h4>Emergency Fund</h4>
+                                <div class="goal-progress">
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 68%;"></div>
+                                    </div>
+                                    <div class="progress-text">68% Complete</div>
+                                </div>
+                                <div class="goal-amount">
+                                    <span>$12,345.67 of $18,000</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="goal-item">
+                            <div class="goal-info">
+                                <h4>Vacation Fund</h4>
+                                <div class="goal-progress">
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 25%;"></div>
+                                    </div>
+                                    <div class="progress-text">25% Complete</div>
+                                </div>
+                                <div class="goal-amount">
+                                    <span>$1,250.00 of $5,000</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="savings-transactions">
+                        <h3>Recent Transactions</h3>
+                        <table class="transaction-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Description</th>
+                                    <th>Amount</th>
+                                    <th>Balance</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>03/01/2025</td>
+                                    <td>Automatic Transfer</td>
+                                    <td class="amount-positive">+$500.00</td>
+                                    <td>$12,345.67</td>
+                                </tr>
+                                <tr>
+                                    <td>02/15/2025</td>
+                                    <td>Interest Payment</td>
+                                    <td class="amount-positive">+$29.34</td>
+                                    <td>$11,845.67</td>
+                                </tr>
+                                <tr>
+                                    <td>02/01/2025</td>
+                                    <td>Automatic Transfer</td>
+                                    <td class="amount-positive">+$500.00</td>
+                                    <td>$11,816.33</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="service-action">
+                    <button class="action-button">Set Up New Goal</button>
+                </div>
+            `;
+            
+            modalContent.innerHTML = content;
+            modal.style.display = 'block';
+        }
+    </script>
 </body>
 </html>
