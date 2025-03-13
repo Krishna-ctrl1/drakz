@@ -7,6 +7,7 @@ const crypto = require("crypto");
 const nodemailer = require("nodemailer");
 const session = require("express-session");
 const Razorpay = require("razorpay");
+const fetch = require("node-fetch");
 require("dotenv").config();
 
 // Initialize express app first
@@ -2432,6 +2433,46 @@ app.get("/api/client-investments/:userId", (req, res) => {
         res.status(500).json({ error: "Database error" });
       });
   });
+});
+
+
+// OpenAI
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+
+app.post("/api/chat", async (req, res) => {
+  try {
+    const userMessage = req.body.message;
+
+    const openaiResponse = await fetch(
+      "https://api.openai.com/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: "gpt-3.5-turbo",
+          messages: [
+            { role: "system", content: "You are a helpful assistant." },
+            { role: "user", content: userMessage },
+          ],
+          max_tokens: 150,
+        }),
+      }
+    );
+
+    const data = await openaiResponse.json();
+
+    if (data.choices && data.choices[0].message) {
+      res.json({ response: data.choices[0].message.content });
+    } else {
+      res.status(500).json({ error: "Invalid response from OpenAI" });
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ error: "Failed to process request" });
+  }
 });
 
 // Start the server
