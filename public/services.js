@@ -18,9 +18,9 @@ function closeNav() {
     closeButton.innerHTML = '<img width="25" src="assets/icons/sidebaropen.png">'; // Set open button image
     closeButton.setAttribute("onclick", "openNav()"); // Set open behavior
     sidebar.classList.add("icons-only"); // Hide text
-}
+} 
 
-// Service details content
+ // Service details content
 const serviceDetails = {
     'bill-pay': {
         title: 'Bill Pay Service',
@@ -449,4 +449,4 @@ document.addEventListener('DOMContentLoaded', function() {
 function filterDashboard() {
     // Implement search functionality here
     console.log('Search functionality would be implemented here');
-}
+}     
