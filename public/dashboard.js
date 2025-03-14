@@ -58,45 +58,11 @@ function updateCreditScore(score) {
 
   document.querySelector(".credit-score-marker").style.left = `${position}%`;
   document.querySelector(".credit-score-value").style.left = `${position - 2}%`;
-  document.querySelector(".credit-score-value").textContent = `${score}/850`;
+  document.querySelector(".credit-score-value").textContent = `${score}`;
 }
 
 // Example: Update to 774 dynamically
-updateCreditScore(670);
-
-// const expenseCtx = document
-//   .getElementById("expenseChartCanvas")
-//   .getContext("2d");
-// new Chart(expenseCtx, {
-//   type: "pie",
-//   data: {
-//     labels: ["Leisure", "Utilities", "Savings", "Miscellaneous"],
-//     datasets: [
-//       {
-//         data: [30, 15, 20, 35], // Values
-//         backgroundColor: [
-//           "#2c3e50", // Dark Blue (Leisure)
-//           "#5d6981", // Grayish Blue (Utilities)
-//           "#4a90e2", // Light Blue (Savings)
-//           "#9bb1ff", // Soft Blue (Miscellaneous)
-//         ],
-//         borderWidth: 2,
-//         borderColor: "#ffffff",
-//       },
-//     ],
-//   },
-//   options: {
-//     responsive: true,
-//     plugins: {
-//       legend: {
-//         display: false, // Hide legend, show text inside slices
-//       },
-//       tooltip: {
-//         enabled: true,
-//       },
-//     },
-//   },
-// });
+// updateCreditScore(670);
 
 /*Video Library*/
 
@@ -446,8 +412,9 @@ function fetchDashboardData() {
       // Display credit cards
       displayCreditCards(data.creditCards);
 
-      // Update other UI elements with the received data
-      // ... other UI update functions
+      if (data && data.expenses) {
+        createOrUpdateExpenseChart(data.expenses);
+      }
     })
     .catch((error) => {
       console.error("Error fetching dashboard data:", error);
@@ -829,118 +796,145 @@ function formatCurrency(value) {
 // ============ CREDIT SCORE DISPLAY ============
 function displayCreditScore(creditScores) {
   // Ensure we have credit score data
-  if (!creditScores || creditScores.length === 0) return;
+  if (!creditScores || creditScores.length === 0) {
+    console.error("No credit scores available");
+    return;
+  }
 
-  // Get the most recent credit score (assuming the API returns them in chronological order)
+  // Get the most recent credit score
   const latestScore = creditScores[creditScores.length - 1];
+
   const score = parseInt(latestScore.credit_score);
 
-  // Get all the necessary elements
-  const scoreValueElement = document.querySelector(".gauge-value");
+  // Get all the necessary elements based on your actual HTML structure
   const scoreMarker = document.querySelector(".credit-score-marker");
+  const gaugeValue = document.querySelector(".gauge-value");
   const scoreValueText = document.querySelector(".credit-score-value");
   const scoreStatusElement = document.querySelector(".credit-score-status");
 
-  // Update the score value in the gauge
-  scoreValueElement.textContent = score;
+  console.log("DOM Elements found:", {
+    scoreMarker,
+    scoreValueText,
+    scoreStatusElement,
+  });
+
+  if (!scoreMarker || !scoreValueText || !scoreStatusElement) {
+    console.error("Required DOM elements not found!");
+    // Let's check if the container exists
+    const container = document.querySelector(".credit-score-container");
+    if (container) {
+      console.log("Container HTML:", container.outerHTML);
+    }
+    return;
+  }
 
   // Calculate position for the marker (as percentage from left)
-  // Assuming credit score range is 300-850
   const minScore = 300;
   const maxScore = 850;
   const scoreRange = maxScore - minScore;
   const scorePercentage = ((score - minScore) / scoreRange) * 100;
 
-  // Update the marker position
-  scoreMarker.style.left = `${scorePercentage}%`;
-  scoreValueText.style.left = `${scorePercentage}%`;
-  scoreValueText.textContent = `${score}/${maxScore}`;
+  try {
+    // Update the marker position
+    scoreMarker.style.left = `${scorePercentage}%`;
 
-  // Determine credit score status
-  let status;
-  if (score >= 800) {
-    status = "EXCELLENT";
-  } else if (score >= 740) {
-    status = "VERY GOOD";
-  } else if (score >= 670) {
-    status = "GOOD";
-  } else if (score >= 580) {
-    status = "FAIR";
-  } else {
-    status = "POOR";
-  }
+    scoreValueText.style.left = `${scorePercentage}%`;
 
-  // Update status text
-  scoreStatusElement.textContent = status;
+    scoreValueText.textContent = `${score}`;
+    gaugeValue.textContent = `${score}`;
 
-  // Optional: Update color based on status
-  scoreStatusElement.className = "credit-score-status " + status.toLowerCase();
-
-  // If you have previous credit score data to show change
-  if (creditScores.length > 1) {
-    const previousScore = creditScores[creditScores.length - 2].credit_score;
-    const change = score - previousScore;
-    const changeElement = document.querySelector(
-      ".gauge-change span:nth-child(2)"
-    );
-    const arrowElement = document.querySelector(".gauge-change .arrow");
-
-    changeElement.textContent = Math.abs(change);
-
-    if (change > 0) {
-      arrowElement.innerHTML = "&#9650;"; // Up arrow
-      arrowElement.style.color = "green";
-    } else if (change < 0) {
-      arrowElement.innerHTML = "&#9660;"; // Down arrow
-      arrowElement.style.color = "red";
+    // Determine credit score status
+    let status;
+    if (score >= 800) {
+      status = "EXCELLENT";
+    } else if (score >= 740) {
+      status = "VERY GOOD";
+    } else if (score >= 670) {
+      status = "GOOD";
+    } else if (score >= 580) {
+      status = "FAIR";
     } else {
-      arrowElement.innerHTML = "&#8212;"; // Dash for no change
-      arrowElement.style.color = "gray";
+      status = "POOR";
     }
+
+    scoreStatusElement.textContent = status;
+
+    // Update the container class based on status
+    const containerStatusDiv = scoreStatusElement.parentElement;
+    containerStatusDiv.className = status.toLowerCase();
+  } catch (error) {
+    console.error("Error updating credit score display:", error);
   }
 }
 
 // ============ EXPENSE DISTRIBUTION CHART ============
-let expenseChart;
-function displayExpenseDistribution(expenses) {
-  // Ensure we have expense data
-  if (!expenses || expenses.length === 0) return;
 
-  // Group expenses by category and sum amounts
+function createOrUpdateExpenseChart(expenseData) {
+  console.log("Creating/updating chart with data:", expenseData);
+
+  // Reference to the global chart instance
+  if (typeof window.expenseChartInstance === "undefined") {
+    window.expenseChartInstance = null;
+  }
+
+  // Get canvas
+  const canvas = document.getElementById("expenseChartCanvas");
+  if (!canvas) {
+    console.error("Canvas 'expenseChartCanvas' not found!");
+    return;
+  }
+
+  // Ensure Chart.js is loaded
+  if (typeof Chart === "undefined") {
+    console.error("Chart.js is not loaded!");
+    return;
+  }
+
+  // Process the data
+  if (!expenseData || !Array.isArray(expenseData) || expenseData.length === 0) {
+    console.error("No valid expense data provided");
+    return;
+  }
+
+  // Group expenses by category
   const expensesByCategory = {};
-
-  expenses.forEach((expense) => {
+  expenseData.forEach((expense) => {
     const category = expense.category;
     const amount = parseFloat(expense.amount);
 
-    if (expensesByCategory[category]) {
-      expensesByCategory[category] += amount;
-    } else {
-      expensesByCategory[category] = amount;
+    if (!isNaN(amount)) {
+      if (expensesByCategory[category]) {
+        expensesByCategory[category] += amount;
+      } else {
+        expensesByCategory[category] = amount;
+      }
     }
   });
 
-  // Prepare data for chart
   const categories = Object.keys(expensesByCategory);
-  const amounts = categories.map((category) => expensesByCategory[category]);
+  const amounts = categories.map((cat) => expensesByCategory[cat]);
 
-  // Define colors for each category
+  // Define colors
   const colors = [
-    "#4a6b97", // Red
-    "rgb(101, 79, 113)", // Blue
-    "rgb(222, 132, 132)", // Yellow
+    "#4a6b97", // Blue
+    "rgb(101, 79, 113)", // Purple
+    "rgb(222, 132, 132)", // Pink
     "#4BC0C0", // Teal
     "#9966FF", // Purple
-    "rgb(177, 169, 123)", // Orange
+    "rgb(177, 169, 123)", // Tan
     "#C9CBCF", // Gray
   ];
 
-  // Get the canvas element
-  const canvas = document.getElementById("expenseChartCanvas");
+  // Get context
   const ctx = canvas.getContext("2d");
 
-  // Create the chart
-  const expenseChart = new Chart(ctx, {
+  // Destroy existing chart if it exists
+  if (window.expenseChartInstance) {
+    window.expenseChartInstance.destroy();
+  }
+
+  // Create new chart
+  window.expenseChartInstance = new Chart(ctx, {
     type: "doughnut",
     data: {
       labels: categories,
@@ -948,42 +942,146 @@ function displayExpenseDistribution(expenses) {
         {
           data: amounts,
           backgroundColor: colors.slice(0, categories.length),
-          borderWidth: 1,
-          borderColor: "#fff", // White border for clean look
+          borderColor: "#fff",
           borderWidth: 2,
-          hoverOffset: 5, // Add hover effect
         },
       ],
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      legend: {
-        display: false, // Hide default legend
-      },
-      tooltips: {
-        callbacks: {
-          label: function (tooltipItem, data) {
-            const dataset = data.datasets[tooltipItem.datasetIndex];
-            const total = dataset.data.reduce((acc, val) => acc + val, 0);
-            const currentValue = dataset.data[tooltipItem.index];
-            const percentage = Math.round((currentValue / total) * 100);
-            return `${
-              data.labels[tooltipItem.index]
-            }: $${currentValue} (${percentage}%)`;
+      plugins: {
+        legend: {
+          position: "bottom",
+        },
+        tooltip: {
+          callbacks: {
+            label: function (context) {
+              const label = context.label || "";
+              const value = context.raw || 0;
+              const total = context.dataset.data.reduce(
+                (acc, val) => acc + val,
+                0
+              );
+              const percentage = Math.round((value / total) * 100);
+              return `${label}: $${value.toFixed(2)} (${percentage}%)`;
+            },
           },
         },
       },
     },
   });
 
-  // Create custom legend
-  //createCustomLegend(categories, colors.slice(0, categories.length), amounts);
+  // Update custom legend if you have one
+  // updateCustomLegend(categories, amounts, colors);
+}
+
+// Optional custom legend function
+function updateCustomLegend(categories, amounts, colors) {
+  const legendEl = document.getElementById("chartLegend");
+  if (!legendEl) return;
+
+  legendEl.innerHTML = "";
+
+  const total = amounts.reduce((sum, amount) => sum + amount, 0);
+
+  categories.forEach((category, i) => {
+    const percent = Math.round((amounts[i] / total) * 100);
+    const item = document.createElement("div");
+    item.style.margin = "5px 0";
+    item.style.display = "flex";
+    item.style.alignItems = "center";
+
+    const colorBox = document.createElement("span");
+    colorBox.style.display = "inline-block";
+    colorBox.style.width = "12px";
+    colorBox.style.height = "12px";
+    colorBox.style.backgroundColor = colors[i];
+    colorBox.style.marginRight = "8px";
+
+    const text = document.createElement("span");
+    text.textContent = `${category}: $${amounts[i].toFixed(2)} (${percent}%)`;
+
+    item.appendChild(colorBox);
+    item.appendChild(text);
+    legendEl.appendChild(item);
+  });
+}
+
+// Make sure to execute when the page is ready
+document.addEventListener("DOMContentLoaded", function () {
+  console.log("DOM loaded, initializing dashboard");
+  fetchDashboardData();
+});
+
+// Function to create a custom legend
+function createCustomLegend(categories, colors, amounts) {
+  const legendContainer = document.getElementById("chartLegend");
+  if (!legendContainer) {
+    console.error("Legend container 'chartLegend' not found");
+    return;
+  }
+
+  // Clear previous legend
+  legendContainer.innerHTML = "";
+
+  // Calculate total for percentages
+  const total = amounts.reduce((acc, val) => acc + val, 0);
+
+  // Create legend items
+  categories.forEach((category, index) => {
+    const percentage = Math.round((amounts[index] / total) * 100);
+    const legendItem = document.createElement("div");
+    legendItem.className = "legend-item";
+    legendItem.style.display = "flex";
+    legendItem.style.alignItems = "center";
+    legendItem.style.margin = "5px 0";
+
+    const colorBox = document.createElement("span");
+    colorBox.style.backgroundColor = colors[index];
+    colorBox.style.width = "15px";
+    colorBox.style.height = "15px";
+    colorBox.style.display = "inline-block";
+    colorBox.style.marginRight = "8px";
+
+    const labelText = document.createElement("span");
+    labelText.textContent = `${category}: $${amounts[index].toFixed(
+      2
+    )} (${percentage}%)`;
+
+    legendItem.appendChild(colorBox);
+    legendItem.appendChild(labelText);
+    legendContainer.appendChild(legendItem);
+  });
+}
+
+// Make sure to call fetchDashboardData when the page loads
+document.addEventListener("DOMContentLoaded", function () {
+  console.log("DOM fully loaded, calling fetchDashboardData");
+  fetchDashboardData();
+});
+
+// Also add an immediate call in case the script is loaded after DOMContentLoaded
+// This helps if the script is placed at the end of the body
+if (
+  document.readyState === "complete" ||
+  document.readyState === "interactive"
+) {
+  console.log(
+    "Document already loaded, calling fetchDashboardData immediately"
+  );
+  setTimeout(fetchDashboardData, 1);
 }
 
 // Helper function to create a custom legend
 function createCustomLegend(categories, colors, amounts) {
   const legendContainer = document.getElementById("chartLegend");
+
+  if (!legendContainer) {
+    console.error("Legend container 'chartLegend' not found");
+    return;
+  }
+
   legendContainer.innerHTML = ""; // Clear existing content
 
   // Calculate total for percentages
@@ -1009,36 +1107,26 @@ function createCustomLegend(categories, colors, amounts) {
   });
 }
 
-// Update your fetchDashboardData function to include these new displays
-function fetchDashboardData() {
-  fetch("/api/dashboard", {
-    credentials: "include",
-  })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-      return response.json();
-    })
-    .then((data) => {
-      console.log("Dashboard Data:", data);
+// To check if the chart elements exist in the DOM
+document.addEventListener("DOMContentLoaded", function () {
+  const canvas = document.getElementById("expenseChartCanvas");
+  const legend = document.getElementById("chartLegend");
 
-      // Display credit cards
-      displayCreditCards(data.creditCards);
+  if (!canvas) {
+    console.error("Canvas element 'expenseChartCanvas' not found in the DOM");
+  }
 
-      // Display total holdings
-      displayTotalHoldings(data.holdings);
+  if (!legend) {
+    console.error("Legend container 'chartLegend' not found in the DOM");
+  }
 
-      // Display credit score
-      displayCreditScore(data.creditScores);
-
-      // Display expense distribution
-      displayExpenseDistribution(data.expenses);
-    })
-    .catch((error) => {
-      console.error("Error fetching dashboard data:", error);
-    });
-}
+  // Check if Chart.js is loaded
+  if (typeof Chart === "undefined") {
+    console.error(
+      "Chart.js is not loaded. Make sure to include the Chart.js library."
+    );
+  }
+});
 
 // Add some CSS for the credit score status colors
 document.head.insertAdjacentHTML(
@@ -1659,3 +1747,75 @@ function showSuccessModal(modalOverlay, advisor = null) {
       window.location.reload();
     });
 }
+
+async function sendToOpenAI(message) {
+  try {
+    // Show loading indicator
+    const loadingDiv = document.createElement("div");
+    loadingDiv.classList.add("message", "bot");
+    loadingDiv.textContent = "...";
+    messagesContainer.appendChild(loadingDiv);
+
+    // Send to your server endpoint instead of directly to OpenAI
+    const response = await fetch("/api/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        message: message,
+      }),
+    });
+
+    const data = await response.json();
+
+    // Remove loading indicator
+    messagesContainer.removeChild(loadingDiv);
+
+    // Add bot response
+    if (data.response) {
+      addMessage(data.response, false);
+    } else {
+      addMessage("Sorry, I couldn't process that request.", false);
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    addMessage("Sorry, there was an error processing your request.", false);
+  }
+}
+
+// Get references to DOM elements
+const messagesContainer = document.querySelector(".messages-container");
+const textArea = document.querySelector("textarea");
+const sendButton = document.querySelector(".send-btn");
+
+// Function to add a message to the chat
+function addMessage(message, isUser) {
+  const messageDiv = document.createElement("div");
+  messageDiv.classList.add("message");
+  messageDiv.classList.add(isUser ? "user" : "bot");
+  messageDiv.textContent = message;
+  messagesContainer.appendChild(messageDiv);
+  messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+// Add event listener for the send button
+sendButton.addEventListener("click", () => {
+  const message = textArea.value.trim();
+  if (message) {
+    // Add user message to chat
+    addMessage(message, true);
+    // Send to OpenAI
+    sendToOpenAI(message);
+    // Clear input
+    textArea.value = "";
+  }
+});
+
+// Add event listener for Enter key
+textArea.addEventListener("keypress", (e) => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    sendButton.click();
+  }
+});

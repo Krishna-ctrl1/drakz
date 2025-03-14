@@ -11,7 +11,6 @@
     <link rel="stylesheet" href="sidebar2.css" />
     <link rel="stylesheet" href="header.css" />
     <link rel="stylesheet" href="dashboard.css" />
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link
       rel="stylesheet"
       href="https://unpkg.com/swiper/swiper-bundle.min.css"
@@ -196,7 +195,7 @@
           <div class="gauge-container">
             <div class="ticks"></div>
             <div class="gauge-ring">
-              <div class="gauge-value">670</div>
+              <div class="gauge-value"></div>
               <div class="gauge-change">
                 <span class="arrow">&#9660;</span>
                 <span>20</span>
@@ -206,9 +205,7 @@
           <div class="credit-score-container">
             <div class="credit-score-bar">
               <div class="credit-score-marker" style="left: 78.8%"></div>
-              <span class="credit-score-value" style="left: 78.8%"
-                >670/850</span
-              >
+              <span class="credit-score-value" style="left: 78.8%">670</span>
             </div>
             <div class="credit-score-labels">
               <span>300</span>
@@ -226,7 +223,6 @@
           <h2>Expense Distribution</h2>
           <canvas id="expenseChartCanvas"></canvas>
           <div class="legend" id="chartLegend"></div>
-          <!-- Legend container -->
         </div>
 
         <div class="atm-cards-container">
@@ -289,9 +285,9 @@
 
           <!-- Add Card Form -->
           <div class="overlay" id="overlay"></div>
-          
+
           <div class="add-card-form" id="addCardForm">
-            <img  class="form-bg" src="assets/images/3bg.jpg">
+            <img class="form-bg" src="assets/images/3bg.jpg" />
             <div class="form-heading"><h3>Add New Card</h3></div>
             <input
               type="text"
@@ -316,19 +312,19 @@
                 required
               />
               <datalist id="bankList">
-                <option value="State Bank of India">
-                <option value="HDFC Bank">
-                <option value="ICICI Bank">
-                <option value="Axis Bank">
-                <option value="Kotak Mahindra Bank">
-                <option value="Punjab National Bank">
-                <option value="Bank of Baroda">
-                <option value="Canara Bank">
-                <option value="Union Bank of India">
-                <option value="IndusInd Bank">
+                <option value="State Bank of India"></option>
+                <option value="HDFC Bank"></option>
+                <option value="ICICI Bank"></option>
+                <option value="Axis Bank"></option>
+                <option value="Kotak Mahindra Bank"></option>
+                <option value="Punjab National Bank"></option>
+                <option value="Bank of Baroda"></option>
+                <option value="Canara Bank"></option>
+                <option value="Union Bank of India"></option>
+                <option value="IndusInd Bank"></option>
               </datalist>
             </div>
-          
+
             <input
               type="text"
               id="validFrom"
@@ -351,22 +347,196 @@
           </div>
         </div>
 
-        <div class="total-holding-card-container">
-          <div class="title">Total Holding</div>
-          <div class="amount">$ 12,304.11</div>
-          <div class="return">
-            <i class="fas fa-chart-line"></i>
-            <span class="return-text">+3.5% ($532)</span>
+        <div class="chat-container">
+          <div class="chat-header">
+            <span class="chat-header-icon">💬</span>
+            ChatBox
           </div>
-          <div class="buttons">
-            <button class="btn"><span>6M</span></button>
-            <button class="btn"><i class="fas fa-chevron-down"></i></button>
+          <div class="header-divider"></div>
+          <div class="messages-container">
+            <!-- Messages go here -->
+            <div class="message bot">Hi there! How can I help you today?</div>
+            <div class="message user">
+              Just checking out this chat interface!
+            </div>
+          </div>
+          <div class="input-area">
+            <textarea placeholder="Type your message..."></textarea>
+            <button class="send-btn">➤</button>
           </div>
         </div>
       </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
     <script src="dashboard.js"></script>
+    <script>
+      (function () {
+        // Store our chart instance
+        let myExpenseChart = null;
+
+        // Main function to create chart
+        function createExpenseChart(expenseData) {
+          // Get the canvas
+          const canvas = document.getElementById("expenseChartCanvas");
+          if (!canvas) {
+            console.error("Canvas not found!");
+            return;
+          }
+
+          // Make sure Chart.js is available
+          if (typeof Chart === "undefined") {
+            console.error(
+              "Chart.js is not loaded! Please include it in your HTML."
+            );
+            return;
+          }
+
+          // Set canvas dimensions
+          canvas.style.width = "400px";
+          canvas.style.height = "300px";
+          canvas.width = 400;
+          canvas.height = 300;
+
+          // Process the expense data
+          const categories = {};
+
+          // Check that we have valid expense data
+          if (
+            !expenseData ||
+            !Array.isArray(expenseData) ||
+            expenseData.length === 0
+          ) {
+            console.error("No valid expense data provided");
+            return;
+          }
+
+          // Group expenses by category
+          expenseData.forEach((expense) => {
+            const category = expense.category;
+            const amount = parseFloat(expense.amount);
+
+            if (!isNaN(amount)) {
+              if (categories[category]) {
+                categories[category] += amount;
+              } else {
+                categories[category] = amount;
+              }
+            }
+          });
+
+          const categoryNames = Object.keys(categories);
+          const categoryAmounts = categoryNames.map((name) => categories[name]);
+
+          // Define chart colors
+          const chartColors = [
+            "#4a6b97",
+            "rgb(101, 79, 113)",
+            "rgb(222, 132, 132)",
+            "#4BC0C0",
+            "#9966FF",
+            "rgb(177, 169, 123)",
+            "#C9CBCF",
+          ];
+
+          // Get the context
+          const ctx = canvas.getContext("2d");
+
+          // Destroy existing chart if it exists
+          if (myExpenseChart) {
+            myExpenseChart.destroy();
+          }
+
+          // Create a simple chart
+          myExpenseChart = new Chart(ctx, {
+            type: "doughnut",
+            data: {
+              labels: categoryNames,
+              datasets: [
+                {
+                  data: categoryAmounts,
+                  backgroundColor: chartColors.slice(0, categoryNames.length),
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+            },
+          });
+
+          console.log("Chart created successfully");
+
+          // Create a simple legend
+          createSimpleLegend(categoryNames, categoryAmounts, chartColors);
+        }
+
+        // Create a simple legend
+        function createSimpleLegend(categories, amounts, colors) {
+          const legendEl = document.getElementById("chartLegend");
+          if (!legendEl) return;
+
+          // Clear previous legend
+          legendEl.innerHTML = "";
+
+          const total = amounts.reduce((sum, amount) => sum + amount, 0);
+
+          // Create legend items
+          categories.forEach((category, i) => {
+            const percent = Math.round((amounts[i] / total) * 100);
+            const item = document.createElement("div");
+            item.style.margin = "5px 0";
+            item.style.display = "flex";
+            item.style.alignItems = "center";
+
+            const colorBox = document.createElement("span");
+            colorBox.style.display = "inline-block";
+            colorBox.style.width = "12px";
+            colorBox.style.height = "12px";
+            colorBox.style.backgroundColor = colors[i];
+            colorBox.style.marginRight = "8px";
+
+            const text = document.createElement("span");
+            text.textContent = `${category}: $${amounts[i].toFixed(
+              2
+            )} (${percent}%)`;
+
+            item.appendChild(colorBox);
+            item.appendChild(text);
+            legendEl.appendChild(item);
+          });
+        }
+
+        // Function to extract data from the global scope
+        function initializeFromGlobalData() {
+          // Try to find the data in the page
+          // Option 1: Direct access to current data
+          if (window.dashboardData && window.dashboardData.expenses) {
+            console.log("Found dashboard data in window.dashboardData");
+            createExpenseChart(window.dashboardData.expenses);
+            return true;
+          }
+        }
+
+        // Initialize when document is ready
+        if (
+          document.readyState === "complete" ||
+          document.readyState === "interactive"
+        ) {
+          setTimeout(initializeFromGlobalData, 1000); // Delay to ensure data is loaded
+        } else {
+          document.addEventListener("DOMContentLoaded", function () {
+            setTimeout(initializeFromGlobalData, 1000);
+          });
+        }
+
+        // Also expose a global function to manually trigger chart creation
+        window.manuallyCreateExpenseChart = function (data) {
+          console.log("Manually creating chart with data:", data);
+          createExpenseChart(data);
+        };
+      });
+    </script>
   </body>
 </html>
