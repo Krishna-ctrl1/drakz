@@ -1,249 +1,309 @@
 
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: Arial, sans-serif;
-    }
-    
-    
-    .page {
-    margin-left: 170px; 
-    padding: 20px;
-    margin-top: 70px;
-    margin-right:0;
-    transition: width 0.3s;
-    }
-  /* Container */
-  .container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    height:auto;
-    width: 100%;
-    animation: fadeIn 1.5s ease-in-out;
-    gap:20px;
-    padding-top: 0;
-    margin-top: 0;
-    /* padding-bottom:200px; */
-    max-height:500px;
-  }
-  .container button {
-    background: #3b82f6;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-    margin-right: 10px;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
   }
   
-  .container button:hover {
-    background: #2563eb;
-  }
   
-  h1 {
-    text-align: center;
-    color: #2e2e2e;
-    margin-bottom: 20px;
-    animation: slideDown 1s ease-in-out;
+  .page {
+  margin-left: 170px; 
+  padding: 20px;
+  margin-top: 70px;
+  margin-right:0;
+  transition: width 0.3s;
   }
+/* Container */
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  height:auto;
+  width: 100%;
+  animation: fadeIn 1.5s ease-in-out;
+  gap:20px;
+  padding-top: 0;
+  margin-top: 0;
+  /* padding-bottom:200px; */
+  max-height:500px;
+}
+.container button {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-right: 10px;
+}
+
+.container button:hover {
+  background: #2563eb;
+}
+
+h1 {
+  text-align: center;
+  color: #2e2e2e;
+  margin-bottom: 20px;
+  animation: slideDown 1s ease-in-out;
+}
+
+/* Overlay Styles */
+.overlay {
+  display: none; /* Hidden by default */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.overlay.active {
+  display: flex; /* Show overlay when active */
+}
+
+.blog-form-container {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  width: 90%;
+ /*  max-width: 600px; */
+ height:80%;
+  animation: slideDown 0.3s ease-in-out;
+}
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideDown {
+  from { transform: translateY(-20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.blog-form-container h2 {
+  color: #2e2e2e;
+  margin-bottom: 20px;
+}
+.blog-form-container p{
+  color:gray;
+  text-align: right;
+}
+.blog-form-container label {
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 5px;
+  display: block;
+}
+
+.blog-form-container input,
+.blog-form-container textarea {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
+  height:80%;
+}
+
+.blog-form-container button {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-right: 10px;
+}
+
+.blog-form-container button:hover {
+  background: #2563eb;
+}
+/* Blogs Section */
+.blogs-section {
+  max-width: 100%;
+  margin: 10px auto;
+  padding: 20px;
+  display: block;
+}
+
+.blogs-section h2 {
+  color: #2e2e2e;
+  margin-bottom: 20px;
+}
+
+/* Blog Post */
+.blog-post {
+  margin-bottom: 10px;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.blog-post h3 {
+  color: #3b82f6;
+  margin-bottom: 10px;
+  font-size: 20px;
+}
+
+.blog-post p {
+  color: #555;
+  line-height: 1.6;
+  margin-bottom: 10px;
+}
+
+.blog-post p strong {
+  color: #333;
+}
+
+.blog-post hr {
+  border: 0;
+  height: 1px;
+  background: #ddd;
+  margin: 20px 0;
+}
+/* Comments Section */
+.comments-section {
+  margin-top: 20px;
+}
+
+.comments-section h4 {
+  margin-bottom: 10px;
+}
+
+.comments-section textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  margin-bottom: 10px;
+}
+
+.comments-section button {
+  padding: 5px 10px;
+  border: none;
+  border-radius: 5px;
+  background: #3b82f6;
+  color: white;
+  cursor: pointer;
+}
+.blog-actions{
+  display:flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.buttons{
+  display:flex;
+  flex-direction: row;
+ gap:20px;
+}
+.buttons button{
+  background:white;
+  color:black;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-right: 10px;
+  height: 35px;
+  transition: background 0.3s ease;
+}
+.open{
+  display:flex;
+  flex-direction: row;
+  padding: 0;
+  margin: 0;
+  gap:20px;
+}
+.animation{
+  height:auto;
+  width:100%;
+  max-height:700px;
+}
+
+/**/
+/* Like button style */
+.like-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  color: #606770; /* Default gray color */
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 4px;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+/* Liked button style */
+.like-button.liked {
+  color: #1877f2; /* Facebook blue color */
+}
+
+/* Hover effect for Like button */
+.like-button:hover {
+  background-color: rgba(0, 0, 0, 0.05); /* Light gray background on hover */
+}
+
+/* Thumbs-up icon style */
+.fa-thumbs-up {
+  font-size: 18px;
+}
+/**/
+/* Dislike button style */
+.dislike-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  color: #606770; /* Default gray color */
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 4px;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+/* Disliked button style */
+.dislike-button.disliked {
+  color: #f44336; /* Red color */
+}
+
+/* Hover effect for Dislike button */
+.dislike-button:hover {
+  background-color: rgba(0, 0, 0, 0.05); /* Light gray background on hover */
+}
+
+/* Thumbs-down icon style */
+.fa-thumbs-down {
+  font-size: 18px;
+}
+@media(max-width:920px){
   
-  /* Overlay Styles */
-  .overlay {
-    display: none; /* Hidden by default */
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.7);
-    z-index: 1000;
-    justify-content: center;
-    align-items: center;
-    animation: fadeIn 0.3s ease-in-out;
-  }
-  
-  .overlay.active {
-    display: flex; /* Show overlay when active */
-  }
-  
-  .blog-form-container {
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    width: 90%;
-   /*  max-width: 600px; */
-   height:80%;
-    animation: slideDown 0.3s ease-in-out;
-  }
-  /* Animations */
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-  
-  @keyframes slideDown {
-    from { transform: translateY(-20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-  }
-  .blog-form-container h2 {
-    color: #2e2e2e;
-    margin-bottom: 20px;
-  }
-  .blog-form-container p{
-    color:gray;
-    text-align: right;
-  }
-  .blog-form-container label {
-    font-size: 16px;
-    color: #333;
-    margin-bottom: 5px;
-    display: block;
-  }
-  
-  .blog-form-container input,
-  .blog-form-container textarea {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 20px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 16px;
-    height:80%;
-  }
-  
-  .blog-form-container button {
-    background: #3b82f6;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-    margin-right: 10px;
-  }
-  
-  .blog-form-container button:hover {
-    background: #2563eb;
-  }
-  /* Blogs Section */
-  .blogs-section {
-    max-width: 100%;
-    margin: 10px auto;
-    padding: 20px;
-    display: block;
-  }
-  
-  .blogs-section h2 {
-    color: #2e2e2e;
-    margin-bottom: 20px;
-  }
-  
-  /* Blog Post */
-  .blog-post {
-    margin-bottom: 10px;
-    padding: 20px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    background: white;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-  
-  .blog-post h3 {
-    color: #3b82f6;
-    margin-bottom: 10px;
-    font-size: 20px;
-  }
-  
-  .blog-post p {
-    color: #555;
-    line-height: 1.6;
-    margin-bottom: 10px;
-  }
-  
-  .blog-post p strong {
-    color: #333;
-  }
-  
-  .blog-post hr {
-    border: 0;
-    height: 1px;
-    background: #ddd;
-    margin: 20px 0;
-  }
-  /* Comments Section */
-  .comments-section {
-    margin-top: 20px;
-  }
-  
-  .comments-section h4 {
-    margin-bottom: 10px;
-  }
-  
-  .comments-section textarea {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    margin-bottom: 10px;
-  }
-  
-  .comments-section button {
-    padding: 5px 10px;
-    border: none;
-    border-radius: 5px;
-    background: #3b82f6;
-    color: white;
-    cursor: pointer;
-  }
-  .blog-actions{
-    display:flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-  .buttons{
-    display:flex;
-    flex-direction: row;
-   gap:20px;
-  }
-  .buttons button{
-    background:white;
-    color:black;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-    margin-right: 10px;
-    height: 35px;
-    transition: background 0.3s ease;
-  }
-  .open{
-    display:flex;
-    flex-direction: row;
-    padding: 0;
-    margin: 0;
-    gap:20px;
-  }
   .animation{
-    height:auto;
-    width:100%;
-    max-height:700px;
+      width:0%;
+      visibility:hidden;
   }
-  @media(max-width:920px){
-    
-    .animation{
-        width:0%;
-        visibility:hidden;
-    }
-    .page{
-        display:flex;
-        flex-direction:column;
-        gap:20px;
-    }
-    
-  }   
+  .page{
+      display:flex;
+      flex-direction:column;
+      gap:20px;
+  }
   
+}   
