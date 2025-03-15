@@ -41,8 +41,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Create MySQL connection
 const db = mysql.createConnection({
   host: "localhost",
-  user: "root", // MySQL username
-  password: "1234567890", // MySQL password
+  user: "root", // MySQL username`
+  password: "Abhi04@28", // MySQL password
   database: "DRAKZDatabase", // The database you created earlier
 });
 
@@ -1138,23 +1138,7 @@ function showSavingsDetails() {
 }
 
 // Close modal when clicking the X
-document.addEventListener('DOMContentLoaded', function() {
-  const modal = document.getElementById('serviceModal');
-  const closeButton = document.querySelector('.close-modal');
-  
-  if (closeButton) {
-      closeButton.onclick = function() {
-          modal.style.display = 'none';
-      }
-  }
-  
-  // Close modal when clicking outside the modal content
-  window.onclick = function(event) {
-      if (event.target == modal) {
-          modal.style.display = 'none';
-      }
-  }
-});
+
 
 // API endpoint to get user's stocks and investments
 app.get("/api/client-investments/:userId", (req, res) => {
