@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="sidebar2.css">
     <link rel="stylesheet" href="header.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-   <link rel="stylesheet" href="myprivilage.css">
+    <link rel="stylesheet" href="myprivilage.css">
 </head>
 <body>
     <!-- Top Navigation -->
@@ -65,58 +65,56 @@
     
         <!-- Main Content -->
         <div class="content" id="main">
-            <!-- Properties Section -->
-            <div class="asset-box">
-                <div class="section-header">
-                    <h2>Your Properties</h2>
-                    <button class="add-property-btn" id="addPropertyBtn">
-                        <i class="fas fa-plus"></i> Add Property
-                    </button>
-                </div>
-                <div class="property-grid" id="propertyGrid">
-                    <!-- Property Card 1 -->
-                    <div class="property-card">
-                        <div class="property-image">
-                            <img src="assets\images\apartment jpg for assets 2.jpg" alt="Sunset Villa">
-                        </div>
-                        <div class="property-details">
-                            <h4>Sunset Villa</h4>
-                            <p>Value: $750,000</p>
-                            <p>Location: 123 Sunset Boulevard</p>
-                        </div>
-                        <div class="property-actions">
-                            <button class="action-btn edit-btn" onclick="editProperty('property1')">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="action-btn delete-btn" onclick="deleteProperty('property1')">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <!-- Property Card 2 -->
-                    <div class="property-card">
-                        <div class="property-image">
-                            <img src="assets\images\apartment jpg for assets 1.jpg" alt="Downtown Apartment">
-                        </div>
-                        <div class="property-details">
-                            <h4>Downtown Apartment</h4>
-                            <p>Value: $450,000</p>
-                            <p>Location: 456 Main Street</p>
-                
-                        </div>
-                        <div class="property-actions">
-                            <button class="action-btn edit-btn" onclick="editProperty('property2')">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="action-btn delete-btn" onclick="deleteProperty('property2')">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
+    <!-- Properties Section -->
+<div class="asset-box">
+    <div class="section-header">
+        <h2>Your Properties</h2>
+        <button class="add-property-btn" id="addPropertyBtn">
+            <i class="fas fa-plus"></i> Add Property
+        </button>
+    </div>
+    <div class="property-grid" id="propertyGrid">
+        <!-- Property Card 1 -->
+        <div class="property-card" id="property1">
+            <div class="property-image">
+                <img src="assets/images/apartment jpg for assets 2.jpg" alt="Sunset Villa">
             </div>
-
+            <div class="property-details">
+                <h4>Sunset Villa</h4>
+                <p>Value: $750,000</p>
+                <p>Location: 123 Sunset Boulevard</p>
+            </div>
+            <div class="property-actions">
+                <button class="action-btn edit-btn" onclick="editProperty('property1')">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="action-btn delete-btn" onclick="deleteProperty('property1')">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Property Card 2 -->
+        <div class="property-card" id="property2">
+            <div class="property-image">
+                <img src="assets/images/apartment jpg for assets 1.jpg" alt="Downtown Apartment">
+            </div>
+            <div class="property-details">
+                <h4>Downtown Apartment</h4>
+                <p>Value: $450,000</p>
+                <p>Location: 456 Main Street</p>
+            </div>
+            <div class="property-actions">
+                <button class="action-btn edit-btn" onclick="editProperty('property2')">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="action-btn delete-btn" onclick="deleteProperty('property2')">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
             <!-- Insurance Policies Section -->
             <div class="asset-box">
                 <div class="section-header">
@@ -161,7 +159,6 @@
                             <h4>Gold</h4>
                             <p>Amount: 250g</p>
                             <p>Value: $15,750</p>
-                        
                             <p>Date of Purchase: June 15, 2023</p>
                         </div>
                     </div>
@@ -173,7 +170,6 @@
                             <h4>Silver</h4>
                             <p>Amount: 5kg</p>
                             <p>Value: $4,200</p>
-                      
                             <p>Date of Purchase: October 3, 2023</p>
                         </div>
                     </div>
@@ -185,7 +181,6 @@
                             <h4>Platinum</h4>
                             <p>Amount: 50g</p>
                             <p>Value: $1,850</p>
-                           
                             <p>Date of Purchase: February 22, 2024</p>
                         </div>
                     </div>
@@ -231,8 +226,6 @@
         </div>
     </div>
 
-    <script src="myprivilage.js">
-       
-    </script>
+    <script src="myprivilage.js"></script>
 </body>
 </html>
