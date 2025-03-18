@@ -211,14 +211,18 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 
-// Configuration
-const API_KEY = "AEM70DPOO3L91TMY"; // actual Alpha Vantage API key
 // Alpha Vantage Free Tier API has limit. 25 requests per day and 5 requests per miniute.
 const TRENDING_SYMBOLS = ["MSFT", "AAPL", "AMZN", "GOOGL", "META"]; // Example stock symbols to track
 
 // Function to fetch stock data for a specific symbol
 async function fetchStockData(symbol) {
   try {
+    // First, get the API key from your server
+    const keyResponse = await fetch("/api/getStockApiKey");
+    const keyData = await keyResponse.json();
+    const API_KEY = keyData.apiKey;
+
+    // Then use it to make the Alpha Vantage request
     const response = await fetch(
       `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${API_KEY}`
     );

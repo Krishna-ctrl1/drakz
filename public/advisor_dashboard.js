@@ -122,8 +122,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Initial setup
   function initializeDashboard() {
-    populateCountryDropdown();
-    setupCountryChangeListener();
+    // populateCountryDropdown();
+    // setupCountryChangeListener();
     setupEventListeners();
     populateClientList();
 
@@ -132,7 +132,6 @@ document.addEventListener("DOMContentLoaded", () => {
       loadClientData(0);
     }
   }
-
   // Call initialization
   initializeDashboard();
 });

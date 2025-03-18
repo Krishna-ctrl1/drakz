@@ -412,6 +412,9 @@ function fetchDashboardData() {
       // Display credit cards
       displayCreditCards(data.creditCards);
 
+      // Display Credut Scores
+      displayCreditScore(data.creditScores);
+
       if (data && data.expenses) {
         createOrUpdateExpenseChart(data.expenses);
       }
@@ -795,54 +798,63 @@ function formatCurrency(value) {
 
 // ============ CREDIT SCORE DISPLAY ============
 function displayCreditScore(creditScores) {
+  console.log("displayCreditScore called with:", JSON.stringify(creditScores));
   // Ensure we have credit score data
   if (!creditScores || creditScores.length === 0) {
     console.error("No credit scores available");
     return;
   }
-
+  
   // Get the most recent credit score
   const latestScore = creditScores[creditScores.length - 1];
-
   const score = parseInt(latestScore.credit_score);
-
+  
   // Get all the necessary elements based on your actual HTML structure
   const scoreMarker = document.querySelector(".credit-score-marker");
   const gaugeValue = document.querySelector(".gauge-value");
   const scoreValueText = document.querySelector(".credit-score-value");
   const scoreStatusElement = document.querySelector(".credit-score-status");
-
+  
   console.log("DOM Elements found:", {
     scoreMarker,
+    gaugeValue, // Include this in the log
     scoreValueText,
     scoreStatusElement,
   });
-
-  if (!scoreMarker || !scoreValueText || !scoreStatusElement) {
+  
+  // Check if ALL required elements exist
+  if (!scoreMarker || !gaugeValue || !scoreValueText || !scoreStatusElement) {
     console.error("Required DOM elements not found!");
-    // Let's check if the container exists
+    // Let's check if the container exists and log which elements are missing
     const container = document.querySelector(".credit-score-container");
+    console.log("Missing elements:", {
+      scoreMarker: !scoreMarker,
+      gaugeValue: !gaugeValue,
+      scoreValueText: !scoreValueText,
+      scoreStatusElement: !scoreStatusElement
+    });
+    
     if (container) {
       console.log("Container HTML:", container.outerHTML);
     }
     return;
   }
-
-  // Calculate position for the marker (as percentage from left)
+  
+  // Update the Gauge Value
+  gaugeValue.textContent = score;
+  
+  // Rest of your code remains the same...
   const minScore = 300;
   const maxScore = 850;
   const scoreRange = maxScore - minScore;
   const scorePercentage = ((score - minScore) / scoreRange) * 100;
-
+  
   try {
     // Update the marker position
     scoreMarker.style.left = `${scorePercentage}%`;
-
     scoreValueText.style.left = `${scorePercentage}%`;
-
     scoreValueText.textContent = `${score}`;
-    gaugeValue.textContent = `${score}`;
-
+    
     // Determine credit score status
     let status;
     if (score >= 800) {
@@ -856,12 +868,19 @@ function displayCreditScore(creditScores) {
     } else {
       status = "POOR";
     }
-
+    
     scoreStatusElement.textContent = status;
-
+    
     // Update the container class based on status
     const containerStatusDiv = scoreStatusElement.parentElement;
     containerStatusDiv.className = status.toLowerCase();
+    
+    console.log("Credit score updated successfully:", {
+      score,
+      status,
+      percentagePosition: `${scorePercentage}%`
+    });
+    
   } catch (error) {
     console.error("Error updating credit score display:", error);
   }

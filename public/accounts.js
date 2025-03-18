@@ -657,8 +657,10 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 // Function to fetch invoices from the server
+// Function to fetch invoices from the server
 async function fetchInvoices() {
   try {
+    console.log("Starting to fetch invoices...");
     const response = await fetch("/api/invoices");
 
     // Check if the request was successful
@@ -668,10 +670,13 @@ async function fetchInvoices() {
     }
 
     const data = await response.json();
+    console.log("Received invoice data:", data);
 
     if (data.status === "success") {
+      console.log("Success status received, rendering invoices:", data.data);
       renderInvoices(data.data);
     } else {
+      console.error("Error status in response:", data);
       showError("Error loading invoices");
     }
   } catch (error) {
@@ -683,7 +688,6 @@ async function fetchInvoices() {
 // Function to render invoices in the DOM
 function renderInvoices(invoices) {
   const container = document.querySelector(".invoice-container");
-
   // Clear existing content
   container.innerHTML = "";
 
@@ -696,6 +700,8 @@ function renderInvoices(invoices) {
   invoices.forEach((invoice) => {
     const invoiceElement = document.createElement("div");
     invoiceElement.className = "invoice";
+    invoiceElement.dataset.id = invoice.id; // Store the ID as a data attribute
+
     invoiceElement.innerHTML = `
       <p class="name">${escapeHTML(invoice.storeName)}</p>
       <p class="time">${escapeHTML(invoice.timeAgo)}</p>

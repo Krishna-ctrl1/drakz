@@ -7,6 +7,7 @@ const crypto = require("crypto");
 const nodemailer = require("nodemailer");
 const session = require("express-session");
 const Razorpay = require("razorpay");
+const fetch = require("node-fetch");
 require("dotenv").config();
 
 // Initialize express app first
@@ -41,8 +42,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Create MySQL connection
 const db = mysql.createConnection({
   host: "localhost",
-  user: "root", // MySQL username`
-  password: "Abhi04@28", // MySQL password
+  user: "root", // MySQL username
+  password: "1234567890", // MySQL password
   database: "DRAKZDatabase", // The database you created earlier
 });
 
@@ -834,311 +835,1421 @@ app.get("/api/admins", (req, res) => {
   });
 });
 
-// Function to show service details in modal
-function showServiceDetails(serviceId) {
-  const modal = document.getElementById('serviceModal');
-  const modalContent = document.getElementById('serviceModalContent');
-  const service = serviceDetails[serviceId];
-  
-  if (service) {
-      // Create content for modal
-      let content = `
-          <h2 class="service-detail-title">${service.title}</h2>
-          <p class="service-detail-content">${service.description}</p>
-          <div class="service-features">
-              <h4>Features & Benefits</h4>
-              <ul class="feature-list">
-      `;
-      
-      // Add features
-      service.features.forEach(feature => {
-          content += `<li>${feature}</li>`;
+// API endpoint to get all advisors
+app.get("/api/advisors", (req, res) => {
+  // Check if user is authenticated as admin (implement proper authentication middleware in production)
+
+  const query = `
+    SELECT 
+      id, 
+      username,
+      name, 
+      email, 
+      DATE_FORMAT(created_at, '%d %b %Y') as join_date
+    FROM advisors
+    ORDER BY created_at DESC
+  `;
+
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error("Error fetching advisors:", err);
+      return res.status(500).json({ error: "Database error" });
+    }
+
+    // Format the data to match the expected structure
+    const formattedAdvisors = results.map((advisor) => {
+      const nameParts = advisor.name.split(" ");
+      const firstName = nameParts[0] || "";
+      const lastName = nameParts.slice(1).join(" ") || "";
+
+      return {
+        id: advisor.id,
+        firstName: firstName,
+        lastName: lastName,
+        email: advisor.email,
+        username: advisor.username,
+        role: "advisor",
+        status: "active",
+        joinDate: advisor.join_date,
+      };
+    });
+
+    res.json(formattedAdvisors);
+  });
+});
+
+// API endpoint to get all system users (combined users, admins, advisors)
+app.get("/api/all-users", (req, res) => {
+  // Run multiple queries to get data from all three tables
+  const userQuery = `
+    SELECT 
+      id, 
+      name, 
+      email, 
+      'standard' as role,
+      email_verified, 
+      DATE_FORMAT(created_at, '%d %b %Y') as join_date
+    FROM users
+  `;
+
+  const adminQuery = `
+    SELECT 
+      id, 
+      name, 
+      email, 
+      'admin' as role,
+      1 as email_verified, 
+      DATE_FORMAT(created_at, '%d %b %Y') as join_date
+    FROM admins
+  `;
+
+  const advisorQuery = `
+    SELECT 
+      id, 
+      name, 
+      email, 
+      'advisor' as role,
+      1 as email_verified, 
+      DATE_FORMAT(created_at, '%d %b %Y') as join_date
+    FROM advisors
+  `;
+
+  // Execute all queries
+  db.query(userQuery, (err, users) => {
+    if (err) {
+      console.error("Error fetching users:", err);
+      return res.status(500).json({ error: "Database error" });
+    }
+
+    db.query(adminQuery, (err, admins) => {
+      if (err) {
+        console.error("Error fetching admins:", err);
+        return res.status(500).json({ error: "Database error" });
+      }
+
+      db.query(advisorQuery, (err, advisors) => {
+        if (err) {
+          console.error("Error fetching advisors:", err);
+          return res.status(500).json({ error: "Database error" });
+        }
+
+        // Combine and format all results
+        const allUsers = [...users, ...admins, ...advisors].map((user) => {
+          const nameParts = user.name.split(" ");
+          const firstName = nameParts[0] || "";
+          const lastName = nameParts.slice(1).join(" ") || "";
+
+          return {
+            id: user.id,
+            firstName: firstName,
+            lastName: lastName,
+            email: user.email,
+            role: user.role,
+            status: user.email_verified ? "active" : "pending",
+            joinDate: user.join_date,
+          };
+        });
+
+        res.json(allUsers);
       });
-      
-      content += `
-              </ul>
-          </div>
-          <div class="service-action">
-              <button class="action-button">${service.actionText}</button>
-          </div>
-      `;
-      
-      modalContent.innerHTML = content;
-      modal.style.display = 'block';
+    });
+  });
+});
+
+// API endpoint to update user status (active/suspended)
+app.put("/api/users/:id/status", (req, res) => {
+  const userId = req.params.id;
+  const { status } = req.body;
+
+  if (!status || !["active", "pending", "suspended"].includes(status)) {
+    return res.status(400).json({ error: "Invalid status value" });
   }
-}
 
-// Function to show user's business loan details
-function showUserLoanDetails() {
-  const modal = document.getElementById('serviceModal');
-  const modalContent = document.getElementById('serviceModalContent');
-  const loanDetails = userAccountDetails['loan'];
-  
-  let content = `
-      <h2 class="service-detail-title">${loanDetails.title}</h2>
-      
-      <div class="account-summary">
-          <div class="summary-item">
-              <span class="label">Account Number:</span>
-              <span class="value">${loanDetails.accountNumber}</span>
-          </div>
-          <div class="summary-item">
-              <span class="label">Remaining Balance:</span>
-              <span class="value">${loanDetails.balance}</span>
-          </div>
-          <div class="summary-item">
-              <span class="label">Loan Term:</span>
-              <span class="value">${loanDetails.term}</span>
-          </div>
-          <div class="summary-item">
-              <span class="label">Interest Rate:</span>
-              <span class="value">${loanDetails.interestRate}</span>
-          </div>
-          <div class="summary-item">
-              <span class="label">Monthly Payment:</span>
-              <span class="value">${loanDetails.monthlyPayment}</span>
-          </div>
-          <div class="summary-item">
-              <span class="label">Next Payment Due:</span>
-              <span class="value">${loanDetails.nextPaymentDate}</span>
-          </div>
-      </div>
-      
-      <div class="payment-history">
-          <h4>Recent Payment History</h4>
-          <table class="history-table">
-              <thead>
-                  <tr>
-                      <th>Date</th>
-                      <th>Amount</th>
-                      <th>Status</th>
-                  </tr>
-              </thead>
-              <tbody>
-  `;
-  
-  loanDetails.paymentHistory.forEach(payment => {
-      content += `
-          <tr>
-              <td>${payment.date}</td>
-              <td>${payment.amount}</td>
-              <td><span class="status-badge">${payment.status}</span></td>
-          </tr>
-      `;
+  // Convert status to email_verified value
+  const emailVerified = status === "active" ? 1 : 0;
+
+  const query = "UPDATE users SET email_verified = ? WHERE id = ?";
+
+  db.query(query, [emailVerified, userId], (err, result) => {
+    if (err) {
+      console.error("Error updating user status:", err);
+      return res.status(500).json({ error: "Database error" });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json({ success: true, message: "User status updated successfully" });
   });
-  
-  content += `
-              </tbody>
-          </table>
-      </div>
-      
-      <div class="documents">
-          <h4>Loan Documents</h4>
-          <ul class="document-list">
-  `;
-  
-  loanDetails.documents.forEach(doc => {
-      content += `<li><i class="fas fa-file-pdf"></i> ${doc}</li>`;
+});
+
+// API endpoint to add a new user
+app.post("/api/users", (req, res) => {
+  const { firstName, lastName, email, password, role } = req.body;
+
+  if (!firstName || !lastName || !email || !password) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+
+  // Combine first and last name
+  const fullName = `${firstName} ${lastName}`;
+
+  // Hash the password
+  const hashedPassword = hashPassword(password);
+
+  // Determine which table to insert into based on role
+  let table = "users";
+  let fieldsString = "name, email, password, email_verified";
+  let valuesString = "?, ?, ?, ?";
+  let values = [fullName, email, hashedPassword, 1]; // Email verified by default
+
+  if (role === "admin") {
+    table = "admins";
+    fieldsString = "name, email, password, username";
+    valuesString = "?, ?, ?, ?";
+    // Generate username from email (before the @)
+    const username = email.split("@")[0];
+    values = [fullName, email, hashedPassword, username];
+  } else if (role === "advisor") {
+    table = "advisors";
+    fieldsString = "name, email, password, username";
+    valuesString = "?, ?, ?, ?";
+    // Generate username from email (before the @)
+    const username = email.split("@")[0];
+    values = [fullName, email, hashedPassword, username];
+  }
+
+  const query = `INSERT INTO ${table} (${fieldsString}) VALUES (${valuesString})`;
+
+  db.query(query, values, (err, result) => {
+    if (err) {
+      console.error("Error adding new user:", err);
+      // Check for duplicate email
+      if (err.code === "ER_DUP_ENTRY") {
+        return res.status(409).json({ error: "Email already exists" });
+      }
+      return res.status(500).json({ error: "Database error" });
+    }
+
+    res.status(201).json({
+      success: true,
+      message: "User added successfully",
+      userId: result.insertId,
+    });
   });
+});
+
+// API endpoint to get security alerts
+app.get("/api/security-alerts", (req, res) => {
+  // In a real application, you'd fetch actual security alerts from a database table
+  // For now, we'll return sample data
+  const securityAlerts = [
+    {
+      id: 1,
+      type: "Failed Login Attempt",
+      user: "robert.b@example.com",
+      time: "10:23 AM",
+      location: "Kiev, Ukraine",
+      status: "Open",
+    },
+    {
+      id: 2,
+      type: "Suspicious Activity",
+      user: "jane.smith@example.com",
+      time: "09:45 AM",
+      location: "New York, USA",
+      status: "Investigating",
+    },
+    {
+      id: 3,
+      type: "Multiple Logins",
+      user: "david.m@example.com",
+      time: "08:12 AM",
+      location: "London, UK",
+      status: "Resolved",
+    },
+    {
+      id: 4,
+      type: "Password Reset",
+      user: "emily.w@example.com",
+      time: "07:56 AM",
+      location: "Toronto, Canada",
+      status: "Closed",
+    },
+    {
+      id: 5,
+      type: "API Key Misuse",
+      user: "james.t@example.com",
+      time: "02:34 AM",
+      location: "Singapore",
+      status: "Open",
+    },
+  ];
+
+  res.json(securityAlerts);
+});
+
+// API endpoint to save contact messages
+app.post("/api/save-contact-message", async (req, res) => {
+  try {
+    // Get data from request body
+    const { name, email, phone, subject, message, submission_date } = req.body;
+
+    // Validate required fields
+    if (!name || !email || !subject || !message) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing required fields",
+      });
+    }
+
+    // Format the date properly for MySQL
+    const formattedDate = new Date()
+      .toISOString()
+      .slice(0, 19)
+      .replace("T", " ");
+
+    // Use your existing db connection
+    db.query(
+      `INSERT INTO contact_messages 
+       (name, email, phone, subject, message, submission_date) 
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [name, email, phone || null, subject, message, formattedDate],
+      (err, result) => {
+        if (err) {
+          console.error("Database error:", err);
+          return res.status(500).json({
+            success: false,
+            message: "Database error while saving your message",
+          });
+        }
+
+        if (result.affectedRows > 0) {
+          // Success response
+          return res.status(201).json({
+            success: true,
+            message: "Message saved successfully",
+            id: result.insertId,
+          });
+        } else {
+          return res.status(500).json({
+            success: false,
+            message: "Failed to insert data",
+          });
+        }
+      }
+    );
+  } catch (error) {
+    console.error("Error saving contact message:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error while saving your message",
+    });
+  }
+});
+
+// API endpoint to get all messages (for admin dashboard)
+app.get("/api/messages", async (req, res) => {
+  try {
+    // Using the existing db connection
+    db.query(
+      "SELECT * FROM contact_messages ORDER BY submission_date DESC",
+      (error, results) => {
+        if (error) {
+          console.error("Error fetching messages:", error);
+          return res.status(500).json({
+            success: false,
+            message: "An error occurred while fetching messages.",
+          });
+        }
+
+        res.json({
+          success: true,
+          messages: results,
+        });
+      }
+    );
+  } catch (error) {
+    console.error("Error fetching messages:", error);
+    res.status(500).json({
+      success: false,
+      message: "An error occurred while fetching messages.",
+    });
+  }
+});
+
+// API endpoint to mark a message as read
+app.post("/api/messages/mark-read", async (req, res) => {
+  try {
+    const { id } = req.body;
+
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "Message ID is required.",
+      });
+    }
+
+    // Using the existing db connection
+    db.query(
+      "UPDATE contact_messages SET is_read = TRUE WHERE id = ?",
+      [id],
+      (error, result) => {
+        if (error) {
+          console.error("Error marking message as read:", error);
+          return res.status(500).json({
+            success: false,
+            message: "An error occurred while marking the message as read.",
+          });
+        }
+
+        if (result.affectedRows > 0) {
+          res.json({
+            success: true,
+            message: "Message marked as read.",
+          });
+        } else {
+          res.status(404).json({
+            success: false,
+            message: "Message not found or already marked as read.",
+          });
+        }
+      }
+    );
+  } catch (error) {
+    console.error("Error marking message as read:", error);
+    res.status(500).json({
+      success: false,
+      message: "An error occurred while marking the message as read.",
+    });
+  }
+});
+
+// API end-point for replying to messages
+app.post("/api/messages/reply", async (req, res) => {
+  try {
+    const { id, to, subject, message } = req.body;
+
+    if (!id || !to || !subject || !message) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing required fields",
+      });
+    }
+
+    // Send the email
+    const mailOptions = {
+      from: process.env.EMAIL_USER || "your-email@gmail.com",
+      to: to,
+      subject: subject,
+      text: message,
+    };
+
+    // Send mail with defined transport object
+    await transporter.sendMail(mailOptions);
+
+    // Update message status in database using promise interface
+    const promiseConnection = db.promise();
+    const query = "UPDATE contact_messages SET is_replied = true WHERE id = ?";
+    await promiseConnection.query(query, [id]);
+
+    res.json({ success: true, message: "Reply sent successfully" });
+  } catch (error) {
+    console.error("Error sending reply:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to send reply: " + error.message,
+    });
+  }
+});
+
+// Dashboard API endpoint
+app.get("/api/dashboard", (req, res) => {
+  // Ensure the user is logged in
+  const userId = req.session.userId;
+  console.log("Session userId:", req.session.userId);
+
+  // IMPORTANT: Set the content type to JSON
+  res.setHeader("Content-Type", "application/json");
+
+  if (!userId) {
+    return res.status(401).json({ error: "Unauthorized. Please log in." });
+  }
+
+  let dashboardData = {};
+
+  // Get basic user details
+  db.query("SELECT * FROM users WHERE id = ?", [userId], (err, userResult) => {
+    if (err) return res.status(500).json({ error: "Database error" });
+    dashboardData.user = userResult[0];
+
+    // Get credit scores
+    db.query(
+      "SELECT * FROM user_credit_scores WHERE user_id = ?",
+      [userId],
+      (err, creditResults) => {
+        if (err) return res.status(500).json({ error: "Database error" });
+        dashboardData.creditScores = creditResults;
+
+        // Get expenses
+        db.query(
+          "SELECT * FROM user_expenses WHERE user_id = ?",
+          [userId],
+          (err, expenseResults) => {
+            if (err) return res.status(500).json({ error: "Database error" });
+            dashboardData.expenses = expenseResults;
+
+            // Get credit cards
+            db.query(
+              "SELECT * FROM user_credit_cards WHERE user_id = ?",
+              [userId],
+              (err, cardResults) => {
+                if (err)
+                  return res.status(500).json({ error: "Database error" });
+                dashboardData.creditCards = cardResults;
+
+                // Get total holdings
+                db.query(
+                  "SELECT * FROM user_holdings WHERE user_id = ?",
+                  [userId],
+                  (err, holdingsResults) => {
+                    if (err)
+                      return res.status(500).json({ error: "Database error" });
+                    dashboardData.holdings = holdingsResults[0];
+
+                    // Send all the data as JSON (or render a view with this data)
+                    res.json(dashboardData);
+                  }
+                );
+              }
+            );
+          }
+        );
+      }
+    );
+  });
+});
+
+// Credit card API endpoint
+app.post("/api/credit-cards", (req, res) => {
+  console.log("Credit card addition request received:", req.body);
+
+  console.log("Credit card addition request received:", req.body);
+
+  if (!req.session || !req.session.userId) {
+    return res
+      .status(401)
+      .json({ error: "You must be logged in to add a credit card" });
+  }
+
+  const userId = req.session.userId;
+
+  const {
+    card_number,
+    cardholder_name,
+    valid_from,
+    valid_thru,
+    bank_name,
+    card_type,
+  } = req.body;
+
+  console.log("Processing card data:", {
+    userId,
+    cardDetails: {
+      card_number,
+      cardholder_name,
+      valid_from,
+      valid_thru,
+      bank_name,
+      card_type,
+    },
+  });
+
+  // Validate required fields
+  if (!card_number || !cardholder_name || !valid_from || !valid_thru) {
+    console.log("Validation failed - missing fields");
+    return res
+      .status(400)
+      .json({ error: "Missing required credit card information" });
+  }
+
+  // Basic card number validation
+  const sanitizedCardNumber = card_number.replace(/\s/g, "");
+  if (!/^\d{13,19}$/.test(sanitizedCardNumber)) {
+    console.log("Validation failed - invalid card number format");
+    return res.status(400).json({ error: "Invalid card number format" });
+  }
+
+  // Insert the credit card into database
+  const query = `
+    INSERT INTO user_credit_cards 
+    (user_id, card_number, cardholder_name, valid_from, valid_thru, bank_name, card_type) 
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+  `;
+
+  const params = [
+    userId,
+    sanitizedCardNumber,
+    cardholder_name,
+    valid_from,
+    valid_thru,
+    bank_name || "Unknown Bank",
+    card_type || "Unknown Type",
+  ];
+
+  console.log("Executing query with params:", params);
+
+  db.query(query, params, (error, result) => {
+    if (error) {
+      console.error("Database error adding credit card:", error);
+      return res.status(500).json({
+        error: "Failed to add credit card",
+        details: error.message,
+      });
+    }
+
+    console.log("Card added successfully, result:", result);
+
+    // Return success response
+    res.status(201).json({
+      success: true,
+      message: "Credit card added successfully",
+      cardId: result.insertId,
+    });
+  });
+});
+
+// At the end of your middleware chain
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+
+  // If the request is to an API endpoint, return JSON
+  if (
+    req.path.startsWith("/dashboard") ||
+    req.xhr ||
+    req.headers.accept.includes("application/json")
+  ) {
+    return res.status(500).json({ error: "Server error" });
+  }
+
+  // Otherwise return HTML
+  res.status(500).send("Server error");
+});
+
+// API route to fetch user profile data
+app.get("/api/user/profile", (req, res) => {
+  // Check if user is logged in
+  if (!req.session.userId) {
+    return res.status(401).json({
+      status: "error",
+      message: "Unauthorized - Please log in",
+    });
+  }
+
+  const query =
+    "SELECT id, name, email, monthly_income, employment_status, financial_goals, risk_tolerance, aadhaar_number, pan_number, created_at FROM users WHERE id = ?";
+
+  db.query(query, [req.session.userId], (err, results) => {
+    if (err) {
+      console.error("Database error fetching user profile:", err);
+      return res.status(500).json({
+        status: "error",
+        message: "Internal server error",
+      });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({
+        status: "error",
+        message: "User not found",
+      });
+    }
+
+    // Return user profile data (excluding password)
+    res.json({
+      status: "success",
+      data: results[0],
+    });
+  });
+});
+
+// API route to fetch user holdings
+app.get("/api/user/holdings", (req, res) => {
+  if (!req.session.userId) {
+    return res.status(401).json({
+      status: "error",
+      message: "Unauthorized - Please log in",
+    });
+  }
+
+  const query =
+    "SELECT total_balance, savings_account_balance, income, expense, last_updated FROM user_holdings WHERE user_id = ?";
+
+  db.query(query, [req.session.userId], (err, results) => {
+    if (err) {
+      console.error("Database error fetching user holdings:", err);
+      return res.status(500).json({
+        status: "error",
+        message: "Internal server error",
+      });
+    }
+
+    if (results.length === 0) {
+      // If no holding records found, return defaults
+      return res.json({
+        status: "success",
+        data: {
+          total_balance: 0,
+          savings_account_balance: 0,
+          income: 0,
+          expense: 0,
+          last_updated: new Date(),
+        },
+      });
+    }
+
+    res.json({
+      status: "success",
+      data: results[0],
+    });
+  });
+});
+
+// API route to fetch user loans
+app.get("/api/user/loans", (req, res) => {
+  if (!req.session.userId) {
+    return res.status(401).json({
+      status: "error",
+      message: "Unauthorized - Please log in",
+    });
+  }
+
+  const query =
+    "SELECT id, loan_type, principal_amount, remaining_balance, interest_rate, loan_term, emi_amount, loan_taken_on, next_payment_due, total_paid, status FROM user_loans WHERE user_id = ?";
+
+  db.query(query, [req.session.userId], (err, results) => {
+    if (err) {
+      console.error("Database error fetching user loans:", err);
+      return res.status(500).json({
+        status: "error",
+        message: "Internal server error",
+      });
+    }
+
+    res.json({
+      status: "success",
+      data: results,
+    });
+  });
+});
+
+// API route to fetch user transactions
+app.get("/api/user/transactions", (req, res) => {
+  if (!req.session.userId) {
+    return res.status(401).json({
+      status: "error",
+      message: "Unauthorized - Please log in",
+    });
+  }
+
+  // Get limit from query parameter or use default
+  const limit = req.query.limit || 10;
+
+  const query =
+    "SELECT id, description, type, transaction_datetime, amount, created_at FROM user_transactions WHERE user_id = ? ORDER BY transaction_datetime DESC LIMIT ?";
+
+  db.query(query, [req.session.userId, parseInt(limit)], (err, results) => {
+    if (err) {
+      console.error("Database error fetching user transactions:", err);
+      return res.status(500).json({
+        status: "error",
+        message: "Internal server error",
+      });
+    }
+
+    res.json({
+      status: "success",
+      data: results,
+    });
+  });
+});
+
+const isAuthenticated = (req, res, next) => {
+  if (req.session && req.session.userId) {
+    return next();
+  }
+  return res
+    .status(401)
+    .json({ status: "error", message: "Not authenticated" });
+};
+
+app.get("/api/user/weekly-activity", isAuthenticated, (req, res) => {
+  const userId = req.session.userId;
+  console.log("Processing weekly activity request for user:", userId);
+
+  // Get current week's date range (Sunday to Saturday)
+  const today = new Date();
+  const startOfWeek = new Date(today);
+  startOfWeek.setDate(today.getDate() - today.getDay()); // Start from Sunday
+  startOfWeek.setHours(0, 0, 0, 0); // Set to beginning of day
+
+  const endOfWeek = new Date(startOfWeek);
+  endOfWeek.setDate(startOfWeek.getDate() + 6); // End on Saturday
+  endOfWeek.setHours(23, 59, 59, 999); // Set to end of day
+
+  // Format dates for SQL
+  const formatSqlDate = (date) => {
+    return date.toISOString().slice(0, 19).replace("T", " ");
+  };
+
+  const startDate = formatSqlDate(startOfWeek);
+  const endDate = formatSqlDate(endOfWeek);
+
+  console.log("Week date range:", startDate, "to", endDate);
+
+  // Query to get daily deposit and withdrawal totals for the week
+  const query = `
+    SELECT 
+      DATE(transaction_datetime) as date,
+      SUM(CASE WHEN amount > 0 THEN amount ELSE 0 END) as deposit_total,
+      SUM(CASE WHEN amount < 0 THEN ABS(amount) ELSE 0 END) as withdraw_total
+    FROM 
+      user_transactions
+    WHERE 
+      user_id = ? AND
+      transaction_datetime BETWEEN ? AND ?
+    GROUP BY 
+      DATE(transaction_datetime)
+    ORDER BY 
+      date
+  `;
+
+  db.query(query, [userId, startDate, endDate], (err, results) => {
+    if (err) {
+      console.error("Database error:", err);
+      return res.json({ status: "error", message: "Database error" });
+    }
+
+    console.log("Raw database results:", results);
+
+    // Initialize arrays for the whole week (Sunday to Saturday)
+    const depositValues = [0, 0, 0, 0, 0, 0, 0];
+    const withdrawValues = [0, 0, 0, 0, 0, 0, 0];
+    const weekDates = [];
+
+    // Generate dates for the week
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(startOfWeek);
+      date.setDate(startOfWeek.getDate() + i);
+      weekDates.push(formatSqlDate(date).split(" ")[0]); // Just get the date part
+    }
+
+    // Map results to the correct day of the week
+    results.forEach((row) => {
+      const rowDate = new Date(row.date);
+      // Sunday is 0, Monday is 1, etc.
+      const dayOfWeek = rowDate.getDay();
+
+      depositValues[dayOfWeek] = parseFloat(row.deposit_total);
+      withdrawValues[dayOfWeek] = parseFloat(row.withdraw_total);
+    });
+
+    console.log("Processed deposit values:", depositValues);
+    console.log("Processed withdraw values:", withdrawValues);
+
+    // Check if there's any data for the week
+    const hasTransactions =
+      depositValues.some((val) => val > 0) ||
+      withdrawValues.some((val) => val > 0);
+
+    if (!hasTransactions) {
+      console.log(
+        "No transactions found, adding test data for visualization purposes"
+      );
+      // If you want to send test data, you can do so here
+    }
+
+    // Send actual data from database, not test data
+    res.json({
+      status: "success",
+      data: {
+        weekDates,
+        depositValues,
+        withdrawValues,
+      },
+    });
+  });
+});
+
+// API end-poimt to get user_investments
+app.get("/api/user-investments", (req, res) => {
+  // Check if user is logged in
+  if (!req.session.userId) {
+    return res.status(401).json({ error: "Not authenticated" });
+  }
+
+  // Query to get user investments
+  const query = `
+    SELECT * FROM user_stocks 
+    WHERE user_id = ?
+  `;
+
+  // Execute the query with the user ID from the session
+  db.query(query, [req.session.userId], (err, results) => {
+    if (err) {
+      console.error("Error fetching user investments:", err);
+      return res.status(500).json({ error: "Database error" });
+    }
+
+    // Send the investment data as JSON
+    res.json(results);
+  });
+});
+
+// Premium upgrade endpoint
+app.post("/api/upgrade-to-premium", (req, res) => {
+  // Ensure the user is logged in
+  const userId = req.session.userId;
+
+  if (!userId) {
+    return res
+      .status(401)
+      .json({ success: false, error: "Unauthorized. Please log in." });
+  }
+
+  // Begin transaction
+  db.beginTransaction((err) => {
+    if (err) {
+      console.error("Transaction error:", err);
+      return res.status(500).json({ success: false, error: "Database error" });
+    }
+
+    // 1. Update the user's premium status
+    db.query(
+      "UPDATE users SET is_premium = 1 WHERE id = ?",
+      [userId],
+      (err, result) => {
+        if (err) {
+          return db.rollback(() => {
+            console.error("Database error:", err);
+            res.status(500).json({ success: false, error: "Database error" });
+          });
+        }
+
+        if (result.affectedRows === 0) {
+          return db.rollback(() => {
+            res.status(404).json({ success: false, error: "User not found" });
+          });
+        }
+
+        // 2. Find an advisor with fewer than 5 clients
+        db.query(
+          `SELECT a.id, a.name, a.email, COUNT(ca.id) as client_count 
+           FROM advisors a 
+           LEFT JOIN client_advisors ca ON a.id = ca.advisor_id 
+           GROUP BY a.id 
+           HAVING client_count < 5 
+           ORDER BY client_count ASC 
+           LIMIT 1`,
+          (err, advisors) => {
+            if (err) {
+              return db.rollback(() => {
+                console.error("Database error:", err);
+                res
+                  .status(500)
+                  .json({ success: false, error: "Database error" });
+              });
+            }
+
+            // If no advisor is available
+            if (!advisors || advisors.length === 0) {
+              return db.commit((err) => {
+                if (err) {
+                  return db.rollback(() => {
+                    console.error("Commit error:", err);
+                    res
+                      .status(500)
+                      .json({ success: false, error: "Database error" });
+                  });
+                }
+
+                // Success but no advisor available
+                res.json({ success: true });
+              });
+            }
+
+            const advisor = advisors[0];
+
+            // 3. Assign the advisor to the user
+            db.query(
+              "INSERT INTO client_advisors (advisor_id, user_id) VALUES (?, ?)",
+              [advisor.id, userId],
+              (err, result) => {
+                if (err) {
+                  return db.rollback(() => {
+                    console.error("Database error:", err);
+                    res
+                      .status(500)
+                      .json({ success: false, error: "Database error" });
+                  });
+                }
+
+                // 4. Get user email for sending confirmation
+                db.query(
+                  "SELECT name, email FROM users WHERE id = ?",
+                  [userId],
+                  (err, users) => {
+                    if (err) {
+                      return db.rollback(() => {
+                        console.error("Database error:", err);
+                        res
+                          .status(500)
+                          .json({ success: false, error: "Database error" });
+                      });
+                    }
+
+                    const user = users[0];
+
+                    // 5. Commit the transaction
+                    db.commit((err) => {
+                      if (err) {
+                        return db.rollback(() => {
+                          console.error("Commit error:", err);
+                          res
+                            .status(500)
+                            .json({ success: false, error: "Database error" });
+                        });
+                      }
+
+                      // 6. Send confirmation email
+                      sendConfirmationEmail(user, advisor);
+
+                      // 7. Return success with advisor details
+                      res.json({
+                        success: true,
+                        advisor: {
+                          name: advisor.name,
+                          email: advisor.email,
+                        },
+                      });
+                    });
+                  }
+                );
+              }
+            );
+          }
+        );
+      }
+    );
+  });
+});
+
+// Function to send confirmation email
+function sendConfirmationEmail(user, advisor) {
+  // You would integrate with your email service here (e.g., Nodemailer, SendGrid, etc.)
+  // This is a placeholder function
+  console.log(`Sending confirmation email to ${user.email}`);
+
+  const mailOptions = {
+    from: "drakz.fintech@gmail.com",
+    to: user.email,
+    subject: "Welcome to DRAKZ Premium!",
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <div style="background-color: #ffd700; padding: 20px; text-align: center;">
+          <h1 style="color: #333; margin: 0;">DRAKZ Premium</h1>
+        </div>
+        <div style="padding: 20px;">
+          <h2>Welcome to Premium, ${user.name}!</h2>
+          <p>Your payment has been successfully processed, and you now have access to all premium features.</p>
   
-  content += `
+          <div style="background-color: #f9f9f9; padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="margin-top: 0;">Your Personal Financial Advisor</h3>
+            <p><strong>Name:</strong> ${advisor.name}</p>
+            <p><strong>Email:</strong> ${advisor.email}</p>
+            <p>Your advisor will contact you within 24 hours to schedule your first consultation.</p>
+          </div>
+  
+          <p>As a premium member, you now have access to:</p>
+          <ul>
+            <li>Full access to our financial video library</li>
+            <li>Personal financial advisor services</li>
+            <li>Advanced analytics and insights</li>
+            <li>Priority alerts for market changes</li>
           </ul>
-      </div>
-      
-      <div class="service-action">
-          <button class="action-button">Make a Payment</button>
-      </div>
-  `;
   
-  modalContent.innerHTML = content;
-  modal.style.display = 'block';
+          <p>If you have any questions, please don't hesitate to contact our support team.</p>
+  
+          <div style="text-align: center; margin-top: 30px;">
+            <a href="https://drakz.com/dashboard" style="background-color: #ffd700; color: #333; text-decoration: none; padding: 10px 20px; border-radius: 4px; font-weight: bold;">Go to Dashboard</a>
+          </div>
+        </div>
+        <div style="background-color: #333; color: white; padding: 20px; text-align: center; font-size: 12px;">
+          <p>&copy; 2025 DRAKZ. All rights reserved.</p>
+        </div>
+      </div>
+    `,
+  };
+
+  transporter.sendMail(mailOptions, function (error, info) {
+    if (error) {
+      console.log("Email error:", error);
+    } else {
+      console.log("Email sent: " + info.response);
+    }
+  });
 }
 
-// Function to show user's account receipts
-function showAccountReceipts() {
-  const modal = document.getElementById('serviceModal');
-  const modalContent = document.getElementById('serviceModalContent');
-  const receiptDetails = userAccountDetails['receipts'];
-  
-  let content = `
-      <h2 class="service-detail-title">${receiptDetails.title}</h2>
-      
-      <div class="account-summary">
-          <div class="summary-item">
-              <span class="label">Account Number:</span>
-              <span class="value">${receiptDetails.accountNumber}</span>
-          </div>
-          <div class="summary-item">
-              <span class="label">Current Balance:</span>
-              <span class="value">${receiptDetails.balance}</span>
-          </div>
-      </div>
-      
-      <div class="transaction-history">
-          <h4>Recent Transactions</h4>
-          <table class="history-table">
-              <thead>
-                  <tr>
-                      <th>Date</th>
-                      <th>Description</th>
-                      <th>Category</th>
-                      <th>Amount</th>
-                  </tr>
-              </thead>
-              <tbody>
-  `;
-  
-  receiptDetails.transactions.forEach(transaction => {
-      // Determine if amount is negative or positive for styling
-      const amountClass = transaction.amount.startsWith('+') ? 'positive-amount' : 'negative-amount';
-      
-      content += `
-          <tr>
-              <td>${transaction.date}</td>
-              <td>${transaction.description}</td>
-              <td>${transaction.category || ''}</td>
-              <td class="${amountClass}">${transaction.amount}</td>
-          </tr>
-      `;
-  });
-  
-  content += `
-              </tbody>
-          </table>
-      </div>
-      
-      <div class="spending-summary">
-          <h4>Monthly Spending Breakdown</h4>
-          <div class="spending-chart">
-              <div class="chart-visualization">
-                  <!-- Simplified chart visualization -->
-                  <div class="chart-bars">
-  `;
-  
-  receiptDetails.monthlySpending.forEach(item => {
-      content += `
-          <div class="chart-bar-item">
-              <div class="chart-label">${item.category}</div>
-              <div class="chart-bar" style="width: ${item.percentage}"></div>
-              <div class="chart-value">${item.amount} (${item.percentage})</div>
-          </div>
-      `;
-  });
-  
-  content += `
-                  </div>
-              </div>
-          </div>
-      </div>
-      
-      <div class="service-action">
-          <button class="action-button">Download Statement</button>
-          <button class="action-button secondary">Export Transactions</button>
-      </div>
-  `;
-  
-  modalContent.innerHTML = content;
-  modal.style.display = 'block';
-}
+// // Initialize Razorpay with your credentials
+// const razorpay = new Razorpay({
+//   key_id: process.env.RAZORPAY_KEY_ID || "rzp_test_your_key_id",
+//   key_secret: process.env.RAZORPAY_KEY_SECRET || "your_key_secret",
+// });
 
-// Function to show user's savings account details
-function showSavingsDetails() {
-  const modal = document.getElementById('serviceModal');
-  const modalContent = document.getElementById('serviceModalContent');
-  const savingsDetails = userAccountDetails['savings'];
-  
-  let content = `
-      <h2 class="service-detail-title">${savingsDetails.title}</h2>
-      
-      <div class="account-summary">
-          <div class="summary-item">
-              <span class="label">Account Number:</span>
-              <span class="value">${savingsDetails.accountNumber}</span>
-          </div>
-          <div class="summary-item">
-              <span class="label">Current Balance:</span>
-              <span class="value">${savingsDetails.balance}</span>
-          </div>
-          <div class="summary-item">
-              <span class="label">Interest Rate:</span>
-              <span class="value">${savingsDetails.interestRate}</span>
-          </div>
-          <div class="summary-item">
-              <span class="label">Year-to-Date Interest:</span>
-              <span class="value">${savingsDetails.ytdInterest}</span>
-          </div>
-      </div>
-      
-      <div class="savings-goal">
-          <h4>Savings Goal Progress</h4>
-          <div class="goal-details">
-              <div class="goal-name">${savingsDetails.goalProgress.name}</div>
-              <div class="goal-progress-bar">
-                  <div class="progress-fill" style="width: ${savingsDetails.goalProgress.percentage}"></div>
-              </div>
-              <div class="goal-stats">
-                  <div class="goal-stat">
-                      <span class="label">Current:</span>
-                      <span class="value">${savingsDetails.goalProgress.current}</span>
-                  </div>
-                  <div class="goal-stat">
-                      <span class="label">Target:</span>
-                      <span class="value">${savingsDetails.goalProgress.target}</span>
-                  </div>
-                  <div class="goal-stat">
-                      <span class="label">Completion:</span>
-                      <span class="value">${savingsDetails.goalProgress.percentage}</span>
-                  </div>
-                  <div class="goal-stat">
-                      <span class="label">Est. Date:</span>
-                      <span class="value">${savingsDetails.goalProgress.estimatedCompletion}</span>
-                  </div>
-              </div>
-          </div>
-      </div>
-      
-      <div class="transaction-history">
-          <h4>Recent Transactions</h4>
-          <table class="history-table">
-              <thead>
-                  <tr>
-                      <th>Date</th>
-                      <th>Description</th>
-                      <th>Amount</th>
-                  </tr>
-              </thead>
-              <tbody>
+// // Create Razorpay order endpoint
+// app.post("/api/create-razorpay-order", (req, res) => {
+//   // Ensure the user is logged in
+//   const userId = req.session.userId;
+
+//   if (!userId) {
+//     return res
+//       .status(401)
+//       .json({ success: false, error: "Unauthorized. Please log in." });
+//   }
+
+//   // Set amount for premium subscription (e.g., ₹5000 = 500000 paise)
+//   const amount = 500000; // Adjust according to your pricing
+
+//   // Create Razorpay order
+//   const options = {
+//     amount,
+//     currency: "INR",
+//     receipt: `order_${Date.now()}_${userId}`,
+//     payment_capture: 1,
+//   };
+
+//   razorpay.orders.create(options, (err, order) => {
+//     if (err) {
+//       console.error("Razorpay order creation error:", err);
+//       return res
+//         .status(500)
+//         .json({ success: false, error: "Failed to create payment order" });
+//     }
+
+//     res.json({
+//       id: order.id,
+//       amount: order.amount,
+//       currency: order.currency,
+//     });
+//   });
+// });
+
+// // Verify Razorpay payment and upgrade to premium
+// app.post("/api/verify-razorpay-payment", (req, res) => {
+//   // Get payment verification details
+//   const { razorpay_payment_id, razorpay_order_id, razorpay_signature } =
+//     req.body;
+
+//   // Ensure the user is logged in
+//   const userId = req.session.userId;
+
+//   if (!userId) {
+//     return res
+//       .status(401)
+//       .json({ success: false, error: "Unauthorized. Please log in." });
+//   }
+
+//   // Validate input
+//   if (!razorpay_payment_id || !razorpay_order_id || !razorpay_signature) {
+//     return res.status(400).json({
+//       success: false,
+//       error: "Missing payment verification parameters",
+//     });
+//   }
+
+//   // Verify signature
+//   const generatedSignature = crypto
+//     .createHmac("sha256", razorpay.key_secret)
+//     .update(razorpay_order_id + "|" + razorpay_payment_id)
+//     .digest("hex");
+
+//   if (generatedSignature !== razorpay_signature) {
+//     return res.status(400).json({
+//       success: false,
+//       error: "Invalid payment signature",
+//     });
+//   }
+
+//   // Payment signature is valid, now verify payment status
+//   razorpay.payments.fetch(razorpay_payment_id, (err, payment) => {
+//     if (err) {
+//       console.error("Razorpay payment fetch error:", err);
+//       return res
+//         .status(500)
+//         .json({ success: false, error: "Failed to verify payment" });
+//     }
+
+//     if (payment.status !== "captured") {
+//       return res.status(400).json({
+//         success: false,
+//         error: "Payment not completed",
+//       });
+//     }
+
+//     // Payment verified, now upgrade the user to premium
+//     // Begin transaction
+//     db.beginTransaction((err) => {
+//       if (err) {
+//         console.error("Transaction error:", err);
+//         return res
+//           .status(500)
+//           .json({ success: false, error: "Database error" });
+//       }
+
+//       // 1. Update the user's premium status
+//       db.query(
+//         "UPDATE users SET is_premium = 1 WHERE id = ?",
+//         [userId],
+//         (err, result) => {
+//           if (err) {
+//             return db.rollback(() => {
+//               console.error("Database error:", err);
+//               res.status(500).json({ success: false, error: "Database error" });
+//             });
+//           }
+
+//           if (result.affectedRows === 0) {
+//             return db.rollback(() => {
+//               res.status(404).json({ success: false, error: "User not found" });
+//             });
+//           }
+
+//           // 2. Record payment in your database
+//           db.query(
+//             "INSERT INTO payments (user_id, payment_id, order_id, amount, status) VALUES (?, ?, ?, ?, ?)",
+//             [
+//               userId,
+//               razorpay_payment_id,
+//               razorpay_order_id,
+//               payment.amount / 100,
+//               payment.status,
+//             ],
+//             (err, result) => {
+//               if (err) {
+//                 return db.rollback(() => {
+//                   console.error("Database error:", err);
+//                   res
+//                     .status(500)
+//                     .json({ success: false, error: "Database error" });
+//                 });
+//               }
+
+//               // 3. Find an advisor with fewer than 5 clients
+//               db.query(
+//                 `SELECT a.id, a.name, a.email, COUNT(ca.id) as client_count
+//                  FROM advisors a
+//                  LEFT JOIN client_advisors ca ON a.id = ca.advisor_id
+//                  GROUP BY a.id
+//                  HAVING client_count < 5
+//                  ORDER BY client_count ASC
+//                  LIMIT 1`,
+//                 (err, advisors) => {
+//                   if (err) {
+//                     return db.rollback(() => {
+//                       console.error("Database error:", err);
+//                       res
+//                         .status(500)
+//                         .json({ success: false, error: "Database error" });
+//                     });
+//                   }
+
+//                   // If no advisor is available
+//                   if (!advisors || advisors.length === 0) {
+//                     return db.commit((err) => {
+//                       if (err) {
+//                         return db.rollback(() => {
+//                           console.error("Commit error:", err);
+//                           res
+//                             .status(500)
+//                             .json({ success: false, error: "Database error" });
+//                         });
+//                       }
+
+//                       // Success but no advisor available
+//                       res.json({ success: true });
+//                     });
+//                   }
+
+//                   const advisor = advisors[0];
+
+//                   // 4. Assign the advisor to the user
+//                   db.query(
+//                     "INSERT INTO client_advisors (advisor_id, user_id) VALUES (?, ?)",
+//                     [advisor.id, userId],
+//                     (err, result) => {
+//                       if (err) {
+//                         return db.rollback(() => {
+//                           console.error("Database error:", err);
+//                           res
+//                             .status(500)
+//                             .json({ success: false, error: "Database error" });
+//                         });
+//                       }
+
+//                       // 5. Get user email for sending confirmation
+//                       db.query(
+//                         "SELECT name, email FROM users WHERE id = ?",
+//                         [userId],
+//                         (err, users) => {
+//                           if (err) {
+//                             return db.rollback(() => {
+//                               console.error("Database error:", err);
+//                               res
+//                                 .status(500)
+//                                 .json({
+//                                   success: false,
+//                                   error: "Database error",
+//                                 });
+//                             });
+//                           }
+
+//                           const user = users[0];
+
+//                           // 6. Commit the transaction
+//                           db.commit((err) => {
+//                             if (err) {
+//                               return db.rollback(() => {
+//                                 console.error("Commit error:", err);
+//                                 res
+//                                   .status(500)
+//                                   .json({
+//                                     success: false,
+//                                     error: "Database error",
+//                                   });
+//                               });
+//                             }
+
+//                             // 7. Send confirmation email
+//                             sendConfirmationEmail(user, advisor);
+
+//                             // 8. Return success with advisor details
+//                             res.json({
+//                               success: true,
+//                               advisor: {
+//                                 name: advisor.name,
+//                                 email: advisor.email,
+//                               },
+//                             });
+//                           });
+//                         }
+//                       );
+//                     }
+//                   );
+//                 }
+//               );
+//             }
+//           );
+//         }
+//       );
+//     });
+//   });
+// });
+
+// Un-comment the above code when you have the RazorPay API Key. Also check dashboard.js
+
+// API endpoint to get advisor's clients
+app.get("/api/advisor-clients", (req, res) => {
+  if (!req.session.advisorId) {
+    return res.status(401).json({ error: "Not authenticated" });
+  }
+
+  const advisorId = req.session.advisorId;
+  const query = `
+    SELECT ca.user_id, u.name, u.email 
+    FROM client_advisors ca
+    JOIN users u ON ca.user_id = u.id
+    WHERE ca.advisor_id = ?
   `;
-  
-  savingsDetails.transactions.forEach(transaction => {
-      const amountClass = transaction.amount.startsWith('+') ? 'positive-amount' : 'negative-amount';
-      
-      content += `
-          <tr>
-              <td>${transaction.date}</td>
-              <td>${transaction.description}</td>
-              <td class="${amountClass}">${transaction.amount}</td>
-          </tr>
-      `;
+
+  db.query(query, [advisorId], (err, results) => {
+    if (err) {
+      console.error("Error fetching clients:", err);
+      return res.status(500).json({ error: "Database error" });
+    }
+
+    console.log(`Clients for advisor ID ${advisorId}:`, results);
+    res.json({ clients: results });
   });
-  
-  content += `
-              </tbody>
-          </table>
-      </div>
-      
-      <div class="service-action">
-          <button class="action-button">Transfer Money</button>
-          <button class="action-button secondary">Manage Goals</button>
-      </div>
+});
+
+// API endpoint to get detailed client information
+app.get("/api/client-details/:userId", (req, res) => {
+  if (!req.session.advisorId) {
+    return res.status(401).json({ error: "Not authenticated" });
+  }
+
+  const advisorId = req.session.advisorId;
+  const userId = req.params.userId;
+
+  // First verify that this client is assigned to this advisor
+  const verifyQuery = `
+    SELECT * FROM client_advisors 
+    WHERE advisor_id = ? AND user_id = ?
   `;
-  
-  modalContent.innerHTML = content;
-  modal.style.display = 'block';
-}
 
-// Close modal when clicking the X
+  db.query(verifyQuery, [advisorId, userId], (err, results) => {
+    if (err) {
+      console.error("Error verifying client-advisor relationship:", err);
+      return res.status(500).json({ error: "Database error" });
+    }
 
+    if (results.length === 0) {
+      return res
+        .status(403)
+        .json({ error: "Not authorized to view this client" });
+    }
+
+    // Once verified, get the client details from both tables
+    const clientQuery = `
+      SELECT u.id, u.name, u.email, ud.phone, ud.country, ud.postal_code
+      FROM users u
+      LEFT JOIN user_details ud ON u.id = ud.user_id
+      WHERE u.id = ?
+    `;
+
+    db.query(clientQuery, [userId], (err, clientResults) => {
+      if (err) {
+        console.error("Error fetching client details:", err);
+        return res.status(500).json({ error: "Database error" });
+      }
+
+      if (clientResults.length === 0) {
+        return res.status(404).json({ error: "Client not found" });
+      }
+
+      // Parse the client name into first and last name
+      const fullName = clientResults[0].name || "";
+      const nameParts = fullName.split(" ");
+      const firstName = nameParts[0] || "";
+      const lastName = nameParts.slice(1).join(" ") || "";
+
+      // Create response object with all required fields
+      const clientDetails = {
+        id: clientResults[0].id,
+        firstName: firstName,
+        lastName: lastName,
+        email: clientResults[0].email || "",
+        phone: clientResults[0].phone || "",
+        country: clientResults[0].country || "",
+        postalCode: clientResults[0].postal_code || "",
+      };
+
+      console.log(`Details for client ID ${userId}:`, clientDetails);
+      res.json({ client: clientDetails });
+    });
+  });
+});
 
 // API endpoint to get user's stocks and investments
 app.get("/api/client-investments/:userId", (req, res) => {
@@ -1211,6 +2322,109 @@ app.get("/api/client-investments/:userId", (req, res) => {
         res.status(500).json({ error: "Database error" });
       });
   });
+});
+
+// ChatGPT
+require("dotenv").config(); // For loading environment variables
+
+// Your OpenAI API key should be stored in an environment variable
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+
+app.post("/api/chat", async (req, res) => {
+  try {
+    const userMessage = req.body.message;
+
+    const openaiResponse = await fetch(
+      "https://api.openai.com/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: "gpt-3.5-turbo",
+          messages: [
+            { role: "system", content: "You are a helpful assistant." },
+            { role: "user", content: userMessage },
+          ],
+          max_tokens: 150,
+        }),
+      }
+    );
+
+    const data = await openaiResponse.json();
+
+    if (data.choices && data.choices[0].message) {
+      res.json({ response: data.choices[0].message.content });
+    } else {
+      res.status(500).json({ error: "Invalid response from OpenAI" });
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ error: "Failed to process request" });
+  }
+});
+
+// Endpoint to fetch invoices
+app.get("/api/invoices", (req, res) => {
+  
+  const userId = req.session.userId;
+  console.log("Fetching invoices for user:", userId);
+
+  const query =
+    "SELECT id, store_name, amount, transaction_time FROM invoices WHERE user_id = ? ORDER BY transaction_time DESC";
+
+  db.query(query, [userId], (err, results) => {
+    if (err) {
+      console.error("Database error:", err);
+      return res.status(500).json({
+        status: "error",
+        message: "Failed to fetch invoices from the database",
+      });
+    }
+
+    console.log("Found invoices:", results.length);
+
+    // Process data for client
+    const invoices = results.map((row) => ({
+      id: row.id,
+      storeName: row.store_name,
+      amount: row.amount,
+      transactionTime: row.transaction_time,
+      timeAgo: getTimeAgo(new Date(row.transaction_time)),
+    }));
+
+    res.json({
+      status: "success",
+      data: invoices,
+    });
+  });
+});
+
+// Helper function to calculate time ago
+function getTimeAgo(date) {
+  const now = new Date();
+  const diffMs = now - date;
+  const diffSec = Math.floor(diffMs / 1000);
+  const diffMin = Math.floor(diffSec / 60);
+  const diffHour = Math.floor(diffMin / 60);
+  const diffDay = Math.floor(diffHour / 24);
+
+  if (diffDay > 0) {
+    return diffDay === 1 ? "1 day ago" : `${diffDay} days ago`;
+  } else if (diffHour > 0) {
+    return diffHour === 1 ? "1 hour ago" : `${diffHour} hours ago`;
+  } else if (diffMin > 0) {
+    return diffMin === 1 ? "1 minute ago" : `${diffMin} minutes ago`;
+  } else {
+    return "Just now";
+  }
+}
+
+app.get('/api/getStockApiKey', (req, res) => {
+  // Store API key in environment variable instead of hardcoding
+  res.json({ apiKey: process.env.ALPHA_VANTAGE_API_KEY });
 });
 
 // Start the server
