@@ -355,3 +355,65 @@ body {
         margin-bottom: 5px;
     }
 }
+
+/* Metal card actions and policy icons */
+.metal-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+}
+
+.policy-icon {
+    background-color: #f0f2f5;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 15px;
+    margin-bottom: 10px;
+    float: left;
+}
+
+.policy-icon i {
+    font-size: 22px;
+    color: #3a5a97;
+}
+
+.policy-card {
+    display: flex;
+    flex-direction: column;
+    padding-top: 15px;
+}
+
+.policy-card h4 {
+    margin-top: 5px;
+}
+
+/* Modal form styling for metal inputs */
+.input-group {
+    display: flex;
+    gap: 10px;
+}
+
+.unit-select {
+    width: 30%;
+    flex-shrink: 0;
+}
+
+/* Responsive adjustments for modals */
+@media (max-width: 768px) {
+    .modal-content {
+        width: 90%;
+    }
+    
+    .input-group {
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .unit-select {
+        width: 100%;
+    }
+}
