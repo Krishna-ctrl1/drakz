@@ -573,6 +573,12 @@ function deleteCard(cardId) {
       })
       .catch((error) => {
         console.error("Error deleting card:", error);
+        // Log the actual response for more details
+        if (error.response) {
+          error.response
+            .json()
+            .then((data) => console.error("Server response:", data));
+        }
       });
   }
 }
@@ -804,24 +810,24 @@ function displayCreditScore(creditScores) {
     console.error("No credit scores available");
     return;
   }
-  
+
   // Get the most recent credit score
   const latestScore = creditScores[creditScores.length - 1];
   const score = parseInt(latestScore.credit_score);
-  
+
   // Get all the necessary elements based on your actual HTML structure
   const scoreMarker = document.querySelector(".credit-score-marker");
   const gaugeValue = document.querySelector(".gauge-value");
   const scoreValueText = document.querySelector(".credit-score-value");
   const scoreStatusElement = document.querySelector(".credit-score-status");
-  
+
   console.log("DOM Elements found:", {
     scoreMarker,
     gaugeValue, // Include this in the log
     scoreValueText,
     scoreStatusElement,
   });
-  
+
   // Check if ALL required elements exist
   if (!scoreMarker || !gaugeValue || !scoreValueText || !scoreStatusElement) {
     console.error("Required DOM elements not found!");
@@ -831,30 +837,30 @@ function displayCreditScore(creditScores) {
       scoreMarker: !scoreMarker,
       gaugeValue: !gaugeValue,
       scoreValueText: !scoreValueText,
-      scoreStatusElement: !scoreStatusElement
+      scoreStatusElement: !scoreStatusElement,
     });
-    
+
     if (container) {
       console.log("Container HTML:", container.outerHTML);
     }
     return;
   }
-  
+
   // Update the Gauge Value
   gaugeValue.textContent = score;
-  
+
   // Rest of your code remains the same...
   const minScore = 300;
   const maxScore = 850;
   const scoreRange = maxScore - minScore;
   const scorePercentage = ((score - minScore) / scoreRange) * 100;
-  
+
   try {
     // Update the marker position
     scoreMarker.style.left = `${scorePercentage}%`;
     scoreValueText.style.left = `${scorePercentage}%`;
     scoreValueText.textContent = `${score}`;
-    
+
     // Determine credit score status
     let status;
     if (score >= 800) {
@@ -868,19 +874,18 @@ function displayCreditScore(creditScores) {
     } else {
       status = "POOR";
     }
-    
+
     scoreStatusElement.textContent = status;
-    
+
     // Update the container class based on status
     const containerStatusDiv = scoreStatusElement.parentElement;
     containerStatusDiv.className = status.toLowerCase();
-    
+
     console.log("Credit score updated successfully:", {
       score,
       status,
-      percentagePosition: `${scorePercentage}%`
+      percentagePosition: `${scorePercentage}%`,
     });
-    
   } catch (error) {
     console.error("Error updating credit score display:", error);
   }

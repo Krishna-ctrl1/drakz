@@ -1420,6 +1420,42 @@ app.post("/api/credit-cards", (req, res) => {
   });
 });
 
+// DELETE endpoint for credit cards
+app.delete("/api/credit-cards/:id", (req, res) => {
+  if (!req.session || !req.session.userId) {
+    return res
+      .status(401)
+      .json({ error: "You must be logged in to delete a credit card" });
+  }
+  
+  const userId = req.session.userId;
+  const cardId = req.params.id;
+  
+  // First verify the card belongs to this user
+  const verifyQuery = "SELECT * FROM user_credit_cards WHERE id = ? AND user_id = ?";
+  db.query(verifyQuery, [cardId, userId], (verifyError, verifyResults) => {
+    if (verifyError) {
+      console.error("Database error verifying card ownership:", verifyError);
+      return res.status(500).json({ error: "Failed to verify card ownership" });
+    }
+    
+    if (verifyResults.length === 0) {
+      return res.status(404).json({ error: "Card not found or you don't have permission to delete it" });
+    }
+    
+    // If verification passed, delete the card
+    const deleteQuery = "DELETE FROM user_credit_cards WHERE id = ? AND user_id = ?";
+    db.query(deleteQuery, [cardId, userId], (deleteError, deleteResult) => {
+      if (deleteError) {
+        console.error("Database error deleting credit card:", deleteError);
+        return res.status(500).json({ error: "Failed to delete credit card" });
+      }
+      
+      res.json({ success: true, message: "Credit card deleted successfully" });
+    });
+  });
+});
+
 // At the end of your middleware chain
 app.use((err, req, res, next) => {
   console.error(err.stack);
@@ -2325,11 +2361,8 @@ app.get("/api/client-investments/:userId", (req, res) => {
 });
 
 // ChatGPT
-require("dotenv").config(); // For loading environment variables
 
-// Your OpenAI API key should be stored in an environment variable
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-
 app.post("/api/chat", async (req, res) => {
   try {
     const userMessage = req.body.message;
@@ -2348,7 +2381,7 @@ app.post("/api/chat", async (req, res) => {
             { role: "system", content: "You are a helpful assistant." },
             { role: "user", content: userMessage },
           ],
-          max_tokens: 150,
+          max_tokens: 20,
         }),
       }
     );
