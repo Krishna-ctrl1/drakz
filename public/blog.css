@@ -198,6 +198,7 @@ h1 {
   background: #3b82f6;
   color: white;
   cursor: pointer;
+  margin-bottom: 15px;
 }
 .blog-actions{
   display:flex;
