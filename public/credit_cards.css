@@ -96,8 +96,6 @@ padding-top: 20px;
     width: 100%;
     transition: width 0.3s ease-in-out; 
 }
-
-
 /* After clicking "View Details" */
 .sec.details-visible {
     width: 70%;
@@ -248,6 +246,7 @@ padding-top: 20px;
     background-color: #0056b3; 
 }
 
+/* Table Styling */
 #table{
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     height: auto;
@@ -266,7 +265,7 @@ padding-top: 20px;
     border-collapse: collapse;
     margin: 40px 0px;
     font-family: 'Arial', sans-serif;
-    
+    /* padding:10px; */
 }
 
 .due-dates-table th,
@@ -309,17 +308,63 @@ padding-top: 20px;
     justify-content: space-between;
 }
 
-@media(max-width:1190px) {
-    .sec {
-        flex-direction: column;
-        gap: 20px;
-    }
-
-    .content {
-        margin-left: 200px;
-        padding: 20px;
-        margin-top: 70px;
-        margin-right: 40px;
-    }
-
+.sec,
+#cardlist,
+#cardDetailsSection,
+#Cardstatistics,
+#table {
+    transition: all 0.3s ease; 
 }
+
+@media(max-width:1109px){
+
+    .viewDetails {
+        background-color: #007bff;
+        color: white; 
+        border: none;
+        padding: 8px 10px;
+        border-radius: 10px;
+        font-size: 12px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    .bottom-page{
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    .align{
+        display:flex;
+        flex-direction: column;
+    }
+    .content {
+        margin-left: 170px;
+        padding: 20px;
+        padding-right: 2px;
+        margin-top: 70px;
+    }
+    #cardDetailsSection {
+        width: 100%; 
+        margin-top: 20px; 
+    }
+
+    /* Ensure all sections take full width */
+    #cardlist,
+    #Cardstatistics,
+    #table {
+        width: 100%;
+    }
+
+    /* Adjust layout when "View Details" is clicked */
+    .sec.details-visible {
+        width: 100%; /* Ensure .sec takes full width */
+    }
+
+    .sec.details-visible + #cardDetailsSection {
+        display: block; 
+        width: 100%; 
+    }
+    
+}
+

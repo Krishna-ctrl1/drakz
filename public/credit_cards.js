@@ -1,3 +1,28 @@
+
+function openNav() {
+    const sidebar = document.getElementById("mySidebar");
+    const closeButton = document.getElementById("close-button");
+
+    sidebar.style.width = "180px"; // Open sidebar to full width
+    document.getElementById("main").style.marginLeft = "180px"; // Adjust main content
+    closeButton.innerHTML =
+        '<img width="25" src="assets/icons/sidebarclose.png">'; // Set close button image
+    closeButton.setAttribute("onclick", "closeNav()"); // Set close behavior
+    sidebar.classList.remove("icons-only"); // Ensure text is visible
+}
+
+function closeNav() {
+    const sidebar = document.getElementById("mySidebar");
+    const closeButton = document.getElementById("close-button");
+
+    sidebar.style.width = "60px"; // Set sidebar to icons-only mode
+    document.getElementById("main").style.marginLeft = "60px"; // Adjust main content
+    closeButton.innerHTML = '<img width="25" src="assets/icons/sidebaropen.png">'; // Set open button image
+    closeButton.setAttribute("onclick", "openNav()"); // Set open behavior
+    sidebar.classList.add("icons-only"); // Hide text
+}
+
+
 document.addEventListener("DOMContentLoaded", function () {
     // Expense Chart
     const ctx = document.getElementById("expenseChart").getContext("2d");
@@ -60,7 +85,7 @@ document.addEventListener("DOMContentLoaded", function () {
             detailBankName.innerText = bankName || "N/A";
             detailCardType.innerText = this.dataset.cardType || "N/A";
             detailNameOnCard.innerText = this.dataset.name || "N/A";
-            detailCardNumber.innerText = "**** **** **** " + cardNumber.slice(-4); 
+            detailCardNumber.innerText = cardNumber || "N/A";
             detailValidFrom.innerText = this.dataset.validfrom || "N/A";
             detailExpirationDate.innerText = this.dataset.expiry || "N/A";
 
@@ -177,49 +202,57 @@ document.addEventListener("DOMContentLoaded", function () {
                 benefitsList.appendChild(li);
             });
 
-            // Show the details section and adjust layout
+    
             let detailsSection = document.querySelector(".sec");
-            let cardDetailsSection = document.getElementById("cardDetailsSection");
+        let cardDetailsSection = document.getElementById("cardDetailsSection");
+
+        if (detailsSection) {
+            detailsSection.classList.add("details-visible");
+        }
+
+        if (cardDetailsSection) {
+            cardDetailsSection.style.display = "block";
+        }
+
+        // Adjust layout for smaller screens
+        if (window.innerWidth <= 1109) {
             let cardList = document.getElementById("cardlist");
             let cardStatistics = document.getElementById("Cardstatistics");
             let tableSection = document.getElementById("table");
-
-            if (detailsSection) {
-                detailsSection.classList.add("details-visible");
-            }
-
-            if (cardDetailsSection) {
-                cardDetailsSection.style.display = "block";
-            }
 
             if (cardList && cardStatistics && tableSection) {
                 cardList.style.width = "100%";
                 cardStatistics.style.width = "100%";
                 tableSection.style.width = "100%";
             }
+        }
         });
     });
 
-    // Function to close details
     window.closeDetails = function () {
         let detailsSection = document.querySelector(".sec");
         let cardDetailsSection = document.getElementById("cardDetailsSection");
-        let cardList = document.getElementById("cardlist");
-        let cardStatistics = document.getElementById("Cardstatistics");
-        let tableSection = document.getElementById("table");
-
+    
         if (detailsSection) {
             detailsSection.classList.remove("details-visible");
         }
-
+    
         if (cardDetailsSection) {
             cardDetailsSection.style.display = "none";
         }
-
-        if (cardList && cardStatistics && tableSection) {
-            cardList.style.width = "100%";
-            cardStatistics.style.width = "50%";
-            tableSection.style.width = "50%";
+    
+        // Reset layout for smaller screens
+        if (window.innerWidth <= 1109) {
+            let cardList = document.getElementById("cardlist");
+            let cardStatistics = document.getElementById("Cardstatistics");
+            let tableSection = document.getElementById("table");
+    
+            if (cardList && cardStatistics && tableSection) {
+                cardList.style.width = "100%";
+                cardStatistics.style.width = "100%";
+                tableSection.style.width = "100%";
+            }
         }
     };
+
 });
