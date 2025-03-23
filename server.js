@@ -43,7 +43,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 const db = mysql.createConnection({
   host: "localhost",
   user: "root", // MySQL username
-  password: "Abhi04@28", // MySQL password
+  password: "1234567890", // MySQL password
   database: "DRAKZDatabase", // The database you created earlier
 });
 
@@ -1420,6 +1420,42 @@ app.post("/api/credit-cards", (req, res) => {
   });
 });
 
+// DELETE endpoint for credit cards
+app.delete("/api/credit-cards/:id", (req, res) => {
+  if (!req.session || !req.session.userId) {
+    return res
+      .status(401)
+      .json({ error: "You must be logged in to delete a credit card" });
+  }
+  
+  const userId = req.session.userId;
+  const cardId = req.params.id;
+  
+  // First verify the card belongs to this user
+  const verifyQuery = "SELECT * FROM user_credit_cards WHERE id = ? AND user_id = ?";
+  db.query(verifyQuery, [cardId, userId], (verifyError, verifyResults) => {
+    if (verifyError) {
+      console.error("Database error verifying card ownership:", verifyError);
+      return res.status(500).json({ error: "Failed to verify card ownership" });
+    }
+    
+    if (verifyResults.length === 0) {
+      return res.status(404).json({ error: "Card not found or you don't have permission to delete it" });
+    }
+    
+    // If verification passed, delete the card
+    const deleteQuery = "DELETE FROM user_credit_cards WHERE id = ? AND user_id = ?";
+    db.query(deleteQuery, [cardId, userId], (deleteError, deleteResult) => {
+      if (deleteError) {
+        console.error("Database error deleting credit card:", deleteError);
+        return res.status(500).json({ error: "Failed to delete credit card" });
+      }
+      
+      res.json({ success: true, message: "Credit card deleted successfully" });
+    });
+  });
+});
+
 // At the end of your middleware chain
 app.use((err, req, res, next) => {
   console.error(err.stack);
@@ -2325,11 +2361,8 @@ app.get("/api/client-investments/:userId", (req, res) => {
 });
 
 // ChatGPT
-require("dotenv").config(); // For loading environment variables
 
-// Your OpenAI API key should be stored in an environment variable
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-
 app.post("/api/chat", async (req, res) => {
   try {
     const userMessage = req.body.message;
@@ -2348,7 +2381,7 @@ app.post("/api/chat", async (req, res) => {
             { role: "system", content: "You are a helpful assistant." },
             { role: "user", content: userMessage },
           ],
-          max_tokens: 150,
+          max_tokens: 20,
         }),
       }
     );
@@ -2368,7 +2401,6 @@ app.post("/api/chat", async (req, res) => {
 
 // Endpoint to fetch invoices
 app.get("/api/invoices", (req, res) => {
-  
   const userId = req.session.userId;
   console.log("Fetching invoices for user:", userId);
 
@@ -2422,9 +2454,362 @@ function getTimeAgo(date) {
   }
 }
 
-app.get('/api/getStockApiKey', (req, res) => {
+app.get("/api/getStockApiKey", (req, res) => {
   // Store API key in environment variable instead of hardcoding
   res.json({ apiKey: process.env.ALPHA_VANTAGE_API_KEY });
+});
+
+// Helper function to execute queries with promises
+const query = (sql, params) => {
+  return new Promise((resolve, reject) => {
+    db.execute(sql, params, (err, results) => {
+      if (err) reject(err);
+      else resolve(results);
+    });
+  });
+};
+
+// GET all blogs
+app.get("/api/blogs", async (req, res) => {
+  try {
+    const search = req.query.search || "";
+    let sql = `
+      SELECT b.*, u.name as author_name 
+      FROM blogs b
+      JOIN users u ON b.author_id = u.id
+    `;
+
+    let params = [];
+    if (search) {
+      sql += ` WHERE b.title LIKE ? OR b.content LIKE ? OR u.name LIKE ?`;
+      const searchParam = `%${search}%`;
+      params = [searchParam, searchParam, searchParam];
+    }
+
+    const rows = await query(sql, params);
+    res.json(rows);
+  } catch (error) {
+    console.error("Error fetching blogs:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// POST a new blog
+app.post("/api/blogs", async (req, res) => {
+  try {
+    const { title, content, author_id } = req.body;
+
+    // Validate input
+    if (!title || !content || !author_id) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Missing required fields" });
+    }
+
+    // Insert blog into database
+    const result = await query(
+      "INSERT INTO blogs (title, content, author_id) VALUES (?, ?, ?)",
+      [title, content, author_id]
+    );
+
+    res.json({ success: true, id: result.insertId });
+  } catch (error) {
+    console.error("Error creating blog:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
+
+// DELETE a blog
+app.delete("/api/blogs/:id", async (req, res) => {
+  try {
+    const blogId = req.params.id;
+    const userId = req.body.userId;
+
+    // Verify ownership
+    const blogs = await query("SELECT author_id FROM blogs WHERE id = ?", [
+      blogId,
+    ]);
+
+    if (blogs.length === 0) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Blog not found" });
+    }
+
+    if (blogs[0].author_id != userId) {
+      return res.status(403).json({ success: false, message: "Unauthorized" });
+    }
+
+    // Delete blog
+    await query("DELETE FROM blogs WHERE id = ?", [blogId]);
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Error deleting blog:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
+
+// GET blog interactions for a user
+app.get("/api/blogs/:id/interactions", async (req, res) => {
+  try {
+    const blogId = req.params.id;
+    const userId = req.query.userId;
+
+    if (!userId) {
+      return res.json({ liked: false, disliked: false });
+    }
+
+    // Check if user has liked/disliked this blog
+    const interactions = await query(
+      "SELECT * FROM blog_interactions WHERE blog_id = ? AND user_id = ?",
+      [blogId, userId]
+    );
+
+    if (interactions.length === 0) {
+      return res.json({ liked: false, disliked: false });
+    }
+
+    res.json({
+      liked: interactions[0].interaction_type === "like",
+      disliked: interactions[0].interaction_type === "dislike",
+    });
+  } catch (error) {
+    console.error("Error fetching blog interactions:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// POST like a blog
+app.post("/api/blogs/:id/like", async (req, res) => {
+  try {
+    const blogId = req.params.id;
+    const userId = req.body.userId;
+
+    db.beginTransaction(async (err) => {
+      if (err) throw err;
+
+      try {
+        // Check if user has already interacted with this blog
+        const interactions = await query(
+          "SELECT * FROM blog_interactions WHERE blog_id = ? AND user_id = ?",
+          [blogId, userId]
+        );
+
+        if (interactions.length > 0) {
+          // User has already interacted with this blog
+          if (interactions[0].interaction_type === "like") {
+            // User has already liked this blog, so remove the like
+            await query(
+              "DELETE FROM blog_interactions WHERE blog_id = ? AND user_id = ?",
+              [blogId, userId]
+            );
+
+            await query("UPDATE blogs SET likes = likes - 1 WHERE id = ?", [
+              blogId,
+            ]);
+          } else {
+            // User has disliked this blog, so change to like
+            await query(
+              'UPDATE blog_interactions SET interaction_type = "like" WHERE blog_id = ? AND user_id = ?',
+              [blogId, userId]
+            );
+
+            await query(
+              "UPDATE blogs SET likes = likes + 1, dislikes = dislikes - 1 WHERE id = ?",
+              [blogId]
+            );
+          }
+        } else {
+          // User has not interacted with this blog yet
+          await query(
+            'INSERT INTO blog_interactions (blog_id, user_id, interaction_type) VALUES (?, ?, "like")',
+            [blogId, userId]
+          );
+
+          await query("UPDATE blogs SET likes = likes + 1 WHERE id = ?", [
+            blogId,
+          ]);
+        }
+
+        db.commit((err) => {
+          if (err) throw err;
+          res.json({ success: true });
+        });
+      } catch (error) {
+        db.rollback(() => {
+          throw error;
+        });
+      }
+    });
+  } catch (error) {
+    console.error("Error liking blog:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
+
+// POST dislike a blog
+app.post("/api/blogs/:id/dislike", async (req, res) => {
+  try {
+    const blogId = req.params.id;
+    const userId = req.body.userId;
+
+    db.beginTransaction(async (err) => {
+      if (err) throw err;
+
+      try {
+        // Check if user has already interacted with this blog
+        const interactions = await query(
+          "SELECT * FROM blog_interactions WHERE blog_id = ? AND user_id = ?",
+          [blogId, userId]
+        );
+
+        if (interactions.length > 0) {
+          // User has already interacted with this blog
+          if (interactions[0].interaction_type === "dislike") {
+            // User has already disliked this blog, so remove the dislike
+            await query(
+              "DELETE FROM blog_interactions WHERE blog_id = ? AND user_id = ?",
+              [blogId, userId]
+            );
+
+            await query(
+              "UPDATE blogs SET dislikes = dislikes - 1 WHERE id = ?",
+              [blogId]
+            );
+          } else {
+            // User has liked this blog, so change to dislike
+            await query(
+              'UPDATE blog_interactions SET interaction_type = "dislike" WHERE blog_id = ? AND user_id = ?',
+              [blogId, userId]
+            );
+
+            await query(
+              "UPDATE blogs SET dislikes = dislikes + 1, likes = likes - 1 WHERE id = ?",
+              [blogId]
+            );
+          }
+        } else {
+          // User has not interacted with this blog yet
+          await query(
+            'INSERT INTO blog_interactions (blog_id, user_id, interaction_type) VALUES (?, ?, "dislike")',
+            [blogId, userId]
+          );
+
+          await query("UPDATE blogs SET dislikes = dislikes + 1 WHERE id = ?", [
+            blogId,
+          ]);
+        }
+
+        db.commit((err) => {
+          if (err) throw err;
+          res.json({ success: true });
+        });
+      } catch (error) {
+        db.rollback(() => {
+          throw error;
+        });
+      }
+    });
+  } catch (error) {
+    console.error("Error disliking blog:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
+
+// GET comments for a blog
+app.get("/api/blogs/:id/comments", async (req, res) => {
+  try {
+    const blogId = req.params.id;
+
+    const comments = await query(
+      `SELECT c.*, u.name as username
+       FROM blog_comments c
+       JOIN users u ON c.user_id = u.id
+       WHERE c.blog_id = ?
+       ORDER BY c.created_at DESC;`,
+      [blogId]
+    );
+
+    res.json(comments);
+  } catch (error) {
+    console.error("Error fetching comments:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// POST a comment
+app.post("/api/blogs/:id/comments", async (req, res) => {
+  try {
+    const blogId = req.params.id;
+    const { userId, text } = req.body;
+
+    // Validate input
+    if (!userId || !text) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Missing required fields" });
+    }
+
+    // Insert comment into database
+    const result = await query(
+      "INSERT INTO blog_comments (blog_id, user_id, text) VALUES (?, ?, ?)",
+      [blogId, userId, text]
+    );
+
+    res.json({ success: true, id: result.insertId });
+  } catch (error) {
+    console.error("Error creating comment:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
+
+// DELETE a comment
+app.delete("/api/comments/:id", async (req, res) => {
+  try {
+    const commentId = req.params.id;
+    const userId = req.body.userId;
+
+    // Verify ownership
+    const comments = await query(
+      "SELECT user_id FROM blog_comments WHERE id = ?",
+      [commentId]
+    );
+
+    if (comments.length === 0) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Comment not found" });
+    }
+
+    if (comments[0].user_id != userId) {
+      return res.status(403).json({ success: false, message: "Unauthorized" });
+    }
+
+    // Delete comment
+    await query("DELETE FROM blog_comments WHERE id = ?", [commentId]);
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Error deleting comment:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
+
+module.exports = app;
+
+app.get("/api/auth/current-user", (req, res) => {
+  if (req.session && req.session.userId) {
+    res.json({
+      authenticated: true,
+      userId: req.session.userId
+    });
+  } else {
+    res.json({
+      authenticated: false,
+      userId: null
+    });
+  }
 });
 
 // Start the server

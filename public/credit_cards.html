@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,15 +10,14 @@
     <link rel="stylesheet" href="header.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
-    <link rel="stylesheet" href="credits_cards.css">
-    
+    <link rel="stylesheet" href="credit_cards.css">
 </head>
-<body>
 
+<body>
     <header class="header">
         <div class="left">
             <span class="logo">D R A K Z</span>
-            
+
         </div>
         <div class="search-bar">
             <i class="fas fa-search"></i>
@@ -30,21 +30,20 @@
                 <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="User">
             </div>
         </div>
-        
+
     </header>
-    
+
     <div class="main-container">
 
         <div class="sidebar" id="mySidebar">
-            <!-- Close Button (visible when sidebar is open) -->
             <a href="javascript:void(0)" class="closebtn" id="close-button" onclick="closeNav()">
                 <img width="25" src="assets/icons/sidebarclose.png">
             </a>
-           
-            
+
+
             <ul class="sidebar-list">
                 <a href="dashboard.html">
-                    <li ><i class="fas fa-home"></i> <span>Dashboard</span></li>
+                    <li><i class="fas fa-home"></i> <span>Dashboard</span></li>
                 </a>
                 <a href="accounts.html">
                     <li><i class="fas fa-user"></i> <span>Accounts</span></li>
@@ -62,112 +61,254 @@
                     <li><i class="fas fa-tools"></i> <span>Services</span></li>
                 </a>
                 <a href="My_privilege.html">
-                    <li ><i class="fas fa-gift"></i> <span>My Privileges</span></li>
+                    <li><i class="fas fa-gift"></i> <span>My Privileges</span></li>
                 </a>
                 <a href="settings.html">
                     <li><i class="fas fa-cog"></i> <span>Settings</span></li>
                 </a>
             </ul>
         </div>
-    
 
-        
 
-        
         <div class="content" id="main">
-            
-            <div class="sec">
-              <section id="mycards">
-                  <div class="atm-cards-header">
-                          <h2>My Cards</h2>
-                      </div>
-                  <div class="atm-cards-container">
-                      
-              
-                      <!-- Swiper Container -->
-                      <div class="swiper-container">
-                          <div class="swiper-wrapper">
-                              <!-- Initially empty -->
-                          </div>
-              
-                          <!-- No Cards Message -->
-                          <div id="noCardsMessage" class="no-cards-message">Your Cards will be Displayed here</div>
-              
-                          <!-- Pagination (Indicators) -->
-                          <div class="swiper-pagination"></div>
-              
-                          <!-- Navigation Arrows -->
-                          <div class="swiper-button-next"></div>
-                          <div class="swiper-button-prev"></div>
-                      </div>
-                  </div>
-              </section>
-              <section id="addnewcard">
-                  <h2>Add New Card</h2>
-                  <div class="addcard">
-                      <form id="addCardForm">
-                          <div class="form-group">
-                              <label>Card Type</label>
-                              <input type="text" id="cardType" required>
-                          </div>
-                          <div class="form-group">
-                              <label>Name On Card</label>
-                              <input type="text" id="cardName" required>
-                          </div>
-                          <div class="form-group">
-                              <label>Card Number</label>
-                              <input type="text" id="cardNumber" placeholder="XXXX XXXX XXXX XXXX" required>
-                              <span class="error" id="cardNumberError"></span>
-                          </div>
-                          <div classs="organizer"> 
-                            <div class="form-group">
-                              <label>Valid From</label>
-                              <input type="text" id="validFrom" placeholder="MM/YY" required>
-                              <span class="error" id="validFromError"></span>
+            <div class="align">
+
+                <div class="sec">
+                    <section id="cardlist">
+                        <h2>Card List</h2>
+
+                        <div id="cardListContainer">
+                            <!---->
+                            <div class="listdetails">
+                                <div>
+                                    <h4>Card Type</h4>
+                                    <p>Credit</p>
+                                </div>
+                                <div>
+                                    <h4>Name on Card</h4>
+                                    <p>John Doe</p>
+                                </div>
+                                <div>
+                                    <h4>Card Number</h4>
+                                    <p>**** **** **** 1234</p>
+                                </div>
+                                <div>
+                                    <h4>Expiration</h4>
+                                    <p>12/25</p>
+                                </div>
+                                <div>
+                                    <button class="viewDetails" data-card-type="Credit" data-name="John Doe"
+                                        data-bank="HDFC Bank" data-number="5678 1234 8976 1234" data-validfrom="01/23"
+                                        data-expiry="12/25">
+                                        View Details
+                                    </button>
+                                </div>
                             </div>
-                            <div class="form-group">
-                              <label>Expiration Date</label>
-                              <input type="text" id="cardExpiry" placeholder="MM/YY" required>
-                              <span class="error" id="cardExpiryError"></span>
+
+                            <div class="listdetails">
+                                <div>
+                                    <h4>Card Type</h4>
+                                    <p>Credit</p>
+                                </div>
+                                <div>
+                                    <h4>Name on Card</h4>
+                                    <p>Alice Smith</p>
+                                </div>
+                                <div>
+                                    <h4>Card Number</h4>
+                                    <p>**** **** **** 5678</p>
+                                </div>
+                                <div>
+                                    <h4>Expiration</h4>
+                                    <p>11/26</p>
+                                </div>
+                                <div>
+                                    <button class="viewDetails" data-card-type="Credit" data-name="Alice Smith"
+                                        data-bank="ICICI Bank" data-number="9876 5432 1234 5678" data-validfrom="05/24"
+                                        data-expiry="11/26">
+                                        View details
+                                    </button>
+                                </div>
                             </div>
-                          </div>
-                          <button type="submit" class="btn">Add Card</button>
-                      </form>
-                  </div>
-              </section>
+                            
+                            <div class="listdetails">
+                                <div>
+                                    <h4>Card Type</h4>
+                                    <p>Credit</p>
+                                </div>
+                                <div>
+                                    <h4>Name on Card</h4>
+                                    <p>Emily Davis</p>
+                                </div>
+                                <div>
+                                    <h4>Card Number</h4>
+                                    <p>**** **** **** 3456</p>
+                                </div>
+                                <div>
+                                    <h4>Expiration</h4>
+                                    <p>09/28</p>
+                                </div>
+                                <div>
+                                    <button class="viewDetails" data-card-type="Credit" data-name="Emily Davis"
+                                        data-bank="Axis Bank" data-number="3456 1234 9876 3456" data-validfrom="02/26"
+                                        data-expiry="09/28">
+                                        View details
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="listdetails">
+                                <div>
+                                    <h4>Card Type</h4>
+                                    <p>Credit</p>
+                                </div>
+                                <div>
+                                    <h4>Name on Card</h4>
+                                    <p>Michael Johnson</p>
+                                </div>
+                                <div>
+                                    <h4>Card Number</h4>
+                                    <p>**** **** **** 9012</p>
+                                </div>
+                                <div>
+                                    <h4>Expiration</h4>
+                                    <p>07/27</p>
+                                </div>
+                                <div>
+                                    <button class="viewDetails" data-card-type="Credit" data-name="Michael Johnson"
+                                        data-bank="Canara Bank" data-number="1234 9876 5432 9012" data-validfrom="03/25"
+                                        data-expiry="07/27">
+                                        View details
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <!---->
+                    </section>
+
+                    <div class="bottom-page">
+                        <section id="Cardstatistics">
+                            <h2>Card Expense Statistics</h2>
+                            <div class="chart-container">
+                                <canvas id="expenseChart"></canvas>
+                            </div>
+                        </section>
+                        
+                        <section id="table">
+                            <table class="due-dates-table">
+                                <h2>Payments Dues</h2>
+                                <thead>
+                                    <tr>
+                                        <th>S.No</th>
+                                        <th>Card Name</th>
+                                        <th>Amount Due</th>
+                                        <th>Due Date</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>01.</td>
+                                        <td>Visa Platinum</td>
+                                        <td>₹1,500</td>
+                                        <td>25/10/2023</td>
+                                        <td data-status="Pending">Pending</td>
+                                    </tr>
+                                    <tr>
+                                        <td>02.</td>
+                                        <td>MasterCard Gold</td>
+                                        <td>₹2,300</td>
+                                        <td>28/10/2023</td>
+                                        <td data-status="Pending">Pending</td>
+                                    </tr>
+                                    <tr>
+                                        <td>03.</td>
+                                        <td>American Express</td>
+                                        <td>₹3,000</td>
+                                        <td>01/11/2023</td>
+                                        <td data-status="Paid">Paid</td>
+                                    </tr>
+                                    <tr>
+                                        <td>04.</td>
+                                        <td>Rupay Select</td>
+                                        <td>₹1,200</td>
+                                        <td>05/11/2023</td>
+                                        <td data-status="Pending">Pending</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </section>
+                    </div>
+                </div>
+
+                 <!-- New Card Details Section -->
+                 <section id="cardDetailsSection">
+                    <h2>Card Details</h2>
+                
+                    <div class="card-info">
+                        <div class="info-row">
+                            <p><strong>Bank Name:</strong></p>
+                            <p id="detailBankName">N/A</p>
+                        </div>
+                        <div class="info-row">
+                            <p><strong>Card Type:</strong></p>
+                            <p id="detailCardType">Credit</p>
+                        </div>
+                        <div class="info-row">
+                            <p><strong>Name on Card:</strong></p>
+                            <p id="detailNameOnCard">John Doe</p>
+                        </div>
+                        <div class="info-row">
+                            <p><strong>Card Number:</strong></p>
+                            <p id="detailCardNumber">**** **** **** 1234</p>
+                        </div>
+                        <div class="info-row">
+                            <p><strong>Valid From:</strong></p>
+                            <p id="detailValidFrom">01/23</p>
+                        </div>
+                        <div class="info-row">
+                            <p><strong>Expiration Date:</strong></p>
+                            <p id="detailExpirationDate">12/25</p>
+                        </div>
+                    </div>
+                
+                    <div id="billingInfo">
+                        <h3>Billing Information</h3>
+                        <div class="card-info">
+                            <div class="info-row">
+                                <p><strong>Current Bill:</strong></p>
+                                <p>₹<span id="detailBillAmount">5603</span></p>
+                            </div>
+                            <div class="info-row">
+                                <p><strong>Due Date:</strong></p>
+                                <p id="detailDueDate">2025-04-04</p>
+                            </div>
+                            <div class="info-row">
+                                <p><strong>Minimum Amount Due:</strong></p>
+                                <p>₹<span id="detailMinDue">1120</span></p>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div id="offers">
+                        <h3>Benefits & Offers</h3>
+                        <ul id="benefitsList">
+                            <li>10x reward points on shopping</li>
+                            <li>Airport lounge access</li>
+                            <li>EMI conversion</li>
+                        </ul>
+                    </div>
+                
+                    <button class="close-btn" onclick="closeDetails()">Close</button>
+                  </section>
+                
             </div>
-            <div class="sec">
-              <section id="Cardstatistics">
-                  <h2>Card Expense Statistics</h2>
-                  <div class="chart-container">
-                      <canvas id="expenseChart"></canvas>
-                  </div>
-              </section>
-              <section id="cardlist">
-                  <h2>Card List</h2>
-                  <div id="cardListContainer"></div>
-  
-                  <dialog id="cardDetailsDialog">
-                      <div>
-                          <h2>Card Details</h2>
-                          <p><strong>Card Type:</strong> <span id="detailCardType"></span></p>
-                          <p><strong>Name on Card:</strong> <span id="detailNameOnCard"></span></p>
-                          <p><strong>Card Number:</strong> <span id="detailCardNumber"></span></p>
-                          <p><strong>Valid From:</strong> <span id="detailValidFrom"></span></p>
-                          <p><strong>Expiration Date:</strong> <span id="detailExpirationDate"></span></p>
-                          <button id="deleteCardButton">Delete Card</button>
-                          <button onclick="document.getElementById('cardDetailsDialog').close()">Close</button>
-                      </div>
-                  </dialog>
-              </section>
-              
-            </div>
-          </div>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
 
-   <script src="credit_cards.js"></script>
-    </body>
+    <script src="credit_cards.js"></script>
+</body>
+
 </html>
