@@ -397,7 +397,7 @@ document.addEventListener('DOMContentLoaded', function() {
         closeModal('property');
       };
     }
-    
+    ``
     // Update cancel button for property modal
     const propertyCancelBtn = document.querySelector('#propertyModal .btn-secondary');
     if (propertyCancelBtn) {
@@ -420,7 +420,7 @@ document.addEventListener('DOMContentLoaded', function() {
       metalCancelBtn.onclick = function() {
         closeModal('metal');
       };
-    }
+    }  
   });
   // Edit property - this function needs to be globally accessible
   function editProperty(propertyId) {
