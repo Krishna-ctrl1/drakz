@@ -587,6 +587,7 @@ function addCard() {
   const validFrom = document.getElementById("validFrom").value;
   const validThru = document.getElementById("validThru").value;
   const bankName = document.getElementById("bankName").value;
+  const cardType = document.getElementById("cardType").value;
 
   // Convert MM/YY to database format (YYYY-MM-DD)
   const validFromDate = convertToISODate(validFrom);
@@ -599,7 +600,8 @@ function addCard() {
     valid_from: validFromDate,
     valid_thru: validThruDate,
     bank_name: bankName,
-    card_type: determineCardType(cardNumber),
+    card_type: cardType,
+    card_network: determineCardType(cardNumber),
   };
 
   // Send POST request to add card
@@ -628,6 +630,7 @@ function addCard() {
       document.getElementById("validFrom").value = "";
       document.getElementById("validThru").value = "";
       document.getElementById("bankName").value = "";
+      document.getElementById("cardType").value = "";
       // Refresh the dashboard data
       fetchDashboardData();
     })

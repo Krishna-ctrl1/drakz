@@ -102,6 +102,9 @@
           <a href="My_privilege.html">
             <li><i class="fas fa-gift"></i> <span>My Privileges</span></li>
           </a>
+          <a href="drakz_chatbot.html">
+            <li><i class="fas fa-cog"></i> <span>FinBot</span></li>
+          </a>
           <a href="settings.html">
             <li><i class="fas fa-cog"></i> <span>Settings</span></li>
           </a>
@@ -324,7 +327,13 @@
                 <option value="IndusInd Bank"></option>
               </datalist>
             </div>
-
+            <div class="card-type-container">
+              <select id="cardType" required>
+                <option value="" disabled selected>Select Card Type</option>
+                <option value="credit">Credit Card</option>
+                <option value="debit">Debit Card</option>
+              </select>
+            </div>
             <input
               type="text"
               id="validFrom"

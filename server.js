@@ -44,7 +44,7 @@ const db = mysql.createConnection({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME
+  database: process.env.DB_NAME,
 });
 
 // Connect to MySQL
@@ -1334,26 +1334,21 @@ app.get("/api/dashboard", (req, res) => {
 // Credit card API endpoint
 app.post("/api/credit-cards", (req, res) => {
   console.log("Credit card addition request received:", req.body);
-
-  console.log("Credit card addition request received:", req.body);
-
   if (!req.session || !req.session.userId) {
     return res
       .status(401)
       .json({ error: "You must be logged in to add a credit card" });
   }
-
   const userId = req.session.userId;
-
   const {
     card_number,
     cardholder_name,
     valid_from,
     valid_thru,
     bank_name,
+    card_network,
     card_type,
   } = req.body;
-
   console.log("Processing card data:", {
     userId,
     cardDetails: {
@@ -1362,10 +1357,10 @@ app.post("/api/credit-cards", (req, res) => {
       valid_from,
       valid_thru,
       bank_name,
+      card_network,
       card_type,
     },
   });
-
   // Validate required fields
   if (!card_number || !cardholder_name || !valid_from || !valid_thru) {
     console.log("Validation failed - missing fields");
@@ -1373,21 +1368,18 @@ app.post("/api/credit-cards", (req, res) => {
       .status(400)
       .json({ error: "Missing required credit card information" });
   }
-
   // Basic card number validation
   const sanitizedCardNumber = card_number.replace(/\s/g, "");
   if (!/^\d{13,19}$/.test(sanitizedCardNumber)) {
     console.log("Validation failed - invalid card number format");
     return res.status(400).json({ error: "Invalid card number format" });
   }
-
   // Insert the credit card into database
   const query = `
-    INSERT INTO user_credit_cards 
-    (user_id, card_number, cardholder_name, valid_from, valid_thru, bank_name, card_type) 
-    VALUES (?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO user_credit_cards
+      (user_id, card_number, cardholder_name, valid_from, valid_thru, bank_name, card_type, card_network)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   `;
-
   const params = [
     userId,
     sanitizedCardNumber,
@@ -1395,11 +1387,10 @@ app.post("/api/credit-cards", (req, res) => {
     valid_from,
     valid_thru,
     bank_name || "Unknown Bank",
-    card_type || "Unknown Type",
+    card_type || "credit", // Default to credit if not specified
+    card_network || "Unknown", // Add card_network to params
   ];
-
   console.log("Executing query with params:", params);
-
   db.query(query, params, (error, result) => {
     if (error) {
       console.error("Database error adding credit card:", error);
@@ -1408,9 +1399,7 @@ app.post("/api/credit-cards", (req, res) => {
         details: error.message,
       });
     }
-
     console.log("Card added successfully, result:", result);
-
     // Return success response
     res.status(201).json({
       success: true,
@@ -1427,30 +1416,36 @@ app.delete("/api/credit-cards/:id", (req, res) => {
       .status(401)
       .json({ error: "You must be logged in to delete a credit card" });
   }
-  
+
   const userId = req.session.userId;
   const cardId = req.params.id;
-  
+
   // First verify the card belongs to this user
-  const verifyQuery = "SELECT * FROM user_credit_cards WHERE id = ? AND user_id = ?";
+  const verifyQuery =
+    "SELECT * FROM user_credit_cards WHERE id = ? AND user_id = ?";
   db.query(verifyQuery, [cardId, userId], (verifyError, verifyResults) => {
     if (verifyError) {
       console.error("Database error verifying card ownership:", verifyError);
       return res.status(500).json({ error: "Failed to verify card ownership" });
     }
-    
+
     if (verifyResults.length === 0) {
-      return res.status(404).json({ error: "Card not found or you don't have permission to delete it" });
+      return res
+        .status(404)
+        .json({
+          error: "Card not found or you don't have permission to delete it",
+        });
     }
-    
+
     // If verification passed, delete the card
-    const deleteQuery = "DELETE FROM user_credit_cards WHERE id = ? AND user_id = ?";
+    const deleteQuery =
+      "DELETE FROM user_credit_cards WHERE id = ? AND user_id = ?";
     db.query(deleteQuery, [cardId, userId], (deleteError, deleteResult) => {
       if (deleteError) {
         console.error("Database error deleting credit card:", deleteError);
         return res.status(500).json({ error: "Failed to delete credit card" });
       }
-      
+
       res.json({ success: true, message: "Credit card deleted successfully" });
     });
   });
@@ -2802,12 +2797,12 @@ app.get("/api/auth/current-user", (req, res) => {
   if (req.session && req.session.userId) {
     res.json({
       authenticated: true,
-      userId: req.session.userId
+      userId: req.session.userId,
     });
   } else {
     res.json({
       authenticated: false,
-      userId: null
+      userId: null,
     });
   }
 });
