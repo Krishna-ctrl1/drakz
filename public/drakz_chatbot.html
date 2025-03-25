@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DRAKZ - Financial Chatbot</title>
+    <link rel="stylesheet" href="drakz_chatbot.css" />
+    <link rel="stylesheet" href="sidebar2.css" />
+    <link rel="stylesheet" href="header.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    />
+  </head>
+  <body>
+    <header class="header">
+      <div class="left">
+        <span class="logo">D R A K Z</span>
+      </div>
+      <div class="search-bar">
+        <i class="fas fa-search"></i>
+        <input
+          type="text"
+          id="searchInput"
+          placeholder="Search for something"
+          onkeyup="filterDashboard()"
+        />
+      </div>
+      <div class="icons">
+        <i class="fas fa-cog"></i>
+        <i class="fas fa-bell"></i>
+        <div class="profile">
+          <img
+            src="https://randomuser.me/api/portraits/women/44.jpg"
+            alt="User"
+          />
+        </div>
+      </div>
+    </header>
+
+    <div class="main-container">
+      <div class="sidebar" id="mySidebar">
+        <!-- Close Button (visible when sidebar is open) -->
+        <a
+          href="javascript:void(0)"
+          class="closebtn"
+          id="close-button"
+          onclick="closeNav()"
+        >
+          <img width="25" src="assets/icons/sidebarclose.png" />
+        </a>
+
+        <ul class="sidebar-list">
+          <a href="dashboard.html">
+            <li><i class="fas fa-home"></i> <span>Dashboard</span></li>
+          </a>
+          <a href="accounts.html">
+            <li><i class="fas fa-user"></i> <span>Accounts</span></li>
+          </a>
+          <a href="investments.html">
+            <li>
+              <i class="fa-solid fa-chart-column"></i> <span>Investments</span>
+            </li>
+          </a>
+          <a href="credit_cards.html">
+            <li>
+              <i class="fas fa-credit-card"></i> <span>Credit Cards</span>
+            </li>
+          </a>
+          <a href="blog.html">
+            <li><i class="fa-solid fa-blog"></i> <span>Blog</span></li>
+          </a>
+          <a href="services.html">
+            <li><i class="fas fa-tools"></i> <span>Services</span></li>
+          </a>
+          <a href="My_privilege.html">
+            <li><i class="fas fa-gift"></i> <span>My Privileges</span></li>
+          </a>
+          <a href="#">
+            <li class="active">
+              <i class="fas fa-home"></i> <span>FinBot</span>
+            </li>
+          </a>
+          <a href="settings.html">
+            <li><i class="fas fa-cog"></i> <span>Settings</span></li>
+          </a>
+        </ul>
+      </div>
+
+      <div class="chatbot-container">
+        <div class="chat-section">
+          <div class="tab-navigation">
+            <div class="tab-item active" data-section="welcome">
+              <svg class="icon" viewBox="0 0 24 24">
+                <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"></path>
+              </svg>
+              <span>Home</span>
+            </div>
+            <div class="tab-item" data-section="financial-planning">
+              <svg class="icon" viewBox="0 0 24 24">
+                <path
+                  d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"
+                ></path>
+                <path d="M7 12h2v5H7zm4-7h2v12h-2zm4 4h2v8h-2z"></path>
+              </svg>
+              <span>Financial Planning</span>
+            </div>
+            <div class="tab-item" data-section="stock-analysis">
+              <svg class="icon" viewBox="0 0 24 24">
+                <path
+                  d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 16.99z"
+                ></path>
+              </svg>
+              <span>Stock Analysis</span>
+            </div>
+            <div class="tab-item" data-section="investment">
+              <svg class="icon" viewBox="0 0 24 24">
+                <path
+                  d="M21 18v1c0 1.1-.9 2-2 2H5c-1.1 0-2-.9-2-2V5c0-1.1.9-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"
+                ></path>
+              </svg>
+              <span>Investment Recommendations</span>
+            </div>
+            <div class="tab-item" data-section="advisor">
+              <svg class="icon" viewBox="0 0 24 24">
+                <path
+                  d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+                ></path>
+              </svg>
+              <span>Financial Advisor</span>
+            </div>
+          </div>
+
+          <!-- Welcome Section Content -->
+          <div class="section-content active" id="welcome-content">
+            <div class="welcome-message">
+              <h1>Welcome to DRAKZ Financial Assistant</h1>
+              <p>
+                Our AI-powered chatbot is here to help you with all your
+                financial needs. Choose from one of our specialized services to
+                get started.
+              </p>
+
+              <div class="section-cards">
+                <div class="section-card" data-section="financial-planning">
+                  <svg class="icon financial-planning-icon" viewBox="0 0 24 24">
+                    <path
+                      d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"
+                    ></path>
+                    <path d="M7 12h2v5H7zm4-7h2v12h-2zm4 4h2v8h-2z"></path>
+                  </svg>
+                  <h3>Financial Planning</h3>
+                  <p>Budget, savings, and retirement planning</p>
+                </div>
+                <div class="section-card" data-section="stock-analysis">
+                  <svg class="icon stock-analysis-icon" viewBox="0 0 24 24">
+                    <path
+                      d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 16.99z"
+                    ></path>
+                  </svg>
+                  <h3>Stock Analysis</h3>
+                  <p>Market trends and stock performance</p>
+                </div>
+                <div class="section-card" data-section="investment">
+                  <svg class="icon investment-icon" viewBox="0 0 24 24">
+                    <path
+                      d="M21 18v1c0 1.1-.9 2-2 2H5c-1.1 0-2-.9-2-2V5c0-1.1.9-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"
+                    ></path>
+                  </svg>
+                  <h3>Investment Recommendations</h3>
+                  <p>Personalized investment opportunities</p>
+                </div>
+                <div class="section-card" data-section="advisor">
+                  <svg class="icon advisor-icon" viewBox="0 0 24 24">
+                    <path
+                      d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+                    ></path>
+                  </svg>
+                  <h3>Financial Advisor</h3>
+                  <p>Expert advice for your financial questions</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Financial Planning Section Content -->
+          <div class="section-content" id="financial-planning-content">
+            <h2>Financial Planning</h2>
+            <p>
+              Create and manage your budget, savings goals, and retirement
+              planning.
+            </p>
+            <div class="financial-planning-inputs">
+              <h2>Monthly Income & Expenses</h2>
+              <div class="input-row">
+                <div class="input-group">
+                  <label for="monthly-income"
+                    >1. Monthly Net Income (INR)</label
+                  >
+                  <input
+                    type="number"
+                    id="monthly-income"
+                    class="number-input"
+                    min="0"
+                    step="0.01"
+                  />
+                </div>
+                <div class="input-group">
+                  <label for="outing-expenses">2. Outing Expenses (INR)</label>
+                  <input
+                    type="number"
+                    id="outing-expenses"
+                    class="number-input"
+                    min="0"
+                    step="0.01"
+                  />
+                </div>
+                <div class="input-group">
+                  <label for="transportation-costs"
+                    >3. Transportation Costs (INR)</label
+                  >
+                  <input
+                    type="number"
+                    id="transportation-costs"
+                    class="number-input"
+                    min="0"
+                    step="0.01"
+                  />
+                </div>
+              </div>
+
+              <div class="input-row">
+                <div class="input-group">
+                  <label for="fixed-costs">4. Other Fixed Costs (INR)</label>
+                  <input
+                    type="number"
+                    id="fixed-costs"
+                    class="number-input"
+                    min="0"
+                    step="0.01"
+                  />
+                </div>
+                <div class="input-group">
+                  <label for="food-costs">5. Food Costs (INR)</label>
+                  <input
+                    type="number"
+                    id="food-costs"
+                    class="number-input"
+                    min="0"
+                    step="0.01"
+                  />
+                </div>
+                <div class="input-group">
+                  <label for="available-savings"
+                    >6. Available Savings (INR)</label
+                  >
+                  <input
+                    type="number"
+                    id="available-savings"
+                    class="number-input"
+                    min="0"
+                    step="0.01"
+                  />
+                </div>
+              </div>
+
+              <div class="toggle-container">
+                <label class="toggle-switch">
+                  <input type="checkbox" id="variable-costs-toggle" />
+                  <span class="toggle-slider"></span>
+                  <span class="toggle-label"
+                    >I have variable monthly costs</span
+                  >
+                </label>
+              </div>
+
+              <div id="variable-costs-container" class="hidden">
+                <h3>Monthly Variable Expenses</h3>
+                <div class="input-row">
+                  <div class="input-group">
+                    <label for="january-costs">January (INR)</label>
+                    <input
+                      type="number"
+                      id="january-costs"
+                      class="number-input"
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+                  <div class="input-group">
+                    <label for="february-costs">February (INR)</label>
+                    <input
+                      type="number"
+                      id="february-costs"
+                      class="number-input"
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+                  <div class="input-group">
+                    <label for="march-costs">March (INR)</label>
+                    <input
+                      type="number"
+                      id="march-costs"
+                      class="number-input"
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+                </div>
+                <div class="input-row">
+                  <div class="input-group">
+                    <label for="april-costs">April (INR)</label>
+                    <input
+                      type="number"
+                      id="april-costs"
+                      class="number-input"
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+                  <div class="input-group">
+                    <label for="may-costs">May (INR)</label>
+                    <input
+                      type="number"
+                      id="may-costs"
+                      class="number-input"
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+                  <div class="input-group">
+                    <label for="june-costs">June (INR)</label>
+                    <input
+                      type="number"
+                      id="june-costs"
+                      class="number-input"
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+                </div>
+                <div class="input-row">
+                  <div class="input-group">
+                    <label for="july-costs">July (INR)</label>
+                    <input
+                      type="number"
+                      id="july-costs"
+                      class="number-input"
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+                  <div class="input-group">
+                    <label for="august-costs">August (INR)</label>
+                    <input
+                      type="number"
+                      id="august-costs"
+                      class="number-input"
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+                  <div class="input-group">
+                    <label for="september-costs">September (INR)</label>
+                    <input
+                      type="number"
+                      id="september-costs"
+                      class="number-input"
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+                </div>
+                <div class="input-row">
+                  <div class="input-group">
+                    <label for="october-costs">October (INR)</label>
+                    <input
+                      type="number"
+                      id="october-costs"
+                      class="number-input"
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+                  <div class="input-group">
+                    <label for="november-costs">November (INR)</label>
+                    <input
+                      type="number"
+                      id="november-costs"
+                      class="number-input"
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+                  <div class="input-group">
+                    <label for="december-costs">December (INR)</label>
+                    <input
+                      type="number"
+                      id="december-costs"
+                      class="number-input"
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <button id="calculate-summary" class="calculate-btn">
+                Calculate Financial Summary
+              </button>
+            </div>
+          </div>
+
+          <!-- Stock Analysis Section Content -->
+          <div class="section-content" id="stock-analysis-content">
+            <h2>Stock Analysis</h2>
+            <p>
+              Get detailed analysis and performance information about stocks.
+            </p>
+
+            <div class="stock-input-container">
+              <input
+                type="text"
+                class="stock-input"
+                id="stock-symbol"
+                placeholder="Enter stock symbol (e.g., AAPL)"
+              />
+              <button class="stock-button" id="get-stock-details">
+                Get Details
+              </button>
+            </div>
+
+            <div class="stock-analysis-results" id="stock-results">
+              <!-- This section will be populated with stock data -->
+              <div class="stock-graph">
+                <!-- Placeholder for stock price graph -->
+                <img
+                  src="/api/placeholder/800/300"
+                  alt="Stock Price History Graph"
+                  style="width: 100%; height: 100%; object-fit: cover"
+                />
+              </div>
+
+              <h3>Key Financial Metrics</h3>
+              <div class="key-metrics">
+                <div class="metric-card">
+                  <div class="metric-label">Current Price</div>
+                  <div class="metric-value">$175.42</div>
+                </div>
+                <div class="metric-card">
+                  <div class="metric-label">Price Change (%)</div>
+                  <div class="metric-value positive">+2.34%</div>
+                </div>
+                <div class="metric-card">
+                  <div class="metric-label">Revenue</div>
+                  <div class="metric-value">$394.3B</div>
+                </div>
+                <div class="metric-card">
+                  <div class="metric-label">Net Income</div>
+                  <div class="metric-value">$96.9B</div>
+                </div>
+                <div class="metric-card">
+                  <div class="metric-label">Net Margin (%)</div>
+                  <div class="metric-value">24.6%</div>
+                </div>
+              </div>
+
+              <div class="company-info">
+                <h3>Company Information</h3>
+                <p><strong>Name:</strong> Apple Inc.</p>
+                <p><strong>Industry:</strong> Technology</p>
+                <p>
+                  <strong>Description:</strong> Apple Inc. designs,
+                  manufactures, and markets smartphones, personal computers,
+                  tablets, wearables, and accessories worldwide. The company
+                  offers iPhone, Mac, iPad, and wearables, home, and
+                  accessories.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Investment Section Content -->
+          <div class="section-content" id="investment-content">
+            <h2>Investment Recommendations</h2>
+            <p>
+              Get personalized investment opportunities based on your financial
+              goals.
+            </p>
+            <!-- Investment content would go here -->
+          </div>
+
+          <!-- Financial Advisor Section Content -->
+          <div class="section-content" id="advisor-content">
+            <h2>Financial Advisor</h2>
+            <p>Ask questions and get expert financial advice.</p>
+            <!-- Financial Advisor content would go here -->
+            <div class="messages-container">
+              <!-- Messages go here -->
+              <div class="message bot">Hi there! How can I help you today?</div>
+              <div class="message user">
+                Just checking out this chat interface!
+              </div>
+            </div>
+            <div class="input-area">
+              <textarea placeholder="Type your message..."></textarea>
+              <button class="send-btn">➤</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="drakz_chatbot.js"></script>
+  </body>
+</html>
