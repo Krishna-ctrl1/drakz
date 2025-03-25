@@ -1430,11 +1430,9 @@ app.delete("/api/credit-cards/:id", (req, res) => {
     }
 
     if (verifyResults.length === 0) {
-      return res
-        .status(404)
-        .json({
-          error: "Card not found or you don't have permission to delete it",
-        });
+      return res.status(404).json({
+        error: "Card not found or you don't have permission to delete it",
+      });
     }
 
     // If verification passed, delete the card
@@ -2805,6 +2803,188 @@ app.get("/api/auth/current-user", (req, res) => {
       userId: null,
     });
   }
+});
+
+// GET endpoint to fetch user's credit cards
+app.get("/api/user-credit-cards", (req, res) => {
+  // Check if user is logged in
+  if (!req.session || !req.session.userId) {
+    return res
+      .status(401)
+      .json({ error: "You must be logged in to view credit cards" });
+  }
+
+  const userId = req.session.userId;
+
+  // Query to fetch user's credit cards
+  const query = `
+      SELECT 
+          id, 
+          card_number, 
+          cardholder_name, 
+          valid_from, 
+          valid_thru, 
+          bank_name, 
+          card_type, 
+          card_network
+      FROM user_credit_cards
+      WHERE user_id = ?
+  `;
+
+  db.query(query, [userId], (error, results) => {
+    if (error) {
+      console.error("Database error fetching credit cards:", error);
+      return res.status(500).json({
+        error: "Failed to retrieve credit cards",
+        details: error.message,
+      });
+    }
+
+    // Return the cards
+    res.status(200).json(results);
+  });
+});
+
+// GET endpoint to fetch bill details for a specific credit card
+app.get("/api/credit-card-bill", (req, res) => {
+  // Check if user is logged in
+  if (!req.session || !req.session.userId) {
+    return res
+      .status(401)
+      .json({ error: "You must be logged in to view credit card bills" });
+  }
+
+  const userId = req.session.userId;
+  const creditCardNumber = req.query.cardNumber;
+
+  // Query to fetch specific credit card bill details
+  const query = `
+ SELECT
+ current_bill,
+ minimum_amount_due,
+ due_date
+ FROM
+ credit_card_bills
+ WHERE
+ user_id = ?
+ AND card_number = ?
+ ORDER BY
+ due_date DESC
+ LIMIT 1
+`;
+
+  db.query(query, [userId, creditCardNumber], (error, results) => {
+    if (error) {
+      console.error("Database error fetching credit card bill:", error);
+      return res.status(500).json({
+        error: "Failed to retrieve credit card bill",
+        details: error.message,
+      });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({
+        error: "No bill found for this credit card",
+      });
+    }
+
+    // Return the bill details
+    res.status(200).json(results[0]);
+  });
+});
+
+app.get("/api/credit-card-dues", (req, res) => {
+  // Check if user is logged in
+  if (!req.session || !req.session.userId) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  const query = `
+      SELECT 
+          ucr.cardholder_name, 
+          CONCAT(SUBSTRING(ucr.card_number, 1, 4), ' **** **** ' , SUBSTRING(ucr.card_number, -4)) AS masked_card_number,
+          cb.current_bill,
+          cb.minimum_amount_due,
+          DATE_FORMAT(cb.due_date, '%d/%m/%Y') AS formatted_due_date,
+          cb.status
+      FROM 
+          credit_card_bills cb
+      JOIN 
+          user_credit_cards ucr ON cb.user_id = ucr.user_id AND cb.card_number = ucr.card_number
+      WHERE 
+          cb.user_id = ?
+      ORDER BY 
+          cb.due_date
+  `;
+
+  db.query(query, [req.session.userId], (error, results) => {
+    if (error) {
+      console.error("Error fetching credit card dues:", error);
+      return res
+        .status(500)
+        .json({ error: "Failed to retrieve credit card dues" });
+    }
+
+    res.status(200).json(results);
+  });
+});
+
+app.get("/api/bank-expenses", (req, res) => {
+  // Check if user is logged in
+  if (!req.session || !req.session.userId) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  const query = `
+      SELECT 
+          uc.bank_name,
+          SUM(cb.current_bill) as total_expense
+      FROM 
+          credit_card_bills cb
+      JOIN 
+          user_credit_cards uc ON cb.user_id = uc.user_id AND cb.card_number = uc.card_number
+      WHERE 
+          cb.user_id = ?
+      GROUP BY 
+          uc.bank_name
+      ORDER BY 
+          total_expense DESC
+  `;
+
+  db.query(query, [req.session.userId], (error, results) => {
+    if (error) {
+      console.error("Error fetching bank expenses:", error);
+      return res
+        .status(500)
+        .json({ error: "Failed to retrieve bank expenses" });
+    }
+
+    // Prepare data for chart
+    const bankNames = results.map((result) => result.bank_name);
+    const expenses = results.map((result) => parseFloat(result.total_expense));
+
+    // Color palette (can be expanded or modified)
+    const colors = [
+      "#3b82f6", // Blue
+      "#38bdf8", // Light Blue
+      "#06b6d4", // Cyan
+      "#4f46e5", // Indigo
+      "#6366f1", // Indigo Light
+      "#a855f7", // Purple
+      "#ec4899", // Pink
+    ];
+
+    res.status(200).json({
+      labels: bankNames,
+      datasets: [
+        {
+          data: expenses,
+          backgroundColor: colors.slice(0, bankNames.length),
+          borderWidth: 2,
+        },
+      ],
+    });
+  });
 });
 
 // Start the server
