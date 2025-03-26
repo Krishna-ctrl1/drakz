@@ -61,7 +61,7 @@
                     <li ><i class="fas fa-gift"></i> <span>My Privileges</span></li>
                 </a>
                 <a href="drakz_chatbot.html">
-                    <li><i class="fas fa-cog"></i> <span>FinBot</span></li>
+                    <li><i class="fas fa-robot"></i> <span>FinBot</span></li>
                   </a>
                 <a href="#">
                     <li class="active"><i class="fas fa-cog"></i> <span>Settings</span></li>
@@ -77,100 +77,336 @@
 
         <div class="content" id="main">
             
-            <div class="container">
-                <div class="tabs">
-                    <div class="tab active" onclick="showTab('profile')">Profile</div>
-                    <div class="tab" onclick="showTab('preferences')">Preferences</div>
-                    <div class="tab" onclick="showTab('security')">Security</div>
-                </div>
-        
-                <div id="profile" class="tab-content active">
-                    <div class="profile-container">
-                        <img id="profile-pic" class="profile-pic" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Profile Picture">
-                        <input type="file" id="profile-img" accept="image/*" style="display:none" onchange="previewImage(event)">
-                        <i class="fa fa-pencil-alt edit-icon" onclick="document.getElementById('profile-img').click();"></i>
-                    </div>
-                    <div class="input-groups">
-                        <div class="left-inputgroup">
-                            <div class="input-group"><label>Name</label><input type="text" id="name"><span id="name-error" class="error-message"></span></div>
-                            <div class="input-group"><label>Email</label><input type="email" id="email"><span id="email-error" class="error-message"></span></div>
-                            <div class="input-group"><label>Mobile Number</label><input type="tel" id="mobile"><span id="mobile-error" class="error-message"></span></div>
-                            <div class="input-group"><label>DOB</label><input type="date" id="dob"><span id="dob-error" class="error-message"></span></div>
-                        </div>
-                        <div class="right-inputgroup">
-                            <div class="input-group"><label>Permanent Address</label><input type="text" id="perm-address"></div>
-                            <div class="input-group"><label>Present Address</label><input type="text" id="pres-address"></div>
-                            <div class="input-group"><label>PIN Code</label><input type="text" id="pin"><span id="pin-error" class="error-message"></span></div>
-                            <div class="input-group"><label>City</label><input type="text" id="city"></div>
-                
-                        </div>
+                <h1>Settings</h1>
+                <div class="settings-container">
+                    <!-- 1. Account Settings -->
+                    <section class="settings-section">
+                        <h2><i class="fas fa-user-circle"></i> Account Settings</h2>
+                        <div class="settings-card">
+                            <div class="setting-item">
+                                <label>Profile Information</label>
+                                
+                                
+                                <div class="profile-display" id="profile-display">
+                                    <div class="profile-pic">
+                                        <img src="https://randomuser.me/api/portraits/women/44.jpg" id="profile-image">
+                                    </div>
+                                    <div class="profile-details">
+                                        <p><strong>Name:</strong> <span id="profile-name">Kamala Sen</span></p>
+                                        <p><strong>Email:</strong> <span id="profile-email">kamala.sen@example.com</span></p>
+                                        <p><strong>Phone:</strong> <span id="profile-phone">+91 9399313638</span></p>
+                                        <p><strong>DOB:</strong> <span id="profile-dob">1990-05-15</span></p>
+                                        <button class="edit-btn" id="profile-edit-btn">Edit</button>
+                                    </div>
+                                </div>
+                            
+                                <div class="profile-edit-form" id="profile-edit-form" style="display:none">
+                                    <div class="form-group">
+                                        <label>Profile Picture</label>
+                                        <input type="file" id="profile-image-upload" accept="image/*">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Full Name</label>
+                                        <input type="text" id="edit-name" value="Kamala Sen">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Email</label>
+                                        <input type="email" id="edit-email" value="kamala.sen@example.com">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Phone</label>
+                                        <input type="tel" id="edit-phone" value="+91 9399313638">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Date of Birth</label>
+                                        <input type="date" id="edit-dob" value="1990-05-15">
+                                    </div>
+                                    <div class="form-actions">
+                                        <button class="cancel-btn" id="profile-cancel-btn">Cancel</button>
+                                        <button class="save-btn" id="profile-save-btn">Save Changes</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="setting-item">
+                                <label>Change Password</label>
+                                <button class="edit-btn" id="change-password-btn">Change</button>
+                                
+                            </div>
+                            
+                                <!-- Password Change Form (initially hidden) -->
+                                <div class="password-change-form" id="password-change-form" style="display: none;">
+                                    <div class="form-group">
+                                        <label>Current Password</label>
+                                        <input type="password" id="current-password" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>New Password</label>
+                                        <input type="password" id="new-password" required>
+                                        <small class="password-hint">Minimum 8 characters with at least 1 number and 1 special character</small>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Confirm New Password</label>
+                                        <input type="password" id="confirm-password" required>
+                                        <small class="validation-error" id="password-error"></small>
+                                    </div>
+                                    <div class="form-actions">
+                                        <button class="cancel-btn" id="cancel-password-change">Cancel</button>
+                                        <button class="save-btn" id="save-password-change">Update Password</button>
+                                    </div>
+                                </div>
+                                <!-- 2 fa -->
 
-                    </div>
-                    
-                    
-                    <div class="input-group">
-                        <label>Country</label>
-                        <div id="country-box" class="country-box" onclick="editCountry()">
-                            <span id="country-text">Select Country</span>
-                            <i class="fas fa-pencil-alt"></i>
+                                <div class="setting-item">
+                                    <label>Two-Factor Authentication (2FA)</label>
+                                    <label class="switch">
+                                        <input type="checkbox" id="2fa-toggle">
+                                        <span class="slider"></span>
+                                    </label>
+                                    
+                                    
+                                </div>
+                                <!-- 2FA Setup Form -->
+                                <div class="t2fa-setup-form" id="t2fa-setup-form" style="display: none;">
+                                    <div class="form-group">
+                                        <label>Choose verification method:</label>
+                                        <div class="verification-options">
+                                            <label>
+                                                <input type="radio" name="2fa-method" value="email" checked> 
+                                                Email
+                                            </label>
+                                            <label>
+                                                <input type="radio" name="2fa-method" value="sms"> 
+                                                SMS
+                                            </label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group" id="email-verification">
+                                        <label>Email Address</label>
+                                        <input type="email" id="2fa-email" placeholder="your@email.com" value="<%= localStorage.getItem('userEmail') || '' %>">
+                                    </div>
+                                    
+                                    <div class="form-group" id="phone-verification" style="display: none;">
+                                        <label>Phone Number</label>
+                                        <input type="tel" id="2fa-phone" placeholder="+1 (555) 123-4567" value="<%= localStorage.getItem('userPhone') || '' %>">
+                                    </div>
+                                    
+                                    <div class="form-actions">
+                                        <button class="cancel-btn" id="cancel-2fa-setup">Cancel</button>
+                                        <button class="save-btn" id="confirm-2fa-setup">Enable 2FA</button>
+                                    </div>
+                                </div>
+                               
                         </div>
-                        <select id="country-select" style="display: none;" onchange="saveCountry()"></select>
-                    </div>
-                    
-                    <button class="save-btn" onclick="saveProfile()">Save</button>
-                    <div id="success-message" class="success-message"></div>
+                    </section>
+            
+                    <!-- 2. Notification Settings -->
+                    <section class="settings-section">
+                        <h2><i class="fas fa-bell"></i> Notifications</h2>
+                        <div class="settings-card">
+                            <div class="setting-item">
+                                <label>Email Notifications</label>
+                                <label class="switch">
+                                    <input type="checkbox" id="email-notifications" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <label>Push Notifications</label>
+                                <label class="switch">
+                                    <input type="checkbox" id="push-notifications" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <label>SMS Alerts</label>
+                                <label class="switch">
+                                    <input type="checkbox" id="sms-alerts">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </section>
+            
+                    <!-- 3. Financial Preferences -->
+                    <section class="settings-section">
+                        <h2><i class="fas fa-wallet"></i> Financial Preferences</h2>
+                        <div class="settings-card">
+                          <!-- Monthly Budget -->
+                          <div class="setting-item monthly-budget-goal">
+                            <label>Monthly Budget Goal</label>
+                            <div class="budget-input-container">
+                              <span class="currency-symbol">$</span>
+                              <input type="number" id="monthly-budget" placeholder="0.00" min="0" step="0.01">
+                              <button class="save-btn" id="save-budget">Save</button>
+                            </div>
+                            <small class="validation-error" id="budget-error"></small>
+                          </div>
+                          
+                          <!-- Long-Term Goals -->
+                          <div class="setting-item">
+                            <label>Long-Term Goals</label>
+                            <div id="goals-display">
+                              <!-- Goals will be displayed here -->
+                            </div>
+                            <button class="edit-btn" id="edit-goals-btn">Set Goals</button>
+                            
+                            <!-- Goals Form (hidden by default) -->
+                            <div class="goals-form" id="goals-form" style="display: none;">
+                              <div class="form-group">
+                                <label>Goal Name</label>
+                                <input type="text" id="goal-name" placeholder="e.g., Buy a house">
+                              </div>
+                              <div class="form-group">
+                                <label>Target Amount</label>
+                                <input type="number" id="goal-amount" placeholder="0.00" min="0" step="0.01">
+                              </div>
+                              <div class="form-group">
+                                <label>Target Date</label>
+                                <input type="date" id="goal-date">
+                              </div>
+                              <div class="form-actions">
+                                <button class="cancel-btn" id="cancel-goals">Cancel</button>
+                                <button class="save-btn" id="save-goals">Save Goal</button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </section>
+                      
+
+                    <!-- Add this after the Financial Preferences section -->
+                    <section class="settings-section">
+                        <h2><i class="fas fa-university"></i> Linked Accounts</h2>
+                        <div class="settings-card">
+                            <div id="bank-accounts-list">
+                                <!-- Dynamically populated accounts will appear here -->
+                            </div>
+                            <button class="add-account-btn" id="link-new-account">
+                                <i class="fas fa-plus"></i> Link New Account
+                            </button>
+
+                            <!-- Link Account Modal (Hidden by Default) -->
+                            <div id="link-account-modal" class="modal">
+                                <div class="modal-content">
+                                    <span class="close-modal" onclick="closeModal('link-account-modal')">&times;</span>
+                                    <h3>Link Bank Account</h3>
+                                    <form id="link-account-form">
+                                        <div class="form-group">
+                                            <label>Bank Name</label>
+                                            <select id="bank-name" required>
+                                                <option value="">Select Bank</option>
+                                                <!-- Public Sector Banks -->
+                                                <optgroup label="Public Sector Banks">
+                                                    <option value="State Bank of India">State Bank of India</option>
+                                                    <option value="Punjab National Bank">Punjab National Bank</option>
+                                                    <option value="Bank of Baroda">Bank of Baroda</option>
+                                                    <option value="Canara Bank">Canara Bank</option>
+                                                    <option value="Union Bank of India">Union Bank of India</option>
+                                                    <option value="Bank of India">Bank of India</option>
+                                                    <option value="Indian Bank">Indian Bank</option>
+                                                    <option value="Central Bank of India">Central Bank of India</option>
+                                                </optgroup>
+                                                
+                                                <!-- Private Banks -->
+                                                <optgroup label="Private Banks">
+                                                    <option value="HDFC Bank">HDFC Bank</option>
+                                                    <option value="ICICI Bank">ICICI Bank</option>
+                                                    <option value="Axis Bank">Axis Bank</option>
+                                                    <option value="Kotak Mahindra Bank">Kotak Mahindra Bank</option>
+                                                    <option value="IndusInd Bank">IndusInd Bank</option>
+                                                    <option value="Yes Bank">Yes Bank</option>
+                                                    <option value="IDFC First Bank">IDFC First Bank</option>
+                                                </optgroup>
+                                                
+                                                <!-- Payment Banks -->
+                                                <optgroup label="Payment Banks">
+                                                    <option value="Paytm Payments Bank">Paytm Payments Bank</option>
+                                                    <option value="Airtel Payments Bank">Airtel Payments Bank</option>
+                                                </optgroup>
+                                            </select>
+                                            
+                                            <!-- Change account number input to full digits -->
+                                            <div class="form-group">
+                                                <label>Account Number</label>
+                                                <input type="text" id="account-number" pattern="[0-9]{9,18}" 
+                                                       title="9-18 digit account number" required>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Account Type</label>
+                                            <select id="account-type" required>
+                                                <option value="">Select Type</option>
+                                                <option value="Checking">Checking</option>
+                                                <option value="Savings">Savings</option>
+                                                <option value="Credit Card">Credit Card</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Last 4 Digits of Account Number</label>
+                                            <input type="text" id="account-number" pattern="\d{4}" maxlength="4" required>
+                                        </div>
+                                        <button type="submit" class="save-btn">Link Account</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+            
+                    <!-- 4. Privacy & Security -->
+                    <section class="settings-section">
+                        <h2><i class="fas fa-shield-alt"></i> Privacy & Security</h2>
+                        <div class="settings-card">
+                            <div class="setting-item">
+                                <label>Active Sessions</label>
+                                <button class="edit-btn" onclick="openModal('sessions-modal')">Manage</button>
+                            </div>
+                            <div class="setting-item">
+                                <label>Trusted Devices</label>
+                                <button class="edit-btn" onclick="openModal('devices-modal')">View</button>
+                            </div>
+                            <div class="setting-item">
+                                <label>Export Data</label>
+                                <button class="edit-btn" id="export-data">Download</button>
+                            </div>
+                            <div class="setting-item danger">
+                                <label>Delete Account</label>
+                                <button class="delete-btn" onclick="confirmDelete()">Delete</button>
+                            </div>
+                        </div>
+                    </section>
+            
+                    <!-- 5. Subscription & Billing -->
+                    <section class="settings-section">
+                        <h2><i class="fas fa-credit-card"></i> Subscription</h2>
+                        <div class="settings-card">
+                            <div class="setting-item">
+                                <label>Plan Type</label>
+                                <span class="value">Premium (Renews: Jan 15, 2025)</span>
+                            </div>
+                            <div class="setting-item">
+                                <label>Payment Method</label>
+                                <button class="edit-btn" onclick="openModal('payment-modal')">Update</button>
+                            </div>
+                            <div class="setting-item">
+                                <label>Billing History</label>
+                                <button class="edit-btn" onclick="openModal('billing-modal')">View</button>
+                            </div>
+                            <div class="setting-item">
+                                <label>Upgrade/Downgrade</label>
+                                <button class="upgrade-btn">Change Plan</button>
+                            </div>
+                        </div>
+                    </section>
                 </div>
-        
-                <div id="preferences" class="tab-content">
-                    <div class="input-group">
-                        <label>Currency</label>
-                        <div class="dropdown-container">
-                            <input type="text" id="currency" readonly onclick="toggleDropdown('currency-dropdown')">
-                            <i class="fas fa-chevron-down dropdown-icon" onclick="toggleDropdown('currency-dropdown')"></i>
-                            <ul id="currency-dropdown" class="dropdown-menu">
-                                <!-- Will be populated by JavaScript -->
-                            </ul>
-                        </div>
-                    </div>
-                    
-                    <div class="input-group">
-                        <label>Time Zone</label>
-                        <div class="dropdown-container">
-                            <input type="text" id="timezone" readonly onclick="toggleDropdown('timezone-dropdown')">
-                            <i class="fas fa-chevron-down dropdown-icon" onclick="toggleDropdown('timezone-dropdown')"></i>
-                            <ul id="timezone-dropdown" class="dropdown-menu">
-                                <!-- Will be populated by JavaScript -->
-                            </ul>
-                        </div>
-                    </div>
-                    
-                    <!-- Toggle Switches for Preferences -->
-                    <div class="input-group">
-                        <label>Send/Receive Digital Currency</label>
-                        <label class="switch">
-                            <input type="checkbox" id="digital-currency">
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                    <div class="input-group">
-                        <label>Receive Merchant Orders</label>
-                        <label class="switch">
-                            <input type="checkbox" id="merchant-orders">
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                    <div class="input-group">
-                        <label>Recommendations for My Account</label>
-                        <label class="switch">
-                            <input type="checkbox" id="account-recommendations">
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                    
-                    <button class="save-btn" onclick="savePreferences()">Save</button>
+            
+                <!-- Modals (Hidden by Default) -->
+                <div id="profile-modal" class="modal">
+                    <!-- Modal content would go here -->
                 </div>
             </div>
-        </div>
+            
+        
 
     </div>
  

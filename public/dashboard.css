@@ -402,20 +402,21 @@
 
 /* Chat */
 .chat-container {
-  display: flex;
-  flex-direction: column;
-  width: 48%;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-  height: 400px;
-  background-color: rgb(251, 251, 251);
-  padding-left: 20px;
-  padding-right: 25px;
-  padding-top: 25px;
-  padding-bottom: 15px;
-  margin-bottom: 20px;
-  border-radius: 15px;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
+    display: flex;
+    flex-direction: column;
+    min-width:450px;
+    width: 48%;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    height: 400px;
+    background-color: rgb(251, 251, 251);
+    padding-left: 20px;
+    padding-right: 25px;
+    padding-top: 25px;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+    border-radius: 15px;
+    overflow: hidden;
+  }
 
 .chat-container:hover {
   transform: translateY(-5px);
@@ -424,14 +425,14 @@
 
 .messages-container {
   flex: 1;
-  overflow-y: auto; /* Enables vertical scrolling */
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 12px;
   padding: 0 0 16px 0;
   margin-bottom: 10px;
   scroll-behavior: smooth;
-  min-height: 0; /* Critical for flex child scrolling */
+  justify-content: flex-end;
 }
 
 .message {
@@ -442,24 +443,22 @@
 }
 
 .message.user {
-  background-color: #2b63c2;
+  background-color: #263a5b;
   color: white;
   align-self: flex-end;
 }
 
 .message.bot {
-  background-color: #8ba9d9;
+  background-color: #5d749b;
   color: white;
   align-self: flex-start;
 }
 
-/* Refined Input Area */
 .input-area {
   display: flex;
-  padding: 16px 0;
-  border-top: 1px solid rgba(139, 169, 217, 0.3);
+  padding: 12px 0;
+  border-top: 1px solid #eaeaea;
   background-color: rgb(251, 251, 251);
-  align-items: center;
 }
 
 /* Enhanced Input Text Box */
@@ -488,6 +487,15 @@ textarea:focus {
 textarea::placeholder {
   color: #8ba9d9;
   opacity: 0.7;
+}
+
+/* Refined Input Area */
+.input-area {
+  display: flex;
+  padding: 16px 0;
+  border-top: 1px solid rgba(139, 169, 217, 0.3);
+  background-color: rgb(251, 251, 251);
+  align-items: center;
 }
 
 /* Enhanced Send Button */
@@ -613,9 +621,7 @@ textarea::placeholder {
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-  .total-holding-card-container {
-    padding: 30px; /* Reduced padding for smaller screens */
-  }
+  
 
   .amount {
     font-size: 28px; /* Smaller font size for smaller screens */
@@ -636,10 +642,7 @@ textarea::placeholder {
 }
 
 @media (max-width: 480px) {
-  .total-holding-card-container {
-    padding: 20px; /* Further reduced padding for very small screens */
-  }
-
+ 
   .amount {
     font-size: 24px; /* Even smaller font size for very small screens */
   }
@@ -751,15 +754,27 @@ textarea::placeholder {
   .credit-score {
     width: 100vw;
   }
-  .total-holding-card-container {
-    width: 100vw;
+  
+  
+}
+
+@media (max-width: 1211px) {
+  .chat-container {
+    width: 100%;
   }
   .atm-cards-container {
     width: 100vw !important;
   }
 }
-
-@media (max-width: 1239px) and (min-width: 891px) {
+@media (max-width: 1239px) and (min-width: 1212px) {
+  .atm-cards-container {
+    width: 48%;
+  }
+  .chat-container {
+    width: 48%;
+  }
+}
+@media (max-width: 1239px) and (min-width: 890px) {
   .credit-score {
     width: 49%;
   }
@@ -767,12 +782,7 @@ textarea::placeholder {
     width: 48%;
     height: 415.5px;
   }
-  .atm-cards-container {
-    width: 100vw;
-  }
-  .total-holding-card-container {
-    width: 100vw;
-  }
+  
 }
 @media (min-width: 1240px) and (max-width: 1363px) {
   .credit-score {
