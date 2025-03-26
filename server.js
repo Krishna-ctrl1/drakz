@@ -780,7 +780,7 @@ app.get("/api/users", (req, res) => {
         firstName: firstName,
         lastName: lastName,
         email: user.email,
-        role: user.is_premium ? "premium" : "standard", 
+        role: user.is_premium ? "premium" : "standard",
         status: user.email_verified ? "active" : "pending",
         joinDate: user.join_date,
         // Additional fields for detailed view
@@ -800,11 +800,11 @@ app.get("/api/users", (req, res) => {
 //   // Check if user is authenticated as admin (implement proper authentication middleware in production)
 
 //   const query = `
-//     SELECT 
-//       id, 
+//     SELECT
+//       id,
 //       username,
-//       name, 
-//       email, 
+//       name,
+//       email,
 //       DATE_FORMAT(created_at, '%d %b %Y') as join_date
 //     FROM admins
 //     ORDER BY created_at DESC
@@ -2283,6 +2283,52 @@ app.get("/api/client-details/:userId", (req, res) => {
   });
 });
 
+// Route to get client image by user ID
+app.get("/api/client-image/:userId", (req, res) => {
+  const userId = req.params.userId;
+
+  // Query the database to find the image path for the given user ID
+  const query = "SELECT image_path FROM images WHERE user_id = ?";
+
+  db.query(query, [userId], (err, results) => {
+    if (err) {
+      console.error("Database query error:", err);
+      return res.status(500).json({ error: "Failed to retrieve image" });
+    }
+
+    // If no image found, send default profile image
+    if (results.length === 0) {
+      return res.sendFile(
+        path.join(
+          __dirname,
+          "public",
+          "assets",
+          "images",
+          "default-profile.png"
+        )
+      );
+    }
+
+    const localImagePath = results[0].image_path;
+
+    // Check if the file exists
+    if (!fs.existsSync(localImagePath)) {
+      return res.sendFile(
+        path.join(
+          __dirname,
+          "public",
+          "assets",
+          "images",
+          "default-profile.png"
+        )
+      );
+    }
+
+    // Serve the image
+    res.sendFile(localImagePath);
+  });
+});
+
 // API endpoint to get user's stocks and investments
 app.get("/api/client-investments/:userId", (req, res) => {
   if (!req.session.advisorId) {
@@ -3377,6 +3423,24 @@ app.get("/properties", (req, res) => {
       res.json(results);
     }
   );
+});
+
+// Middleware to serve local images
+app.use('/local-images', (req, res, next) => {
+  // Base directory for local images (adjust as needed)
+  const baseDir = '/Users/ziko/Downloads';
+  
+  // Construct the full file path
+  const filePath = path.join(baseDir, req.path);
+  
+  // Check if file exists
+  if (fs.existsSync(filePath)) {
+    // Serve the file
+    res.sendFile(filePath);
+  } else {
+    // If file not found, send default image
+    res.sendFile(path.join(__dirname, 'public', 'assets', 'images', 'default-property.jpg'));
+  }
 });
 
 // Add new property

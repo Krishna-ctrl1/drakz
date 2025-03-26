@@ -931,8 +931,27 @@ document.addEventListener("DOMContentLoaded", () => {
     const imageDiv = document.createElement("div");
     imageDiv.className = "property-image";
     const img = document.createElement("img");
-    img.src = property.image_url || "assets/images/default-property.jpg";
+
+    // Convert local file path to a format that can be displayed
+    const getLocalImagePath = (localPath) => {
+      if (!localPath) {
+        return "assets/images/default-property.jpg";
+      }
+
+      // Extract filename and create a path that can be fetched
+      const filename = localPath.split("/").pop();
+      return `/local-images/${filename}`;
+    };
+
+    // Set image source using the converted path
+    img.src = getLocalImagePath(property.image_url);
     img.alt = property.property_name;
+
+    // Add error handling for image loading
+    img.onerror = () => {
+      img.src = "assets/images/default-property.jpg";
+    };
+
     imageDiv.appendChild(img);
 
     // Details section
@@ -1067,8 +1086,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // Initial fetch of properties
   fetchProperties();
 });
-
-
 
 // Initialize on DOM load
 document.addEventListener("DOMContentLoaded", fetchPolicies);
