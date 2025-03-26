@@ -68,6 +68,7 @@
     
         <!-- Main Content -->
         <div class="content" id="main">
+
     <!-- Properties Section -->
 <div class="asset-box">
     <div class="section-header">
@@ -96,28 +97,45 @@
                 </button>
             </div>
         </div>
-        
-        <!-- Property Card 2 -->
-        <div class="property-card" id="property2">
-            <div class="property-image">
-                <img src="assets/images/apartment jpg for assets 1.jpg" alt="Downtown Apartment">
+    </div>
+      <!-- Property Form Modal -->
+    <div id="propertyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Add New Property</h3>
+                <span class="close-modal" onclick="closeModal('property')">&times;</span>
             </div>
-            <div class="property-details">
-                <h4>Downtown Apartment</h4>
-                <p>Value: $450,000</p>
-                <p>Location: 456 Main Street</p>
-            </div>
-            <div class="property-actions">
-                <button class="action-btn edit-btn" onclick="editProperty('property2')">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button class="action-btn delete-btn" onclick="deleteProperty('property2')">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </div>
+            <form id="propertyForm">
+                <input type="hidden" id="propertyId" value="">
+                <div class="form-group">
+                    <label for="propertyName">Property Name</label>
+                    <input type="text" id="propertyName" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="propertyValue">Value ($)</label>
+                    <input type="number" id="propertyValue" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="propertyLocation">Location</label>
+                    <input type="text" id="propertyLocation" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="propertyImage">Property Image</label>
+                    <div class="file-input-container">
+                        <span class="file-input-label">Select Image</span>
+                        <input type="file" id="propertyImage" class="file-input" accept="image/*">
+                    </div>
+                    <div class="selected-file" id="selectedFileName">No file selected</div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('property')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Property</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
+
            <!-- Insurance Policies Section -->
 <div class="asset-box">
     <div class="section-header">
@@ -147,43 +165,42 @@
                 </button>
             </div>
         </div>
-        <!-- Other policy cards with proper structure -->
-         <!-- Policy Form Modal -->
-<div id="policyModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3 id="policyModalTitle">Add New Insurance Policy</h3>
-            <span class="close-modal" onclick="closeModal('policy')">&times;</span>
-        </div>
-        <form id="policyForm">
-            <input type="hidden" id="policyId" value="">
-            <div class="form-group">
-                <label for="policyName">Policy Name</label>
-                <input type="text" id="policyName" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label for="policyNumber">Policy Number</label>
-                <input type="text" id="policyNumber" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label for="policyProperty">Property</label>
-                <input type="text" id="policyProperty" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label for="policyCoverage">Coverage ($)</label>
-                <input type="number" id="policyCoverage" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label for="policyRenewalDate">Renewal Date</label>
-                <input type="date" id="policyRenewalDate" class="form-control" required>
-            </div>
-            <div class="form-actions">
-                <button type="button" class="btn btn-secondary" onclick="closeModal('policy')">Cancel</button>
-                <button type="submit" class="btn btn-primary">Save Policy</button>
-            </div>
-        </form>
     </div>
-</div>
+     <!-- Policy Form Modal -->
+     <div id="policyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="policyModalTitle">Add New Insurance Policy</h3>
+                <span class="close-modal" onclick="closeModal('policy')">&times;</span>
+            </div>
+            <form id="policyForm">
+                <input type="hidden" id="policyId" value="">
+                <div class="form-group">
+                    <label for="policyName">Policy Name</label>
+                    <input type="text" id="policyName" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="policyNumber">Policy Number</label>
+                    <input type="text" id="policyNumber" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="policyProperty">Property</label>
+                    <input type="text" id="policyProperty" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="policyCoverage">Coverage ($)</label>
+                    <input type="number" id="policyCoverage" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="policyRenewalDate">Renewal Date</label>
+                    <input type="date" id="policyRenewalDate" class="form-control" required>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('policy')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Policy</button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
@@ -216,129 +233,49 @@
             </div>
         </div>
         <!-- Precious Metal Form Modal -->
-<div id="metalModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3 id="metalModalTitle">Add New Precious Metal</h3>
-            <span class="close-modal" onclick="closeModal('metal')">&times;</span>
-        </div>
-        <form id="metalForm">
-            <input type="hidden" id="metalId" value="">
-            <div class="form-group">
-                <label for="metalType">Metal Type</label>
-                <select id="metalType" class="form-control" required>
-                    <option value="Gold">Gold</option>
-                    <option value="Silver">Silver</option>
-                    <option value="Platinum">Platinum</option>
-                    <option value="Other">Other</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="metalAmount">Amount</label>
-                <div class="input-group">
-                    <input type="number" id="metalAmount" class="form-control" required>
-                    <select id="metalUnit" class="form-control unit-select">
-                        <option value="g">g (grams)</option>
-                        <option value="kg">kg (kilograms)</option>
-                        <option value="oz">oz (ounces)</option>
-                    </select>
+        <div id="metalModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="metalModalTitle">Add New Precious Metal</h3>
+                    <span class="close-modal" onclick="closeModal('metal')">&times;</span>
                 </div>
+                <form id="metalForm">
+                    <input type="hidden" id="metalId" value="">
+                    <div class="form-group">
+                        <label for="metalType">Metal Type</label>
+                        <select id="metalType" class="form-control" required>
+                            <option value="Gold">Gold</option>
+                            <option value="Silver">Silver</option>
+                            <option value="Platinum">Platinum</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="metalAmount">Amount</label>
+                        <div class="input-group">
+                            <input type="number" id="metalAmount" class="form-control" required>
+                            <select id="metalUnit" class="form-control unit-select">
+                                <option value="g">g (grams)</option>
+                                <option value="kg">kg (kilograms)</option>
+                                <option value="oz">oz (ounces)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="metalValue">Value ($)</label>
+                        <input type="number" id="metalValue" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="metalPurchaseDate">Date of Purchase</label>
+                        <input type="date" id="metalPurchaseDate" class="form-control" required>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('metal')">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Metal</button>
+                    </div>
+                </form>
             </div>
-            <div class="form-group">
-                <label for="metalValue">Value ($)</label>
-                <input type="number" id="metalValue" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label for="metalPurchaseDate">Date of Purchase</label>
-                <input type="date" id="metalPurchaseDate" class="form-control" required>
-            </div>
-            <div class="form-actions">
-                <button type="button" class="btn btn-secondary" onclick="closeModal('metal')">Cancel</button>
-                <button type="submit" class="btn btn-primary">Save Metal</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-  <!-- Property Form Modal -->
-<div id="propertyModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3 id="modalTitle">Add New Property</h3>
-            <span class="close-modal" onclick="closeModal('property')">&times;</span>
         </div>
-        <form id="propertyForm">
-            <input type="hidden" id="propertyId" value="">
-            <div class="form-group">
-                <label for="propertyName">Property Name</label>
-                <input type="text" id="propertyName" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label for="propertyValue">Value ($)</label>
-                <input type="number" id="propertyValue" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label for="propertyLocation">Location</label>
-                <input type="text" id="propertyLocation" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label for="propertyImage">Property Image</label>
-                <div class="file-input-container">
-                    <span class="file-input-label">Select Image</span>
-                    <input type="file" id="propertyImage" class="file-input" accept="image/*">
-                </div>
-                <div class="selected-file" id="selectedFileName">No file selected</div>
-            </div>
-            <div class="form-actions">
-                <button type="button" class="btn btn-secondary" onclick="closeModal('property')">Cancel</button>
-                <button type="submit" class="btn btn-primary">Save Property</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-    <!-- Precious Metal Form Modal -->
-<div id="metalModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3 id="metalModalTitle">Add New Precious Metal</h3>
-            <span class="close-modal" onclick="closeMetalModal()">&times;</span>
-        </div>
-        <form id="metalForm">
-            <input type="hidden" id="metalId" value="">
-            <div class="form-group">
-                <label for="metalType">Metal Type</label>
-                <select id="metalType" class="form-control" required>
-                    <option value="Gold">Gold</option>
-                    <option value="Silver">Silver</option>
-                    <option value="Platinum">Platinum</option>
-                    <option value="Other">Other</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="metalAmount">Amount</label>
-                <div class="input-group">
-                    <input type="number" id="metalAmount" class="form-control" required>
-                    <select id="metalAmountUnit" class="form-control unit-select">
-                        <option value="g">g (grams)</option>
-                        <option value="kg">kg (kilograms)</option>
-                        <option value="oz">oz (ounces)</option>
-                    </select>
-                </div>
-            </div>
-            <div class="form-group">
-                <label for="metalValue">Value ($)</label>
-                <input type="number" id="metalValue" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label for="metalPurchaseDate">Date of Purchase</label>
-                <input type="text" id="metalPurchaseDate" class="form-control" placeholder="e.g. January 15, 2024" required>
-            </div>
-            <div class="form-actions">
-                <button type="button" class="btn btn-secondary" onclick="closeMetalModal()">Cancel</button>
-                <button type="submit" class="btn btn-primary">Save Metal</button>
-            </div>
-        </form>
     </div>
 </div>
 

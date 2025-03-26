@@ -1123,3 +1123,41 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 });
+
+document.addEventListener("DOMContentLoaded", function () {
+  const sendButton = document.querySelector(".send-btn");
+  const messageInput = document.querySelector("textarea");
+  const messagesContainer = document.querySelector(".messages-container");
+
+  sendButton.addEventListener("click", async function () {
+    let userMessage = messageInput.value.trim();
+    if (userMessage === "") return;
+
+    // Display user message in chat
+    displayMessage(userMessage, "user");
+
+    // Send message to FastAPI backend
+    try {
+      const response = await fetch("http://127.0.0.1:8000/chat/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_input: userMessage }),
+      });
+
+      const data = await response.json();
+      displayMessage(data.response, "bot");
+    } catch (error) {
+      displayMessage("Error connecting to the bot.", "bot");
+    }
+
+    messageInput.value = "";
+  });
+
+  function displayMessage(text, sender) {
+    const messageDiv = document.createElement("div");
+    messageDiv.classList.add("message", sender);
+    messageDiv.innerText = text;
+    messagesContainer.appendChild(messageDiv);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  }
+});

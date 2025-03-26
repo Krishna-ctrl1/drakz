@@ -3,6 +3,8 @@ const mysql = require("mysql2");
 const bodyParser = require("body-parser");
 const path = require("path");
 const cors = require("cors");
+const multer = require("multer");
+const fs = require("fs");
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
 const session = require("express-session");
@@ -753,6 +755,7 @@ app.get("/api/users", (req, res) => {
       employment_status, 
       financial_goals, 
       risk_tolerance,
+      is_premium,
       email_verified, 
       DATE_FORMAT(created_at, '%d %b %Y') as join_date
     FROM users
@@ -777,7 +780,7 @@ app.get("/api/users", (req, res) => {
         firstName: firstName,
         lastName: lastName,
         email: user.email,
-        role: "standard", // Default role, can be updated if you add role to users table
+        role: user.is_premium ? "premium" : "standard", 
         status: user.email_verified ? "active" : "pending",
         joinDate: user.join_date,
         // Additional fields for detailed view
@@ -792,48 +795,48 @@ app.get("/api/users", (req, res) => {
   });
 });
 
-// API endpoint to get all admins
-app.get("/api/admins", (req, res) => {
-  // Check if user is authenticated as admin (implement proper authentication middleware in production)
+// // API endpoint to get all admins
+// app.get("/api/admins", (req, res) => {
+//   // Check if user is authenticated as admin (implement proper authentication middleware in production)
 
-  const query = `
-    SELECT 
-      id, 
-      username,
-      name, 
-      email, 
-      DATE_FORMAT(created_at, '%d %b %Y') as join_date
-    FROM admins
-    ORDER BY created_at DESC
-  `;
+//   const query = `
+//     SELECT 
+//       id, 
+//       username,
+//       name, 
+//       email, 
+//       DATE_FORMAT(created_at, '%d %b %Y') as join_date
+//     FROM admins
+//     ORDER BY created_at DESC
+//   `;
 
-  db.query(query, (err, results) => {
-    if (err) {
-      console.error("Error fetching admins:", err);
-      return res.status(500).json({ error: "Database error" });
-    }
+//   db.query(query, (err, results) => {
+//     if (err) {
+//       console.error("Error fetching admins:", err);
+//       return res.status(500).json({ error: "Database error" });
+//     }
 
-    // Format the data to match the expected structure
-    const formattedAdmins = results.map((admin) => {
-      const nameParts = admin.name.split(" ");
-      const firstName = nameParts[0] || "";
-      const lastName = nameParts.slice(1).join(" ") || "";
+//     // Format the data to match the expected structure
+//     const formattedAdmins = results.map((admin) => {
+//       const nameParts = admin.name.split(" ");
+//       const firstName = nameParts[0] || "";
+//       const lastName = nameParts.slice(1).join(" ") || "";
 
-      return {
-        id: admin.id,
-        firstName: firstName,
-        lastName: lastName,
-        email: admin.email,
-        username: admin.username,
-        role: "admin",
-        status: "active",
-        joinDate: admin.join_date,
-      };
-    });
+//       return {
+//         id: admin.id,
+//         firstName: firstName,
+//         lastName: lastName,
+//         email: admin.email,
+//         username: admin.username,
+//         role: "admin",
+//         status: "active",
+//         joinDate: admin.join_date,
+//       };
+//     });
 
-    res.json(formattedAdmins);
-  });
-});
+//     res.json(formattedAdmins);
+//   });
+// });
 
 // API endpoint to get all advisors
 app.get("/api/advisors", (req, res) => {
@@ -2828,7 +2831,7 @@ app.get("/api/user-credit-cards", (req, res) => {
           card_type, 
           card_network
       FROM user_credit_cards
-      WHERE user_id = ?
+      WHERE user_id = ? AND card_type = 'credit'
   `;
 
   db.query(query, [userId], (error, results) => {
@@ -2986,6 +2989,597 @@ app.get("/api/bank-expenses", (req, res) => {
     });
   });
 });
+
+// Get all insurance policies for a user
+app.get("/api/policies", (req, res) => {
+  const userId = req.session.userId; // Get user ID from session
+
+  if (!userId) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  const query = "SELECT * FROM user_insurance_policy WHERE user_id = ?";
+  db.query(query, [userId], (error, results) => {
+    if (error) {
+      console.error("Error fetching policies:", error);
+      return res.status(500).json({ error: "Failed to fetch policies" });
+    }
+    res.json(results);
+  });
+});
+
+// Add a new insurance policy
+app.post("/api/policies", (req, res) => {
+  const userId = req.session.userId; // Get user ID from session
+
+  if (!userId) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  const {
+    policy_name,
+    policy_number,
+    property_description,
+    coverage_amount,
+    renewal_date,
+  } = req.body;
+
+  const query =
+    "INSERT INTO user_insurance_policy (user_id, policy_name, policy_number, property_description, coverage_amount, renewal_date) VALUES (?, ?, ?, ?, ?, ?)";
+
+  db.query(
+    query,
+    [
+      userId,
+      policy_name,
+      policy_number,
+      property_description,
+      coverage_amount,
+      renewal_date,
+    ],
+    (error, result) => {
+      if (error) {
+        console.error("Error adding policy:", error);
+        return res.status(500).json({ error: "Failed to add policy" });
+      }
+
+      res.status(201).json({
+        id: result.insertId,
+        message: "Policy added successfully",
+      });
+    }
+  );
+});
+
+// Delete an insurance policy
+app.delete("/api/policies/:policyId", (req, res) => {
+  const userId = req.session.userId; // Get user ID from session
+
+  if (!userId) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  const query =
+    "DELETE FROM user_insurance_policy WHERE id = ? AND user_id = ?";
+
+  db.query(query, [req.params.policyId, userId], (error, result) => {
+    if (error) {
+      console.error("Error deleting policy:", error);
+      return res.status(500).json({ error: "Failed to delete policy" });
+    }
+
+    if (result.affectedRows > 0) {
+      res.json({ message: "Policy deleted successfully" });
+    } else {
+      res.status(404).json({ error: "Policy not found" });
+    }
+  });
+});
+
+// Update an existing policy
+app.put("/api/policies/:policyId", (req, res) => {
+  const userId = req.session.userId; // Get user ID from session
+
+  if (!userId) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  const {
+    policy_name,
+    policy_number,
+    property_description,
+    coverage_amount,
+    renewal_date,
+  } = req.body;
+
+  const query =
+    "UPDATE user_insurance_policy SET policy_name = ?, policy_number = ?, property_description = ?, coverage_amount = ?, renewal_date = ? WHERE id = ? AND user_id = ?";
+
+  db.query(
+    query,
+    [
+      policy_name,
+      policy_number,
+      property_description,
+      coverage_amount,
+      renewal_date,
+      req.params.policyId,
+      userId,
+    ],
+    (error, result) => {
+      if (error) {
+        console.error("Error updating policy:", error);
+        return res.status(500).json({ error: "Failed to update policy" });
+      }
+
+      if (result.affectedRows > 0) {
+        res.json({ message: "Policy updated successfully" });
+      } else {
+        res.status(404).json({ error: "Policy not found" });
+      }
+    }
+  );
+});
+
+// Get user's precious metal holdings
+app.get("/precious-holdings", (req, res) => {
+  try {
+    // Assuming user_id is available from the authenticated session
+    const userId = req.session.userId;
+
+    db.query(
+      "SELECT id, metal_type, amount, amount_unit, value, date_of_purchase " +
+        "FROM user_precious_holdings " +
+        "WHERE user_id = ?",
+      [userId],
+      (error, results) => {
+        if (error) {
+          console.error("Error fetching precious holdings:", error);
+          return res
+            .status(500)
+            .json({ error: "Failed to retrieve precious holdings" });
+        }
+        res.json(results);
+      }
+    );
+  } catch (error) {
+    console.error("Error in precious holdings retrieval:", error);
+    res.status(500).json({ error: "Failed to retrieve precious holdings" });
+  }
+});
+
+// Add new precious metal holding
+app.post("/precious-holdings", (req, res) => {
+  try {
+    const userId = req.session.userId;
+    const { metalType, metalAmount, metalUnit, metalValue, metalPurchaseDate } =
+      req.body;
+
+    // Validate input
+    if (
+      !metalType ||
+      !metalAmount ||
+      !metalUnit ||
+      !metalValue ||
+      !metalPurchaseDate
+    ) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    db.query(
+      "INSERT INTO user_precious_holdings " +
+        "(user_id, metal_type, amount, amount_unit, value, date_of_purchase) " +
+        "VALUES (?, ?, ?, ?, ?, ?)",
+      [
+        userId,
+        metalType.toLowerCase(),
+        metalAmount,
+        metalUnit,
+        metalValue,
+        metalPurchaseDate,
+      ],
+      (error, result) => {
+        if (error) {
+          console.error("Error adding precious metal:", error);
+          return res
+            .status(500)
+            .json({ error: "Failed to add precious metal" });
+        }
+
+        res.status(201).json({
+          id: result.insertId,
+          message: "Metal holding added successfully",
+        });
+      }
+    );
+  } catch (error) {
+    console.error("Error in adding precious metal:", error);
+    res.status(500).json({ error: "Failed to add precious metal" });
+  }
+});
+
+// Delete a precious metal holding
+app.delete("/precious-holdings/:id", (req, res) => {
+  try {
+    const userId = req.session.userId;
+    const metalId = req.params.id;
+
+    // First, verify the holding belongs to the user
+    db.query(
+      "SELECT id FROM user_precious_holdings " + "WHERE id = ? AND user_id = ?",
+      [metalId, userId],
+      (checkError, checkResults) => {
+        if (checkError) {
+          console.error("Error checking metal holding:", checkError);
+          return res.status(500).json({ error: "Failed to delete metal" });
+        }
+
+        if (checkResults.length === 0) {
+          return res
+            .status(403)
+            .json({ error: "Unauthorized or metal holding not found" });
+        }
+
+        // Delete the metal holding
+        db.query(
+          "DELETE FROM user_precious_holdings WHERE id = ?",
+          [metalId],
+          (deleteError) => {
+            if (deleteError) {
+              console.error("Error deleting precious metal:", deleteError);
+              return res
+                .status(500)
+                .json({ error: "Failed to delete precious metal" });
+            }
+
+            res.json({ message: "Metal holding deleted successfully" });
+          }
+        );
+      }
+    );
+  } catch (error) {
+    console.error("Error in deleting precious metal:", error);
+    res.status(500).json({ error: "Failed to delete precious metal" });
+  }
+});
+
+app.put("/precious-holdings/:id", (req, res) => {
+  try {
+    const userId = req.session.userId;
+    const metalId = req.params.id;
+    const { metalType, metalAmount, metalUnit, metalValue, metalPurchaseDate } =
+      req.body;
+
+    // Validate input
+    if (
+      !metalType ||
+      !metalAmount ||
+      !metalUnit ||
+      !metalValue ||
+      !metalPurchaseDate
+    ) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    // First, verify the holding belongs to the user
+    db.query(
+      "SELECT id FROM user_precious_holdings " + "WHERE id = ? AND user_id = ?",
+      [metalId, userId],
+      (checkError, checkResults) => {
+        if (checkError) {
+          console.error("Error checking metal holding:", checkError);
+          return res.status(500).json({ error: "Failed to update metal" });
+        }
+
+        if (checkResults.length === 0) {
+          return res
+            .status(403)
+            .json({ error: "Unauthorized or metal holding not found" });
+        }
+
+        // Update the metal holding
+        db.query(
+          "UPDATE user_precious_holdings " +
+            "SET metal_type = ?, amount = ?, amount_unit = ?, value = ?, date_of_purchase = ? " +
+            "WHERE id = ?",
+          [
+            metalType.toLowerCase(),
+            metalAmount,
+            metalUnit,
+            metalValue,
+            metalPurchaseDate,
+            metalId,
+          ],
+          (updateError) => {
+            if (updateError) {
+              console.error("Error updating precious metal:", updateError);
+              return res
+                .status(500)
+                .json({ error: "Failed to update precious metal" });
+            }
+
+            res.json({ message: "Metal holding updated successfully" });
+          }
+        );
+      }
+    );
+  } catch (error) {
+    console.error("Error in updating precious metal:", error);
+    res.status(500).json({ error: "Failed to update precious metal" });
+  }
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: "Something went wrong!" });
+});
+
+// Close database connection when app is terminated
+process.on("SIGINT", () => {
+  db.end((err) => {
+    if (err) {
+      console.error("Error closing database connection:", err);
+    }
+    console.log("Database connection closed");
+    process.exit();
+  });
+});
+
+// Multer configuration for file upload
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadDir = path.join(__dirname, "public", "uploads", "properties");
+    // Ensure directory exists
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    cb(null, `property-${Date.now()}${path.extname(file.originalname)}`);
+  },
+});
+
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB file size limit
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = ["image/jpeg", "image/png", "image/gif"];
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Invalid file type. Only JPEG, PNG, and GIF are allowed."));
+    }
+  },
+});
+
+app.get("/properties", (req, res) => {
+  // Check if user is logged in (session exists)
+  if (!req.session || !req.session.userId) {
+    return res.status(401).json({
+      error: "Unauthorized",
+      message: "User not logged in",
+    });
+  }
+
+  db.query(
+    "SELECT id, property_name, property_value, location, image_url FROM user_properties WHERE user_id = ?",
+    [req.session.userId],
+    (error, results) => {
+      if (error) {
+        console.error("Database query error:", error);
+        return res.status(500).json({
+          error: "Failed to fetch properties",
+          details: error.message,
+        });
+      }
+      res.json(results);
+    }
+  );
+});
+
+// Add new property
+app.post("/properties", upload.single("propertyImage"), (req, res) => {
+  // Check if user is logged in
+  if (!req.session || !req.session.userId) {
+    return res.status(401).json({
+      error: "Unauthorized",
+      message: "User not logged in",
+    });
+  }
+
+  const { propertyName, propertyValue, propertyLocation } = req.body;
+
+  // Handle image upload
+  let imageUrl = null;
+  if (req.file) {
+    imageUrl = `/uploads/properties/${req.file.filename}`;
+  }
+
+  // Insert property into database
+  db.query(
+    "INSERT INTO user_properties (user_id, property_name, property_value, location, image_url) VALUES (?, ?, ?, ?, ?)",
+    [
+      req.session.userId,
+      propertyName,
+      parseFloat(propertyValue),
+      propertyLocation,
+      imageUrl,
+    ],
+    (error, result) => {
+      if (error) {
+        console.error("Error adding property:", error);
+
+        // If an image was uploaded but insert failed, remove the image
+        if (req.file) {
+          const imagePath = path.join(
+            __dirname,
+            "public",
+            `/uploads/properties/${req.file.filename}`
+          );
+          if (fs.existsSync(imagePath)) {
+            fs.unlinkSync(imagePath);
+          }
+        }
+
+        return res.status(500).json({
+          error: "Failed to add property",
+          details: error.message,
+        });
+      }
+
+      res.status(201).json({
+        id: result.insertId,
+        property_name: propertyName,
+        property_value: propertyValue,
+        location: propertyLocation,
+        image_url: imageUrl,
+      });
+    }
+  );
+});
+
+// Update property
+app.put("/properties/:id", upload.single("propertyImage"), (req, res) => {
+  // Check if user is logged in
+  if (!req.session || !req.session.userId) {
+    return res.status(401).json({
+      error: "Unauthorized",
+      message: "User not logged in",
+    });
+  }
+
+  const propertyId = req.params.id;
+  const { propertyName, propertyValue, propertyLocation } = req.body;
+
+  // First, check if the property belongs to the user
+  db.query(
+    "SELECT * FROM user_properties WHERE id = ? AND user_id = ?",
+    [propertyId, req.session.userId],
+    (checkError, existingProperties) => {
+      if (checkError) {
+        return res.status(500).json({
+          error: "Error checking property",
+          details: checkError.message,
+        });
+      }
+
+      if (existingProperties.length === 0) {
+        return res.status(404).json({ error: "Property not found" });
+      }
+
+      // Handle image upload
+      let imageUrl = existingProperties[0].image_url;
+      if (req.file) {
+        // Delete old image if exists
+        if (existingProperties[0].image_url) {
+          const oldImagePath = path.join(
+            __dirname,
+            "public",
+            existingProperties[0].image_url
+          );
+          if (fs.existsSync(oldImagePath)) {
+            fs.unlinkSync(oldImagePath);
+          }
+        }
+        imageUrl = `/uploads/properties/${req.file.filename}`;
+      }
+
+      // Update property
+      db.query(
+        "UPDATE user_properties SET property_name = ?, property_value = ?, location = ?, image_url = ? WHERE id = ?",
+        [
+          propertyName,
+          parseFloat(propertyValue),
+          propertyLocation,
+          imageUrl,
+          propertyId,
+        ],
+        (updateError) => {
+          if (updateError) {
+            console.error("Error updating property:", updateError);
+            return res.status(500).json({
+              error: "Failed to update property",
+              details: updateError.message,
+            });
+          }
+
+          res.json({
+            id: propertyId,
+            property_name: propertyName,
+            property_value: propertyValue,
+            location: propertyLocation,
+            image_url: imageUrl,
+          });
+        }
+      );
+    }
+  );
+});
+
+// Delete property
+app.delete("/properties/:id", (req, res) => {
+  // Check if user is logged in
+  if (!req.session || !req.session.userId) {
+    return res.status(401).json({
+      error: "Unauthorized",
+      message: "User not logged in",
+    });
+  }
+
+  const propertyId = req.params.id;
+
+  // First, find the property to get its image
+  db.query(
+    "SELECT image_url FROM user_properties WHERE id = ? AND user_id = ?",
+    [propertyId, req.session.userId],
+    (checkError, existingProperties) => {
+      if (checkError) {
+        return res.status(500).json({
+          error: "Error checking property",
+          details: checkError.message,
+        });
+      }
+
+      if (existingProperties.length === 0) {
+        return res.status(404).json({ error: "Property not found" });
+      }
+
+      // Delete image file if exists
+      if (existingProperties[0].image_url) {
+        const imagePath = path.join(
+          __dirname,
+          "public",
+          existingProperties[0].image_url
+        );
+        if (fs.existsSync(imagePath)) {
+          fs.unlinkSync(imagePath);
+        }
+      }
+
+      // Delete property from database
+      db.query(
+        "DELETE FROM user_properties WHERE id = ?",
+        [propertyId],
+        (deleteError) => {
+          if (deleteError) {
+            console.error("Error deleting property:", deleteError);
+            return res.status(500).json({
+              error: "Failed to delete property",
+              details: deleteError.message,
+            });
+          }
+
+          res.status(200).json({ message: "Property deleted successfully" });
+        }
+      );
+    }
+  );
+});
+
+module.exports = app;
+module.exports = { app, db };
 
 // Start the server
 app.listen(port, () => {
