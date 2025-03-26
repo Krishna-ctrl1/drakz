@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Investments</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">    
-    <link rel="stylesheet" href="investments.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="investments.css" />
     <link rel="stylesheet" href="sidebar2.css" />
     <link rel="stylesheet" href="header.css" />
 </head>
@@ -16,7 +16,7 @@
     <header class="header">
         <div class="left">
             <span class="logo">D R A K Z</span>
-            
+
         </div>
         <div class="search-bar">
             <i class="fas fa-search"></i>
@@ -37,14 +37,14 @@
                 <a href="javascript:void(0)" class="closebtn" id="close-button" onclick="closeNav()">
                     <img width="25" src="assets/icons/sidebarclose.png">
                 </a>
-               
-                
+
+
                 <ul class="sidebar-list">
                     <a href="dashboard.html">
                         <li><i class="fas fa-home"></i> <span>Dashboard</span></li>
                     </a>
                     <a href="accounts.html">
-                        <li  ><i class="fas fa-user"></i> <span>Accounts</span></li>
+                        <li><i class="fas fa-user"></i> <span>Accounts</span></li>
                     </a>
                     <a href="#">
                         <li class="active"><i class="fa-solid fa-chart-column"></i> <span>Investments</span></li>
@@ -59,98 +59,99 @@
                         <li><i class="fas fa-tools"></i> <span>Services</span></li>
                     </a>
                     <a href="My_privilege.html">
-                        <li ><i class="fas fa-gift"></i> <span>My Privileges</span></li>
+                        <li><i class="fas fa-gift"></i> <span>My Privileges</span></li>
                     </a>
                     <a href="drakz_chatbot.html">
                         <li><i class="fas fa-cog"></i> <span>FinBot</span></li>
-                      </a>
+                    </a>
                     <a href="settings.html">
                         <li><i class="fas fa-cog"></i> <span>Settings</span></li>
                     </a>
                 </ul>
             </div>
-            
-        <div class="content" id="main">
-            
-            <section>
-                <div class="container">
-                    <div class="chart-card">
-                        <h2>Your Investments</h2>
-                        <div class="filter-buttons">
-                            <button class="filter-btn" data-timeframe="1D">1D</button>
-                            <button class="filter-btn" data-timeframe="1M">1M</button>
-                            <button class="filter-btn" data-timeframe="6M">6M</button>
-                            <button class="filter-btn active" data-timeframe="1Y">1Y</button>
+
+            <div class="content" id="main">
+
+                <section>
+                    <div class="container">
+                        <div class="chart-card">
+                            <h2>Your Investments</h2>
+                            <div class="filter-buttons">
+                                <button class="filter-btn" data-timeframe="1D">1D</button>
+                                <button class="filter-btn" data-timeframe="1M">1M</button>
+                                <button class="filter-btn" data-timeframe="6M">6M</button>
+                                <button class="filter-btn active" data-timeframe="1Y">1Y</button>
+                            </div>
+                            <canvas id="investmentChart"></canvas>
                         </div>
-                        <canvas id="investmentChart"></canvas>
                     </div>
+
+                </section>
+
+
+                <div class="bottom">
+
+
+                    <section class="myinvestment-container">
+
+                        <h3 style="text-align: start;">My Investment</h3>
+                        <div class="investment-card">
+                            <img src="data:image/png;base64,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"
+                                alt="Tesla Logo">
+                            <div class="investment-info">
+                                <h3>Tesla Motors</h3>
+                                <p>Electric Vehicles</p>
+                            </div>
+                            <div class="investment-value">
+                                <p>$8,200</p>
+                                <p class="return positive">+25%</p>
+                            </div>
+                        </div>
+                    </section>
+
+
+                    <section class="stock-container">
+                        <h3 style="text-align: start;">Trending Stock</h3>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>SL No</th>
+                                    <th>Name</th>
+                                    <th>Price</th>
+                                    <th>Return</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>01.</td>
+                                    <td>Trivago</td>
+                                    <td>$520</td>
+                                    <td class="positive">+5%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </section>
                 </div>
-            
-            </section>
 
 
-            <div class="bottom">
+
+                <div class="bottom"></div>
 
 
-            <section class="myinvestment-container">
-
-                <h3 style="text-align: start;">My Investment</h3>
-                <div class="investment-card">
-                    <img src="data:image/png;base64,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" alt="Tesla Logo">
-                    <div class="investment-info">
-                        <h3>Tesla Motors</h3>
-                        <p>Electric Vehicles</p>
+                <section class="bottom">
+                    <div class="chart-container">
+                        <h3>Monthly Revenue</h3>
+                        <canvas id="revenueChart" height="200px" width="500px"></canvas>
                     </div>
-                    <div class="investment-value">
-                        <p>$8,200</p>
-                        <p class="return positive">+25%</p>
+                    <div class="chart-container">
+                        <h3>Yearly Total Investment</h3>
+                        <canvas id="totalinvestmentChart" height="200px" width="500px"></canvas>
                     </div>
-                </div>
-            </section>
-
-    
-        <section class="stock-container">
-            <h3 style="text-align: start;">Trending Stock</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>SL No</th>
-                        <th>Name</th>
-                        <th>Price</th>
-                        <th>Return</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>01.</td>
-                        <td>Trivago</td>
-                        <td>$520</td>
-                        <td class="positive">+5%</td>
-                    </tr>
-                </tbody>
-            </table>
-        </section>
-    </div>
-
-
-    
-    <div class="bottom"></div>
-
-
-    <section  class="bottom">
-            <div class="chart-container">
-                <h3>Monthly Revenue</h3>
-                <canvas id="revenueChart" height="200px" width="500px"></canvas>
-            </div>   
-            <div class="chart-container">
-                <h3>Yearly Total Investment</h3>
-                <canvas id="totalinvestmentChart" height="200px" width="500px"></canvas>
+                </section>
             </div>
-    </section>
-</div>
-</div>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-     <script src="investments.js"></script>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="investments.js"></script>
 
 </body>
 
