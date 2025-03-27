@@ -1,5 +1,5 @@
-const express = require("express");
 const mysql = require("mysql2");
+const express = require("express");
 const bodyParser = require("body-parser");
 const path = require("path");
 const cors = require("cors");
@@ -14,6 +14,7 @@ require("dotenv").config();
 
 // Initialize express app first
 const app = express();
+const sqlite3 = require("sqlite3").verbose();
 
 // Then configure it
 app.set("view engine", "ejs");
