@@ -14,7 +14,6 @@ require("dotenv").config();
 
 // Initialize express app first
 const app = express();
-const sqlite3 = require("sqlite3").verbose();
 
 // Then configure it
 app.set("view engine", "ejs");
@@ -112,7 +111,6 @@ async function verifyOTP(email, submittedOTP, sessionOTP) {
 }
 
 // Route definitions (unchanged)
-
 app.get("/", (req, res) => {
   res.redirect("/start_page.html");
 });
