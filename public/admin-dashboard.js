@@ -103,9 +103,6 @@ function manageUser(userId, userRole) {
         
         // Determine which API endpoint to use
         let apiEndpoint = '/api/users';
-        // if (userRole === 'admin') {
-        //     apiEndpoint = '/api/admins';
-        // } else
         if (userRole === 'advisor') {
             apiEndpoint = '/api/advisors';
         }
@@ -383,7 +380,7 @@ function renderUserTable(filtered = null) {
     // Add event listener to the new manage-user button
     document.querySelectorAll('.manage-user').forEach(button => {
         button.addEventListener('click', function() {
-            const userId = parseInt(this.getAttribute('data-id'));
+            const userId = this.getAttribute('data-id');
             const userRole = this.getAttribute('data-role');
             manageUser(userId, userRole);
         });
@@ -606,9 +603,6 @@ async function deleteUser() {
     if (confirm('Are you sure you want to delete this user?')) {
         try {
             let apiEndpoint = '/api/users';
-            // if (userRole === 'admin') {
-            //     apiEndpoint = '/api/admins';
-            // } else 
             if (userRole === 'advisor') {
                 apiEndpoint = '/api/advisors';
             }

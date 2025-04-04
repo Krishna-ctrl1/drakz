@@ -2402,7 +2402,6 @@ app.get("/api/client-investments/:userId", (req, res) => {
 });
 
 // ChatGPT
-
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 app.post("/api/chat", async (req, res) => {
   try {
