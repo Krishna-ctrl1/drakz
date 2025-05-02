@@ -16,6 +16,8 @@ const userInvestmentsSchema = new mongoose.Schema({
     required: true
   },
   // Other investment fields...
-}, { timestamps: true });
+}, { timestamps: true }, {
+  collection: 'user_investments'
+});
 
 module.exports = mongoose.model('UserInvestments', userInvestmentsSchema, 'user_investments');

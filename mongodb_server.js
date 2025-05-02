@@ -5,12 +5,28 @@ const path = require("path");
 const cors = require("cors");
 const crypto = require("crypto");
 require("dotenv").config();
+const fs = require("fs");
+const multer = require("multer");
 
 // Import Advisor Model
 const Advisor = require("./models/Advisor");
 const Admin = require("./models/Admin");
 const User = require("./models/User");
 const Message = require("./models/Message");
+const CreditCard = require("./models/CardCredit");
+const CreditCardBill = require("./models/CreditCardBill");
+const CreditScore = require("./models/CreditScore");
+const Expense = require("./models/Expense");
+const Holding = require("./models/Holding");
+const ClientAdvisor = require("./models/ClientAdvisor");
+const UserHoldings = require("./models/UserHoldings");
+const Invoice = require("./models/Invoice");
+const UserLoan = require("./models/UserLoan");
+const UserTransaction = require("./models/UserTransaction");
+const UserInsurancePolicy = require("./models/UserInsurancePolicy");
+const UserPreciousHoldings = require("./models/UserPreciousHoldings");
+const UserProperty = require("./models/UserProperties");
+const UserStocks = require("./models/UserStocks");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -250,7 +266,7 @@ app.post("/advisor-login", async (req, res) => {
   }
 });
 
-// API to get Cleint for the Advisor Dashboard
+// API to get Client for the Advisor Dashboard
 app.get("/api/advisor-clients", async (req, res) => {
   if (!req.session.advisorId) {
     return res.status(401).json({ error: "Not authenticated" });
@@ -264,7 +280,6 @@ app.get("/api/advisor-clients", async (req, res) => {
     const User = require("./models/User");
 
     // Find clients for this advisor using the correct MongoDB structure
-    // Use new keyword with ObjectId
     const clientRelations = await ClientAdvisors.find({
       advisor_id: new mongoose.Types.ObjectId(advisorId),
     })
@@ -845,10 +860,1621 @@ app.post("/api/messages/reply", async (req, res) => {
 });
 
 // ---------------------------------------------------------------------------------------------------------------------------------------------
-// USER DASHBOARD
+// USER LOGIN
 // ---------------------------------------------------------------------------------------------------------------------------------------------
 
+app.post("/login", async (req, res) => {
+  const { email, password } = req.body;
 
+  // Basic validation
+  if (!email || !password) {
+    return res.status(400).json({
+      status: "error",
+      message: "Email and password are required",
+    });
+  }
+
+  try {
+    const hashedPassword = hashPassword(password);
+
+    // Find user with matching email and password
+    const user = await User.findOne({
+      email: email,
+      password: hashedPassword,
+    });
+
+    if (!user) {
+      return res.status(401).json({
+        status: "error",
+        message: "Invalid email or password",
+      });
+    }
+
+    // User found, set session and redirect to dashboard
+    req.session.userId = user._id;
+    console.log("Login successful for user:", email);
+    console.log("User Id: ", req.session.userId);
+
+    // For AJAX requests, redirect will be handled by the client
+    res.redirect("/dashboard");
+  } catch (err) {
+    console.error("Database error during login:", err);
+    return res.status(500).json({
+      status: "error",
+      message: "Internal server error",
+    });
+  }
+});
+
+// ---------------------------------------------------------------------------------------------------------------------------------------------
+// DASHBOARD
+// ---------------------------------------------------------------------------------------------------------------------------------------------
+
+// Dashboard API endpoint
+app.get("/api/dashboard", async (req, res) => {
+  // Ensure the user is logged in
+  const userId = req.session.userId;
+  console.log("Session userId:", userId);
+
+  // Set content type
+  res.setHeader("Content-Type", "application/json");
+
+  if (!userId) {
+    return res.status(401).json({ error: "Unauthorized. Please log in." });
+  }
+
+  try {
+    // Create an object to store all dashboard data
+    const dashboardData = {};
+
+    // Get basic user details
+    const user = await mongoose.model("User").findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    dashboardData.user = user;
+
+    // Create MongoDB ObjectId from the userId string
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+
+    // Log the ObjectId we're using for queries
+    console.log("Using ObjectId for queries:", userObjectId);
+
+    // Define the collections to query based on your MongoDB collection names
+    const collections = {
+      creditScores: "user_credit_scores",
+      creditCards: "user_credit_cards",
+      expenses: "user_expenses",
+      holdings: "user_holdings",
+    };
+
+    // Get credit scores
+    dashboardData.creditScores = await mongoose.connection
+      .collection(collections.creditScores)
+      .find({ user_id: userObjectId })
+      .toArray();
+
+    // Get credit cards
+    dashboardData.creditCards = await mongoose.connection
+      .collection(collections.creditCards)
+      .find({ user_id: userObjectId })
+      .toArray();
+
+    // Get expenses
+    dashboardData.expenses = await mongoose.connection
+      .collection(collections.expenses)
+      .find({ user_id: userObjectId })
+      .toArray();
+
+    // Get holdings (single document)
+    dashboardData.holdings = await mongoose.connection
+      .collection(collections.holdings)
+      .findOne({ user_id: userObjectId });
+
+    // Check if we're getting data or empty results
+    console.log("Credit Cards found:", dashboardData.creditCards.length);
+    console.log("Credit Scores found:", dashboardData.creditScores.length);
+    console.log("Expenses found:", dashboardData.expenses.length);
+    console.log("Holdings found:", dashboardData.holdings ? "Yes" : "No");
+
+    // Send all the data as JSON
+    res.json(dashboardData);
+  } catch (error) {
+    console.error("Error fetching dashboard data:", error);
+    res.status(500).json({
+      error: "Database error",
+      details: error.message,
+    });
+  }
+});
+
+// Credit card API endpoint
+app.post("/api/credit-cards", async (req, res) => {
+  console.log("Credit card addition request received:", req.body);
+
+  if (!req.session || !req.session.userId) {
+    return res
+      .status(401)
+      .json({ error: "You must be logged in to add a credit card" });
+  }
+
+  const userId = req.session.userId;
+  const {
+    card_number,
+    cardholder_name,
+    valid_from,
+    valid_thru,
+    bank_name,
+    card_network,
+    card_type,
+  } = req.body;
+
+  console.log("Processing card data:", {
+    userId,
+    cardDetails: {
+      card_number,
+      cardholder_name,
+      valid_from,
+      valid_thru,
+      bank_name,
+      card_network,
+      card_type,
+    },
+  });
+
+  // Validate required fields
+  if (!card_number || !cardholder_name || !valid_from || !valid_thru) {
+    console.log("Validation failed - missing fields");
+    return res
+      .status(400)
+      .json({ error: "Missing required credit card information" });
+  }
+
+  // Basic card number validation
+  const sanitizedCardNumber = card_number.replace(/\s/g, "");
+  if (!/^\d{13,19}$/.test(sanitizedCardNumber)) {
+    console.log("Validation failed - invalid card number format");
+    return res.status(400).json({ error: "Invalid card number format" });
+  }
+
+  try {
+    // Create new credit card document
+    const newCreditCard = new CreditCard({
+      user_id: userId,
+      card_number: sanitizedCardNumber,
+      cardholder_name,
+      valid_from,
+      valid_thru,
+      bank_name: bank_name || "Unknown Bank",
+      card_type: card_type || "credit",
+      card_network: card_network || "Unknown",
+    });
+
+    // Save the credit card to database
+    const savedCard = await newCreditCard.save();
+    console.log("Card added successfully, result:", savedCard);
+
+    // Return success response
+    res.status(201).json({
+      success: true,
+      message: "Credit card added successfully",
+      cardId: savedCard._id,
+    });
+  } catch (error) {
+    console.error("Database error adding credit card:", error);
+    return res.status(500).json({
+      error: "Failed to add credit card",
+      details: error.message,
+    });
+  }
+});
+
+// DELETE endpoint for credit cards
+app.delete("/api/credit-cards/:id", async (req, res) => {
+  if (!req.session || !req.session.userId) {
+    return res
+      .status(401)
+      .json({ error: "You must be logged in to delete a credit card" });
+  }
+
+  const userId = req.session.userId;
+  const cardId = req.params.id;
+
+  try {
+    // First verify the card belongs to this user
+    const card = await CreditCard.findOne({ _id: cardId, user_id: userId });
+
+    if (!card) {
+      return res.status(404).json({
+        error: "Card not found or you don't have permission to delete it",
+      });
+    }
+
+    // If verification passed, delete the card
+    await CreditCard.deleteOne({ _id: cardId, user_id: userId });
+
+    res.json({ success: true, message: "Credit card deleted successfully" });
+  } catch (error) {
+    console.error("Database error with credit card deletion:", error);
+    return res.status(500).json({
+      error: "Failed to delete credit card",
+      details: error.message,
+    });
+  }
+});
+
+// ChatGPT
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+app.post("/api/chat", async (req, res) => {
+  try {
+    const userMessage = req.body.message;
+
+    const openaiResponse = await fetch(
+      "https://api.openai.com/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: "gpt-3.5-turbo",
+          messages: [
+            { role: "system", content: "You are a helpful assistant." },
+            { role: "user", content: userMessage },
+          ],
+          max_tokens: 20,
+        }),
+      }
+    );
+
+    const data = await openaiResponse.json();
+
+    if (data.choices && data.choices[0].message) {
+      res.json({ response: data.choices[0].message.content });
+    } else {
+      res.status(500).json({ error: "Invalid response from OpenAI" });
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ error: "Failed to process request" });
+  }
+});
+
+// Premium upgrade endpoint
+app.post("/api/upgrade-to-premium", async (req, res) => {
+  // Ensure the user is logged in
+  const userId = req.session.userId;
+
+  if (!userId) {
+    return res
+      .status(401)
+      .json({ success: false, error: "Unauthorized. Please log in." });
+  }
+
+  // Using Mongoose transactions
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    // 1. Update the user's premium status
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { is_premium: true },
+      { new: true, session }
+    );
+
+    if (!user) {
+      await session.abortTransaction();
+      return res.status(404).json({ success: false, error: "User not found" });
+    }
+
+    // 2. Find an advisor with fewer than 5 clients
+    const advisorAggregation = await ClientAdvisor.aggregate([
+      {
+        $group: {
+          _id: "$advisor_id",
+          client_count: { $sum: 1 },
+        },
+      },
+      {
+        $match: {
+          client_count: { $lt: 5 },
+        },
+      },
+      {
+        $sort: { client_count: 1 },
+      },
+      {
+        $limit: 1,
+      },
+    ]).session(session);
+
+    let advisor;
+
+    if (advisorAggregation.length > 0) {
+      advisor = await Advisor.findById(advisorAggregation[0]._id).session(
+        session
+      );
+
+      // 3. Assign the advisor to the user
+      await ClientAdvisor.create(
+        [
+          {
+            advisor_id: advisor._id,
+            user_id: userId,
+          },
+        ],
+        { session }
+      );
+    }
+
+    // 5. Commit the transaction
+    await session.commitTransaction();
+
+    // 6. Send confirmation email if advisor was assigned
+    if (advisor) {
+      sendConfirmationEmail(user, advisor);
+
+      // 7. Return success with advisor details
+      res.json({
+        success: true,
+        advisor: {
+          name: advisor.name,
+          email: advisor.email,
+        },
+      });
+    } else {
+      // Success but no advisor available
+      res.json({ success: true });
+    }
+  } catch (error) {
+    // Abort transaction on error
+    await session.abortTransaction();
+    console.error("Error in transaction:", error);
+    res.status(500).json({ success: false, error: "Database error" });
+  } finally {
+    session.endSession();
+  }
+});
+
+// ---------------------------------------------------------------------------------------------------------------------------------------------
+// ACCOUNTS
+// ---------------------------------------------------------------------------------------------------------------------------------------------
+
+// Middleware to check authentication
+const isAuthenticated = (req, res, next) => {
+  if (req.session && req.session.userId) {
+    return next();
+  }
+  return res
+    .status(401)
+    .json({ status: "error", message: "Not authenticated" });
+};
+
+app.get("/api/user/weekly-activity", isAuthenticated, async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    console.log("Processing weekly activity request for user:", userId);
+
+    // Get current week's date range (Sunday to Saturday)
+    const today = new Date();
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() - today.getDay()); // Start from Sunday
+    startOfWeek.setHours(0, 0, 0, 0); // Set to beginning of day
+
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6); // End on Saturday
+    endOfWeek.setHours(23, 59, 59, 999); // Set to end of day
+
+    console.log(
+      "Week date range:",
+      startOfWeek.toISOString(),
+      "to",
+      endOfWeek.toISOString()
+    );
+
+    // Get the UserTransaction model
+    const UserTransaction = mongoose.model("UserTransaction");
+
+    // Query all transactions for this user within the date range
+    const transactions = await UserTransaction.find({
+      user_id: new mongoose.Types.ObjectId(userId),
+      transaction_datetime: { $gte: startOfWeek, $lte: endOfWeek },
+    });
+
+    console.log(`Found ${transactions.length} transactions for the week`);
+
+    // Initialize arrays for the whole week (Sunday to Saturday)
+    const depositValues = [0, 0, 0, 0, 0, 0, 0];
+    const withdrawValues = [0, 0, 0, 0, 0, 0, 0];
+    const weekDates = [];
+
+    // Generate dates for the week
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(startOfWeek);
+      date.setDate(startOfWeek.getDate() + i);
+      weekDates.push(date.toISOString().split("T")[0]); // Format as YYYY-MM-DD
+    }
+
+    // Process the transactions
+    transactions.forEach((transaction) => {
+      const txDate = new Date(transaction.transaction_datetime);
+      const dayOfWeek = txDate.getDay(); // 0 = Sunday, 1 = Monday, etc.
+
+      if (transaction.amount > 0) {
+        depositValues[dayOfWeek] += transaction.amount;
+      } else {
+        withdrawValues[dayOfWeek] += Math.abs(transaction.amount);
+      }
+    });
+
+    console.log("Processed deposit values:", depositValues);
+    console.log("Processed withdraw values:", withdrawValues);
+
+    // Check if there's any data for the week
+    const hasTransactions =
+      depositValues.some((val) => val > 0) ||
+      withdrawValues.some((val) => val > 0);
+
+    if (!hasTransactions) {
+      console.log("No transactions found for the week");
+      // If you want to add test data for visualization, you could do it here
+    }
+
+    // Send the data
+    res.json({
+      status: "success",
+      data: {
+        weekDates,
+        depositValues,
+        withdrawValues,
+      },
+    });
+  } catch (err) {
+    console.error("Error processing weekly activity:", err);
+    res.status(500).json({
+      status: "error",
+      message: "Failed to process weekly activity",
+    });
+  }
+});
+
+// Alternative implementation using Mongoose aggregation
+app.get("/api/user/weekly-activity", isAuthenticated, async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    console.log("Processing weekly activity request for user:", userId);
+
+    // Get current week's date range (Sunday to Saturday)
+    const today = new Date();
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() - today.getDay()); // Start from Sunday
+    startOfWeek.setHours(0, 0, 0, 0); // Set to beginning of day
+
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6); // End on Saturday
+    endOfWeek.setHours(23, 59, 59, 999); // Set to end of day
+
+    console.log(
+      "Week date range:",
+      startOfWeek.toISOString(),
+      "to",
+      endOfWeek.toISOString()
+    );
+
+    // Get the UserTransaction model
+    const UserTransaction = mongoose.model("UserTransaction");
+
+    // MongoDB aggregation pipeline to get daily totals
+    const dailyTotals = await UserTransaction.aggregate([
+      // Match transactions for this user in the date range
+      {
+        $match: {
+          user_id: new mongoose.Types.ObjectId(userId),
+          transaction_datetime: { $gte: startOfWeek, $lte: endOfWeek },
+        },
+      },
+      // Group by date and calculate deposit and withdrawal totals
+      {
+        $group: {
+          _id: {
+            $dateToString: {
+              format: "%Y-%m-%d",
+              date: "$transaction_datetime",
+            },
+          },
+          depositTotal: {
+            $sum: {
+              $cond: [{ $gt: ["$amount", 0] }, "$amount", 0],
+            },
+          },
+          withdrawTotal: {
+            $sum: {
+              $cond: [{ $lt: ["$amount", 0] }, { $abs: "$amount" }, 0],
+            },
+          },
+        },
+      },
+      // Sort by date
+      {
+        $sort: { _id: 1 },
+      },
+    ]);
+
+    console.log("Aggregation results:", dailyTotals);
+
+    // Initialize arrays for the whole week (Sunday to Saturday)
+    const depositValues = [0, 0, 0, 0, 0, 0, 0];
+    const withdrawValues = [0, 0, 0, 0, 0, 0, 0];
+    const weekDates = [];
+
+    // Generate dates for the week
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(startOfWeek);
+      date.setDate(startOfWeek.getDate() + i);
+      weekDates.push(date.toISOString().split("T")[0]); // Format as YYYY-MM-DD
+    }
+
+    // Map the aggregation results to the correct day of the week
+    dailyTotals.forEach((day) => {
+      const dayDate = new Date(day._id);
+      const dayOfWeek = dayDate.getDay();
+
+      depositValues[dayOfWeek] = day.depositTotal;
+      withdrawValues[dayOfWeek] = day.withdrawTotal;
+    });
+
+    console.log("Processed deposit values:", depositValues);
+    console.log("Processed withdraw values:", withdrawValues);
+
+    // Send the data
+    res.json({
+      status: "success",
+      data: {
+        weekDates,
+        depositValues,
+        withdrawValues,
+      },
+    });
+  } catch (err) {
+    console.error("Error processing weekly activity:", err);
+    res.status(500).json({
+      status: "error",
+      message: "Failed to process weekly activity",
+    });
+  }
+});
+
+// API route to fetch user profile data
+app.get("/api/user/profile", async (req, res) => {
+  try {
+    // Check if user is logged in
+    if (!req.session.userId) {
+      return res.status(401).json({
+        status: "error",
+        message: "Unauthorized - Please log in",
+      });
+    }
+
+    // Get the User model
+    const User = mongoose.model("User");
+
+    // Query the user by ID, excluding the password field
+    const user = await User.findById(req.session.userId).select(
+      "name email monthly_income employment_status financial_goals risk_tolerance aadhaar_number pan_number created_at"
+    );
+
+    // Check if user exists
+    if (!user) {
+      return res.status(404).json({
+        status: "error",
+        message: "User not found",
+      });
+    }
+
+    // Return user profile data
+    res.json({
+      status: "success",
+      data: user,
+    });
+  } catch (err) {
+    console.error("Error fetching user profile:", err);
+    res.status(500).json({
+      status: "error",
+      message: "Internal server error",
+    });
+  }
+});
+
+// API route to fetch user holdings
+app.get("/api/user/holdings", async (req, res) => {
+  try {
+    // Check if user is logged in
+    if (!req.session.userId) {
+      return res.status(401).json({
+        status: "error",
+        message: "Unauthorized - Please log in",
+      });
+    }
+
+    // Get the UserHolding model
+    const UserHolding = mongoose.model("UserHoldings");
+
+    // Query the user holdings by user ID
+    const holdings = await UserHolding.findOne({ user_id: req.session.userId });
+
+    // If no holding records found, return defaults
+    if (!holdings) {
+      return res.json({
+        status: "success",
+        data: {
+          total_balance: 0,
+          savings_account_balance: 0,
+          income: 0,
+          expense: 0,
+          last_updated: new Date(),
+        },
+      });
+    }
+
+    // Return user holdings data
+    res.json({
+      status: "success",
+      data: holdings,
+    });
+  } catch (err) {
+    console.error("Error fetching user holdings:", err);
+    res.status(500).json({
+      status: "error",
+      message: "Internal server error",
+    });
+  }
+});
+
+// API route to fetch user loans
+app.get("/api/user/loans", async (req, res) => {
+  try {
+    // Check if user is logged in
+    if (!req.session.userId) {
+      return res.status(401).json({
+        status: "error",
+        message: "Unauthorized - Please log in",
+      });
+    }
+
+    // Get the UserLoan model
+    const UserLoan = mongoose.model("UserLoan");
+
+    // Query the user loans by user ID
+    const loans = await UserLoan.find({ user_id: req.session.userId }).select(
+      "loan_type principal_amount remaining_balance interest_rate loan_term emi_amount loan_taken_on next_payment_due total_paid status"
+    );
+
+    // Return user loans data
+    res.json({
+      status: "success",
+      data: loans,
+    });
+  } catch (err) {
+    console.error("Error fetching user loans:", err);
+    res.status(500).json({
+      status: "error",
+      message: "Internal server error",
+    });
+  }
+});
+
+// API route to fetch user transactions
+app.get("/api/user/transactions", async (req, res) => {
+  try {
+    // Check if user is logged in
+    if (!req.session.userId) {
+      return res.status(401).json({
+        status: "error",
+        message: "Unauthorized - Please log in",
+      });
+    }
+
+    // Get limit from query parameter or use default
+    const limit = parseInt(req.query.limit) || 10;
+
+    // Get the UserTransaction model
+    const UserTransaction = mongoose.model("UserTransaction");
+
+    // Query the user transactions by user ID with limit and ordering
+    const transactions = await UserTransaction.find({
+      user_id: req.session.userId,
+    })
+      .sort({ transaction_datetime: -1 })
+      .limit(limit);
+
+    // Return user transactions data
+    res.json({
+      status: "success",
+      data: transactions,
+    });
+  } catch (err) {
+    console.error("Error fetching user transactions:", err);
+    res.status(500).json({
+      status: "error",
+      message: "Internal server error",
+    });
+  }
+});
+
+// Endpoint to fetch invoices
+app.get("/api/invoices", async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    console.log("Fetching invoices for user:", userId);
+
+    // Get the Invoice model
+    const Invoice = mongoose.model("Invoice");
+
+    // Query invoices for the user and sort by transaction_time descending
+    const results = await Invoice.find({ user_id: userId })
+      .sort({ transaction_time: -1 })
+      .select("id store_name amount transaction_time");
+
+    console.log("Found invoices:", results.length);
+
+    // Process data for client
+    const invoices = results.map((invoice) => ({
+      id: invoice._id || invoice.id, // Using MongoDB's _id or custom id field if present
+      storeName: invoice.store_name,
+      amount: invoice.amount,
+      transactionTime: invoice.transaction_time,
+      timeAgo: getTimeAgo(new Date(invoice.transaction_time)),
+    }));
+
+    res.json({
+      status: "success",
+      data: invoices,
+    });
+  } catch (err) {
+    console.error("Database error:", err);
+    return res.status(500).json({
+      status: "error",
+      message: "Failed to fetch invoices from the database",
+    });
+  }
+});
+
+// Helper function for timeAgo calculations
+function getTimeAgo(date) {
+  const seconds = Math.floor((new Date() - date) / 1000);
+
+  let interval = seconds / 31536000;
+  if (interval > 1) return Math.floor(interval) + " years ago";
+
+  interval = seconds / 2592000;
+  if (interval > 1) return Math.floor(interval) + " months ago";
+
+  interval = seconds / 86400;
+  if (interval > 1) return Math.floor(interval) + " days ago";
+
+  interval = seconds / 3600;
+  if (interval > 1) return Math.floor(interval) + " hours ago";
+
+  interval = seconds / 60;
+  if (interval > 1) return Math.floor(interval) + " minutes ago";
+
+  return Math.floor(seconds) + " seconds ago";
+}
+
+// ---------------------------------------------------------------------------------------------------------------------------------------------
+// INVESTMENTS
+// ---------------------------------------------------------------------------------------------------------------------------------------------
+
+// API endpoint to get stock API key
+app.get("/api/getStockApiKey", (req, res) => {
+  // Store API key in environment variable instead of hardcoding
+  res.json({ apiKey: process.env.ALPHA_VANTAGE_API_KEY });
+});
+
+// API endpoint to get user investments
+app.get("/api/user-investments", async (req, res) => {
+  try {
+    // Check if user is logged in
+    if (!req.session.userId) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+
+    const UserStocks = mongoose.model("UserStocks");
+
+    // Query to get user investments
+    const userStocks = await UserStocks.find({ user_id: req.session.userId });
+
+    // Send the investment data as JSON
+    res.json(userStocks);
+  } catch (err) {
+    console.error("Error fetching user investments:", err);
+    return res.status(500).json({ error: "Database error" });
+  }
+});
+
+// ---------------------------------------------------------------------------------------------------------------------------------------------
+// CREDIT CARDS
+// ---------------------------------------------------------------------------------------------------------------------------------------------
+
+app.get("/api/user-credit-cards", async (req, res) => {
+  try {
+    // Check if user is logged in
+    if (!req.session || !req.session.userId) {
+      return res
+        .status(401)
+        .json({ error: "You must be logged in to view credit cards" });
+    }
+
+    const userId = req.session.userId;
+
+    // Query to fetch user's credit cards
+    const creditCards = await CreditCard.find({
+      user_id: userId,
+      card_type: "credit",
+    }).select(
+      "card_number cardholder_name valid_from valid_thru bank_name card_type card_network"
+    );
+
+    // Return the cards
+    res.status(200).json(creditCards);
+  } catch (error) {
+    console.error("Database error fetching credit cards:", error);
+    return res.status(500).json({
+      error: "Failed to retrieve credit cards",
+      details: error.message,
+    });
+  }
+});
+
+app.get("/api/bank-expenses", async (req, res) => {
+  try {
+    if (!req.session || !req.session.userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const userId = new mongoose.Types.ObjectId(req.session.userId);
+
+    const results = await CreditCardBill.aggregate([
+      {
+        $match: { user_id: userId },
+      },
+      {
+        $lookup: {
+          from: "credit_card_bills",
+          localField: "card_number",
+          foreignField: "card_number",
+          as: "card_details",
+        },
+      },
+      {
+        $unwind: "$card_details",
+      },
+      {
+        $match: {
+          "card_details.user_id": userId,
+        },
+      },
+      {
+        $group: {
+          _id: "$card_details.bank_name",
+          total_expense: { $sum: "$current_bill" },
+        },
+      },
+      {
+        $sort: { total_expense: -1 },
+      },
+    ]);
+
+    const bankNames = results.map((item) => item._id);
+    const expenses = results.map((item) => item.total_expense);
+
+    const colors = [
+      "#3b82f6",
+      "#38bdf8",
+      "#06b6d4",
+      "#4f46e5",
+      "#6366f1",
+      "#a855f7",
+      "#ec4899",
+    ];
+
+    res.status(200).json({
+      labels: bankNames,
+      datasets: [
+        {
+          data: expenses,
+          backgroundColor: colors.slice(0, bankNames.length),
+          borderWidth: 2,
+        },
+      ],
+    });
+  } catch (error) {
+    console.error("MongoDB error fetching bank expenses:", error);
+    res.status(500).json({
+      error: "Failed to retrieve bank expenses",
+      details: error.message,
+    });
+  }
+});
+
+app.get("/api/credit-card-bill", async (req, res) => {
+  if (!req.session || !req.session.userId) {
+    return res
+      .status(401)
+      .json({ error: "You must be logged in to view credit card bills" });
+  }
+
+  const userId = req.session.userId;
+  const creditCardNumber = req.query.cardNumber;
+
+  try {
+    const bill = await CreditCardBill.findOne({
+      user_id: userId,
+      card_number: creditCardNumber,
+    })
+      .sort({ due_date: -1 })
+      .select("current_bill minimum_amount_due due_date");
+
+    if (!bill) {
+      return res
+        .status(404)
+        .json({ error: "No bill found for this credit card" });
+    }
+
+    res.status(200).json(bill);
+  } catch (error) {
+    console.error("Database error fetching credit card bill:", error);
+    res.status(500).json({
+      error: "Failed to retrieve credit card bill",
+      details: error.message,
+    });
+  }
+});
+
+app.get("/api/credit-card-dues", async (req, res) => {
+  if (!req.session || !req.session.userId) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  const userId = new mongoose.Types.ObjectId(req.session.userId);
+
+  try {
+    const results = await CreditCardBill.aggregate([
+      {
+        $match: { user_id: userId }
+      },
+      {
+        $lookup: {
+          from: "user_credit_cards", // This should match your actual collection name
+          let: { cardNumber: "$card_number", userId: "$user_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$card_number", "$$cardNumber"] },
+                    { $eq: ["$user_id", "$$userId"] }
+                  ]
+                }
+              }
+            }
+          ],
+          as: "card_details"
+        }
+      },
+      {
+        $unwind: "$card_details"
+      },
+      {
+        $project: {
+          cardholder_name: "$card_details.cardholder_name",
+          masked_card_number: {
+            $concat: [
+              { $substr: ["$card_number", 0, 4] },
+              " **** **** ",
+              {
+                $substr: [
+                  "$card_number",
+                  { $subtract: [{ $strLenCP: "$card_number" }, 4] },
+                  4
+                ]
+              }
+            ]
+          },
+          current_bill: 1,
+          minimum_amount_due: 1,
+          formatted_due_date: {
+            $dateToString: { format: "%d/%m/%Y", date: "$due_date" }
+          },
+          status: 1
+        }
+      },
+      {
+        $sort: { due_date: 1 }
+      }
+    ]);
+
+    res.status(200).json(results);
+  } catch (error) {
+    console.error("Error fetching credit card dues:", error);
+    res.status(500).json({
+      error: "Failed to retrieve credit card dues",
+      details: error.message
+    });
+  }
+});
+
+// ---------------------------------------------------------------------------------------------------------------------------------------------
+// BLOGS
+// ---------------------------------------------------------------------------------------------------------------------------------------------
+
+app.get("/api/auth/current-user", async (req, res) => {
+  if (req.session && req.session.userId) {
+    try {
+      const user = await User.findById(req.session.userId).select("-password"); // exclude password
+
+      if (!user) {
+        return res.status(404).json({
+          authenticated: false,
+          userId: null,
+          error: "User not found",
+        });
+      }
+
+      res.json({
+        authenticated: true,
+        userId: user._id,
+        user: user, // or customize fields returned
+      });
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      res.status(500).json({
+        authenticated: false,
+        error: "Failed to fetch user data",
+      });
+    }
+  } else {
+    res.json({
+      authenticated: false,
+      userId: null,
+    });
+  }
+});
+
+// ---------------------------------------------------------------------------------------------------------------------------------------------
+// INSURANCE POLICIES
+// ---------------------------------------------------------------------------------------------------------------------------------------------
+
+// Get all insurance policies for a user
+app.get("/api/policies", async (req, res) => {
+  const userId = req.session.userId; // Get user ID from session
+
+  if (!userId) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  try {
+    const policies = await UserInsurancePolicy.find({ user_id: userId });
+    res.json(policies);
+  } catch (error) {
+    console.error("Error fetching policies:", error);
+    res.status(500).json({ error: "Failed to fetch policies" });
+  }
+});
+
+// Add a new insurance policy
+app.post("/api/policies", async (req, res) => {
+  const userId = req.session.userId; // Get user ID from session
+
+  if (!userId) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  const {
+    policy_name,
+    policy_number,
+    property_description,
+    coverage_amount,
+    renewal_date,
+  } = req.body;
+
+  try {
+    const newPolicy = new UserInsurancePolicy({
+      user_id: userId,
+      policy_name,
+      policy_number,
+      property_description,
+      coverage_amount,
+      renewal_date,
+    });
+
+    const savedPolicy = await newPolicy.save();
+
+    res.status(201).json({
+      id: savedPolicy._id,
+      message: "Policy added successfully",
+    });
+  } catch (error) {
+    console.error("Error adding policy:", error);
+
+    // Check for duplicate policy number
+    if (error.code === 11000) {
+      return res.status(400).json({ error: "Policy number already exists" });
+    }
+
+    res.status(500).json({ error: "Failed to add policy" });
+  }
+});
+
+// Delete an insurance policy
+app.delete("/api/policies/:policyId", async (req, res) => {
+  const userId = req.session.userId; // Get user ID from session
+
+  if (!userId) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  try {
+    const result = await UserInsurancePolicy.deleteOne({
+      _id: req.params.policyId,
+      user_id: userId,
+    });
+
+    if (result.deletedCount > 0) {
+      res.json({ message: "Policy deleted successfully" });
+    } else {
+      res.status(404).json({ error: "Policy not found" });
+    }
+  } catch (error) {
+    console.error("Error deleting policy:", error);
+    res.status(500).json({ error: "Failed to delete policy" });
+  }
+});
+
+// Update an existing policy
+app.put("/api/policies/:policyId", async (req, res) => {
+  const userId = req.session.userId; // Get user ID from session
+
+  if (!userId) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  const {
+    policy_name,
+    policy_number,
+    property_description,
+    coverage_amount,
+    renewal_date,
+  } = req.body;
+
+  try {
+    const result = await UserInsurancePolicy.updateOne(
+      { _id: req.params.policyId, user_id: userId },
+      {
+        $set: {
+          policy_name,
+          policy_number,
+          property_description,
+          coverage_amount,
+          renewal_date,
+        },
+      }
+    );
+
+    if (result.matchedCount > 0) {
+      res.json({ message: "Policy updated successfully" });
+    } else {
+      res.status(404).json({ error: "Policy not found" });
+    }
+  } catch (error) {
+    console.error("Error updating policy:", error);
+
+    // Check for duplicate policy number
+    if (error.code === 11000) {
+      return res.status(400).json({ error: "Policy number already exists" });
+    }
+
+    res.status(500).json({ error: "Failed to update policy" });
+  }
+});
+
+// Get user's precious metal holdings
+app.get("/precious-holdings", async (req, res) => {
+  try {
+    // Assuming user_id is available from the authenticated session
+    const userId = req.session.userId;
+
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const holdings = await UserPreciousHoldings.find({ user_id: userId });
+    res.json(holdings);
+  } catch (error) {
+    console.error("Error fetching precious holdings:", error);
+    res.status(500).json({ error: "Failed to retrieve precious holdings" });
+  }
+});
+
+// Add new precious metal holding
+app.post("/precious-holdings", async (req, res) => {
+  try {
+    const userId = req.session.userId;
+
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const { metalType, metalAmount, metalUnit, metalValue, metalPurchaseDate } =
+      req.body;
+
+    // Validate input
+    if (
+      !metalType ||
+      !metalAmount ||
+      !metalUnit ||
+      !metalValue ||
+      !metalPurchaseDate
+    ) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    const newHolding = new UserPreciousHoldings({
+      user_id: userId,
+      metal_type: metalType.toLowerCase(),
+      amount: metalAmount,
+      amount_unit: metalUnit,
+      value: metalValue,
+      date_of_purchase: metalPurchaseDate,
+    });
+
+    const savedHolding = await newHolding.save();
+
+    res.status(201).json({
+      id: savedHolding._id,
+      message: "Metal holding added successfully",
+    });
+  } catch (error) {
+    console.error("Error in adding precious metal:", error);
+    res.status(500).json({ error: "Failed to add precious metal" });
+  }
+});
+
+// Delete a precious metal holding
+app.delete("/precious-holdings/:id", async (req, res) => {
+  try {
+    const userId = req.session.userId;
+
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const metalId = req.params.id;
+
+    const result = await UserPreciousHoldings.deleteOne({
+      _id: metalId,
+      user_id: userId,
+    });
+
+    if (result.deletedCount > 0) {
+      res.json({ message: "Metal holding deleted successfully" });
+    } else {
+      res
+        .status(403)
+        .json({ error: "Unauthorized or metal holding not found" });
+    }
+  } catch (error) {
+    console.error("Error in deleting precious metal:", error);
+    res.status(500).json({ error: "Failed to delete precious metal" });
+  }
+});
+
+// Update a precious metal holding
+app.put("/precious-holdings/:id", async (req, res) => {
+  try {
+    const userId = req.session.userId;
+
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const metalId = req.params.id;
+    const { metalType, metalAmount, metalUnit, metalValue, metalPurchaseDate } =
+      req.body;
+
+    // Validate input
+    if (
+      !metalType ||
+      !metalAmount ||
+      !metalUnit ||
+      !metalValue ||
+      !metalPurchaseDate
+    ) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    const result = await UserPreciousHoldings.updateOne(
+      { _id: metalId, user_id: userId },
+      {
+        $set: {
+          metal_type: metalType.toLowerCase(),
+          amount: metalAmount,
+          amount_unit: metalUnit,
+          value: metalValue,
+          date_of_purchase: metalPurchaseDate,
+        },
+      }
+    );
+
+    if (result.matchedCount > 0) {
+      res.json({ message: "Metal holding updated successfully" });
+    } else {
+      res
+        .status(403)
+        .json({ error: "Unauthorized or metal holding not found" });
+    }
+  } catch (error) {
+    console.error("Error in updating precious metal:", error);
+    res.status(500).json({ error: "Failed to update precious metal" });
+  }
+});
+
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const uploadDir = path.join(__dirname, "public", "uploads", "properties");
+
+    // Ensure directory exists
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    // Create unique filename with original extension
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    const extension = path.extname(file.originalname);
+    cb(null, file.fieldname + "-" + uniqueSuffix + extension);
+  },
+});
+
+// Create the upload middleware
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB file size limit
+  fileFilter: function (req, file, cb) {
+    // Accept images only
+    if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
+      return cb(new Error("Only image files are allowed!"), false);
+    }
+    cb(null, true);
+  },
+});
+
+// Get all properties for a user
+app.get("/properties", async (req, res) => {
+  // Check if user is logged in (session exists)
+  if (!req.session || !req.session.userId) {
+    return res.status(401).json({
+      error: "Unauthorized",
+      message: "User not logged in",
+    });
+  }
+
+  try {
+    const properties = await UserProperty.find({
+      user_id: req.session.userId,
+    }).select("property_name property_value location image_url");
+
+    res.json(properties);
+  } catch (error) {
+    console.error("Database query error:", error);
+    return res.status(500).json({
+      error: "Failed to fetch properties",
+      details: error.message,
+    });
+  }
+});
+
+// Middleware to serve local images
+app.use("/local-images", (req, res, next) => {
+  // Base directory for local images (adjust as needed)
+  const baseDir = "/Users/ziko/Downloads";
+
+  // Construct the full file path
+  const filePath = path.join(baseDir, req.path);
+
+  // Check if file exists
+  if (fs.existsSync(filePath)) {
+    // Serve the file
+    res.sendFile(filePath);
+  } else {
+    // If file not found, send default image
+    res.sendFile(
+      path.join(__dirname, "public", "assets", "images", "default-property.jpg")
+    );
+  }
+});
+
+// Add new property
+app.post("/properties", upload.single("propertyImage"), async (req, res) => {
+  // Check if user is logged in
+  if (!req.session || !req.session.userId) {
+    return res.status(401).json({
+      error: "Unauthorized",
+      message: "User not logged in",
+    });
+  }
+
+  const { propertyName, propertyValue, propertyLocation } = req.body;
+
+  // Handle image upload
+  let imageUrl = null;
+  if (req.file) {
+    imageUrl = `/uploads/properties/${req.file.filename}`;
+  }
+
+  try {
+    // Create new property document
+    const newProperty = new UserProperty({
+      user_id: req.session.userId,
+      property_name: propertyName,
+      property_value: parseFloat(propertyValue),
+      location: propertyLocation,
+      image_url: imageUrl,
+    });
+
+    // Save the new property
+    const savedProperty = await newProperty.save();
+
+    res.status(201).json({
+      id: savedProperty._id,
+      property_name: propertyName,
+      property_value: propertyValue,
+      location: propertyLocation,
+      image_url: imageUrl,
+    });
+  } catch (error) {
+    console.error("Error adding property:", error);
+
+    // If an image was uploaded but insert failed, remove the image
+    if (req.file) {
+      const imagePath = path.join(
+        __dirname,
+        "public",
+        `/uploads/properties/${req.file.filename}`
+      );
+      if (fs.existsSync(imagePath)) {
+        fs.unlinkSync(imagePath);
+      }
+    }
+
+    return res.status(500).json({
+      error: "Failed to add property",
+      details: error.message,
+    });
+  }
+});
+
+// Update property
+app.put("/properties/:id", upload.single("propertyImage"), async (req, res) => {
+  // Check if user is logged in
+  if (!req.session || !req.session.userId) {
+    return res.status(401).json({
+      error: "Unauthorized",
+      message: "User not logged in",
+    });
+  }
+
+  const propertyId = req.params.id;
+  const { propertyName, propertyValue, propertyLocation } = req.body;
+
+  try {
+    // First, check if the property belongs to the user
+    const existingProperty = await UserProperty.findOne({
+      _id: propertyId,
+      user_id: req.session.userId,
+    });
+
+    if (!existingProperty) {
+      return res.status(404).json({ error: "Property not found" });
+    }
+
+    // Handle image upload
+    let imageUrl = existingProperty.image_url;
+    if (req.file) {
+      // Delete old image if exists
+      if (existingProperty.image_url) {
+        const oldImagePath = path.join(
+          __dirname,
+          "public",
+          existingProperty.image_url
+        );
+        if (fs.existsSync(oldImagePath)) {
+          fs.unlinkSync(oldImagePath);
+        }
+      }
+      imageUrl = `/uploads/properties/${req.file.filename}`;
+    }
+
+    // Update property
+    const updatedProperty = await UserProperty.findByIdAndUpdate(
+      propertyId,
+      {
+        property_name: propertyName,
+        property_value: parseFloat(propertyValue),
+        location: propertyLocation,
+        image_url: imageUrl,
+      },
+      { new: true } // Return the updated document
+    );
+
+    res.json({
+      id: updatedProperty._id,
+      property_name: updatedProperty.property_name,
+      property_value: updatedProperty.property_value,
+      location: updatedProperty.location,
+      image_url: updatedProperty.image_url,
+    });
+  } catch (error) {
+    console.error("Error updating property:", error);
+    return res.status(500).json({
+      error: "Failed to update property",
+      details: error.message,
+    });
+  }
+});
+
+// Delete property
+app.delete("/properties/:id", async (req, res) => {
+  // Check if user is logged in
+  if (!req.session || !req.session.userId) {
+    return res.status(401).json({
+      error: "Unauthorized",
+      message: "User not logged in",
+    });
+  }
+
+  const propertyId = req.params.id;
+
+  try {
+    // First, find the property to get its image
+    const existingProperty = await UserProperty.findOne({
+      _id: propertyId,
+      user_id: req.session.userId,
+    });
+
+    if (!existingProperty) {
+      return res.status(404).json({ error: "Property not found" });
+    }
+
+    // Delete image file if exists
+    if (existingProperty.image_url) {
+      const imagePath = path.join(
+        __dirname,
+        "public",
+        existingProperty.image_url
+      );
+      if (fs.existsSync(imagePath)) {
+        fs.unlinkSync(imagePath);
+      }
+    }
+
+    // Delete property from database
+    await UserProperty.findByIdAndDelete(propertyId);
+
+    res.status(200).json({ message: "Property deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting property:", error);
+    return res.status(500).json({
+      error: "Failed to delete property",
+      details: error.message,
+    });
+  }
+});
 
 // Start the server
 app.listen(PORT, () => {

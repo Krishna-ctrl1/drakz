@@ -16,6 +16,8 @@ const clientAdvisorsSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   }
+}, {
+  collection: 'client_advisors'
 });
 
 // Use the same collection name as in your migration script
