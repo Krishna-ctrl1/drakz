@@ -7,8 +7,8 @@ const crypto = require("crypto");
 require("dotenv").config();
 const fs = require("fs");
 const multer = require("multer");
+const { exec } = require('child_process');
 
-// Import Advisor Model
 const Advisor = require("./models/Advisor");
 const Admin = require("./models/Admin");
 const User = require("./models/User");
@@ -1843,7 +1843,7 @@ app.get("/api/credit-card-dues", async (req, res) => {
   try {
     const results = await CreditCardBill.aggregate([
       {
-        $match: { user_id: userId }
+        $match: { user_id: userId },
       },
       {
         $lookup: {
@@ -1855,17 +1855,17 @@ app.get("/api/credit-card-dues", async (req, res) => {
                 $expr: {
                   $and: [
                     { $eq: ["$card_number", "$$cardNumber"] },
-                    { $eq: ["$user_id", "$$userId"] }
-                  ]
-                }
-              }
-            }
+                    { $eq: ["$user_id", "$$userId"] },
+                  ],
+                },
+              },
+            },
           ],
-          as: "card_details"
-        }
+          as: "card_details",
+        },
       },
       {
-        $unwind: "$card_details"
+        $unwind: "$card_details",
       },
       {
         $project: {
@@ -1878,22 +1878,22 @@ app.get("/api/credit-card-dues", async (req, res) => {
                 $substr: [
                   "$card_number",
                   { $subtract: [{ $strLenCP: "$card_number" }, 4] },
-                  4
-                ]
-              }
-            ]
+                  4,
+                ],
+              },
+            ],
           },
           current_bill: 1,
           minimum_amount_due: 1,
           formatted_due_date: {
-            $dateToString: { format: "%d/%m/%Y", date: "$due_date" }
+            $dateToString: { format: "%d/%m/%Y", date: "$due_date" },
           },
-          status: 1
-        }
+          status: 1,
+        },
       },
       {
-        $sort: { due_date: 1 }
-      }
+        $sort: { due_date: 1 },
+      },
     ]);
 
     res.status(200).json(results);
@@ -1901,7 +1901,7 @@ app.get("/api/credit-card-dues", async (req, res) => {
     console.error("Error fetching credit card dues:", error);
     res.status(500).json({
       error: "Failed to retrieve credit card dues",
-      details: error.message
+      details: error.message,
     });
   }
 });
@@ -2474,6 +2474,78 @@ app.delete("/properties/:id", async (req, res) => {
       details: error.message,
     });
   }
+});
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+// LLM ChatBot
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+app.post("/api/financial-advice", (req, res) => {
+  const { query, userData = {} } = req.body;
+
+  if (!query) {
+    return res.status(400).json({ error: "Query is required" });
+  }
+
+  // Create context string if user data is available
+  let context = "";
+  if (userData.monthly_income > 0) {
+    const income = userData.monthly_income;
+    const savings = userData.savings;
+
+    if (userData.currency === "INR") {
+      context = `With a monthly income of ₹${income.toFixed(
+        2
+      )} and savings of ₹${savings.toFixed(2)}: `;
+    } else {
+      context = `With a monthly income of $${income.toFixed(
+        2
+      )} and savings of $${savings.toFixed(2)}: `;
+    }
+  }
+
+  // Full prompt to send to the model
+  const fullPrompt = `
+  <|system|>
+  You are a knowledgeable financial advisor assistant. Provide clear, accurate, and helpful advice on personal finance topics. 
+  Keep responses concise but informative. Don't recommend specific investments or make promises about returns.
+  </|system|>
+
+  <|user|>
+  ${context}${query}
+  </|user|>
+
+  <|assistant|>
+  `;
+
+  // Call your Python script that loads and runs the LLM model
+  exec(
+    `python llm.py "${fullPrompt.replace(/"/g, '\\"')}"`,
+    (error, stdout, stderr) => {
+      if (error) {
+        console.error(`LLM execution error: ${error}`);
+        return res
+          .status(500)
+          .json({ error: "Error processing request with LLM" });
+      }
+
+      if (stderr) {
+        console.error(`LLM stderr: ${stderr}`);
+      }
+
+      // Extract response from the LLM output
+      let llmResponse = stdout.trim();
+
+      // Clean up the response if needed
+      if (llmResponse.includes("<|")) {
+        llmResponse = llmResponse.split("<|")[0].trim();
+      }
+
+      res.json({
+        response: llmResponse,
+        timestamp: new Date(),
+      });
+    }
+  );
 });
 
 // Start the server

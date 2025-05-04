@@ -1032,3 +1032,104 @@ document.addEventListener("DOMContentLoaded", function () {
 // -------------------------------------------------------------------------------------------------------------------------------------
 // Financial Advisor Chat
 // -------------------------------------------------------------------------------------------------------------------------------------
+document.addEventListener("DOMContentLoaded", () => {
+  console.log("DOM fully loaded");
+  console.log("Global variables check:", { 
+    monthlyIncome: typeof monthlyIncome !== 'undefined', 
+    savings: typeof savings !== 'undefined', 
+    currentCurrency: typeof currentCurrency !== 'undefined' 
+  });
+  
+  // Elements
+  const messagesContainer = document.querySelector(".messages-container");
+  const textarea = document.querySelector(".input-area textarea");
+  const sendButton = document.querySelector(".send-btn");
+  
+  // Check if elements are found
+  if (!messagesContainer) console.error("Messages container not found");
+  if (!textarea) console.error("Textarea not found");
+  if (!sendButton) console.error("Send button not found");
+  
+  // Use the global variables that are already defined
+  const userData = {
+    monthly_income: typeof monthlyIncome !== 'undefined' ? monthlyIncome : 0,
+    savings: typeof savings !== 'undefined' ? savings : 0,
+    currency: typeof currentCurrency !== 'undefined' ? currentCurrency : 'USD',
+  };
+
+  // Function to add a message to the chat
+  function addMessage(message, isUser = false) {
+    const messageDiv = document.createElement("div");
+    messageDiv.className = `message ${isUser ? "user" : "bot"}`;
+    messageDiv.textContent = message;
+    messagesContainer.appendChild(messageDiv);
+
+    // Scroll to the bottom of the messages
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  }
+
+  // Function to send message to server and get response
+  async function sendToAdvisor(query) {
+    try {
+      // Show loading indicator
+      const loadingDiv = document.createElement("div");
+      loadingDiv.className = "message bot loading";
+      loadingDiv.textContent = "Thinking...";
+      messagesContainer.appendChild(loadingDiv);
+
+      // Make API request
+      const response = await fetch("/api/financial-advice", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ query, userData }),
+      });
+
+      // Remove loading indicator
+      messagesContainer.removeChild(loadingDiv);
+
+      if (!response.ok) {
+        throw new Error("Failed to get response from financial advisor");
+      }
+
+      const data = await response.json();
+      addMessage(data.response);
+    } catch (error) {
+      console.error("Error:", error);
+      addMessage(
+        "Sorry, I encountered an error while processing your request. Please try again later."
+      );
+    }
+  }
+
+  // Event listener for send button
+  sendButton.addEventListener("click", () => {
+    console.log("Send Button Clicked");
+    const message = textarea.value.trim();
+    if (message) {
+      addMessage(message, true);
+      textarea.value = "";
+      sendToAdvisor(message);
+    }
+  });
+
+  // Event listener for pressing Enter in textarea
+  textarea.addEventListener("keypress", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendButton.click();
+    }
+  });
+
+  // Optional: Function to update user data
+  function updateUserData(newData) {
+    Object.assign(userData, newData);
+  }
+
+  // Expose updateUserData function globally if needed
+  window.updateUserData = updateUserData;
+  
+  // Add an initial message
+  addMessage("Welcome to your Financial Advisor! How can I help you today?");
+});

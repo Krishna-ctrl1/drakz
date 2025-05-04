@@ -1835,48 +1835,67 @@ input:checked + .toggle-slider:before {
 
 /* Chat UI */
 .messages-container {
-  flex: 1;
+  height: 300px;
   overflow-y: auto;
-  padding: 20px;
+  border: 1px solid #ddd;
+  padding: 15px;
+  margin-bottom: 15px;
+  border-radius: 5px;
+  background-color: #f9f9f9;
 }
 
 .message {
-  margin-bottom: 15px;
-  padding: 12px 15px;
-  border-radius: 8px;
+  margin-bottom: 10px;
+  padding: 10px;
+  border-radius: 5px;
   max-width: 80%;
   word-wrap: break-word;
 }
 
+.message.user {
+  background-color: var(--primary-color);
+  margin-left: auto;
+  text-align: right;
+}
+
 .message.bot {
-  background-color: #f0f4f8;
-  align-self: flex-start;
+  background-color: #000000;
   margin-right: auto;
 }
 
-.message.user {
-  background-color: #4299e1;
-  color: white;
-  align-self: flex-end;
-  margin-left: auto;
+.message.typing {
+  background-color: #eaeaea;
+  color: #666;
+  font-style: italic;
 }
 
 .input-area {
   display: flex;
-  padding: 15px;
-  border-top: 1px solid #e2e8f0;
-  background-color: #fff;
+  margin-top: 10px;
 }
 
 .input-area textarea {
-  flex: 1;
-  padding: 12px;
-  border: 1px solid #cbd5e0;
-  border-radius: 4px;
-  font-size: 16px;
+  flex-grow: 1;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
   resize: none;
-  min-height: 50px;
-  max-height: 100px;
+  height: 50px;
+}
+
+.send-btn {
+  width: 50px;
+  margin-left: 10px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.send-btn:hover {
+  background-color: #45a049;
 }
 
 .input-area textarea:focus {
