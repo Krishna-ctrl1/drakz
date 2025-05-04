@@ -1,3 +1,4 @@
+require("dotenv").config();
 // -------------------------------------------------------------------------------------------------------------------------------------
 // Financial Planning
 // -------------------------------------------------------------------------------------------------------------------------------------
@@ -78,19 +79,6 @@ function initializeVariableCostsToggle() {
     } else {
       variableCostsContainer.classList.add("hidden");
     }
-  });
-}
-
-// Initialize calculate button functionality
-function initializeCalculateButton() {
-  const calculateButton = document.getElementById("calculate-summary");
-
-  calculateButton.addEventListener("click", function () {
-    // Collect data from input fields
-    collectFinancialData();
-
-    // Calculate financial summary
-    calculateFinancialSummary();
   });
 }
 
@@ -241,6 +229,21 @@ function calculateFinancialSummary() {
   renderBarLineChart(yearlyIncome, yearlyExpenses);
   renderPieChart(totalYearlyIncome, totalYearlyExpenses);
 }
+
+// Initialize calculate button functionality
+document.addEventListener("DOMContentLoaded", function () {
+  const calculateButton = document.getElementById("calculate-summary");
+
+  if (calculateButton) {
+    calculateButton.addEventListener("click", function () {
+      console.log("Button clicked"); // Debug log
+      collectFinancialData();
+      calculateFinancialSummary();
+    });
+  } else {
+    console.error("Calculate button not found in DOM");
+  }
+});
 
 // Calculate yearly income
 function calculateYearlyIncome() {
@@ -546,101 +549,70 @@ function filterDashboard() {
 // Stock Analysis
 // -------------------------------------------------------------------------------------------------------------------------------------
 
-// DOM Elements
-document.addEventListener("DOMContentLoaded", function () {
-  // Tab Navigation
+// Wait for DOM to fully load
+document.addEventListener("DOMContentLoaded", () => {
+  // Tab navigation
   const tabItems = document.querySelectorAll(".tab-item");
-  const sectionContents = document.querySelectorAll(".section-content");
   const sectionCards = document.querySelectorAll(".section-card");
+  const sectionContents = document.querySelectorAll(".section-content");
 
-  // Stock Analysis Elements
-  const stockSymbolInput = document.getElementById("stock-symbol");
-  const getStockDetailsBtn = document.getElementById("get-stock-details");
-  const stockResults = document.getElementById("stock-results");
+  // Function to switch tabs
+  function switchTab(sectionId) {
+    // Hide all section contents
+    sectionContents.forEach((content) => {
+      content.classList.remove("active");
+    });
 
-  // Financial Planning Elements
+    // Remove active class from all tabs
+    tabItems.forEach((tab) => {
+      tab.classList.remove("active");
+    });
+
+    // Show the selected section content
+    const selectedContent = document.getElementById(`${sectionId}-content`);
+    if (selectedContent) {
+      selectedContent.classList.add("active");
+    }
+
+    // Add active class to the selected tab
+    const selectedTab = document.querySelector(
+      `.tab-item[data-section="${sectionId}"]`
+    );
+    if (selectedTab) {
+      selectedTab.classList.add("active");
+    }
+  }
+
+  // Add click event listeners to tabs
+  tabItems.forEach((tab) => {
+    tab.addEventListener("click", () => {
+      const sectionId = tab.getAttribute("data-section");
+      switchTab(sectionId);
+    });
+  });
+
+  // Add click event listeners to section cards
+  sectionCards.forEach((card) => {
+    card.addEventListener("click", () => {
+      const sectionId = card.getAttribute("data-section");
+      switchTab(sectionId);
+    });
+  });
+
+  // Toggle for variable costs in Financial Planning
   const variableCostsToggle = document.getElementById("variable-costs-toggle");
   const variableCostsContainer = document.getElementById(
     "variable-costs-container"
   );
-  const calculateSummaryBtn = document.getElementById("calculate-summary");
 
-  // Financial Advisor Chat Elements
-  const messagesContainer = document.querySelector(".messages-container");
-  const textarea = document.querySelector(".input-area textarea");
-  const sendBtn = document.querySelector(".send-btn");
-
-  // Currency state (default to INR as in the HTML)
-  let currentCurrency = "INR";
-
-  // Exchange rate (approximate, would be fetched from API in production)
-  const exchangeRate = 83.0; // USD to INR
-
-  // Stock data cache
-  let stockCache = {};
-
-  // Tab Navigation
-  tabItems.forEach((tab) => {
-    tab.addEventListener("click", () => {
-      // Remove active class from all tabs and sections
-      tabItems.forEach((t) => t.classList.remove("active"));
-      sectionContents.forEach((s) => s.classList.remove("active"));
-
-      // Add active class to clicked tab
-      tab.classList.add("active");
-
-      // Get section name and activate corresponding content
-      const sectionName = tab.getAttribute("data-section");
-      document.getElementById(`${sectionName}-content`).classList.add("active");
-    });
-  });
-
-  // Section Cards Navigation (from welcome page)
-  sectionCards.forEach((card) => {
-    card.addEventListener("click", () => {
-      const sectionName = card.getAttribute("data-section");
-
-      // Activate corresponding tab and content
-      tabItems.forEach((t) => {
-        t.classList.remove("active");
-        if (t.getAttribute("data-section") === sectionName) {
-          t.classList.add("active");
-        }
-      });
-
-      sectionContents.forEach((s) => s.classList.remove("active"));
-      document.getElementById(`${sectionName}-content`).classList.add("active");
-    });
-  });
-
-  // Variable Costs Toggle
-  if (variableCostsToggle) {
+  if (variableCostsToggle && variableCostsContainer) {
     variableCostsToggle.addEventListener("change", () => {
-      if (variableCostsToggle.checked) {
-        variableCostsContainer.classList.remove("hidden");
-      } else {
-        variableCostsContainer.classList.add("hidden");
-      }
-    });
-  }
-
-  // Financial Planning Calculate
-  if (calculateSummaryBtn) {
-    calculateSummaryBtn.addEventListener("click", calculateFinancialSummary);
-  }
-
-  // Financial Advisor Chat
-  if (sendBtn) {
-    sendBtn.addEventListener("click", sendMessage);
-    textarea.addEventListener("keypress", (e) => {
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
-        sendMessage();
-      }
+      variableCostsContainer.classList.toggle("hidden");
     });
   }
 
   // Stock Analysis functionality
+  const stockSymbolInput = document.getElementById("stock-symbol");
   const getStockDetailsButton = document.getElementById("get-stock-details");
   const stockResultsDiv = document.getElementById("stock-results");
 
@@ -666,21 +638,18 @@ document.addEventListener("DOMContentLoaded", function () {
         '<div class="loading">Loading stock data...</div>';
 
       // Fetch stock data from Alpha Vantage API
-      const apiKey = "2AYMZZPUJNUK8VMQ";
-      const overviewUrl = `https://www.alphavantage.co/query?function=OVERVIEW&symbol=${symbol}&apikey=${apiKey}`;
+      const apiKey = process.env.ALPHA_VANTAGE_API_KEY;
+      const url = `https://www.alphavantage.co/query?function=OVERVIEW&symbol=${symbol}&apikey=${apiKey}`;
       const priceUrl = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${apiKey}`;
-      const timeseriesUrl = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${symbol}&apikey=${apiKey}`;
 
       // Make both requests in parallel
-      const [overviewResponse, priceResponse, tsResponse] = await Promise.all([
-        fetch(overviewUrl),
+      const [overviewResponse, priceResponse] = await Promise.all([
+        fetch(url),
         fetch(priceUrl),
-        fetch(timeseriesUrl),
       ]);
 
       const overviewData = await overviewResponse.json();
       const priceData = await priceResponse.json();
-      const tsData = await tsResponse.json();
 
       // Handle potential error responses
       if (overviewData.Note || priceData.Note) {
@@ -735,54 +704,54 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Create stock graph element (placeholder for now)
     const graphHtml = `
-        <div class="stock-graph">
-          <img src="/api/placeholder/800/300" alt="Stock Price History Graph" 
-               style="width: 100%; height: 100%; object-fit: cover">
-        </div>
-      `;
+      <div class="stock-graph">
+        <img src="/api/placeholder/800/300" alt="Stock Price History Graph" 
+             style="width: 100%; height: 100%; object-fit: cover">
+      </div>
+    `;
 
     // Create metrics HTML
     const metricsHtml = `
-        <h3>Key Financial Metrics</h3>
-        <div class="key-metrics">
-          <div class="metric-card">
-            <div class="metric-label">Current Price</div>
-            <div class="metric-value">$${currentPrice.toFixed(2)}</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-label">Price Change (%)</div>
-            <div class="metric-value ${priceChangeClass}">${
+      <h3>Key Financial Metrics</h3>
+      <div class="key-metrics">
+        <div class="metric-card">
+          <div class="metric-label">Current Price</div>
+          <div class="metric-value">$${currentPrice.toFixed(2)}</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Price Change (%)</div>
+          <div class="metric-value ${priceChangeClass}">${
       priceChangePercent >= 0 ? "+" : ""
     }${priceChangePercent.toFixed(2)}%</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-label">Revenue</div>
-            <div class="metric-value">${formatCurrency(revenue)}</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-label">Net Income</div>
-            <div class="metric-value">${formatCurrency(netIncome)}</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-label">Net Margin (%)</div>
-            <div class="metric-value">${netMargin.toFixed(2)}%</div>
-          </div>
         </div>
-      `;
+        <div class="metric-card">
+          <div class="metric-label">Revenue</div>
+          <div class="metric-value">${formatCurrency(revenue)}</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Net Income</div>
+          <div class="metric-value">${formatCurrency(netIncome)}</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Net Margin (%)</div>
+          <div class="metric-value">${netMargin.toFixed(2)}%</div>
+        </div>
+      </div>
+    `;
 
     // Create company info HTML
     const companyInfoHtml = `
-        <div class="company-info">
-          <h3>Company Information</h3>
-          <p><strong>Name:</strong> ${companyData.Name || symbol}</p>
-          <p><strong>Industry:</strong> ${
-            companyData.Industry || "Not available"
-          }</p>
-          <p><strong>Description:</strong> ${
-            companyData.Description || "No description available."
-          }</p>
-        </div>
-      `;
+      <div class="company-info">
+        <h3>Company Information</h3>
+        <p><strong>Name:</strong> ${companyData.Name || symbol}</p>
+        <p><strong>Industry:</strong> ${
+          companyData.Industry || "Not available"
+        }</p>
+        <p><strong>Description:</strong> ${
+          companyData.Description || "No description available."
+        }</p>
+      </div>
+    `;
 
     // Update the results div with all the HTML
     stockResultsDiv.innerHTML = graphHtml + metricsHtml + companyInfoHtml;
@@ -799,9 +768,8 @@ document.addEventListener("DOMContentLoaded", function () {
   async function createStockChart(symbol) {
     try {
       // Fetch historical data from Alpha Vantage
-      const apiKey = "2AYMZZPUJNUK8VMQ";
+      const apiKey = "demo"; // Use 'demo' for testing
       const url = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${symbol}&outputsize=compact&apikey=${apiKey}`;
-      const timeseriesUrl = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${symbol}&apikey=${apiKey}`;
 
       const response = await fetch(url);
       const data = await response.json();
@@ -815,22 +783,10 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
       // Process the data for the chart
-      //   const timeSeriesData = data["Time Series (Daily)"];
-      const tsResponse = await fetch(timeseriesUrl);
-      const tsData = await tsResponse.json();
-
-      if (tsData.Note || tsData["Error Message"]) {
-        console.error(
-          "API limit reached or error:",
-          tsData.Note || tsData["Error Message"]
-        );
-        return;
-      }
-
-      const timeSeriesData = tsData["Time Series (Daily)"];
+      const timeSeriesData = data["Time Series (Daily)"];
 
       if (!timeSeriesData) {
-        console.error("No series data available");
+        console.error("No time series data available");
         return;
       }
 
@@ -843,36 +799,30 @@ document.addEventListener("DOMContentLoaded", function () {
         .sort((a, b) => new Date(a.date) - new Date(b.date))
         .slice(-30); // Last 30 days
 
+      // Replace the placeholder image with a real chart
+      // This is where you'd use a charting library like Chart.js
+      // For now, we'll just leave the placeholder image
       console.log("Chart data prepared:", chartData);
-      const ctx = document.getElementById("stockChart").getContext("2d");
-      new Chart(ctx, {
-        type: "line",
-        data: {
-          labels: chartData.map((d) => d.date),
-          datasets: [
-            {
-              label: `${symbol} Closing Price`,
-              data: chartData.map((d) => d.price),
-              tension: 0.1,
-            },
-          ],
-        },
-        options: {
-          scales: {
-            x: {
-              type: "time",
-              time: {
-                parser: "YYYY-MM-DD",
-                tooltipFormat: "ll",
-              },
-              title: { display: true, text: "Date" },
-            },
-            y: {
-              title: { display: true, text: "Price (USD)" },
-            },
-          },
-        },
-      });
+
+      // Example of how you might implement the chart with a library like Chart.js
+      // if (typeof Chart !== 'undefined') {
+      //   const ctx = document.createElement('canvas');
+      //   document.querySelector('.stock-graph').innerHTML = '';
+      //   document.querySelector('.stock-graph').appendChild(ctx);
+      //
+      //   new Chart(ctx, {
+      //     type: 'line',
+      //     data: {
+      //       labels: chartData.map(d => d.date),
+      //       datasets: [{
+      //         label: `${symbol} Price`,
+      //         data: chartData.map(d => d.price),
+      //         borderColor: 'blue',
+      //         tension: 0.1
+      //       }]
+      //     }
+      //   });
+      // }
     } catch (error) {
       console.error("Error creating stock chart:", error);
     }
@@ -880,6 +830,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Add event listener for the chatbot form in the advisor section
   const chatForm = document.querySelector(".input-area");
+  const messagesContainer = document.querySelector(".messages-container");
 
   if (chatForm) {
     const chatTextarea = chatForm.querySelector("textarea");
@@ -982,6 +933,7 @@ document.addEventListener("DOMContentLoaded", function () {
   window.filterDashboard = filterDashboard;
 
   // Financial Planning calculations
+  const calculateSummaryBtn = document.getElementById("calculate-summary");
 
   if (calculateSummaryBtn) {
     calculateSummaryBtn.addEventListener("click", () => {
@@ -1006,18 +958,18 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // Display a simple alert with the results
       alert(`
-          Financial Summary:
-          ------------------
-          Monthly Income: $${monthlyIncome.toFixed(2)}
-          Monthly Expenses: $${monthlyExpenses.toFixed(2)}
-          Monthly Investment Capacity: $${monthlyInvestmentCapacity.toFixed(2)}
-          
-          Yearly Income: $${(monthlyIncome * 12).toFixed(2)}
-          Yearly Expenses: $${(monthlyExpenses * 12).toFixed(2)}
-          Yearly Investment Capacity: $${(
-            monthlyInvestmentCapacity * 12
-          ).toFixed(2)}
-        `);
+        Financial Summary:
+        ------------------
+        Monthly Income: $${monthlyIncome.toFixed(2)}
+        Monthly Expenses: $${monthlyExpenses.toFixed(2)}
+        Monthly Investment Capacity: $${monthlyInvestmentCapacity.toFixed(2)}
+        
+        Yearly Income: $${(monthlyIncome * 12).toFixed(2)}
+        Yearly Expenses: $${(monthlyExpenses * 12).toFixed(2)}
+        Yearly Investment Capacity: $${(monthlyInvestmentCapacity * 12).toFixed(
+          2
+        )}
+      `);
     });
   }
 });
@@ -1029,3 +981,8 @@ document.addEventListener("DOMContentLoaded", function () {
 // -------------------------------------------------------------------------------------------------------------------------------------
 // Financial Advisor Chat
 // -------------------------------------------------------------------------------------------------------------------------------------
+
+// Add this code at the end of your file or in the console
+document.getElementById("calculate-summary").onclick = function () {
+  alert("Button clicked");
+};

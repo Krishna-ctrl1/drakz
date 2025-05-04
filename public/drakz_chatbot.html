@@ -11,6 +11,7 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
     />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   </head>
   <body>
     <header class="header">
@@ -434,49 +435,41 @@
             <div class="stock-analysis-results" id="stock-results">
               <!-- This section will be populated with stock data -->
               <div class="stock-graph">
-                <!-- Placeholder for stock price graph -->
-                <img
-                  src="/api/placeholder/800/300"
-                  alt="Stock Price History Graph"
-                  style="width: 100%; height: 100%; object-fit: cover"
-                />
+                <div class="stock-graph">
+                  <canvas id="stockChart" width="800" height="300"></canvas>
+                </div>                
               </div>
 
               <h3>Key Financial Metrics</h3>
               <div class="key-metrics">
                 <div class="metric-card">
                   <div class="metric-label">Current Price</div>
-                  <div class="metric-value">$175.42</div>
+                  <div class="metric-value"> ...</div>
                 </div>
                 <div class="metric-card">
                   <div class="metric-label">Price Change (%)</div>
-                  <div class="metric-value positive">+2.34%</div>
+                  <div class="metric-value positive"> ...</div>
                 </div>
                 <div class="metric-card">
                   <div class="metric-label">Revenue</div>
-                  <div class="metric-value">$394.3B</div>
+                  <div class="metric-value"> ...</div>
                 </div>
                 <div class="metric-card">
                   <div class="metric-label">Net Income</div>
-                  <div class="metric-value">$96.9B</div>
+                  <div class="metric-value"> ...</div>
                 </div>
                 <div class="metric-card">
                   <div class="metric-label">Net Margin (%)</div>
-                  <div class="metric-value">24.6%</div>
+                  <div class="metric-value"> ...</div>
                 </div>
               </div>
 
               <div class="company-info">
                 <h3>Company Information</h3>
-                <p><strong>Name:</strong> Apple Inc.</p>
-                <p><strong>Industry:</strong> Technology</p>
+                <p><strong>Name:</strong> ...</p>
+                <p><strong>Industry:</strong> ...</p>
                 <p>
-                  <strong>Description:</strong> Apple Inc. designs,
-                  manufactures, and markets smartphones, personal computers,
-                  tablets, wearables, and accessories worldwide. The company
-                  offers iPhone, Mac, iPad, and wearables, home, and
-                  accessories.
-                </p>
+                  <strong>Description:</strong> ...</p>
               </div>
             </div>
           </div>
@@ -513,5 +506,61 @@
     </div>
 
     <script src="drakz_chatbot.js"></script>
+    <script>
+      // Wait for DOM to fully load
+      document.addEventListener("DOMContentLoaded", () => {
+        // Tab navigation
+        const tabItems = document.querySelectorAll(".tab-item");
+        const sectionContents = document.querySelectorAll(".section-content");
+        const sectionCards = document.querySelectorAll(".section-card");
+
+        // Function to switch tabs
+        function switchTab(sectionId) {
+          console.log("Switching to tab:", sectionId);
+
+          // Hide all section contents
+          sectionContents.forEach((content) => {
+            content.classList.remove("active");
+          });
+
+          // Remove active class from all tabs
+          tabItems.forEach((tab) => {
+            tab.classList.remove("active");
+          });
+
+          // Show the selected section content
+          const selectedContent = document.getElementById(
+            `${sectionId}-content`
+          );
+          if (selectedContent) {
+            selectedContent.classList.add("active");
+          }
+
+          // Add active class to the selected tab
+          const selectedTab = document.querySelector(
+            `.tab-item[data-section="${sectionId}"]`
+          );
+          if (selectedTab) {
+            selectedTab.classList.add("active");
+          }
+        }
+
+        // Add click event listeners to tabs
+        tabItems.forEach((tab) => {
+          tab.addEventListener("click", () => {
+            const sectionId = tab.getAttribute("data-section");
+            switchTab(sectionId);
+          });
+        });
+
+        // Add click event listeners to section cards
+        sectionCards.forEach((card) => {
+          card.addEventListener("click", () => {
+            const sectionId = card.getAttribute("data-section");
+            switchTab(sectionId);
+          });
+        });
+      });
+    </script>
   </body>
 </html>
