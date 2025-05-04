@@ -644,6 +644,23 @@ document.addEventListener("DOMContentLoaded", function () {
   const getStockDetailsButton = document.getElementById("get-stock-details");
   const stockResultsDiv = document.getElementById("stock-results");
 
+  /**
+   * Fetch stock data using Yahoo Finance API via a proxy
+   * @param {string} symbol - Stock ticker symbol
+   */
+
+  /**
+   * Display stock data on the page
+   * @param {string} symbol - Stock ticker symbol
+   * @param {Object} companyData - Company overview data
+   * @param {Object} priceData - Current price data
+   */
+
+  /**
+   * Create a stock price chart for the given symbol
+   * @param {string} symbol - Stock ticker symbol
+   */
+
   if (getStockDetailsButton) {
     getStockDetailsButton.addEventListener("click", () => {
       const symbol = stockSymbolInput.value.trim().toUpperCase();
@@ -655,10 +672,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  /**
-   * Fetch stock data using Yahoo Finance API via a proxy
-   * @param {string} symbol - Stock ticker symbol
-   */
   async function fetchStockData(symbol) {
     try {
       // Show loading indicator
@@ -666,7 +679,7 @@ document.addEventListener("DOMContentLoaded", function () {
         '<div class="loading">Loading stock data...</div>';
 
       // Fetch stock data from Alpha Vantage API
-      const apiKey = "2AYMZZPUJNUK8VMQ";
+      const apiKey = "demo";
       const overviewUrl = `https://www.alphavantage.co/query?function=OVERVIEW&symbol=${symbol}&apikey=${apiKey}`;
       const priceUrl = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${apiKey}`;
       const timeseriesUrl = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${symbol}&apikey=${apiKey}`;
@@ -699,12 +712,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  /**
-   * Display stock data on the page
-   * @param {string} symbol - Stock ticker symbol
-   * @param {Object} companyData - Company overview data
-   * @param {Object} priceData - Current price data
-   */
   function displayStockData(symbol, companyData, priceData) {
     // Extract price information
     const currentPrice =
@@ -735,54 +742,54 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Create stock graph element (placeholder for now)
     const graphHtml = `
-        <div class="stock-graph">
-          <img src="/api/placeholder/800/300" alt="Stock Price History Graph" 
-               style="width: 100%; height: 100%; object-fit: cover">
-        </div>
-      `;
+            <div class="stock-graph">
+              <img src="/api/placeholder/800/300" alt="Stock Price History Graph" 
+                   style="width: 100%; height: 100%; object-fit: cover">
+            </div>
+          `;
 
     // Create metrics HTML
     const metricsHtml = `
-        <h3>Key Financial Metrics</h3>
-        <div class="key-metrics">
-          <div class="metric-card">
-            <div class="metric-label">Current Price</div>
-            <div class="metric-value">$${currentPrice.toFixed(2)}</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-label">Price Change (%)</div>
-            <div class="metric-value ${priceChangeClass}">${
+            <h3>Key Financial Metrics</h3>
+            <div class="key-metrics">
+              <div class="metric-card">
+                <div class="metric-label">Current Price</div>
+                <div class="metric-value">$${currentPrice.toFixed(2)}</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">Price Change (%)</div>
+                <div class="metric-value ${priceChangeClass}">${
       priceChangePercent >= 0 ? "+" : ""
     }${priceChangePercent.toFixed(2)}%</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-label">Revenue</div>
-            <div class="metric-value">${formatCurrency(revenue)}</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-label">Net Income</div>
-            <div class="metric-value">${formatCurrency(netIncome)}</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-label">Net Margin (%)</div>
-            <div class="metric-value">${netMargin.toFixed(2)}%</div>
-          </div>
-        </div>
-      `;
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">Revenue</div>
+                <div class="metric-value">${formatCurrency(revenue)}</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">Net Income</div>
+                <div class="metric-value">${formatCurrency(netIncome)}</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">Net Margin (%)</div>
+                <div class="metric-value">${netMargin.toFixed(2)}%</div>
+              </div>
+            </div>
+          `;
 
     // Create company info HTML
     const companyInfoHtml = `
-        <div class="company-info">
-          <h3>Company Information</h3>
-          <p><strong>Name:</strong> ${companyData.Name || symbol}</p>
-          <p><strong>Industry:</strong> ${
-            companyData.Industry || "Not available"
-          }</p>
-          <p><strong>Description:</strong> ${
-            companyData.Description || "No description available."
-          }</p>
-        </div>
-      `;
+            <div class="company-info">
+              <h3>Company Information</h3>
+              <p><strong>Name:</strong> ${companyData.Name || symbol}</p>
+              <p><strong>Industry:</strong> ${
+                companyData.Industry || "Not available"
+              }</p>
+              <p><strong>Description:</strong> ${
+                companyData.Description || "No description available."
+              }</p>
+            </div>
+          `;
 
     // Update the results div with all the HTML
     stockResultsDiv.innerHTML = graphHtml + metricsHtml + companyInfoHtml;
@@ -792,14 +799,10 @@ document.addEventListener("DOMContentLoaded", function () {
     createStockChart(symbol);
   }
 
-  /**
-   * Create a stock price chart for the given symbol
-   * @param {string} symbol - Stock ticker symbol
-   */
   async function createStockChart(symbol) {
     try {
       // Fetch historical data from Alpha Vantage
-      const apiKey = "2AYMZZPUJNUK8VMQ";
+      const apiKey = "demo";
       const url = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${symbol}&outputsize=compact&apikey=${apiKey}`;
       const timeseriesUrl = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${symbol}&apikey=${apiKey}`;
 
@@ -815,7 +818,6 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
       // Process the data for the chart
-      //   const timeSeriesData = data["Time Series (Daily)"];
       const tsResponse = await fetch(timeseriesUrl);
       const tsData = await tsResponse.json();
 
@@ -845,6 +847,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
       console.log("Chart data prepared:", chartData);
       const ctx = document.getElementById("stockChart").getContext("2d");
+      console.log("canvas element is", ctx);
+      if (!ctx) {
+        console.error('🔥 No <canvas id="stockChart"> found in DOM');
+        return;
+      }
       new Chart(ctx, {
         type: "line",
         data: {
