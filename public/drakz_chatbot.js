@@ -740,73 +740,105 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     };
 
-    // Create stock graph element (placeholder for now)
+    // Create stock graph element with a canvas for the chart
     const graphHtml = `
-            <div class="stock-graph">
-              <img src="/api/placeholder/800/300" alt="Stock Price History Graph" 
-                   style="width: 100%; height: 100%; object-fit: cover">
-            </div>
-          `;
+      <div class="stock-graph">
+        <canvas id="stockChart" width="800" height="300"></canvas>
+      </div>
+    `;
 
     // Create metrics HTML
     const metricsHtml = `
-            <h3>Key Financial Metrics</h3>
-            <div class="key-metrics">
-              <div class="metric-card">
-                <div class="metric-label">Current Price</div>
-                <div class="metric-value">$${currentPrice.toFixed(2)}</div>
-              </div>
-              <div class="metric-card">
-                <div class="metric-label">Price Change (%)</div>
-                <div class="metric-value ${priceChangeClass}">${
+      <h3>Key Financial Metrics</h3>
+      <div class="key-metrics">
+        <div class="metric-card">
+          <div class="metric-label">Current Price</div>
+          <div class="metric-value">$${currentPrice.toFixed(2)}</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Price Change (%)</div>
+          <div class="metric-value ${priceChangeClass}">${
       priceChangePercent >= 0 ? "+" : ""
     }${priceChangePercent.toFixed(2)}%</div>
-              </div>
-              <div class="metric-card">
-                <div class="metric-label">Revenue</div>
-                <div class="metric-value">${formatCurrency(revenue)}</div>
-              </div>
-              <div class="metric-card">
-                <div class="metric-label">Net Income</div>
-                <div class="metric-value">${formatCurrency(netIncome)}</div>
-              </div>
-              <div class="metric-card">
-                <div class="metric-label">Net Margin (%)</div>
-                <div class="metric-value">${netMargin.toFixed(2)}%</div>
-              </div>
-            </div>
-          `;
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Revenue</div>
+          <div class="metric-value">${formatCurrency(revenue)}</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Net Income</div>
+          <div class="metric-value">${formatCurrency(netIncome)}</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Net Margin (%)</div>
+          <div class="metric-value">${netMargin.toFixed(2)}%</div>
+        </div>
+      </div>
+    `;
 
     // Create company info HTML
     const companyInfoHtml = `
-            <div class="company-info">
-              <h3>Company Information</h3>
-              <p><strong>Name:</strong> ${companyData.Name || symbol}</p>
-              <p><strong>Industry:</strong> ${
-                companyData.Industry || "Not available"
-              }</p>
-              <p><strong>Description:</strong> ${
-                companyData.Description || "No description available."
-              }</p>
-            </div>
-          `;
+      <div class="company-info">
+        <h3>Company Information</h3>
+        <p><strong>Name:</strong> ${companyData.Name || symbol}</p>
+        <p><strong>Industry:</strong> ${
+          companyData.Industry || "Not available"
+        }</p>
+        <p><strong>Description:</strong> ${
+          companyData.Description || "No description available."
+        }</p>
+      </div>
+    `;
 
     // Update the results div with all the HTML
     stockResultsDiv.innerHTML = graphHtml + metricsHtml + companyInfoHtml;
 
-    // In a real implementation, you would also create and display a chart here
-    // This could be done with a library like Chart.js
-    createStockChart(symbol);
+    // Now that the canvas is in the DOM, create the chart
+    // We need to use setTimeout to ensure the DOM has been updated
+    setTimeout(() => {
+      createStockChart(symbol);
+    }, 0);
   }
 
   async function createStockChart(symbol) {
     try {
+      const canvas = document.getElementById("stockChart");
+      if (!canvas) {
+        console.error('Canvas element "stockChart" not found in DOM');
+        return;
+      }
+
+      // Check if Chart.js is available
+      if (typeof Chart === "undefined") {
+        console.error("Chart.js library is not loaded.");
+        // Create a fallback message if Chart.js isn't available
+        const chartContainer = canvas.parentNode;
+        chartContainer.innerHTML = `
+          <div style="width: 100%; height: 300px; display: flex; align-items: center; justify-content: center; background-color: #f8f9fa; border-radius: 8px;">
+            <p>Chart cannot be displayed. Chart.js library is not available.</p>
+          </div>
+        `;
+        return;
+      }
+
       // Fetch historical data from Alpha Vantage
       const apiKey = "demo";
-      const url = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${symbol}&outputsize=compact&apikey=${apiKey}`;
       const timeseriesUrl = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${symbol}&apikey=${apiKey}`;
 
-      const response = await fetch(url);
+      // Show loading indicator on canvas
+      const ctx = canvas.getContext("2d");
+      ctx.fillStyle = "#f8f9fa";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#333";
+      ctx.font = "16px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText(
+        "Loading stock data...",
+        canvas.width / 2,
+        canvas.height / 2
+      );
+
+      const response = await fetch(timeseriesUrl);
       const data = await response.json();
 
       if (data.Note || data["Error Message"]) {
@@ -814,25 +846,29 @@ document.addEventListener("DOMContentLoaded", function () {
           "API limit reached or error:",
           data.Note || data["Error Message"]
         );
-        return;
-      }
-
-      // Process the data for the chart
-      const tsResponse = await fetch(timeseriesUrl);
-      const tsData = await tsResponse.json();
-
-      if (tsData.Note || tsData["Error Message"]) {
-        console.error(
-          "API limit reached or error:",
-          tsData.Note || tsData["Error Message"]
+        ctx.fillStyle = "#f8f9fa";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "red";
+        ctx.fillText(
+          "API limit reached. Please try again later.",
+          canvas.width / 2,
+          canvas.height / 2
         );
         return;
       }
 
-      const timeSeriesData = tsData["Time Series (Daily)"];
+      const timeSeriesData = data["Time Series (Daily)"];
 
       if (!timeSeriesData) {
         console.error("No series data available");
+        ctx.fillStyle = "#f8f9fa";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "red";
+        ctx.fillText(
+          "No data available for this symbol",
+          canvas.width / 2,
+          canvas.height / 2
+        );
         return;
       }
 
@@ -846,12 +882,11 @@ document.addEventListener("DOMContentLoaded", function () {
         .slice(-30); // Last 30 days
 
       console.log("Chart data prepared:", chartData);
-      const ctx = document.getElementById("stockChart").getContext("2d");
-      console.log("canvas element is", ctx);
-      if (!ctx) {
-        console.error('🔥 No <canvas id="stockChart"> found in DOM');
-        return;
-      }
+
+      // Clear any existing charts on this canvas
+      Chart.getChart(canvas)?.destroy();
+
+      // Create a new chart
       new Chart(ctx, {
         type: "line",
         data: {
@@ -860,102 +895,63 @@ document.addEventListener("DOMContentLoaded", function () {
             {
               label: `${symbol} Closing Price`,
               data: chartData.map((d) => d.price),
+              borderColor: "rgb(75, 192, 192)",
+              backgroundColor: "rgba(75, 192, 192, 0.1)",
+              borderWidth: 2,
               tension: 0.1,
+              fill: true,
             },
           ],
         },
         options: {
+          responsive: true,
+          maintainAspectRatio: false,
           scales: {
             x: {
-              type: "time",
-              time: {
-                parser: "YYYY-MM-DD",
-                tooltipFormat: "ll",
+              title: {
+                display: true,
+                text: "Date",
               },
-              title: { display: true, text: "Date" },
+              ticks: {
+                maxTicksLimit: 10,
+              },
             },
             y: {
-              title: { display: true, text: "Price (USD)" },
+              title: {
+                display: true,
+                text: "Price (USD)",
+              },
+              beginAtZero: false,
+            },
+          },
+          plugins: {
+            legend: {
+              position: "top",
+            },
+            tooltip: {
+              mode: "index",
+              intersect: false,
             },
           },
         },
       });
     } catch (error) {
       console.error("Error creating stock chart:", error);
-    }
-  }
-
-  // Add event listener for the chatbot form in the advisor section
-  const chatForm = document.querySelector(".input-area");
-
-  if (chatForm) {
-    const chatTextarea = chatForm.querySelector("textarea");
-    const sendButton = chatForm.querySelector(".send-btn");
-
-    sendButton.addEventListener("click", () => {
-      sendMessage(chatTextarea.value);
-    });
-
-    chatTextarea.addEventListener("keypress", (e) => {
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
-        sendMessage(chatTextarea.value);
+      // Display error on canvas
+      const canvas = document.getElementById("stockChart");
+      if (canvas) {
+        const ctx = canvas.getContext("2d");
+        ctx.fillStyle = "#f8f9fa";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "red";
+        ctx.font = "16px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText(
+          `Error: ${error.message}`,
+          canvas.width / 2,
+          canvas.height / 2
+        );
       }
-    });
-  }
-
-  /**
-   * Send a message in the chatbot
-   * @param {string} message - User message
-   */
-  function sendMessage(message) {
-    if (!message.trim()) return;
-
-    // Add user message to chat
-    const userMessageDiv = document.createElement("div");
-    userMessageDiv.className = "message user";
-    userMessageDiv.textContent = message;
-    messagesContainer.appendChild(userMessageDiv);
-
-    // Clear the input
-    document.querySelector(".input-area textarea").value = "";
-
-    // Simulate bot response (in a real app, this would call an API)
-    setTimeout(() => {
-      const botResponse = generateBotResponse(message);
-      const botMessageDiv = document.createElement("div");
-      botMessageDiv.className = "message bot";
-      botMessageDiv.textContent = botResponse;
-      messagesContainer.appendChild(botMessageDiv);
-
-      // Scroll to the bottom
-      messagesContainer.scrollTop = messagesContainer.scrollHeight;
-    }, 1000);
-  }
-
-  /**
-   * Generate a simple bot response
-   * @param {string} message - User message
-   * @returns {string} Bot response
-   */
-  function generateBotResponse(message) {
-    const lowerMessage = message.toLowerCase();
-
-    // Simple keyword-based responses
-    if (lowerMessage.includes("hello") || lowerMessage.includes("hi")) {
-      return "Hello! How can I help with your financial questions today?";
-    } else if (lowerMessage.includes("invest")) {
-      return "Investment strategies vary based on your goals and risk tolerance. Would you like to know more about different investment options?";
-    } else if (lowerMessage.includes("save")) {
-      return "Saving is important for financial security. A good rule is to save at least 20% of your income. Would you like tips on how to save more effectively?";
-    } else if (lowerMessage.includes("budget")) {
-      return "Creating a budget is the first step to financial control. Try the 50/30/20 rule: 50% for needs, 30% for wants, and 20% for savings and debt repayment.";
-    } else if (lowerMessage.includes("credit")) {
-      return "Maintaining good credit is essential. Pay bills on time, keep credit utilization below 30%, and regularly check your credit report.";
-    } else if (lowerMessage.includes("retire")) {
-      return "For retirement planning, aim to save at least 15% of your income. Consider tax-advantaged accounts and diversify your investments.";
-    } else {
-      return "That's an interesting question. For personalized financial advice, I recommend speaking with a financial advisor who can consider your specific situation.";
     }
   }
 

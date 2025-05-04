@@ -144,39 +144,73 @@
 
               <div class="section-cards">
                 <div class="section-card" data-section="financial-planning">
-                  <svg class="icon financial-planning-icon" viewBox="0 0 24 24">
-                    <path
-                      d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"
-                    ></path>
-                    <path d="M7 12h2v5H7zm4-7h2v12h-2zm4 4h2v8h-2z"></path>
-                  </svg>
+                  <div class="icon-container">
+                    <svg class="financial-planning-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="56" height="56" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <!-- Base circle -->
+                        <circle cx="12" cy="12" r="10" fill="#E8EFFF" stroke="#4361EE" stroke-width="1.5"/>
+                        <!-- Coin stack -->
+                        <circle cx="12" cy="8" r="3" fill="#91A7FF" stroke="#4361EE" stroke-width="1.5"/>
+                        <circle cx="12" cy="11" r="3" fill="#4361EE" stroke="#3F37C9" stroke-width="1.5"/>
+                        <circle cx="12" cy="14" r="3" fill="#91A7FF" stroke="#4361EE" stroke-width="1.5"/>
+                        <!-- Growth arrow -->
+                        <path d="M16 16l2-6-6 2" fill="none" stroke="#3F37C9" stroke-width="1.5"/>
+                        <circle cx="18" cy="10" r="1" fill="#3F37C9"/>
+                    </svg>
+                </div>
                   <h3>Financial Planning</h3>
                   <p>Budget, savings, and retirement planning</p>
                 </div>
                 <div class="section-card" data-section="stock-analysis">
-                  <svg class="icon stock-analysis-icon" viewBox="0 0 24 24">
-                    <path
-                      d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 16.99z"
-                    ></path>
-                  </svg>
+                  <div class="icon-container">
+                    <svg class="stock-analysis-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="56" height="56" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <!-- Base background -->
+                        <rect x="2" y="3" width="20" height="18" rx="2" fill="#E3F8FF" stroke="#4CC9F0" stroke-width="1.5"/>
+                        <!-- Chart bars -->
+                        <rect x="6" y="14" width="2" height="4" fill="#4CC9F0" stroke="#4CC9F0" stroke-width="1"/>
+                        <rect x="10" y="12" width="2" height="6" fill="#4CC9F0" stroke="#4CC9F0" stroke-width="1"/>
+                        <rect x="14" y="9" width="2" height="9" fill="#4CC9F0" stroke="#4CC9F0" stroke-width="1"/>
+                        <rect x="18" y="6" width="2" height="12" fill="#4CC9F0" stroke="#4CC9F0" stroke-width="1"/>
+                        <!-- Line chart -->
+                        <polyline points="6,10 10,8 14,11 18,6" stroke="#0077B6" stroke-width="1.5" fill="none"/>
+                        <circle cx="6" cy="10" r="1" fill="#0077B6"/>
+                        <circle cx="10" cy="8" r="1" fill="#0077B6"/>
+                        <circle cx="14" cy="11" r="1" fill="#0077B6"/>
+                        <circle cx="18" cy="6" r="1" fill="#0077B6"/>
+                    </svg>
+                </div>
                   <h3>Stock Analysis</h3>
                   <p>Market trends and stock performance</p>
                 </div>
                 <div class="section-card" data-section="investment">
-                  <svg class="icon investment-icon" viewBox="0 0 24 24">
-                    <path
-                      d="M21 18v1c0 1.1-.9 2-2 2H5c-1.1 0-2-.9-2-2V5c0-1.1.9-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"
-                    ></path>
-                  </svg>
-                  <h3>Investment Recommendations</h3>
+                  <div class="icon-container">
+                    <svg class="investment-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="56" height="56" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <!-- Base circle -->
+                        <circle cx="12" cy="12" r="10" fill="#FFF3E0" stroke="#F8961E" stroke-width="1.5"/>
+                        <!-- Growing plant -->
+                        <path d="M12,18 L12,6" stroke="#F8961E" stroke-width="1.5"/>
+                        <!-- Leaves -->
+                        <path d="M12,8 C12,8 14,6 16,8 C18,10 16,12 16,12" fill="#FFD166" stroke="#F8961E" stroke-width="1.5"/>
+                        <path d="M12,12 C12,12 10,10 8,12 C6,14 8,16 8,16" fill="#FFD166" stroke="#F8961E" stroke-width="1.5"/>
+                        <!-- Soil -->
+                        <path d="M7,18 L17,18" stroke="#F8961E" stroke-width="1.5"/>
+                        <path d="M8,20 L16,20" stroke="#F8961E" stroke-width="1.5"/>
+                    </svg>
+                </div>
+                  <h3>Recommendations</h3>
                   <p>Personalized investment opportunities</p>
                 </div>
                 <div class="section-card" data-section="advisor">
-                  <svg class="icon advisor-icon" viewBox="0 0 24 24">
-                    <path
-                      d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
-                    ></path>
-                  </svg>
+                  <div class="icon-container">
+                    <svg class="advisor-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="56" height="56" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <!-- Chat bubble -->
+                        <path d="M3,12 C3,16.4183 6.58172,20 11,20 C11.3608,20 11.7177,19.9716 12.0683,19.9158 L19,21 L17.9158,14.0683 C17.9716,13.7177 18,13.3608 18,13 C18,8.58172 14.4183,5 10,5 C5.58172,5 3,8.58172 3,12 Z" fill="#FFE0F0" stroke="#F72585" stroke-width="1.5"/>
+                        <!-- Dollar sign -->
+                        <circle cx="10" cy="12" r="4" fill="#FFBCDB" stroke="#F72585" stroke-width="1.5"/>
+                        <path d="M10,9 L10,15" stroke="#F72585" stroke-width="1.5"/>
+                        <path d="M8,11 L12,11" stroke="#F72585" stroke-width="1.5"/>
+                        <path d="M8,13 L12,13" stroke="#F72585" stroke-width="1.5"/>
+                    </svg>
+                </div>
                   <h3>Financial Advisor</h3>
                   <p>Expert advice for your financial questions</p>
                 </div>
