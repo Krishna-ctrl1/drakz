@@ -546,10 +546,6 @@ function filterDashboard() {
 // Stock Analysis
 // -------------------------------------------------------------------------------------------------------------------------------------
 
-// -------------------------------------------------------------------------------------------------------------------------------------
-// Stock Analysis - Fixed Version
-// -------------------------------------------------------------------------------------------------------------------------------------
-
 document.addEventListener("DOMContentLoaded", function () {
   // Get references to stock analysis elements
   const stockSymbolInput = document.getElementById("stock-symbol");
@@ -887,6 +883,429 @@ document.addEventListener("DOMContentLoaded", function () {
 // -------------------------------------------------------------------------------------------------------------------------------------
 // Investment Recommendations
 // -------------------------------------------------------------------------------------------------------------------------------------
+
+// Client-side code for investment-content section
+document.addEventListener("DOMContentLoaded", () => {
+  // Add this HTML to the investment-content section
+  const investmentContent = document.getElementById("investment-content");
+  investmentContent.innerHTML = `
+    <h2>Investment Recommendations</h2>
+    <p>Get personalized investment opportunities based on your financial goals.</p>
+    
+    <div class="investment-inputs">
+      <div class="input-group">
+        <label for="investment-amount">Investment Amount (INR)</label>
+        <input type="number" id="investment-amount" class="number-input" min="0" step="100" value="100000" />
+      </div>
+      <div class="input-group wide">
+        <label for="stock-tickers">Stock Tickers (comma separated, e.g., AAPL,MSFT,GOOG)</label>
+        <input type="text" id="stock-tickers" placeholder="Enter stock tickers separated by commas" />
+      </div>
+      <button id="analyze-stocks" class="calculate-btn">Analyze Stocks and Get Recommendations</button>
+    </div>
+
+    <div id="loading-spinner" class="hidden">
+      <div class="spinner"></div>
+      <p>Loading stock data...</p>
+    </div>
+
+    <div id="stock-analysis-results" class="hidden">
+      <h3>Stock Analysis Results</h3>
+      <div class="metrics-container" id="metrics-container"></div>
+      
+      <h3>Recommended Investment Allocation</h3>
+      <div class="allocation-table-container">
+        <table id="allocation-table" class="investment-table">
+          <thead>
+            <tr>
+              <th>Stock Ticker</th>
+              <th>Allocation (INR)</th>
+              <th>Share Price (INR)</th>
+              <th>Shares to Buy</th>
+              <th>Total Cost (INR)</th>
+              <th>Score</th>
+            </tr>
+          </thead>
+          <tbody id="allocation-body"></tbody>
+        </table>
+      </div>
+      
+      <div class="chart-container">
+        <canvas id="allocation-chart" width="400" height="400"></canvas>
+      </div>
+    </div>
+  `;
+
+  // Add CSS to the page
+  const style = document.createElement("style");
+  style.textContent = `
+    .investment-inputs {
+      background-color: #f9f9f9;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    
+    .input-group.wide {
+      grid-column: span 2;
+    }
+    
+    #loading-spinner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 30px 0;
+    }
+    
+    .spinner {
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border-left-color: #4361ee;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .hidden {
+      display: none;
+    }
+    
+    .metrics-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .metric-card {
+      background-color: #fff;
+      border-radius: 6px;
+      padding: 15px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      flex: 1;
+      min-width: 200px;
+    }
+    
+    .investment-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 30px;
+    }
+    
+    .investment-table th, .investment-table td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: center;
+    }
+    
+    .investment-table th {
+      background-color: #f2f2f2;
+    }
+    
+    .chart-container {
+      width: 100%;
+      max-width: 500px;
+      margin: 0 auto 30px auto;
+    }
+  `;
+  document.head.appendChild(style);
+
+  // Initialize variables
+  const analyzeButton = document.getElementById("analyze-stocks");
+  const loadingSpinner = document.getElementById("loading-spinner");
+  const resultsContainer = document.getElementById("stock-analysis-results");
+  const ALPHA_VANTAGE_API_KEY = "536CTHGRJTDSWQC3w"; // Replace with your API key
+
+  // Add event listener for the analyze button
+  analyzeButton.addEventListener("click", async () => {
+    const tickersInput = document.getElementById("stock-tickers").value.trim();
+    const investmentAmount = parseFloat(
+      document.getElementById("investment-amount").value
+    );
+
+    if (!tickersInput || isNaN(investmentAmount) || investmentAmount <= 0) {
+      alert("Please enter valid stock tickers and investment amount.");
+      return;
+    }
+
+    // Show loading spinner
+    loadingSpinner.classList.remove("hidden");
+    resultsContainer.classList.add("hidden");
+
+    const tickers = tickersInput
+      .split(",")
+      .map((ticker) => ticker.trim().toUpperCase());
+
+    try {
+      // Fetch stock data for all tickers
+      const metricsData = await Promise.all(
+        tickers.map((ticker) => fetchStockData(ticker))
+      );
+
+      // Get recommendations based on metrics
+      const recommendations = get_stock_recommendations(metricsData, tickers);
+
+      // Allocate investment
+      const allocation = allocate_investment(recommendations, investmentAmount);
+
+      // Display results
+      displayMetrics(recommendations);
+      displayAllocation(allocation);
+      createAllocationChart(allocation);
+
+      // Hide loading spinner and show results
+      loadingSpinner.classList.add("hidden");
+      resultsContainer.classList.remove("hidden");
+    } catch (error) {
+      console.error("Error analyzing stocks:", error);
+      alert("Error fetching stock data. Please try again.");
+      loadingSpinner.classList.add("hidden");
+    }
+  });
+
+  // Javascript conversion of the Python functions provided
+  function get_stock_recommendations(metrics_list, tickers) {
+    // Create a scoring system
+    const scored_stocks = [];
+
+    for (let i = 0; i < tickers.length; i++) {
+      const ticker = tickers[i];
+      const metrics = metrics_list[i];
+
+      if (!metrics) {
+        continue;
+      }
+
+      let score = 0;
+
+      // Price change score
+      if ("Price Change (%)" in metrics) {
+        const price_change = metrics["Price Change (%)"];
+        // Higher price change is better, but cap at 20 points
+        score +=
+          price_change > 0
+            ? Math.min(price_change / 5, 20)
+            : Math.max(price_change / 10, -10);
+      }
+
+      // Net margin score
+      if ("Net Margin (%)" in metrics) {
+        const net_margin = metrics["Net Margin (%)"];
+        // Higher margins are better
+        score += Math.min(net_margin / 2, 30);
+      }
+
+      // ROE score
+      if ("ROE (%)" in metrics) {
+        const roe = metrics["ROE (%)"];
+        // Higher ROE is better, but cap at 25 points
+        score += Math.min(roe / 2, 25);
+      }
+
+      // Debt-to-Equity score (lower is better)
+      if ("Debt-to-Equity (%)" in metrics) {
+        const dte = metrics["Debt-to-Equity (%)"];
+        // Lower D/E is better, penalize high debt
+        score -= Math.min(dte / 10, 15);
+      }
+
+      scored_stocks.push([ticker, Math.round(score * 100) / 100, metrics]);
+    }
+
+    // Sort by score (highest first)
+    scored_stocks.sort((a, b) => b[1] - a[1]);
+
+    return scored_stocks;
+  }
+
+  function allocate_investment(recommendations, investment_amount) {
+    if (!recommendations || recommendations.length === 0) {
+      return {};
+    }
+
+    // Number of stocks to invest in (top 3 or all if less than 3)
+    const num_stocks = Math.min(3, recommendations.length);
+    const top_stocks = recommendations.slice(0, num_stocks);
+
+    // Equal allocation
+    const amount_per_stock = investment_amount / num_stocks;
+
+    const allocation = {};
+    for (const [ticker, score, metrics] of top_stocks) {
+      if ("Current Price" in metrics) {
+        const price = metrics["Current Price"];
+        const shares = Math.floor(amount_per_stock / price);
+
+        allocation[ticker] = {
+          "Allocation ($)": Math.round(amount_per_stock * 100) / 100,
+          "Share Price ($)": price,
+          "Shares to Buy": shares,
+          "Total Cost ($)": Math.round(shares * price * 100) / 100,
+          Score: score,
+        };
+      }
+    }
+
+    return allocation;
+  }
+
+  // Function to fetch stock data from Alpha Vantage
+  async function fetchStockData(ticker) {
+    try {
+      // First, get overview data
+      const overviewUrl = `https://www.alphavantage.co/query?function=OVERVIEW&symbol=${ticker}&apikey=${ALPHA_VANTAGE_API_KEY}`;
+      const overviewResponse = await fetch(overviewUrl);
+      const overviewData = await overviewResponse.json();
+
+      // Then get daily price data
+      const priceUrl = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${ticker}&apikey=${ALPHA_VANTAGE_API_KEY}`;
+      const priceResponse = await fetch(priceUrl);
+      const priceData = await priceResponse.json();
+
+      // Check if we got valid data
+      if (Object.keys(overviewData).length <= 1 || !priceData["Global Quote"]) {
+        console.error(`Invalid data for ${ticker}`, overviewData, priceData);
+        return null;
+      }
+
+      // Extract relevant metrics
+      const quote = priceData["Global Quote"];
+      const currentPrice = parseFloat(quote["05. price"]);
+      const priceChange = parseFloat(quote["09. change"]);
+      const priceChangePercent = parseFloat(
+        quote["10. change percent"].replace("%", "")
+      );
+
+      const metrics = {
+        "Current Price": currentPrice,
+        "Price Change (%)": priceChangePercent,
+        "Net Margin (%)": parseFloat(overviewData.ProfitMargin || 0) * 100,
+        "ROE (%)": parseFloat(overviewData.ReturnOnEquityTTM || 0) * 100,
+        "Debt-to-Equity (%)":
+          parseFloat(overviewData.DebtToEquityRatio || 0) * 100,
+      };
+
+      return metrics;
+    } catch (error) {
+      console.error(`Error fetching data for ${ticker}:`, error);
+      return null;
+    }
+  }
+
+  // Function to display metrics
+  function displayMetrics(recommendations) {
+    const metricsContainer = document.getElementById("metrics-container");
+    metricsContainer.innerHTML = "";
+
+    recommendations.forEach(([ticker, score, metrics]) => {
+      const metricCard = document.createElement("div");
+      metricCard.className = "metric-card";
+
+      let metricHtml = `<h4>${ticker}</h4><p>Score: ${score}</p>`;
+
+      for (const [key, value] of Object.entries(metrics)) {
+        metricHtml += `<p><strong>${key}:</strong> ${
+          typeof value === "number" ? value.toFixed(2) : value
+        }</p>`;
+      }
+
+      metricCard.innerHTML = metricHtml;
+      metricsContainer.appendChild(metricCard);
+    });
+  }
+
+  // Function to display allocation table
+  function displayAllocation(allocation) {
+    const tableBody = document.getElementById("allocation-body");
+    tableBody.innerHTML = "";
+
+    for (const [ticker, data] of Object.entries(allocation)) {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${ticker}</td>
+        <td>${data["Allocation ($)"].toLocaleString()}</td>
+        <td>${data["Share Price ($)"].toLocaleString()}</td>
+        <td>${data["Shares to Buy"]}</td>
+        <td>${data["Total Cost ($)"].toLocaleString()}</td>
+        <td>${data["Score"]}</td>
+      `;
+      tableBody.appendChild(row);
+    }
+  }
+
+  // Function to create allocation chart
+  function createAllocationChart(allocation) {
+    const ctx = document.getElementById("allocation-chart").getContext("2d");
+
+    // Prepare data for chart
+    const labels = Object.keys(allocation);
+    const data = labels.map((ticker) => allocation[ticker]["Allocation ($)"]);
+
+    // Generate colors
+    const backgroundColors = [
+      "#4361ee",
+      "#3a0ca3",
+      "#7209b7",
+      "#f72585",
+      "#4cc9f0",
+      "#fb8500",
+      "#ffb703",
+      "#8ac926",
+      "#1982c4",
+      "#6a4c93",
+    ];
+
+    // Create chart
+    if (window.allocationChart) {
+      window.allocationChart.destroy();
+    }
+
+    window.allocationChart = new Chart(ctx, {
+      type: "doughnut",
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            data: data,
+            backgroundColor: backgroundColors.slice(0, labels.length),
+            borderWidth: 1,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: "right",
+          },
+          title: {
+            display: true,
+            text: "Investment Allocation",
+          },
+          tooltip: {
+            callbacks: {
+              label: function (context) {
+                const label = context.label || "";
+                const value = context.raw.toLocaleString();
+                const total = context.chart.data.datasets[0].data.reduce(
+                  (a, b) => a + b,
+                  0
+                );
+                const percentage = Math.round((context.raw / total) * 100);
+                return `${label}: ₹${value} (${percentage}%)`;
+              },
+            },
+          },
+        },
+      },
+    });
+  }
+});
 
 // -------------------------------------------------------------------------------------------------------------------------------------
 // Financial Advisor Chat
