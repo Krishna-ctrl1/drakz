@@ -43,7 +43,7 @@ async function loadUserData() {
             throw new Error('Failed to fetch users');
         }
         
-        currentUsers = await response.json();
+        currentUsers = (await response.json()).filter(user => user.role !== 'admin');
         renderUserTable();
         updateUserPagination();
         
@@ -57,7 +57,7 @@ async function loadUserData() {
     } catch (error) {
         console.error('Error loading user data:', error);
         // Show error message to the user
-        alert('Error loading user data. Please try again later.');
+        // alert('Error loading user data. Please try again later.');
     }
 }
 
@@ -103,9 +103,7 @@ function manageUser(userId, userRole) {
         
         // Determine which API endpoint to use
         let apiEndpoint = '/api/users';
-        if (userRole === 'admin') {
-            apiEndpoint = '/api/admins';
-        } else if (userRole === 'advisor') {
+        if (userRole === 'advisor') {
             apiEndpoint = '/api/advisors';
         }
         
@@ -382,7 +380,7 @@ function renderUserTable(filtered = null) {
     // Add event listener to the new manage-user button
     document.querySelectorAll('.manage-user').forEach(button => {
         button.addEventListener('click', function() {
-            const userId = parseInt(this.getAttribute('data-id'));
+            const userId = this.getAttribute('data-id');
             const userRole = this.getAttribute('data-role');
             manageUser(userId, userRole);
         });
@@ -605,9 +603,7 @@ async function deleteUser() {
     if (confirm('Are you sure you want to delete this user?')) {
         try {
             let apiEndpoint = '/api/users';
-            if (userRole === 'admin') {
-                apiEndpoint = '/api/admins';
-            } else if (userRole === 'advisor') {
+            if (userRole === 'advisor') {
                 apiEndpoint = '/api/advisors';
             }
             
@@ -695,7 +691,7 @@ async function loadSecurityAlerts() {
         });
     } catch (error) {
         console.error('Error loading security alerts:', error);
-        alert('Error loading security alerts. Please try again later.');
+        // alert('Error loading security alerts. Please try again later.');
     }
 }
 

@@ -720,36 +720,50 @@ function clearClientDetails() {
   errorMessages.forEach((msg) => msg.remove());
 }
 
-// Function to display client details in the form
-function displayClientDetails(client) {
-  // Remove loading state
-  hideLoadingState();
-  // Set form field values
-  document.getElementById("clientFirstName").value = client.firstName || "";
-  document.getElementById("clientLastName").value = client.lastName || "";
-  document.getElementById("clientEmail").value = client.email || "";
-  document.getElementById("clientPhone").value = client.phone || "";
-  document.getElementById("clientCountry").value = client.country || "";
-  document.getElementById("clientPostalCode").value = client.postalCode || "";
+// Function to display client details including the profile image
+async function displayClientDetails(client) {
+  try {
+    // Remove loading state
+    hideLoadingState();
 
-  // Set client profile image if available
-  const clientPhoto = document.getElementById("clientPhoto");
-  if (client.imagePath) {
-    // Convert the absolute file path to a URL through our API
-    clientPhoto.src = `/api/images?path=${encodeURIComponent(
-      client.imagePath
-    )}`;
-    clientPhoto.alt = `${client.firstName} ${client.lastName}`;
-  } else {
-    // Make sure this path is correct relative to your HTML file
-    clientPhoto.src = "/assets/images/default-profile.png";
-    clientPhoto.alt = "Default Profile";
-  }
+    // Set form field values
+    document.getElementById("clientFirstName").value = client.firstName || "";
+    document.getElementById("clientLastName").value = client.lastName || "";
+    document.getElementById("clientEmail").value = client.email || "";
+    document.getElementById("clientPhone").value = client.phone || "";
+    document.getElementById("clientCountry").value = client.country || "";
+    document.getElementById("clientPostalCode").value = client.postalCode || "";
 
-  // Make the details section visible if it was hidden
-  const detailsContainer = document.querySelector(".client-details");
-  if (detailsContainer) {
-    detailsContainer.style.display = "block";
+    // Select the client photo element
+    const clientPhoto = document.getElementById("clientPhoto");
+
+    try {
+      // Fetch the client's image based on user ID
+      const response = await fetch(`/api/client-image/${client.id}`);
+
+      if (response.ok) {
+        // If image is found, set the source to the API endpoint
+        clientPhoto.src = `/api/client-image/${client.id}`;
+        clientPhoto.alt = `${client.firstName} ${client.lastName}'s profile picture`;
+      } else {
+        // Fallback to default image if no image found
+        clientPhoto.src = "/assets/images/default-profile.png";
+        clientPhoto.alt = "Default Profile";
+      }
+    } catch (error) {
+      console.error("Error fetching client image:", error);
+      // Set default image in case of any error
+      clientPhoto.src = "/assets/images/default-profile.png";
+      clientPhoto.alt = "Default Profile";
+    }
+
+    // Make the details section visible if it was hidden
+    const detailsContainer = document.querySelector(".client-details");
+    if (detailsContainer) {
+      detailsContainer.style.display = "block";
+    }
+  } catch (error) {
+    console.error("Error in displayClientDetails:", error);
   }
 }
 

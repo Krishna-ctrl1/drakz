@@ -216,7 +216,7 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background-color: white;
+            background-color: rgb(213, 214, 224);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
             z-index: 1000;
             width: 80%;
@@ -254,6 +254,21 @@
             font-size: 12px;
         }
 
+        #cardType {
+            width: 91%;
+            padding: 10px;
+            margin-top:10px;
+            margin-bottom:10px;
+            margin-left:20px;
+            margin-right: 20px;
+            background-color: transparent;
+            color:#5f5656;
+            border: 1px solid #000000fb;;
+            border-radius: 5px;
+            font-size: 12px;
+
+        }
+       
         .button-div
         {
             display:flex;
@@ -264,7 +279,7 @@
         .add-card-form button {
             width: 91%;
             padding: 10px;
-            background-color:#040c2c;
+            background-color:#07062c;
             color: white;
             border: none;
             border-radius: 5px;
@@ -301,7 +316,7 @@
             width:100%;
             display:flex;
             justify-content: center;
-            background-color: #0a112d;
+            background-color: #07062c;
             padding-bottom:10px;
 
         }

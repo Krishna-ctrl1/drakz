@@ -412,7 +412,7 @@ function fetchDashboardData() {
       // Display credit cards
       displayCreditCards(data.creditCards);
 
-      // Display Credut Scores
+      // Display Credit Scores
       displayCreditScore(data.creditScores);
 
       if (data && data.expenses) {
