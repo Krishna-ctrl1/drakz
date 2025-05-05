@@ -546,481 +546,340 @@ function filterDashboard() {
 // Stock Analysis
 // -------------------------------------------------------------------------------------------------------------------------------------
 
-// DOM Elements
-document.addEventListener("DOMContentLoaded", function () {
-  // Tab Navigation
-  const tabItems = document.querySelectorAll(".tab-item");
-  const sectionContents = document.querySelectorAll(".section-content");
-  const sectionCards = document.querySelectorAll(".section-card");
+// -------------------------------------------------------------------------------------------------------------------------------------
+// Stock Analysis - Fixed Version
+// -------------------------------------------------------------------------------------------------------------------------------------
 
-  // Stock Analysis Elements
+document.addEventListener("DOMContentLoaded", function () {
+  // Get references to stock analysis elements
   const stockSymbolInput = document.getElementById("stock-symbol");
   const getStockDetailsBtn = document.getElementById("get-stock-details");
-  const stockResults = document.getElementById("stock-results");
-
-  // Financial Planning Elements
-  const variableCostsToggle = document.getElementById("variable-costs-toggle");
-  const variableCostsContainer = document.getElementById(
-    "variable-costs-container"
-  );
-  const calculateSummaryBtn = document.getElementById("calculate-summary");
-
-  // Financial Advisor Chat Elements
-  const messagesContainer = document.querySelector(".messages-container");
-  const textarea = document.querySelector(".input-area textarea");
-  const sendBtn = document.querySelector(".send-btn");
-
-  // Currency state (default to INR as in the HTML)
-  let currentCurrency = "INR";
-
-  // Exchange rate (approximate, would be fetched from API in production)
-  const exchangeRate = 83.0; // USD to INR
-
-  // Stock data cache
-  let stockCache = {};
-
-  // Tab Navigation
-  tabItems.forEach((tab) => {
-    tab.addEventListener("click", () => {
-      // Remove active class from all tabs and sections
-      tabItems.forEach((t) => t.classList.remove("active"));
-      sectionContents.forEach((s) => s.classList.remove("active"));
-
-      // Add active class to clicked tab
-      tab.classList.add("active");
-
-      // Get section name and activate corresponding content
-      const sectionName = tab.getAttribute("data-section");
-      document.getElementById(`${sectionName}-content`).classList.add("active");
-    });
-  });
-
-  // Section Cards Navigation (from welcome page)
-  sectionCards.forEach((card) => {
-    card.addEventListener("click", () => {
-      const sectionName = card.getAttribute("data-section");
-
-      // Activate corresponding tab and content
-      tabItems.forEach((t) => {
-        t.classList.remove("active");
-        if (t.getAttribute("data-section") === sectionName) {
-          t.classList.add("active");
-        }
-      });
-
-      sectionContents.forEach((s) => s.classList.remove("active"));
-      document.getElementById(`${sectionName}-content`).classList.add("active");
-    });
-  });
-
-  // Variable Costs Toggle
-  if (variableCostsToggle) {
-    variableCostsToggle.addEventListener("change", () => {
-      if (variableCostsToggle.checked) {
-        variableCostsContainer.classList.remove("hidden");
-      } else {
-        variableCostsContainer.classList.add("hidden");
-      }
-    });
-  }
-
-  // Financial Planning Calculate
-  if (calculateSummaryBtn) {
-    calculateSummaryBtn.addEventListener("click", calculateFinancialSummary);
-  }
-
-  // Financial Advisor Chat
-  if (sendBtn) {
-    sendBtn.addEventListener("click", sendMessage);
-    textarea.addEventListener("keypress", (e) => {
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
-        sendMessage();
-      }
-    });
-  }
-
-  // Stock Analysis functionality
-  const getStockDetailsButton = document.getElementById("get-stock-details");
   const stockResultsDiv = document.getElementById("stock-results");
 
-  /**
-   * Fetch stock data using Yahoo Finance API via a proxy
-   * @param {string} symbol - Stock ticker symbol
-   */
+  // Check if elements exist before adding event listeners
+  if (getStockDetailsBtn && stockSymbolInput && stockResultsDiv) {
+    console.log("Stock analysis elements found, attaching event listener");
 
-  /**
-   * Display stock data on the page
-   * @param {string} symbol - Stock ticker symbol
-   * @param {Object} companyData - Company overview data
-   * @param {Object} priceData - Current price data
-   */
-
-  /**
-   * Create a stock price chart for the given symbol
-   * @param {string} symbol - Stock ticker symbol
-   */
-
-  if (getStockDetailsButton) {
-    getStockDetailsButton.addEventListener("click", () => {
+    // Add click event listener to the button
+    getStockDetailsBtn.addEventListener("click", function () {
+      console.log("Get stock details button clicked");
       const symbol = stockSymbolInput.value.trim().toUpperCase();
+
       if (symbol) {
-        fetchStockData(symbol);
+        console.log("Fetching data for symbol:", symbol);
+        fetchStockData(symbol, stockResultsDiv);
       } else {
+        console.log("No symbol entered");
         alert("Please enter a valid stock symbol");
       }
     });
-  }
 
-  async function fetchStockData(symbol) {
-    try {
-      // Show loading indicator
-      stockResultsDiv.innerHTML =
-        '<div class="loading">Loading stock data...</div>';
+    /**
+     * Fetch stock data using Alpha Vantage API
+     * @param {string} symbol - Stock ticker symbol
+     * @param {HTMLElement} resultsDiv - DOM element to display results in
+     */
+    async function fetchStockData(symbol, resultsDiv) {
+      try {
+        // Show loading indicator
+        resultsDiv.innerHTML =
+          '<div class="loading">Loading stock data...</div>';
 
-      // Fetch stock data from Alpha Vantage API
-      const apiKey = "536CTHGRJTDSWQC3w";
-      const overviewUrl = `https://www.alphavantage.co/query?function=OVERVIEW&symbol=${symbol}&apikey=${apiKey}`;
-      const priceUrl = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${apiKey}`;
-      const timeseriesUrl = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${symbol}&apikey=${apiKey}`;
+        // Fetch stock data from Alpha Vantage API
+        const apiKey = "536CTHGRJTDSWQC3w";
+        const overviewUrl = `https://www.alphavantage.co/query?function=OVERVIEW&symbol=${symbol}&apikey=${apiKey}`;
+        const priceUrl = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${apiKey}`;
+        const timeseriesUrl = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${symbol}&apikey=${apiKey}`;
 
-      // Make both requests in parallel
-      const [overviewResponse, priceResponse, tsResponse] = await Promise.all([
-        fetch(overviewUrl),
-        fetch(priceUrl),
-        fetch(timeseriesUrl),
-      ]);
+        // Make all requests in parallel
+        const [overviewResponse, priceResponse, tsResponse] = await Promise.all(
+          [fetch(overviewUrl), fetch(priceUrl), fetch(timeseriesUrl)]
+        );
 
-      const overviewData = await overviewResponse.json();
-      const priceData = await priceResponse.json();
-      const tsData = await tsResponse.json();
+        const overviewData = await overviewResponse.json();
+        const priceData = await priceResponse.json();
+        const tsData = await tsResponse.json();
 
-      // Handle potential error responses
-      if (overviewData.Note || priceData.Note) {
-        throw new Error("API call frequency exceeded. Please try again later.");
+        // Handle potential error responses
+        if (overviewData.Note || priceData.Note) {
+          throw new Error(
+            "API call frequency exceeded. Please try again later."
+          );
+        }
+
+        if (overviewData.Error || !overviewData.Symbol) {
+          throw new Error(`Could not find data for symbol: ${symbol}`);
+        }
+
+        // Process and display the data
+        displayStockData(symbol, overviewData, priceData, resultsDiv);
+      } catch (error) {
+        console.error("Error fetching stock data:", error);
+        resultsDiv.innerHTML = `<div class="error">Error: ${error.message}</div>`;
       }
-
-      if (overviewData.Error || !overviewData.Symbol) {
-        throw new Error(`Could not find data for symbol: ${symbol}`);
-      }
-
-      // Process and display the data
-      displayStockData(symbol, overviewData, priceData);
-    } catch (error) {
-      console.error("Error fetching stock data:", error);
-      stockResultsDiv.innerHTML = `<div class="error">Error: ${error.message}</div>`;
     }
-  }
 
-  function displayStockData(symbol, companyData, priceData) {
-    // Extract price information
-    const currentPrice =
-      parseFloat(priceData["Global Quote"]?.["05. price"]) || 0;
-    const priceChange =
-      parseFloat(priceData["Global Quote"]?.["09. change"]) || 0;
-    const priceChangePercent =
-      parseFloat(
-        priceData["Global Quote"]?.["10. change percent"]?.replace("%", "")
-      ) || 0;
-    const priceChangeClass = priceChangePercent >= 0 ? "positive" : "negative";
+    /**
+     * Display stock data on the page
+     * @param {string} symbol - Stock ticker symbol
+     * @param {Object} companyData - Company overview data
+     * @param {Object} priceData - Current price data
+     * @param {HTMLElement} resultsDiv - DOM element to display results in
+     */
+    function displayStockData(symbol, companyData, priceData, resultsDiv) {
+      // Extract price information
+      const currentPrice =
+        parseFloat(priceData["Global Quote"]?.["05. price"]) || 0;
+      const priceChange =
+        parseFloat(priceData["Global Quote"]?.["09. change"]) || 0;
+      const priceChangePercent =
+        parseFloat(
+          priceData["Global Quote"]?.["10. change percent"]?.replace("%", "")
+        ) || 0;
+      const priceChangeClass =
+        priceChangePercent >= 0 ? "positive" : "negative";
 
-    // Extract company metrics
-    const revenue = parseFloat(companyData.RevenueTTM) || 0;
-    const netIncome = parseFloat(companyData.ProfitMargin) * revenue || 0;
-    const netMargin = parseFloat(companyData.ProfitMargin) * 100 || 0;
+      // Extract company metrics
+      const revenue = parseFloat(companyData.RevenueTTM) || 0;
+      const netIncome = parseFloat(companyData.ProfitMargin) * revenue || 0;
+      const netMargin = parseFloat(companyData.ProfitMargin) * 100 || 0;
 
-    // Format numbers for display
-    const formatCurrency = (value) => {
-      if (value >= 1000000000) {
-        return `$${(value / 1000000000).toFixed(2)}B`;
-      } else if (value >= 1000000) {
-        return `$${(value / 1000000).toFixed(2)}M`;
-      } else {
-        return `$${value.toFixed(2)}`;
-      }
-    };
+      // Format numbers for display
+      const formatCurrency = (value) => {
+        if (value >= 1000000000) {
+          return `$${(value / 1000000000).toFixed(2)}B`;
+        } else if (value >= 1000000) {
+          return `$${(value / 1000000).toFixed(2)}M`;
+        } else {
+          return `$${value.toFixed(2)}`;
+        }
+      };
 
-    // Create stock graph element with a canvas for the chart
-    const graphHtml = `
-      <div class="stock-graph">
-        <canvas id="stockChart" width="800" height="300"></canvas>
-      </div>
-    `;
-
-    // Create metrics HTML
-    const metricsHtml = `
-      <h3>Key Financial Metrics</h3>
-      <div class="key-metrics">
-        <div class="metric-card">
-          <div class="metric-label">Current Price</div>
-          <div class="metric-value">$${currentPrice.toFixed(2)}</div>
+      // Create stock graph element with a canvas for the chart
+      const graphHtml = `
+        <div class="stock-graph">
+          <canvas id="stockChart" width="800" height="300"></canvas>
         </div>
-        <div class="metric-card">
-          <div class="metric-label">Price Change (%)</div>
-          <div class="metric-value ${priceChangeClass}">${
-      priceChangePercent >= 0 ? "+" : ""
-    }${priceChangePercent.toFixed(2)}%</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-label">Revenue</div>
-          <div class="metric-value">${formatCurrency(revenue)}</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-label">Net Income</div>
-          <div class="metric-value">${formatCurrency(netIncome)}</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-label">Net Margin (%)</div>
-          <div class="metric-value">${netMargin.toFixed(2)}%</div>
-        </div>
-      </div>
-    `;
+      `;
 
-    // Create company info HTML
-    const companyInfoHtml = `
-      <div class="company-info">
-        <h3>Company Information</h3>
-        <p><strong>Name:</strong> ${companyData.Name || symbol}</p>
-        <p><strong>Industry:</strong> ${
-          companyData.Industry || "Not available"
-        }</p>
-        <p><strong>Description:</strong> ${
-          companyData.Description || "No description available."
-        }</p>
-      </div>
-    `;
-
-    // Update the results div with all the HTML
-    stockResultsDiv.innerHTML = graphHtml + metricsHtml + companyInfoHtml;
-
-    // Now that the canvas is in the DOM, create the chart
-    // We need to use setTimeout to ensure the DOM has been updated
-    setTimeout(() => {
-      createStockChart(symbol);
-    }, 0);
-  }
-
-  async function createStockChart(symbol) {
-    try {
-      const canvas = document.getElementById("stockChart");
-      if (!canvas) {
-        console.error('Canvas element "stockChart" not found in DOM');
-        return;
-      }
-
-      // Check if Chart.js is available
-      if (typeof Chart === "undefined") {
-        console.error("Chart.js library is not loaded.");
-        // Create a fallback message if Chart.js isn't available
-        const chartContainer = canvas.parentNode;
-        chartContainer.innerHTML = `
-          <div style="width: 100%; height: 300px; display: flex; align-items: center; justify-content: center; background-color: #f8f9fa; border-radius: 8px;">
-            <p>Chart cannot be displayed. Chart.js library is not available.</p>
+      // Create metrics HTML
+      const metricsHtml = `
+        <h3>Key Financial Metrics</h3>
+        <div class="key-metrics">
+          <div class="metric-card">
+            <div class="metric-label">Current Price</div>
+            <div class="metric-value">$${currentPrice.toFixed(2)}</div>
           </div>
-        `;
-        return;
-      }
+          <div class="metric-card">
+            <div class="metric-label">Price Change (%)</div>
+            <div class="metric-value ${priceChangeClass}">${
+        priceChangePercent >= 0 ? "+" : ""
+      }${priceChangePercent.toFixed(2)}%</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Revenue</div>
+            <div class="metric-value">${formatCurrency(revenue)}</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Net Income</div>
+            <div class="metric-value">${formatCurrency(netIncome)}</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Net Margin (%)</div>
+            <div class="metric-value">${netMargin.toFixed(2)}%</div>
+          </div>
+        </div>
+      `;
 
-      // Fetch historical data from Alpha Vantage
-      const apiKey = "536CTHGRJTDSWQC3w";
-      const timeseriesUrl = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${symbol}&apikey=${apiKey}`;
+      // Create company info HTML
+      const companyInfoHtml = `
+        <div class="company-info">
+          <h3>Company Information</h3>
+          <p><strong>Name:</strong> ${companyData.Name || symbol}</p>
+          <p><strong>Industry:</strong> ${
+            companyData.Industry || "Not available"
+          }</p>
+          <p><strong>Description:</strong> ${
+            companyData.Description || "No description available."
+          }</p>
+        </div>
+      `;
 
-      // Show loading indicator on canvas
-      const ctx = canvas.getContext("2d");
-      ctx.fillStyle = "#f8f9fa";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = "#333";
-      ctx.font = "16px Arial";
-      ctx.textAlign = "center";
-      ctx.fillText(
-        "Loading stock data...",
-        canvas.width / 2,
-        canvas.height / 2
-      );
+      // Update the results div with all the HTML
+      resultsDiv.innerHTML = graphHtml + metricsHtml + companyInfoHtml;
 
-      const response = await fetch(timeseriesUrl);
-      const data = await response.json();
+      // Now that the canvas is in the DOM, create the chart
+      // We need to use setTimeout to ensure the DOM has been updated
+      setTimeout(() => {
+        createStockChart(symbol);
+      }, 0);
+    }
 
-      if (data.Note || data["Error Message"]) {
-        console.error(
-          "API limit reached or error:",
-          data.Note || data["Error Message"]
-        );
-        ctx.fillStyle = "#f8f9fa";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = "red";
-        ctx.fillText(
-          "API limit reached. Please try again later.",
-          canvas.width / 2,
-          canvas.height / 2
-        );
-        return;
-      }
+    /**
+     * Create a stock price chart for the given symbol
+     * @param {string} symbol - Stock ticker symbol
+     */
+    async function createStockChart(symbol) {
+      try {
+        const canvas = document.getElementById("stockChart");
+        if (!canvas) {
+          console.error('Canvas element "stockChart" not found in DOM');
+          return;
+        }
 
-      const timeSeriesData = data["Time Series (Daily)"];
+        // Check if Chart.js is available
+        if (typeof Chart === "undefined") {
+          console.error("Chart.js library is not loaded.");
+          // Create a fallback message if Chart.js isn't available
+          const chartContainer = canvas.parentNode;
+          chartContainer.innerHTML = `
+            <div style="width: 100%; height: 300px; display: flex; align-items: center; justify-content: center; background-color: #f8f9fa; border-radius: 8px;">
+              <p>Chart cannot be displayed. Chart.js library is not available.</p>
+            </div>
+          `;
+          return;
+        }
 
-      if (!timeSeriesData) {
-        console.error("No series data available");
-        ctx.fillStyle = "#f8f9fa";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = "red";
-        ctx.fillText(
-          "No data available for this symbol",
-          canvas.width / 2,
-          canvas.height / 2
-        );
-        return;
-      }
+        // Fetch historical data from Alpha Vantage
+        const apiKey = "536CTHGRJTDSWQC3w";
+        const timeseriesUrl = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${symbol}&apikey=${apiKey}`;
 
-      // Extract dates and closing prices
-      const chartData = Object.entries(timeSeriesData)
-        .map(([date, values]) => ({
-          date: date,
-          price: parseFloat(values["4. close"]),
-        }))
-        .sort((a, b) => new Date(a.date) - new Date(b.date))
-        .slice(-30); // Last 30 days
-
-      console.log("Chart data prepared:", chartData);
-
-      // Clear any existing charts on this canvas
-      Chart.getChart(canvas)?.destroy();
-
-      // Create a new chart
-      new Chart(ctx, {
-        type: "line",
-        data: {
-          labels: chartData.map((d) => d.date),
-          datasets: [
-            {
-              label: `${symbol} Closing Price`,
-              data: chartData.map((d) => d.price),
-              borderColor: "rgb(75, 192, 192)",
-              backgroundColor: "rgba(75, 192, 192, 0.1)",
-              borderWidth: 2,
-              tension: 0.1,
-              fill: true,
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            x: {
-              title: {
-                display: true,
-                text: "Date",
-              },
-              ticks: {
-                maxTicksLimit: 10,
-              },
-            },
-            y: {
-              title: {
-                display: true,
-                text: "Price (USD)",
-              },
-              beginAtZero: false,
-            },
-          },
-          plugins: {
-            legend: {
-              position: "top",
-            },
-            tooltip: {
-              mode: "index",
-              intersect: false,
-            },
-          },
-        },
-      });
-    } catch (error) {
-      console.error("Error creating stock chart:", error);
-      // Display error on canvas
-      const canvas = document.getElementById("stockChart");
-      if (canvas) {
+        // Show loading indicator on canvas
         const ctx = canvas.getContext("2d");
         ctx.fillStyle = "#f8f9fa";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = "red";
+        ctx.fillStyle = "#333";
         ctx.font = "16px Arial";
         ctx.textAlign = "center";
         ctx.fillText(
-          `Error: ${error.message}`,
+          "Loading stock data...",
           canvas.width / 2,
           canvas.height / 2
         );
+
+        const response = await fetch(timeseriesUrl);
+        const data = await response.json();
+
+        if (data.Note || data["Error Message"]) {
+          console.error(
+            "API limit reached or error:",
+            data.Note || data["Error Message"]
+          );
+          ctx.fillStyle = "#f8f9fa";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.fillStyle = "red";
+          ctx.fillText(
+            "API limit reached. Please try again later.",
+            canvas.width / 2,
+            canvas.height / 2
+          );
+          return;
+        }
+
+        const timeSeriesData = data["Time Series (Daily)"];
+
+        if (!timeSeriesData) {
+          console.error("No series data available");
+          ctx.fillStyle = "#f8f9fa";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.fillStyle = "red";
+          ctx.fillText(
+            "No data available for this symbol",
+            canvas.width / 2,
+            canvas.height / 2
+          );
+          return;
+        }
+
+        // Extract dates and closing prices
+        const chartData = Object.entries(timeSeriesData)
+          .map(([date, values]) => ({
+            date: date,
+            price: parseFloat(values["4. close"]),
+          }))
+          .sort((a, b) => new Date(a.date) - new Date(b.date))
+          .slice(-30); // Last 30 days
+
+        console.log("Chart data prepared:", chartData);
+
+        // Clear any existing charts on this canvas
+        if (Chart.getChart(canvas)) {
+          Chart.getChart(canvas).destroy();
+        }
+
+        // Create a new chart
+        new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: chartData.map((d) => d.date),
+            datasets: [
+              {
+                label: `${symbol} Closing Price`,
+                data: chartData.map((d) => d.price),
+                borderColor: "rgb(75, 192, 192)",
+                backgroundColor: "rgba(75, 192, 192, 0.1)",
+                borderWidth: 2,
+                tension: 0.1,
+                fill: true,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: {
+                title: {
+                  display: true,
+                  text: "Date",
+                },
+                ticks: {
+                  maxTicksLimit: 10,
+                },
+              },
+              y: {
+                title: {
+                  display: true,
+                  text: "Price (USD)",
+                },
+                beginAtZero: false,
+              },
+            },
+            plugins: {
+              legend: {
+                position: "top",
+              },
+              tooltip: {
+                mode: "index",
+                intersect: false,
+              },
+            },
+          },
+        });
+      } catch (error) {
+        console.error("Error creating stock chart:", error);
+        // Display error on canvas
+        const canvas = document.getElementById("stockChart");
+        if (canvas) {
+          const ctx = canvas.getContext("2d");
+          ctx.fillStyle = "#f8f9fa";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.fillStyle = "red";
+          ctx.font = "16px Arial";
+          ctx.textAlign = "center";
+          ctx.fillText(
+            `Error: ${error.message}`,
+            canvas.width / 2,
+            canvas.height / 2
+          );
+        }
       }
     }
-  }
-
-  // Sidebar toggle functionality
-  function openNav() {
-    document.getElementById("mySidebar").style.width = "250px";
-    document.getElementById("close-button").style.display = "block";
-  }
-
-  function closeNav() {
-    document.getElementById("mySidebar").style.width = "70px";
-    document.getElementById("close-button").style.display = "none";
-  }
-
-  // Dashboard item filtering
-  function filterDashboard() {
-    const searchInput = document.getElementById("searchInput");
-    const filter = searchInput.value.toUpperCase();
-    const dashboardItems = document.querySelectorAll(".dashboard-item");
-
-    dashboardItems.forEach((item) => {
-      const txtValue = item.textContent || item.innerText;
-      item.style.display =
-        txtValue.toUpperCase().indexOf(filter) > -1 ? "" : "none";
-    });
-  }
-
-  // Make the sidebar functions available globally
-  window.openNav = openNav;
-  window.closeNav = closeNav;
-  window.filterDashboard = filterDashboard;
-
-  // Financial Planning calculations
-
-  if (calculateSummaryBtn) {
-    calculateSummaryBtn.addEventListener("click", () => {
-      // Get input values
-      const monthlyIncome =
-        parseFloat(document.getElementById("monthly-income").value) || 0;
-      const outingExpenses =
-        parseFloat(document.getElementById("outing-expenses").value) || 0;
-      const transportationCosts =
-        parseFloat(document.getElementById("transportation-costs").value) || 0;
-      const fixedCosts =
-        parseFloat(document.getElementById("fixed-costs").value) || 0;
-      const foodCosts =
-        parseFloat(document.getElementById("food-costs").value) || 0;
-
-      // Calculate monthly expenses
-      const monthlyExpenses =
-        outingExpenses + transportationCosts + fixedCosts + foodCosts;
-
-      // Calculate monthly investment capacity
-      const monthlyInvestmentCapacity = monthlyIncome - monthlyExpenses;
-
-      // Display a simple alert with the results
-      alert(`
-          Financial Summary:
-          ------------------
-          Monthly Income: $${monthlyIncome.toFixed(2)}
-          Monthly Expenses: $${monthlyExpenses.toFixed(2)}
-          Monthly Investment Capacity: $${monthlyInvestmentCapacity.toFixed(2)}
-          
-          Yearly Income: $${(monthlyIncome * 12).toFixed(2)}
-          Yearly Expenses: $${(monthlyExpenses * 12).toFixed(2)}
-          Yearly Investment Capacity: $${(
-            monthlyInvestmentCapacity * 12
-          ).toFixed(2)}
-        `);
+  } else {
+    console.error("Could not find stock analysis elements:", {
+      buttonFound: !!getStockDetailsBtn,
+      inputFound: !!stockSymbolInput,
+      resultsFound: !!stockResultsDiv,
     });
   }
 });
@@ -1034,27 +893,27 @@ document.addEventListener("DOMContentLoaded", function () {
 // -------------------------------------------------------------------------------------------------------------------------------------
 document.addEventListener("DOMContentLoaded", () => {
   console.log("DOM fully loaded");
-  console.log("Global variables check:", { 
-    monthlyIncome: typeof monthlyIncome !== 'undefined', 
-    savings: typeof savings !== 'undefined', 
-    currentCurrency: typeof currentCurrency !== 'undefined' 
+  console.log("Global variables check:", {
+    monthlyIncome: typeof monthlyIncome !== "undefined",
+    savings: typeof savings !== "undefined",
+    currentCurrency: typeof currentCurrency !== "undefined",
   });
-  
+
   // Elements
   const messagesContainer = document.querySelector(".messages-container");
   const textarea = document.querySelector(".input-area textarea");
   const sendButton = document.querySelector(".send-btn");
-  
+
   // Check if elements are found
   if (!messagesContainer) console.error("Messages container not found");
   if (!textarea) console.error("Textarea not found");
   if (!sendButton) console.error("Send button not found");
-  
+
   // Use the global variables that are already defined
   const userData = {
-    monthly_income: typeof monthlyIncome !== 'undefined' ? monthlyIncome : 0,
-    savings: typeof savings !== 'undefined' ? savings : 0,
-    currency: typeof currentCurrency !== 'undefined' ? currentCurrency : 'USD',
+    monthly_income: typeof monthlyIncome !== "undefined" ? monthlyIncome : 0,
+    savings: typeof savings !== "undefined" ? savings : 0,
+    currency: typeof currentCurrency !== "undefined" ? currentCurrency : "USD",
   };
 
   // Function to add a message to the chat
@@ -1129,7 +988,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Expose updateUserData function globally if needed
   window.updateUserData = updateUserData;
-  
+
   // Add an initial message
   addMessage("Welcome to your Financial Advisor! How can I help you today?");
 });
