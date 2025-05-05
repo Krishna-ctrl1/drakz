@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+<!-- Only Head section modified -->
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Admin Dashboard</title>
     <link rel="stylesheet" href="admin-dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
 </head>
 <body>
     <div class="container">
@@ -15,11 +17,11 @@
                 <div class="logo-circle">D</div>
             </div>
             <div class="nav-links">
-                <div class="nav-item" data-tab="user-management" onclick="window.location.href='admin-dashboard.html';">
+                <div class="nav-item " data-tab="user-management">
                     <i class="fas fa-users"></i>
                     <span>User Management</span>
                 </div>
-                <div class="nav-item active" data-tab="system-monitoring">
+                <div class="nav-item active" data-tab="system-monitoring" onclick="window.location.href='system-monitoring.html';">
                     <i class="fas fa-chart-line"></i>
                     <span>System Monitoring</span>
                 </div>
@@ -38,179 +40,104 @@
                 
             </div>
         </div>
+    <div class="main-content">
+ <!-- Header -->
+ <header>
+    <div class="search-bar">
+        <i class="fas fa-search"></i>
+        <input type="text" placeholder="Search...">
+    </div>
+    <!-- <div class="header-buttons">
+        <button class="btn btn-primary">Admin Dashboard</button>
+        <button class="btn" onclick="window.location.href='messages.html'">Messages</button>
+        <button class="btn">Settings</button>
+    </div> -->
+    <div class="profile">
+        <div class="profile-circle">A</div>
+    </div>
+</header>
 
-        <!-- Main Content -->
-        <div class="main-content">
-            <!-- Header -->
-            <header>
-                <div class="search-bar">
-                    <i class="fas fa-search"></i>
-                    <input type="text" placeholder="Search...">
-                </div>
-                <!-- <div class="header-buttons">
-                    <button class="btn btn-primary">Admin Dashboard</button>
-                    <button class="btn" onclick="window.location.href='messages.html'">Messages</button>
-                    <button class="btn">Settings</button>
-                </div> -->
-                <div class="profile">
-                    <div class="profile-circle">A</div>
-                </div>
-            </header>
+     <!-- 1. User Management Tab -->
+     <div class="tab-content active" id="user-management">
+        <div class="tab-header">
+            <h1>System Monitoring</h1>
+            <!-- <button class="btn btn-primary" id="add-user-btn">Add New User</button> -->
+        </div>
 
-            <!-- 2. System Monitoring Tab -->
-            <div class="tab-content" id="system-monitoring">
-                <div class="tab-header">
-                    <h1>System Monitoring</h1>
-                    <button class="btn btn-primary" id="generate-report-btn">Generate Report</button>
+        <div class="dashboard-grid">
+            <div class="dashboard-grid-item">
+                <div class="chart-header">
+                    <div class="chart-title">Active Users</div>
+                    <div class="year-selector">2025 <i class="fas fa-chevron-down"></i></div>
                 </div>
-
-                <div class="stats-cards">
-                    <div class="stat-card">
-                        <div class="stat-title">Active Users</div>
-                        <div class="stat-value">12,483</div>
-                        <div class="stat-change positive">+12.4% <span>vs last month</span></div>
+                <div class="chart-container" id="activeUsersChart"></div>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color legend-blue"></div>
+                        <span>India</span>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-title">New Sign-ups</div>
-                        <div class="stat-value">748</div>
-                        <div class="stat-change positive">+8.2% <span>vs last month</span></div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-title">Total Transactions</div>
-                        <div class="stat-value">$8.4M</div>
-                        <div class="stat-change positive">+15.7% <span>vs last month</span></div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-title">Security Alerts</div>
-                        <div class="stat-value">24</div>
-                        <div class="stat-change negative">+6 <span>vs last month</span></div>
-                    </div>
-                </div>
-
-                <div class="charts-container">
-                    <div class="chart-card">
-                        <h3>User Engagement</h3>
-                        <div class="chart" id="engagement-chart">
-                            <!-- Chart will be rendered here -->
-                            <div class="chart-placeholder">
-                                <div class="chart-line"></div>
-                                <div class="chart-line"></div>
-                                <div class="chart-line"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="chart-card">
-                        <h3>Financial Summary</h3>
-                        <div class="chart" id="financial-chart">
-                            <!-- Chart will be rendered here -->
-                            <div class="chart-placeholder">
-                                <div class="chart-bar"></div>
-                                <div class="chart-bar"></div>
-                                <div class="chart-bar"></div>
-                                <div class="chart-bar"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="security-alerts">
-                    <h3>Security Alerts</h3>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Alert Type</th>
-                                <th>User</th>
-                                <th>Time</th>
-                                <th>Location</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="security-alerts-body">
-                            <!-- Security alerts will be populated by JavaScript -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            
-    <!-- Modals -->
-    <!-- User Details Modal -->
-    <div class="modal" id="user-modal">
-        <div class="modal-content">
-            <span class="close-btn">&times;</span>
-            <h2>User Details</h2>
-            <div class="user-details">
-                <div class="user-image">
-                    <div class="profile-circle large">U</div>
-                </div>
-                <div class="user-info">
-                    <div class="form-group">
-                        <label>First Name</label>
-                        <input type="text" id="user-first-name">
-                    </div>
-                    <div class="form-group">
-                        <label>Last Name</label>
-                        <input type="text" id="user-last-name">
-                    </div>
-                    <div class="form-group">
-                        <label>Email</label>
-                        <input type="email" id="user-email">
-                    </div>
-                    <div class="form-group">
-                        <label>Role</label>
-                        <select id="user-role">
-                            <option value="standard">Standard</option>
-                            <option value="premium">Premium</option>
-                            <option value="advisor">Advisor</option>
-                            <option value="admin">Admin</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Status</label>
-                        <select id="user-status">
-                            <option value="active">Active</option>
-                            <option value="suspended">Suspended</option>
-                            <option value="pending">Pending</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Join Date</label>
-                        <input type="text" id="user-join-date" disabled>
+                    <div class="legend-item">
+                        <div class="legend-color legend-pink"></div>
+                        <span>Russia</span>
                     </div>
                 </div>
             </div>
-            <div class="modal-actions">
-                <button class="btn btn-danger" id="delete-user-btn">Delete User</button>
-                <button class="btn" id="cancel-user-btn">Cancel</button>
-                <button class="btn btn-primary" id="save-user-btn">Save Changes</button>
+
+            <div class="dashboard-grid-item map-item">
+                <div class="chart-header">
+                    <div class="chart-title">Organic traffic</div>
+                    <div class="country-selector">Country <i class="fas fa-chevron-down"></i></div>
+                </div>
+                <div class="chart-container" id="indiaMapChart" style="height: 490px; position: relative;"></div>
+            </div>
+
+            <div class="dashboard-grid-item">
+                <div class="chart-header">
+                    <div class="chart-title">Web popularity</div>
+                </div>
+                <div class="chart-container" id="webPopularityChart"></div>
+                <div class="total-value">3988</div>
+                <div class="chart-footer">
+                    <div class="color-indicator">
+                        <div class="color-dot" style="background-color: #FF6B6B;"></div>
+                        <span>Desktop</span>
+                    </div>
+                    <div class="color-indicator">
+                        <div class="color-dot" style="background-color: #4285F4;"></div>
+                        <span>Mobile</span>
+                    </div>
+                    <div class="color-indicator">
+                        <div class="color-dot" style="background-color: #4BD4B0;"></div>
+                        <span>Tablet</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-grid-item">
+                <div class="chart-header">
+                    <div class="chart-title">Total Income with equal Division</div>
+                </div>
+                <div class="chart-container" id="incomeChart"></div>
+            </div>
+
+            <div class="dashboard-grid-item">
+                <div class="chart-header">
+                    <div class="chart-title">Revenue Graph</div>
+                    <div class="month-selector">2025, Mar <i class="fas fa-chevron-down"></i></div>
+                </div>
+                <div class="chart-container" id="revenueChart"></div>
+                <div class="details-button">Details</div>
             </div>
         </div>
     </div>
 
-    <!-- Content Review Modal -->
-    <div class="modal" id="content-modal">
-        <div class="modal-content">
-            <span class="close-btn">&times;</span>
-            <h2>Content Review</h2>
-            <div class="content-preview">
-                <h3 id="content-title">Financial Planning in Your 30s</h3>
-                <div class="content-meta">
-                    <span id="content-author">By: John Smith</span>
-                    <span id="content-date">Submitted: 25 Feb 2025</span>
-                </div>
-                <div class="content-type" id="content-type">Blog Post</div>
-                <div class="content-body" id="content-body">
-                    <p>Content preview will appear here...</p>
-                </div>
-            </div>
-            <div class="modal-actions">
-                <button class="btn btn-danger" id="reject-content-btn">Reject</button>
-                <button class="btn" id="cancel-content-btn">Close</button>
-                <button class="btn btn-primary" id="approve-content-btn">Approve</button>
-            </div>
-        </div>
-    </div>
+    <!-- Load necessary libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
 
-    <script src="admin-dashboard.js"></script>
+    <script src="system-monitoring.js">
+     
+    </script>
 </body>
 </html>

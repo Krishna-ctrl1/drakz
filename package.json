@@ -24,7 +24,9 @@
     "mysql": "^2.18.1",
     "mysql2": "^3.12.0",
     "nodemailer": "^6.10.0",
-    "razorpay": "^2.9.6"
+    "razorpay": "^2.9.6",
+    "sharp": "^0.33.5",
+    "sqlite3": "^5.1.7"
   },
   "repository": {
     "type": "git",
