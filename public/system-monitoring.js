@@ -167,7 +167,7 @@ function initializeWebPopularityChart() {
                 data: [1245, 1743, 1000],
                 backgroundColor: ['#FF6B6B', '#4285F4', '#4BD4B0'],
                 borderWidth: 0,
-                cutout: '70%'
+                cutout: '90%'
             }]
         },
         options: {
@@ -178,7 +178,7 @@ function initializeWebPopularityChart() {
                     display: false
                 }
             },
-            cutout: '70%'
+            cutout: '90%'
         }
     });
 }
@@ -188,14 +188,14 @@ const webPopularityData = {
         data: [1245, 1743, 1000],
         backgroundColor: ['#FF6B6B', '#4285F4', '#4BD4B0'],
         borderWidth: 0,
-        cutout: '70%'
+        cutout: '60%'
     }]
 };
 
 
 // India states data
 const indiaStatesData = [
-    { id: "AN", state: "Andaman and Nicobar Islands", value: 45 },
+    { id: "AN", state: "Andaman and Nicobar Islands", value: 400 },
     { id: "AP", state: "Andhra Pradesh", value: 78 },
     { id: "AR", state: "Arunachal Pradesh", value: 32 },
     { id: "AS", state: "Assam", value: 67 },
