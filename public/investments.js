@@ -51,10 +51,22 @@ document.addEventListener("DOMContentLoaded", function () {
     options: {
       responsive: true,
       scales: {
-        x: { grid: { display: false } },
-        y: { beginAtZero: false },
-      },
-    },
+          x: {
+              grid: { display: false },
+              title: {
+                  display: true,
+                  text: 'Month'
+              }
+          },
+          y: {
+              beginAtZero: false,
+              title: {
+                  display: true,
+                  text: 'Portfolio Value ($)'
+              }
+          }
+      }
+  }
   });
 
   function generateLabels(timeframe) {
@@ -108,8 +120,17 @@ document.addEventListener("DOMContentLoaded", function () {
   function updateChart(timeframe) {
     investmentChart.data.labels = generateLabels(timeframe);
     investmentChart.data.datasets[0].data = generateData(timeframe);
+
+    // Update x-axis title based on timeframe
+    let xLabel = "Time";
+    if (timeframe === "1D") xLabel = "Hour of Day";
+    else if (timeframe === "1M") xLabel = "Date";
+    else if (timeframe === "6M" || timeframe === "1Y") xLabel = "Month";
+
+    investmentChart.options.scales.x.title.text = xLabel;
+
     investmentChart.update();
-  }
+}
 
   document.querySelectorAll(".filter-btn").forEach((button) => {
     button.addEventListener("click", function () {
@@ -123,93 +144,112 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 document.addEventListener("DOMContentLoaded", function () {
-  const ctx = document.getElementById("revenueChart");
+  const ctx = document.getElementById('revenueChart');
 
   new Chart(ctx, {
-    type: "line",
-    data: {
-      labels: ["2016", "2017", "2018", "2019", "2020", "2021"],
-      datasets: [
-        {
-          label: "Revenue",
-          data: [8008, 12000, 18000, 25000, 21000, 34000],
-          borderColor: "#00c2ff",
-          backgroundColor: "transparent",
-          borderWidth: 3,
-          pointRadius: 0 /* Hide Data Points */,
-          tension: 0.4 /* Smooth Curve */,
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: true,
-      scales: {
-        x: {
-          grid: { display: false },
-        },
-        y: {
-          beginAtZero: true,
-          ticks: {
-            callback: function (value) {
-              return "$" + value.toLocaleString();
-            },
+      type: 'line',
+      data: {
+          labels: ['2016', '2017', '2018', '2019', '2020', '2021'],
+          datasets: [{
+              label: 'Revenue',
+              data: [8008, 12000, 18000, 25000, 21000, 34000],
+              borderColor: '#00c2ff',
+              backgroundColor: 'transparent',
+              borderWidth: 3,
+              pointRadius: 0, /* Hide Data Points */
+              tension: 0.4 /* Smooth Curve */
+          }]
+      },
+      options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          scales: {
+              x: {
+                  grid: { display: false },
+                  title: {
+                      display: true,
+                      text: 'YEAR'
+                  }
+              },
+              y: {
+                  beginAtZero: true,
+                  ticks: {
+                      callback: function (value) {
+                          return '$' + value.toLocaleString();
+                      }
+                  },
+                  title: {
+                      display: true,
+                      text: 'Revenue'
+                  }
+              }
           },
-        },
-      },
-      plugins: {
-        legend: { display: false },
-        tooltip: { enabled: true },
-      },
-    },
+          plugins: {
+              legend: { display: false },
+              tooltip: { enabled: true }
+          }
+      }
   });
 });
+
 
 document.addEventListener("DOMContentLoaded", function () {
-  const ctx = document.getElementById("totalinvestmentChart");
+  const ctx = document.getElementById('totalinvestmentChart');
 
   new Chart(ctx, {
-    type: "line",
-    data: {
-      labels: ["2016", "2017", "2018", "2019", "2020", "2021"],
-      datasets: [
-        {
-          label: "Total Investment",
-          data: [5000, 20000, 15000, 35000, 18000, 25000],
-          borderColor: "#FFA500", // Orange Line
-          backgroundColor: "transparent",
-          borderWidth: 3,
-          pointRadius: 5,
-          pointBackgroundColor: "#FFA500",
-          pointBorderColor: "#ffffff",
-          pointHoverRadius: 7,
-          tension: 0,
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: true,
-      scales: {
-        x: {
-          grid: { display: false },
-        },
-        y: {
-          beginAtZero: true,
-          ticks: {
-            callback: function (value) {
-              return "$" + value.toLocaleString();
-            },
+      type: 'line',
+      data: {
+          labels: ['2016', '2017', '2018', '2019', '2020', '2021'],
+          datasets: [{
+              label: 'Total Investment',
+              data: [5000, 20000, 15000, 35000, 18000, 25000],
+              borderColor: '#FFA500', // Orange Line
+              backgroundColor: 'transparent',
+              borderWidth: 3,
+              pointRadius: 5,
+              pointBackgroundColor: '#FFA500',
+              pointBorderColor: '#ffffff',
+              pointHoverRadius: 7,
+              tension: 0
+          }]
+      },
+      options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          scales: {
+              x: {
+                  grid: { display: false },
+                  title: {
+                      display: true,
+                      text: 'YEAR'
+                  },
+                  title: {
+                      display: true,
+                      text: 'YEAR'
+                  }
+              },
+              y: {
+                  beginAtZero: true,
+                  ticks: {
+                      callback: function (value) {
+                          return '$' + value.toLocaleString();
+                      }
+                  },
+                  title: {
+                      display: true,
+                      text: 'Investments'
+                  }
+              }
           },
-        },
-      },
-      plugins: {
-        legend: { display: false },
-        tooltip: { enabled: true },
-      },
-    },
+          plugins: {
+              legend: { display: false },
+              tooltip: { enabled: true }
+          }
+      }
   });
 });
+
+
 
 // Alpha Vantage Free Tier API has limit. 25 requests per day and 5 requests per miniute.
 const TRENDING_SYMBOLS = ["MSFT", "AAPL", "AMZN", "GOOGL", "META"]; // Example stock symbols to track
