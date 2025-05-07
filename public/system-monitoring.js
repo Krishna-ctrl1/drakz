@@ -673,3 +673,88 @@ function initializeSelectors() {
         });
     }
 }   
+
+// Revenue Details Button functionality
+document.getElementById('revenueDetails').addEventListener('click', function() {
+    const detailsModal = document.getElementById('detailsModal');
+    detailsModal.classList.add('active');
+    
+    // Generate sample data for the revenue details table
+    const revenueDetailsData = generateRevenueDetailsData(currentYear, currentMonth);
+    
+    // Populate the table with the generated data
+    const tableBody = document.getElementById('revenueDetailsTable');
+    tableBody.innerHTML = '';
+    
+    revenueDetailsData.forEach(item => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${item.date}</td>
+            <td>$${item.income.toLocaleString()}</td>
+            <td>$${item.expenses.toLocaleString()}</td>
+            <td>$${item.profit.toLocaleString()}</td>
+            <td class="${item.growth > 0 ? 'positive' : 'negative'}">${item.growth > 0 ? '+' : ''}${item.growth}%</td>
+        `;
+        tableBody.appendChild(row);
+    });
+    
+    // Update summary values
+    const totalRevenue = revenueDetailsData.reduce((sum, item) => sum + item.income, 0);
+    const averageGrowth = (revenueDetailsData.reduce((sum, item) => sum + item.growth, 0) / revenueDetailsData.length).toFixed(1);
+    
+    document.getElementById('totalRevenue').textContent = '$' + totalRevenue.toLocaleString();
+    document.getElementById('averageGrowth').textContent = (averageGrowth > 0 ? '+' : '') + averageGrowth + '%';
+});
+
+// Close modal when clicking the close button
+document.getElementById('closeDetailsModal').addEventListener('click', function() {
+    document.getElementById('detailsModal').classList.remove('active');
+});
+
+// Close modal when clicking outside of it
+document.getElementById('detailsModal').addEventListener('click', function(event) {
+    if (event.target === this) {
+        this.classList.remove('active');
+    }
+});
+
+// Function to generate random revenue details data
+function generateRevenueDetailsData(year, month) {
+    const daysInMonth = new Date(year, getMonthNumber(month), 0).getDate();
+    const data = [];
+    
+    // Generate data for each day of the month
+    for (let day = 1; day <= daysInMonth; day++) {
+        const income = Math.floor(Math.random() * 15000) + 20000;
+        const expenses = Math.floor(Math.random() * 10000) + 12000;
+        const profit = income - expenses;
+        const growth = (Math.random() * 20 - 5).toFixed(1);
+        
+        data.push({
+            date: `${month} ${day}, ${year}`,
+            income,
+            expenses,
+            profit,
+            growth: parseFloat(growth)
+        });
+    }
+    
+    return data;
+}
+
+// Helper function to convert month name to month number
+function getMonthNumber(monthName) {
+    const months = {
+        'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'May': 4, 'Jun': 5,
+        'Jul': 6, 'Aug': 7, 'Sep': 8, 'Oct': 9, 'Nov': 10, 'Dec': 11
+    };
+    return months[monthName];
+}
+
+// Add CSS for positive/negative growth values
+document.head.insertAdjacentHTML('beforeend', `
+    <style>
+        .positive { color: #4BD4B0; }
+        .negative { color: #DB4437; }
+    </style>
+`);
