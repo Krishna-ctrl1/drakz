@@ -93,6 +93,15 @@ function createChart() {
         x: {
           categoryPercentage: 0.7,
           grid: { display: false },
+          title: {
+            display: true,
+            text: "Day of the Week",
+            font: {
+              size: 12,
+              weight: 'bold'
+            }
+          }
+    
         },
         y: {
           beginAtZero: true,
@@ -107,6 +116,14 @@ function createChart() {
             drawBorder: false,
             color: "rgba(0, 0, 0, 0.1)",
           },
+          title: {
+            display: true,
+            text: "Amount (₹)",
+            font: {
+              size: 12,
+              weight: 'bold'
+            }
+          }
         },
       },
       plugins: {

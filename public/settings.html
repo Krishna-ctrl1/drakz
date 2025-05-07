@@ -83,20 +83,21 @@
                     <section class="settings-section">
                         <h2><i class="fas fa-user-circle"></i> Account Settings</h2>
                         <div class="settings-card">
-                            <div class="setting-item">
+                            <div class="setting-item" id="profil-info-row">
                                 <label>Profile Information</label>
                                 
                                 
                                 <div class="profile-display" id="profile-display">
-                                    <div class="profile-pic">
-                                        <img src="https://randomuser.me/api/portraits/women/44.jpg" id="profile-image">
-                                    </div>
+                                    
                                     <div class="profile-details">
                                         <p><strong>Name:</strong> <span id="profile-name">Kamala Sen</span></p>
                                         <p><strong>Email:</strong> <span id="profile-email">kamala.sen@example.com</span></p>
                                         <p><strong>Phone:</strong> <span id="profile-phone">+91 9399313638</span></p>
                                         <p><strong>DOB:</strong> <span id="profile-dob">1990-05-15</span></p>
                                         <button class="edit-btn" id="profile-edit-btn">Edit</button>
+                                    </div>
+                                    <div class="profile-pic">
+                                        <img src="https://randomuser.me/api/portraits/women/44.jpg" id="profile-image">
                                     </div>
                                 </div>
                             
@@ -162,6 +163,13 @@
                                         <input type="checkbox" id="2fa-toggle">
                                         <span class="slider"></span>
                                     </label>
+                                    <!-- Inline confirmation for disabling 2FA -->
+                                    <div id="confirm-disable-2fa" style="display: none; margin-top: 10px;">
+                                        <p>Are you sure you want to disable Two-Factor Authentication?</p>
+                                        <button id="confirm-disable-yes" class="danger-btn">Yes, Disable</button>
+                                        <button id="confirm-disable-no" class="cancel-confirm-btn">Cancel</button>
+                                    </div>
+                                    
                                     
                                     
                                 </div>
@@ -188,13 +196,23 @@
                                     
                                     <div class="form-group" id="phone-verification" style="display: none;">
                                         <label>Phone Number</label>
-                                        <input type="tel" id="2fa-phone" placeholder="+1 (555) 123-4567" value="<%= localStorage.getItem('userPhone') || '' %>">
+                                        <input type="tel" id="2fa-phone" placeholder="+91 **********" value="<%= localStorage.getItem('userPhone') || '' %>">
                                     </div>
+                                    
                                     
                                     <div class="form-actions">
                                         <button class="cancel-btn" id="cancel-2fa-setup">Cancel</button>
                                         <button class="save-btn" id="confirm-2fa-setup">Enable 2FA</button>
                                     </div>
+                                </div>
+                                <!-- Success message -->
+                                <div id="2fa-success-message" style="display: none; margin-top: 15px;">
+                                    <p style="color: #4CAF50; font-weight: bold;">✓ Two-Factor Authentication set up successfully!</p>
+                                </div>
+
+                                <!-- Change settings button (always visible when 2FA is enabled) -->
+                                <div id="2fa-change-settings" style="display: none; margin-top: 10px;">
+                                    <button id="change-2fa-settings" class="save-btn">Change 2FA Settings</button>
                                 </div>
                                
                         </div>
@@ -228,53 +246,178 @@
                         </div>
                     </section>
             
-                    <!-- 3. Financial Preferences -->
                     <section class="settings-section">
-                        <h2><i class="fas fa-wallet"></i> Financial Preferences</h2>
+                        <h2><i class="fas fa-bullseye"></i> Financial Goals</h2>
                         <div class="settings-card">
-                          <!-- Monthly Budget -->
-                          <div class="setting-item monthly-budget-goal">
-                            <label>Monthly Budget Goal</label>
-                            <div class="budget-input-container">
-                              <span class="currency-symbol">$</span>
-                              <input type="number" id="monthly-budget" placeholder="0.00" min="0" step="0.01">
-                              <button class="save-btn" id="save-budget">Save</button>
+                          <!-- Goals Summary -->
+                          <div class="goals-summary">
+                            <div class="summary-card">
+                              <i class="fas fa-bullseye"></i>
+                              <h3>Active Goals</h3>
+                              <span id="active-goals-count">0</span>
                             </div>
-                            <small class="validation-error" id="budget-error"></small>
+                            <div class="summary-card">
+                              <i class="fas fa-check-circle"></i>
+                              <h3>Completed</h3>
+                              <span id="completed-goals-count">0</span>
+                            </div>
+                            <div class="summary-card">
+                              <i class="fas fa-piggy-bank"></i>
+                              <h3>Total Saved</h3>
+                              <span id="total-saved">₹0.00</span>
+                            </div>
                           </div>
-                          
-                          <!-- Long-Term Goals -->
-                          <div class="setting-item">
-                            <label>Long-Term Goals</label>
-                            <div id="goals-display">
-                              <!-- Goals will be displayed here -->
+                      
+                          <!-- Goals Filter/Sort -->
+                          <div class="goals-controls">
+                            <div class="filter-control">
+                              <label><i class="fas fa-filter"></i> Filter:</label>
+                              <select id="goal-filter">
+                                <option value="all">All Goals</option>
+                                <option value="active">Active</option>
+                                <option value="completed">Completed</option>
+                                <option value="high">High Priority</option>
+                              </select>
                             </div>
-                            <button class="edit-btn" id="edit-goals-btn">Set Goals</button>
-                            
-                            <!-- Goals Form (hidden by default) -->
-                            <div class="goals-form" id="goals-form" style="display: none;">
-                              <div class="form-group">
-                                <label>Goal Name</label>
-                                <input type="text" id="goal-name" placeholder="e.g., Buy a house">
+                            <div class="sort-control">
+                              <label><i class="fas fa-sort"></i> Sort:</label>
+                              <select id="goal-sort">
+                                <option value="priority-desc">Priority (High-Low)</option>
+                                <option value="date-asc">Date (Soonest)</option>
+                                <option value="progress-desc">Progress (Most)</option>
+                              </select>
+                            </div>
+                            <button class="add-goal-btn" id="add-goal-btn">
+                              <i class="fas fa-plus"></i> New Goal
+                            </button>
+                          </div>
+                      
+                          <!-- Goals Display -->
+                          <div id="goals-display" class="goals-display">
+                            <!-- Goals will be rendered here -->
+                          </div>
+                      
+                          <!-- Empty State -->
+                          <div id="no-goals" class="no-goals">
+                            <img src="https://cdn-icons-png.flaticon.com/512/4076/4076478.png" alt="No goals" width="100">
+                            <h3>No goals yet</h3>
+                            <p>Start by setting your first financial goal</p>
+                            <button class="primary-btn" id="empty-add-goal">Add Goal</button>
+                          </div>
+                      
+                          <!-- Goal Form Modal -->
+                          <div class="modal" id="goal-modal">
+                            <div class="modal-content">
+                              <div class="modal-header">
+                                <h3><span id="modal-title">Add New Goal</span></h3>
+                                <button class="close-modal">&times;</button>
                               </div>
-                              <div class="form-group">
-                                <label>Target Amount</label>
-                                <input type="number" id="goal-amount" placeholder="0.00" min="0" step="0.01">
+                              <div class="modal-body">
+                                <div class="form-group">
+                                  <label>Goal Name</label>
+                                  <input type="text" id="goal-name" placeholder="e.g., Buy a house, Vacation fund">
+                                </div>
+                                <div class="form-row">
+                                  <div class="form-group">
+                                    <label>Target Amount ($)</label>
+                                    <input type="number" id="goal-amount" placeholder="0.00" min="0" step="0.01">
+                                  </div>
+                                  <div class="form-group">
+                                    <label>Current Amount ($)</label>
+                                    <input type="number" id="current-amount" placeholder="0.00" min="0" step="0.01">
+                                  </div>
+                                </div>
+                                <div class="form-row">
+                                  <div class="form-group">
+                                    <label>Target Date</label>
+                                    <input type="date" id="goal-date">
+                                  </div>
+                                  <div class="form-group">
+                                    <label>Priority</label>
+                                    <select id="goal-priority">
+                                      <option value="high">High</option>
+                                      <option value="medium" selected>Medium</option>
+                                      <option value="low">Low</option>
+                                    </select>
+                                  </div>
+                                </div>
+                                <div class="form-group">
+                                  <label>Category</label>
+                                  <div class="category-options">
+                                    <label class="category-option">
+                                      <input type="radio" name="category" value="house" checked>
+                                      <div class="category-icon">
+                                        <i class="fas fa-home"></i>
+                                        <span>House</span>
+                                      </div>
+                                    </label>
+                                    <label class="category-option">
+                                      <input type="radio" name="category" value="car">
+                                      <div class="category-icon">
+                                        <i class="fas fa-car"></i>
+                                        <span>Car</span>
+                                      </div>
+                                    </label>
+                                    <label class="category-option">
+                                      <input type="radio" name="category" value="travel">
+                                      <div class="category-icon">
+                                        <i class="fas fa-plane"></i>
+                                        <span>Travel</span>
+                                      </div>
+                                    </label>
+                                    <label class="category-option">
+                                      <input type="radio" name="category" value="education">
+                                      <div class="category-icon">
+                                        <i class="fas fa-graduation-cap"></i>
+                                        <span>Education</span>
+                                      </div>
+                                    </label>
+                                    <label class="category-option">
+                                      <input type="radio" name="category" value="other">
+                                      <div class="category-icon">
+                                        <i class="fas fa-star"></i>
+                                        <span>Other</span>
+                                      </div>
+                                    </label>
+                                  </div>
+                                </div>
+                                <div class="form-group">
+                                  <label>Notes</label>
+                                  <textarea id="goal-notes" placeholder="Any additional notes..."></textarea>
+                                </div>
                               </div>
-                              <div class="form-group">
-                                <label>Target Date</label>
-                                <input type="date" id="goal-date">
+                              <div class="modal-footer">
+                                <button class="cancel-btn" id="cancel-goal">Cancel</button>
+                                <button class="save-btn" id="save-goal">Save Goal</button>
                               </div>
-                              <div class="form-actions">
-                                <button class="cancel-btn" id="cancel-goals">Cancel</button>
-                                <button class="save-btn" id="save-goals">Save Goal</button>
+                            </div>
+                          </div>
+                      
+                          <!-- Contribution Modal -->
+                          <div class="modal" id="contribution-modal">
+                            <div class="modal-content small">
+                              <div class="modal-header">
+                                <h3>Add Contribution</h3>
+                                <button class="close-modal">&times;</button>
+                              </div>
+                              <div class="modal-body">
+                                <div class="form-group">
+                                  <label>Amount to Add ($)</label>
+                                  <input type="number" id="contribution-amount" placeholder="0.00" min="0.01" step="0.01">
+                                </div>
+                                <div class="form-group">
+                                  <label>Date</label>
+                                  <input type="date" id="contribution-date">
+                                </div>
+                              </div>
+                              <div class="modal-footer">
+                                <button class="cancel-btn" id="cancel-contribution">Cancel</button>
+                                <button class="save-btn" id="save-contribution">Add</button>
                               </div>
                             </div>
                           </div>
                         </div>
                       </section>
-                      
-
                     <!-- Add this after the Financial Preferences section -->
                     <section class="settings-section">
                         <h2><i class="fas fa-university"></i> Linked Accounts</h2>
@@ -360,20 +503,31 @@
                             <div class="setting-item">
                                 <label>Active Sessions</label>
                                 <button class="edit-btn" onclick="openModal('sessions-modal')">Manage</button>
+                                
                             </div>
+                            <div id="session-list" class="list-container" style="display:none;"></div>
+                            
                             <div class="setting-item">
                                 <label>Trusted Devices</label>
                                 <button class="edit-btn" onclick="openModal('devices-modal')">View</button>
+                                
                             </div>
-                            <div class="setting-item">
-                                <label>Export Data</label>
-                                <button class="edit-btn" id="export-data">Download</button>
-                            </div>
+                            <div id="device-list" class="list-container" style="display:none;"></div>
+                            
                             <div class="setting-item danger">
                                 <label>Delete Account</label>
                                 <button class="delete-btn" onclick="confirmDelete()">Delete</button>
                             </div>
                         </div>
+                       
+                          <div id="devices-modal" class="modal">
+                            <div class="modal-content">
+                              <span class="close-modal">&times;</span>
+                              <h3>Trusted Devices</h3>
+                              <p>List of your trusted devices...</p>
+                            </div>
+                          </div>
+                          
                     </section>
             
                     <!-- 5. Subscription & Billing -->

@@ -14,7 +14,8 @@ function closeNav() {
     const closeButton = document.getElementById("close-button");
 
     sidebar.style.width = "60px"; // Set sidebar to icons-only mode
-    document.getElementById("main").style.marginLeft = "60px"; // Adjust main content
+    document.getElementsByClassName("content")[0].style.marginLeft = "60px";
+
     closeButton.innerHTML = '<img width="25" src="assets/icons/sidebaropen.png">'; // Set open button image
     closeButton.setAttribute("onclick", "openNav()"); // Set open behavior
     sidebar.classList.add("icons-only"); // Hide text
@@ -351,241 +352,411 @@ document.addEventListener('DOMContentLoaded', function() {
         errorElement.textContent = '';
     });
 });
-
-// 2fa
+let successMessageTimeout;
 document.addEventListener('DOMContentLoaded', function() {
-    const toggle2FA = document.getElementById('2fa-toggle');
-    toggle2FA.checked = localStorage.getItem('2faEnabled') === 'true';
-    const setupForm = document.getElementById('t2fa-setup-form');
-    const emailVerification = document.getElementById('email-verification');
-    const phoneVerification = document.getElementById('phone-verification');
-    const methodRadios = document.querySelectorAll('input[name="2fa-method"]');
-    
+  const toggle2FA = document.getElementById('2fa-toggle');
+  const setupForm = document.getElementById('t2fa-setup-form');
+  const confirmDisableDiv = document.getElementById('confirm-disable-2fa');
+  const successMessageDiv = document.getElementById('2fa-success-message');
+  const changeSettingsBtn = document.getElementById('change-2fa-settings');
+  
+  // Validate email format
+  function validateEmail(email) {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(String(email).toLowerCase());
+  }
 
-    // Initialize based on current 2FA status
+  // Validate phone number format (basic validation)
+  function validatePhone(phone) {
+    const re = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/;
+    return re.test(String(phone));
+  }
+
+  // Initialize 2FA state
+  function init2FAState() {
+    const isEnabled = localStorage.getItem('2faEnabled') === 'true';
+    toggle2FA.checked = isEnabled;
+    
+    if (isEnabled) {
+      successMessageDiv.style.display = 'block';
+      setupForm.style.display = 'none';
+    } else {
+      successMessageDiv.style.display = 'none';
+      setupForm.style.display = 'none';
+    }
+    confirmDisableDiv.style.display = 'none';
+    document.getElementById('2fa-change-settings').style.display = isEnabled ? 'block' : 'none';
+  }
+
+  // Load saved 2FA settings into form
+  function loadSaved2FASettings() {
+    const method = localStorage.getItem('2faMethod') || 'email';
+    const contact = localStorage.getItem('2faContact') || '';
+    
+    document.querySelector(`input[name="2fa-method"][value="${method}"]`).checked = true;
+    if (method === 'email') {
+      document.getElementById('email-verification').style.display = 'block';
+      document.getElementById('phone-verification').style.display = 'none';
+      document.getElementById('2fa-email').value = contact;
+
+    } else {
+      document.getElementById('email-verification').style.display = 'none';
+      document.getElementById('phone-verification').style.display = 'block';
+      document.getElementById('2fa-phone').value = contact;
+    }
+  }
+
+  // Toggle change handler
+  toggle2FA.addEventListener('change', function() {
+    if (this.checked) {
+      // Turning ON
+      if (localStorage.getItem('2faEnabled') === 'true') {
+        // Already enabled - show success message
+        successMessageDiv.style.display = 'block';
+        setupForm.style.display = 'none';
+        document.getElementById('2fa-change-settings').style.display = 'block'; // ✅ show button
+      } else {
+        // New setup - show form
+        setupForm.style.display = 'block';
+        successMessageDiv.style.display = 'none';
+        document.getElementById('2fa-change-settings').style.display = 'block'; // ✅ show button
+      }
+      confirmDisableDiv.style.display = 'none';
+    } else {
+      // Turning OFF
+      if (localStorage.getItem('2faEnabled') === 'true') {
+        // Show confirmation for existing 2FA
+        confirmDisableDiv.style.display = 'block';
+        setupForm.style.display = 'none';
+        successMessageDiv.style.display = 'none';
+      } else {
+        // Cancel new setup
+        setupForm.style.display = 'none';
+        successMessageDiv.style.display = 'none';
+        document.getElementById('2fa-change-settings').style.display = 'none'; // ✅ hide button
+      }
+    }
+  });
+
+  // Confirm setup with validation
+  document.getElementById('confirm-2fa-setup').addEventListener('click', function(e) {
+    const method = document.querySelector('input[name="2fa-method"]:checked').value;
+    let contact, isValid;
+    
+    if (method === 'email') {
+      contact = document.getElementById('2fa-email').value.trim();
+      isValid = validateEmail(contact);
+      if (!isValid) {
+        alert('Please enter a valid email address (e.g., user@example.com)');
+        e.preventDefault();
+        return;
+      }
+    } else {
+      contact = document.getElementById('2fa-phone').value.trim();
+      isValid = validatePhone(contact);
+      if (!isValid) {
+        alert('Please enter a valid phone number (e.g., 123-456-7890)');
+        e.preventDefault();
+        return;
+      }
+    }
+    
+    // Only proceed if validation passed
+    localStorage.setItem('2faEnabled', 'true');
+    localStorage.setItem('2faMethod', method);
+    localStorage.setItem('2faContact', contact);
+    
+    setupForm.style.display = 'none';
+    successMessageDiv.style.display = 'block';
+    
+    // Clear any existing timeout
+    if (successMessageTimeout) {
+      clearTimeout(successMessageTimeout);
+    }
+    
+    // Set new timeout to hide after 5 seconds
+    successMessageTimeout = setTimeout(() => {
+      successMessageDiv.style.display = 'none';
+    }, 3000);
+  });
+
+// Change settings button
+changeSettingsBtn.addEventListener('click', function() {
+  // Clear any existing timeout when manually changing settings
+  if (successMessageTimeout) {
+      clearTimeout(successMessageTimeout);
+      successMessageTimeout = null;
+  }
+  successMessageDiv.style.display = 'none';
+  setupForm.style.display = 'block';
+  loadSaved2FASettings();
+});
+// function init2FAState() {
+//   const isEnabled = localStorage.getItem('2faEnabled') === 'true';
+//   toggle2FA.checked = isEnabled;
+  
+//   if (isEnabled) {
+//       // Don't show success message on initial load
+//       successMessageDiv.style.display = 'none';
+//       setupForm.style.display = 'none';
+//   } else {
+//       successMessageDiv.style.display = 'none';
+//       setupForm.style.display = 'none';
+//   }
+//   confirmDisableDiv.style.display = 'none';
+// }
+
+// Confirm disable
+document.getElementById('confirm-disable-yes').addEventListener('click', function() {
+    localStorage.removeItem('2faEnabled');
+    localStorage.removeItem('2faMethod');
+    localStorage.removeItem('2faContact');
+    toggle2FA.checked = false;
+    confirmDisableDiv.style.display = 'none';
+    successMessageDiv.style.display = 'none';
+});
+
+// Cancel disable
+document.getElementById('confirm-disable-no').addEventListener('click', function() {
+  toggle2FA.checked = true;
+  confirmDisableDiv.style.display = 'none';
+  successMessageDiv.style.display = 'block';
+  
+  // Set timeout to hide after 5 seconds
+  if (successMessageTimeout) {
+      clearTimeout(successMessageTimeout);
+  }
+  successMessageTimeout = setTimeout(() => {
+      successMessageDiv.style.display = 'none';
+  }, 5000);
+});
+
+// Cancel setup
+document.getElementById('cancel-2fa-setup').addEventListener('click', function() {
     if (localStorage.getItem('2faEnabled') === 'true') {
+        // Case 1: 2FA was already enabled - keep it enabled
         toggle2FA.checked = true;
-        setupForm.style.display = 'none'; // Form should be hidden when 2FA is already enabled
-    }
-
-    // Toggle 2FA on/off
-    toggle2FA.addEventListener('change', function() {
-        if (this.checked) {
-            // Show setup form when enabling 2FA
-            setupForm.style.display = 'block';
-        } else {
-            // Immediately hide form when turning off
-            setupForm.style.display = 'none';
-            
-            // Confirm before disabling
-            if (confirm('Are you sure you want to disable two-factor authentication?')) {
-                disable2FA();
-            } else {
-                this.checked = true; // Keep toggle on if canceled
-                if (localStorage.getItem('2faEnabled') === 'true') {
-                    setupForm.style.display = 'none'; // Keep form hidden if 2FA was already enabled
-                }
-            }
-        }
-    });
-    
-    // Toggle between email/SMS verification methods
-    methodRadios.forEach(radio => {
-        radio.addEventListener('change', function() {
-            if (this.value === 'email') {
-                emailVerification.style.display = 'block';
-                phoneVerification.style.display = 'none';
-            } else {
-                emailVerification.style.display = 'none';
-                phoneVerification.style.display = 'block';
-            }
-        });
-    });
-    
-    // Cancel 2FA setup
-    document.getElementById('cancel-2fa-setup').addEventListener('click', function() {
+        successMessageDiv.style.display = 'block';
         setupForm.style.display = 'none';
+    } else {
+        // Case 2: New setup being canceled - fully disable
         toggle2FA.checked = false;
-    });
-    
-    // Confirm 2FA setup
-    document.getElementById('confirm-2fa-setup').addEventListener('click', function() {
-        const method = document.querySelector('input[name="2fa-method"]:checked').value;
-        let contactInfo;
-        
-        if (method === 'email') {
-            contactInfo = document.getElementById('2fa-email').value.trim();
-            if (!validateEmail(contactInfo)) {
-                alert('Please enter a valid email address');
-                return;
-            }
-        } else {
-            contactInfo = document.getElementById('2fa-phone').value.trim();
-            if (!validatePhone(contactInfo)) {
-                alert('Please enter a valid phone number');
-                return;
-            }
-        }
-        
-        enable2FA(method, contactInfo);
         setupForm.style.display = 'none';
-        alert(`2FA enabled via ${method.toUpperCase()}. Verification code sent to ${contactInfo}`);
-    });
-    
-    function enable2FA(method, contactInfo) {
-        localStorage.setItem('2faEnabled', 'true');
-        localStorage.setItem('2faMethod', method);
-        localStorage.setItem('2faContact', contactInfo);
-    }
-    
-    function disable2FA() {
-        localStorage.removeItem('2faEnabled');
-        localStorage.removeItem('2faMethod');
-        localStorage.removeItem('2faContact');
-        alert('Two-factor authentication has been disabled.');
-    }
-    
-    function validateEmail(email) {
-        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-        return emailRegex.test(email);
-    }
-    
-    function validatePhone(phone) {
-        const digits = phone.replace(/\D/g, '');
-        return digits.length >= 7 && digits.length <= 15;
+        successMessageDiv.style.display = 'none';
+        const slider = document.querySelector('.slider');
+        slider.style.backgroundColor = '#ccc';
     }
 });
 
+// Method radio button change handler
+document.querySelectorAll('input[name="2fa-method"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        if (this.value === 'email') {
+            document.getElementById('email-verification').style.display = 'block';
+            document.getElementById('phone-verification').style.display = 'none';
+        } else {
+            document.getElementById('email-verification').style.display = 'none';
+            document.getElementById('phone-verification').style.display = 'block';
+        }
+    });
+});
+
+// Initialize on page load
+init2FAState();
+});
+
 // budgeting preferences
-document.addEventListener('DOMContentLoaded', function() {
-    // Monthly Budget Functionality
-    const budgetInput = document.getElementById('monthly-budget');
-    const saveBudgetBtn = document.getElementById('save-budget');
-    const budgetError = document.getElementById('budget-error');
-    
-    // Load saved budget
-    const savedBudget = localStorage.getItem('monthlyBudget');
-    if (savedBudget) {
-      budgetInput.value = parseFloat(savedBudget).toFixed(2);
-    }
-    
-    saveBudgetBtn.addEventListener('click', function() {
-      const budgetValue = parseFloat(budgetInput.value);
-      
-      if (isNaN(budgetValue)) {
-        budgetError.textContent = 'Please enter a valid number';
-        return;
-      }
-      
-      if (budgetValue < 0) {
-        budgetError.textContent = 'Budget cannot be negative';
-        return;
-      }
-      
-      localStorage.setItem('monthlyBudget', budgetValue);
-      budgetError.textContent = '';
-      alert('Monthly budget saved successfully!');
+ document.addEventListener("DOMContentLoaded", () => {
+  const goals = [];
+  let editingIndex = null;
+
+  const addGoalBtn = document.getElementById("add-goal-btn");
+  const emptyAddGoalBtn = document.getElementById("empty-add-goal");
+  const goalModal = document.getElementById("goal-modal");
+  const contributionModal = document.getElementById("contribution-modal");
+  const closeModalBtns = document.querySelectorAll(".close-modal");
+  const cancelGoalBtn = document.getElementById("cancel-goal");
+  const saveGoalBtn = document.getElementById("save-goal");
+  const saveContributionBtn = document.getElementById("save-contribution");
+  const cancelContributionBtn = document.getElementById("cancel-contribution");
+
+  const goalsDisplay = document.getElementById("goals-display");
+  const noGoals = document.getElementById("no-goals");
+
+  const goalFilter = document.getElementById("goal-filter");
+  const goalSort = document.getElementById("goal-sort");
+
+  const activeGoalsCount = document.getElementById("active-goals-count");
+  const completedGoalsCount = document.getElementById("completed-goals-count");
+  const totalSaved = document.getElementById("total-saved");
+
+  // Modal open/close
+  function toggleModal(modal, show) {
+    modal.style.display = show ? "block" : "none";
+  }
+
+  [addGoalBtn, emptyAddGoalBtn].forEach(btn =>
+    btn.addEventListener("click", () => {
+      editingIndex = null;
+      document.getElementById("modal-title").innerText = "Add New Goal";
+      document.getElementById("goal-name").value = "";
+      document.getElementById("goal-amount").value = "";
+      document.getElementById("current-amount").value = "";
+      document.getElementById("goal-date").value = "";
+      document.getElementById("goal-priority").value = "medium";
+      document.querySelector("input[name='category'][value='house']").checked = true;
+      document.getElementById("goal-notes").value = "";
+      toggleModal(goalModal, true);
+    })
+  );
+
+  closeModalBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      toggleModal(goalModal, false);
+      toggleModal(contributionModal, false);
     });
-    
-    // Long-Term Goals Functionality
-    const goalsDisplay = document.getElementById('goals-display');
-    const editGoalsBtn = document.getElementById('edit-goals-btn');
-    const goalsForm = document.getElementById('goals-form');
-    const cancelGoalsBtn = document.getElementById('cancel-goals');
-    const saveGoalsBtn = document.getElementById('save-goals');
-    
-    let financialGoals = JSON.parse(localStorage.getItem('financialGoals')) || [];
-    
-    // Initialize goals display
-    renderGoals();
-    
-    // Toggle goals form visibility
-    editGoalsBtn.addEventListener('click', function() {
-      goalsForm.style.display = goalsForm.style.display === 'none' ? 'block' : 'none';
-    });
-    
-    cancelGoalsBtn.addEventListener('click', function() {
-      goalsForm.style.display = 'none';
-    });
-    
-    saveGoalsBtn.addEventListener('click', function() {
-      const name = document.getElementById('goal-name').value.trim();
-      const amount = parseFloat(document.getElementById('goal-amount').value);
-      const date = document.getElementById('goal-date').value;
-      
-      if (!name) {
-        alert('Please enter a goal name');
-        return;
-      }
-      
-      if (isNaN(amount) || amount <= 0) {
-        alert('Please enter a valid target amount');
-        return;
-      }
-      
-      if (!date) {
-        alert('Please select a target date');
-        return;
-      }
-      
-      const newGoal = {
-        id: Date.now().toString(),
-        name: name,
-        targetAmount: amount,
-        currentAmount: 0,
-        targetDate: date,
-        createdAt: new Date().toISOString()
-      };
-      
-      financialGoals.push(newGoal);
-      localStorage.setItem('financialGoals', JSON.stringify(financialGoals));
-      
-      renderGoals();
-      goalsForm.style.display = 'none';
-      
-      // Reset form
-      document.getElementById('goal-name').value = '';
-      document.getElementById('goal-amount').value = '';
-      document.getElementById('goal-date').value = '';
-    });
-    
-    function renderGoals() {
-      if (financialGoals.length === 0) {
-        goalsDisplay.innerHTML = '<p class="no-goals">No goals set yet</p>';
-        return;
-      }
-      
-      goalsDisplay.innerHTML = financialGoals.map(goal => `
-        <div class="goal-item" data-id="${goal.id}">
-          <div class="goal-info">
-            <strong>${goal.name}</strong>
-            <div>Target: $${goal.targetAmount.toFixed(2)} by ${new Date(goal.targetDate).toLocaleDateString()}</div>
-            <div>Saved: $${goal.currentAmount.toFixed(2)} of $${goal.targetAmount.toFixed(2)}</div>
-            <div class="goal-progress">
-              <div class="goal-progress-bar" style="width: ${Math.min(100, (goal.currentAmount / goal.targetAmount * 100))}%"></div>
-            </div>
-          </div>
-          <button class="delete-goal" data-id="${goal.id}">
-            <i class="fas fa-trash"></i>
-          </button>
-        </div>
-      `).join('');
-      
-      // Add delete event listeners
-      document.querySelectorAll('.delete-goal').forEach(button => {
-        button.addEventListener('click', function() {
-          const goalId = this.getAttribute('data-id');
-          if (confirm('Are you sure you want to delete this goal?')) {
-            financialGoals = financialGoals.filter(goal => goal.id !== goalId);
-            localStorage.setItem('financialGoals', JSON.stringify(financialGoals));
-            renderGoals();
-          }
-        });
-      });
-    }
   });
+
+  cancelGoalBtn.addEventListener("click", () => toggleModal(goalModal, false));
+  cancelContributionBtn.addEventListener("click", () => toggleModal(contributionModal, false));
+
+  // Save new goal
+  saveGoalBtn.addEventListener("click", () => {
+    const name = document.getElementById("goal-name").value.trim();
+    const amount = parseFloat(document.getElementById("goal-amount").value);
+    const current = parseFloat(document.getElementById("current-amount").value);
+    const date = document.getElementById("goal-date").value;
+    const priority = document.getElementById("goal-priority").value;
+    const notes = document.getElementById("goal-notes").value;
+    const category = document.querySelector("input[name='category']:checked").value;
+
+    if (!name || isNaN(amount)) return alert("Please fill out required fields.");
+
+    const goal = {
+      name,
+      amount,
+      current: isNaN(current) ? 0 : current,
+      date,
+      priority,
+      notes,
+      category
+    };
+
+    if (editingIndex !== null) {
+      goals[editingIndex] = goal;
+    } else {
+      goals.push(goal);
+    }
+
+    toggleModal(goalModal, false);
+    renderGoals();
+  });
+
+  function renderGoals() {
+    goalsDisplay.innerHTML = "";
+
+    const filter = goalFilter.value;
+    const sort = goalSort.value;
+
+    let filteredGoals = [...goals];
+
+    if (filter === "active") {
+      filteredGoals = filteredGoals.filter(g => g.current < g.amount);
+    } else if (filter === "completed") {
+      filteredGoals = filteredGoals.filter(g => g.current >= g.amount);
+    } else if (filter === "high") {
+      filteredGoals = filteredGoals.filter(g => g.priority === "high");
+    }
+
+    if (sort === "priority-desc") {
+      const priorityRank = { high: 3, medium: 2, low: 1 };
+      filteredGoals.sort((a, b) => priorityRank[b.priority] - priorityRank[a.priority]);
+    } else if (sort === "date-asc") {
+      filteredGoals.sort((a, b) => new Date(a.date) - new Date(b.date));
+    } else if (sort === "progress-desc") {
+      filteredGoals.sort((a, b) => (b.current / b.amount) - (a.current / a.amount));
+    }
+
+    filteredGoals.forEach((goal, index) => {
+      const card = document.createElement("div");
+      card.className = "goal-card";
+      const progress = Math.min(100, Math.round((goal.current / goal.amount) * 100));
+      const completed = goal.current >= goal.amount;
+
+      card.innerHTML = `
+      <h4>${goal.name} (${goal.priority})</h4>
+      <p>Target: $${goal.amount.toFixed(2)} | Saved: $${goal.current.toFixed(2)}</p>
+      <progress value="${progress}" max="100"></progress>
+      <p>${progress}% ${completed ? "- Completed" : ""}</p>
+      <button onclick="editGoal(${index})" style="background-color: #4CAF50; color: white; padding: 5px 10px; border: none; border-radius: 5px;">Edit</button>
+      <button onclick="openContribution(${index})" style="background-color: #4CAF50; color: white; padding: 5px 10px; border: none; border-radius: 5px;">Add Contribution</button>
+    `;
+
+
+      goalsDisplay.appendChild(card);
+    });
+
+    noGoals.style.display = goals.length === 0 ? "block" : "none";
+    updateSummary();
+  }
+
+  function updateSummary() {
+    const active = goals.filter(g => g.current < g.amount).length;
+    const completed = goals.filter(g => g.current >= g.amount).length;
+    const saved = goals.reduce((sum, g) => sum + g.current, 0);
+
+    activeGoalsCount.innerText = active;
+    completedGoalsCount.innerText = completed;
+    totalSaved.innerText = `₹${saved.toFixed(2)}`;
+  }
+
+  // Filter and sort listeners
+  goalFilter.addEventListener("change", renderGoals);
+  goalSort.addEventListener("change", renderGoals);
+
+  // Global for inline onclick
+  window.editGoal = function(index) {
+    editingIndex = index;
+    const goal = goals[index];
+    document.getElementById("modal-title").innerText = "Edit Goal";
+    document.getElementById("goal-name").value = goal.name;
+    document.getElementById("goal-amount").value = goal.amount;
+    document.getElementById("current-amount").value = goal.current;
+    document.getElementById("goal-date").value = goal.date;
+    document.getElementById("goal-priority").value = goal.priority;
+    document.querySelector(`input[name='category'][value='${goal.category}']`).checked = true;
+    document.getElementById("goal-notes").value = goal.notes;
+
+    toggleModal(goalModal, true);
+  };
+
+  window.openContribution = function(index) {
+    contributionModal.dataset.index = index;
+    document.getElementById("contribution-amount").value = "";
+    document.getElementById("contribution-date").value = "";
+    toggleModal(contributionModal, true);
+  };
+
+  saveContributionBtn.addEventListener("click", () => {
+    const amount = parseFloat(document.getElementById("contribution-amount").value);
+    const index = parseInt(contributionModal.dataset.index, 10);
+    if (isNaN(amount) || amount <= 0) return alert("Enter a valid amount.");
+
+    goals[index].current += amount;
+    toggleModal(contributionModal, false);
+    renderGoals();
+  });
+
+  // Initial render
+  renderGoals();
+});
+ 
+  
   // linking accounts
   document.addEventListener('DOMContentLoaded', function() {
+    function closeModal(id) {
+      document.getElementById(id).style.display = 'none';
+    }
     // DOM Elements
     const linkNewAccountBtn = document.getElementById('link-new-account');
     const linkAccountModal = document.getElementById('link-account-modal');
@@ -595,7 +766,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const accountNumberError = document.createElement('small');
     accountNumberError.className = 'validation-error';
     accountNumberInput.parentNode.appendChild(accountNumberError);
-  
+
     // Load existing accounts
     renderBankAccounts();
   
@@ -604,10 +775,10 @@ document.addEventListener('DOMContentLoaded', function() {
       linkAccountModal.style.display = 'block';
     });
   
-    // Close modal when X is clicked
-    document.querySelector('.close-modal').addEventListener('click', function() {
-      closeModal('link-account-modal');
-    });
+    // // Close modal when X is clicked
+    // document.querySelector('.close-modal').addEventListener('click', function() {
+    //   closeModal('link-account-modal');
+    // });
   
     // Close modal when clicking outside
     window.addEventListener('click', function(event) {
@@ -711,11 +882,89 @@ document.addEventListener('DOMContentLoaded', function() {
       alert(`${removedAccount[0].bankName} account unlinked.`);
     }
   
-    function closeModal(id) {
-      document.getElementById(id).style.display = 'none';
-    }
+   
   
     // Make unlinkAccount available globally
     window.unlinkAccount = unlinkAccount;
   });
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const sessions = [
+        { id: 1, device: 'Chrome on Windows', location: 'New York, USA' },
+        { id: 2, device: 'Firefox on Linux', location: 'Berlin, Germany' }
+    ];
+
+    const devices = [
+        { id: 101, name: 'iPhone 14 Pro', lastUsed: '2025-05-06' },
+        { id: 102, name: 'MacBook Pro', lastUsed: '2025-05-05' }
+    ];
+
+    function renderList(containerId, items, removeCallback) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = ''; // Clear existing
+        items.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'item-entry';
+
+            const infoSpan = document.createElement('span');
+            infoSpan.textContent = Object.values(item).slice(1).join(' - ');
+
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'remove-btn';
+            removeBtn.textContent = 'Remove';
+            removeBtn.addEventListener('click', () => removeCallback(item.id));
+
+            div.appendChild(infoSpan);
+            div.appendChild(removeBtn);
+            container.appendChild(div);
+        });
+    }
+
+    function openModal(type) {
+        if (type === 'sessions-modal') {
+            const section = document.getElementById('session-list');
+            if (!section.style.display || section.style.display === 'none') {
+                renderList('session-list', sessions, removeSession);
+                section.style.display = 'block';
+            } else {
+                section.style.display = 'none';
+            }
+        } else if (type === 'devices-modal') {
+            const section = document.getElementById('device-list');
+            if (!section.style.display || section.style.display === 'none') {
+                renderList('device-list', devices, removeDevice);
+                section.style.display = 'block';
+            } else {
+                section.style.display = 'none';
+            }
+        }
+    }
+
+    function removeSession(id) {
+        const index = sessions.findIndex(s => s.id === id);
+        if (index !== -1) {
+            sessions.splice(index, 1);
+            renderList('session-list', sessions, removeSession);
+        }
+    }
+
+    function removeDevice(id) {
+        const index = devices.findIndex(d => d.id === id);
+        if (index !== -1) {
+            devices.splice(index, 1);
+            renderList('device-list', devices, removeDevice);
+        }
+    }
+
+    function confirmDelete() {
+        if (confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
+            alert("Account deleted (simulated).");
+        }
+    }
+
+    // Attach functions to window for global access
+    window.openModal = openModal;
+    window.confirmDelete = confirmDelete;
+});
+
   
