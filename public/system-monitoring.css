@@ -182,14 +182,13 @@ header {
     font-size: 1.75rem;
     color: var(--dark-color);
 }
-
 /* DASHBOARD GRID */
 .dashboard-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(2, 1fr); /* Force only 2 columns */
     grid-gap: 20px;
-    width: 100%; /* Ensure grid spans full width */
-    max-width: 100%; /* Prevent overflow */
+    width: 100%;
+    max-width: 100%;
 }
 
 .dashboard-grid-item {
@@ -201,8 +200,23 @@ header {
     min-height: 300px;
     display: flex;
     flex-direction: column;
-    width: 100%; /* Ensure items span full width */
-    max-width: 100%; /* Prevent overflow */
+    width: 100%;
+    max-width: 100%;
+}
+
+/* Revenue chart spans full width */
+.revenue-chart {
+    background-color: var(--card-bg);  
+    box-shadow: var(--shadow-md); 
+    width: 100%;
+    border-radius: 10px;
+    padding: 20px;
+    transition: all 0.3s ease;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    grid-column: span 2; /* Span across both columns */
+    height: 500px;
 }
 
 .dashboard-grid-item:hover {
