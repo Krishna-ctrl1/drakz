@@ -185,7 +185,7 @@
     "range-parser": "^1.2.1",
     "raw-body": "^2.5.2",
     "razorpay": "^2.9.6",
-<<<<<<< HEAD
+
     "readable-stream": "^2.3.7",
     "require-directory": "^2.1.1",
     "retry": "^0.13.1",
@@ -243,11 +243,11 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
-=======
+    "start": "node server.js",
+
     "sharp": "^0.33.5",
     "sqlite3": "^5.1.7"
->>>>>>> 1e9d2519fd7cac8c244b6043b59752832bdb77d9
+
   },
   "repository": {
     "type": "git",

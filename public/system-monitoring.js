@@ -1,84 +1,108 @@
-// Data for different years
-const yearData = {
-    "2024": {
-        activeUsers: {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
-            datasets: [
-                {
-                    label: 'India',
-                    data: [45, 60, 40, 70, 55, 65, 50],
-                    backgroundColor: '#4285F4',
-                    barPercentage: 0.6,
-                    categoryPercentage: 0.5
-                },
-                {
-                    label: 'Russia',
-                    data: [70, 55, 65, 45, 60, 40, 75],
-                    backgroundColor: '#DB4437',
-                    barPercentage: 0.6,
-                    categoryPercentage: 0.5
-                }
-            ]
+// Enhanced Active Users Chart with trend indicators and data labels
+const activeUsersData = {
+    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+    datasets: [
+        {
+            label: 'India',
+            data: [65, 45, 50, 85, 60, 75, 70],
+            backgroundColor: '#4285F4',
+            barPercentage: 0.6,
+            categoryPercentage: 0.5
         },
-        revenue: {
-            'Jan': [190, 210, 230, 200, 180],
-            'Feb': [200, 220, 240, 180, 210],
-            'Mar': [230, 260, 280, 240, 220],
-            'Apr': [180, 200, 220, 190, 170],
-            'May': [210, 230, 250, 220, 200],
-            'Jun': [240, 260, 290, 250, 230],
-            'Jul': [220, 240, 260, 230, 210],
-            'Aug': [200, 220, 240, 210, 190],
-            'Sep': [230, 250, 270, 240, 220],
-            'Oct': [260, 280, 300, 270, 250],
-            'Nov': [220, 240, 260, 230, 210],
-            'Dec': [240, 260, 280, 250, 230]
+        {
+            label: 'Russia',
+            data: [85, 75, 60, 55, 75, 50, 80],
+            backgroundColor: '#DB4437',
+            barPercentage: 0.6,
+            categoryPercentage: 0.5
         }
-    },
-    "2025": {
-        activeUsers: {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
-            datasets: [
-                {
-                    label: 'India',
-                    data: [65, 45, 50, 85, 60, 75, 70],
-                    backgroundColor: '#4285F4',
-                    barPercentage: 0.6,
-                    categoryPercentage: 0.5
-                },
-                {
-                    label: 'Russia',
-                    data: [85, 75, 60, 55, 75, 50, 80],
-                    backgroundColor: '#DB4437',
-                    barPercentage: 0.6,
-                    categoryPercentage: 0.5
-                }
-            ]
-        },
-        revenue: {
-            'Jan': [230, 250, 270, 220, 240],
-            'Feb': [250, 270, 290, 230, 260],
-            'Mar': [320, 340, 360, 300, 320],
-            'Apr': [220, 240, 260, 200, 220],
-            'May': [240, 260, 280, 220, 240],
-            'Jun': [280, 300, 320, 260, 280],
-            'Jul': [260, 280, 300, 240, 260],
-            'Aug': [240, 260, 280, 220, 240],
-            'Sep': [270, 290, 310, 250, 270],
-            'Oct': [300, 320, 340, 280, 300],
-            'Nov': [260, 280, 300, 240, 260],
-            'Dec': [280, 300, 320, 260, 280]
-        }
-    }
+    ]
 };
 
-// Global chart references
-let activeUsersChart;
-let revenueChart;
-let currentYear = "2025";
-let currentMonth = "Mar";
+// Calculate trends for active users
+const calculateTrends = (data) => {
+    const trends = {};
+    data.datasets.forEach(dataset => {
+        const lastTwoMonths = dataset.data.slice(-2);
+        const difference = lastTwoMonths[1] - lastTwoMonths[0];
+        const percentChange = ((difference / lastTwoMonths[0]) * 100).toFixed(1);
+        trends[dataset.label] = {
+            difference,
+            percentChange,
+            isPositive: difference >= 0
+        };
+    });
+    return trends;
+};
 
-// Initialize the charts and add event listeners when the document is loaded
+// Enhanced Web Popularity Chart with detailed percentages
+const webPopularityData = {
+    labels: ['Desktop', 'Mobile', 'Tablet'],
+    datasets: [{
+        data: [1245, 1743, 1000],
+        backgroundColor: ['#FF6B6B', '#4285F4', '#4BD4B0'],
+        borderWidth: 0,
+        cutout: '70%'
+    }]
+};
+
+// Calculate percentages for web popularity
+const calculateWebPercentages = (data) => {
+    const total = data.datasets[0].data.reduce((sum, value) => sum + value, 0);
+    return data.datasets[0].data.map((value, index) => {
+        return {
+            label: data.labels[index],
+            value,
+            percentage: ((value / total) * 100).toFixed(1)
+        };
+    });
+};
+
+// Enhanced Income Chart with detailed percentages
+const incomeData = {
+    labels: ['Banks', 'Retail Points', 'Advisor', 'Admin'],
+    datasets: [{
+        data: [35, 25, 15, 25],
+        backgroundColor: ['#45B7D1', '#FF6B6B', '#A3A0FB', '#FF9F40'],
+        borderWidth: 0
+    }]
+};
+
+// Enhanced Revenue Chart with month-over-month analysis
+const revenueData = {
+    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
+    datasets: [{
+        label: 'Revenue',
+        data: [230, 250, 320, 220, 240],
+        backgroundColor: (context) => {
+            return context.dataIndex === 2 ? '#4285F4' : '#E0E0E0';
+        },
+        borderWidth: 0,
+        borderRadius: 5,
+        barPercentage: 0.5,
+        categoryPercentage: 0.7
+    }]
+};
+
+// Calculate MoM changes for revenue
+const calculateRevenueChanges = (data) => {
+    const monthlyData = data.datasets[0].data;
+    return monthlyData.map((value, index) => {
+        if (index === 0) return { label: data.labels[index], value, change: 0, changePercent: '0.0' };
+        const previousValue = monthlyData[index - 1];
+        const change = value - previousValue;
+        const changePercent = ((change / previousValue) * 100).toFixed(1);
+        return {
+            label: data.labels[index],
+            value,
+            change,
+            changePercent,
+            isPositive: change >= 0
+        };
+    });
+};
+
+// Initialize charts when the document is loaded
 document.addEventListener('DOMContentLoaded', function() {
     // Make sure all chart canvases are properly created
     ['activeUsersChart', 'webPopularityChart', 'incomeChart', 'revenueChart'].forEach(chartId => {
@@ -91,33 +115,23 @@ document.addEventListener('DOMContentLoaded', function() {
         container.appendChild(canvas);
     });
 
-    // Initialize charts
-    initializeActiveUsersChart(currentYear);
-    initializeWebPopularityChart();
-    initializeIncomeChart();
-    initializeRevenueChart(currentYear, currentMonth);
-    
-    // Add event listeners to year and month selectors
-    initializeSelectors();
-    
-    // Create India Map visualization
-    setTimeout(() => {
-        createIndiaMap();
-    }, 100);
-});
+    // Create summary containers for additional textual data
+    const createSummaryContainer = (chartId) => {
+        const container = document.getElementById(chartId);
+        let summaryContainer = container.querySelector('.chart-summary');
+        if (!summaryContainer) {
+            summaryContainer = document.createElement('div');
+            summaryContainer.className = 'chart-summary';
+            container.appendChild(summaryContainer);
+        }
+        return summaryContainer;
+    };
 
-// Initialize Active Users Chart
-function initializeActiveUsersChart(year) {
+    // Active Users Chart with enhanced data
     const activeUsersCtx = document.getElementById('activeUsersChartCanvas').getContext('2d');
-    
-    // If chart already exists, destroy it first
-    if (activeUsersChart) {
-        activeUsersChart.destroy();
-    }
-    
-    activeUsersChart = new Chart(activeUsersCtx, {
+    const activeUsersChart = new Chart(activeUsersCtx, {
         type: 'bar',
-        data: yearData[year].activeUsers,
+        data: activeUsersData,
         options: {
             responsive: true,
             maintainAspectRatio: false,
@@ -127,7 +141,24 @@ function initializeActiveUsersChart(year) {
                 },
                 tooltip: {
                     mode: 'index',
-                    intersect: false
+                    intersect: false,
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.dataset.label || '';
+                            const value = context.raw || 0;
+                            return `${label}: ${value} (${value > 70 ? 'High' : value > 50 ? 'Medium' : 'Low'} activity)`;
+                        }
+                    }
+                },
+                // Add data labels plugin
+                datalabels: {
+                    display: true,
+                    color: '#fff',
+                    font: {
+                        weight: 'bold',
+                        size: 10
+                    },
+                    formatter: (value) => value
                 }
             },
             scales: {
@@ -148,100 +179,243 @@ function initializeActiveUsersChart(year) {
             }
         }
     });
-    
-    // Update the year selector text
-    const yearSelector = document.querySelector('.chart-header .year-selector');
-    if (yearSelector) {
-        yearSelector.innerHTML = `${year} <i class="fas fa-chevron-down"></i>`;
-    }
-}
 
-// Initialize Web Popularity Chart (Doughnut Chart)
-function initializeWebPopularityChart() {
+    // Add Active Users trend summary
+    const activeUsersTrends = calculateTrends(activeUsersData);
+    const activeUsersSummary = createSummaryContainer('activeUsersChart');
+    activeUsersSummary.innerHTML = `
+        <div class="trend-summary">
+            <div class="trend-item">
+                <span class="trend-label">India:</span>
+                <span class="trend-value ${activeUsersTrends.India.isPositive ? 'positive' : 'negative'}">
+                    ${activeUsersTrends.India.isPositive ? '↑' : '↓'} ${Math.abs(activeUsersTrends.India.percentChange)}%
+                </span>
+            </div>
+            <div class="trend-item">
+                <span class="trend-label">Russia:</span>
+                <span class="trend-value ${activeUsersTrends.Russia.isPositive ? 'positive' : 'negative'}">
+                    ${activeUsersTrends.Russia.isPositive ? '↑' : '↓'} ${Math.abs(activeUsersTrends.Russia.percentChange)}%
+                </span>
+            </div>
+            <div class="trend-summary-text">Last 30 days change</div>
+        </div>
+    `;
+
+    // Web Popularity Chart (Doughnut Chart) with enhanced data
     const webPopularityCtx = document.getElementById('webPopularityChartCanvas').getContext('2d');
     const webPopularityChart = new Chart(webPopularityCtx, {
         type: 'doughnut',
-        data: {
-            labels: ['Desktop', 'Mobile', 'Tablet'],
-            datasets: [{
-                data: [1245, 1743, 1000],
-                backgroundColor: ['#FF6B6B', '#4285F4', '#4BD4B0'],
-                borderWidth: 0,
-                cutout: '90%'
-            }]
-        },
+        data: webPopularityData,
         options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
                 legend: {
                     display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.raw || 0;
+                            const total = context.dataset.data.reduce((sum, val) => sum + val, 0);
+                            const percentage = ((value / total) * 100).toFixed(1);
+                            return `${label}: ${value} (${percentage}%)`;
+                        }
+                    }
                 }
             },
-            cutout: '90%'
+            cutout: '70%'
         }
     });
-}
-const webPopularityData = {
-    labels: ['Desktop', 'Mobile', 'Tablet'],
-    datasets: [{
-        data: [1245, 1743, 1000],
-        backgroundColor: ['#FF6B6B', '#4285F4', '#4BD4B0'],
-        borderWidth: 0,
-        cutout: '60%'
-    }]
-};
 
+    // Add Web Popularity details
+    const webPercentages = calculateWebPercentages(webPopularityData);
+    const webPopularitySummary = createSummaryContainer('webPopularityChart');
+    webPopularitySummary.innerHTML = `
+        <div class="percentage-breakdown">
+            ${webPercentages.map(item => `
+                <div class="percentage-item">
+                    <span class="percentage-label">${item.label}:</span>
+                    <span class="percentage-value">${item.percentage}%</span>
+                    <span class="absolute-value">(${item.value})</span>
+                </div>
+            `).join('')}
+        </div>
+    `;
 
-// India states data
-const indiaStatesData = [
-    { id: "AN", state: "Andaman and Nicobar Islands", value: 400 },
-    { id: "AP", state: "Andhra Pradesh", value: 78 },
-    { id: "AR", state: "Arunachal Pradesh", value: 32 },
-    { id: "AS", state: "Assam", value: 67 },
-    { id: "BR", state: "Bihar", value: 56 },
-    { id: "CH", state: "Chandigarh", value: 87 },
-    { id: "CT", state: "Chhattisgarh", value: 43 },
-    { id: "DN", state: "Dadra and Nagar Haveli", value: 29 },
-    { id: "DD", state: "Daman and Diu", value: 34 },
-    { id: "DL", state: "Delhi", value: 95 },
-    { id: "GA", state: "Goa", value: 76 },
-    { id: "GJ", state: "Gujarat", value: 82 },
-    { id: "HR", state: "Haryana", value: 74 },
-    { id: "HP", state: "Himachal Pradesh", value: 54 },
-    { id: "JK", state: "Jammu and Kashmir", value: 48 },
-    { id: "JH", state: "Jharkhand", value: 39 },
-    { id: "KA", state: "Karnataka", value: 89 },
-    { id: "KL", state: "Kerala", value: 91 },
-    { id: "LA", state: "Ladakh", value: 27 },
-    { id: "LD", state: "Lakshadweep", value: 18 },
-    { id: "MP", state: "Madhya Pradesh", value: 62 },
-    { id: "MH", state: "Maharashtra", value: 93 },
-    { id: "MN", state: "Manipur", value: 37 },
-    { id: "ML", state: "Meghalaya", value: 42 },
-    { id: "MZ", state: "Mizoram", value: 31 },
-    { id: "NL", state: "Nagaland", value: 29 },
-    { id: "OR", state: "Odisha", value: 58 },
-    { id: "PY", state: "Puducherry", value: 66 },
-    { id: "PB", state: "Punjab", value: 72 },
-    { id: "RJ", state: "Rajasthan", value: 69 },
-    { id: "SK", state: "Sikkim", value: 38 },
-    { id: "TN", state: "Tamil Nadu", value: 88 },
-    { id: "TG", state: "Telangana", value: 83 },
-    { id: "TR", state: "Tripura", value: 47 },
-    { id: "UP", state: "Uttar Pradesh", value: 71 },
-    { id: "UT", state: "Uttarakhand", value: 53 },
-    { id: "WB", state: "West Bengal", value: 76 }
-];
+    // Income Chart (Pie Chart) with enhanced data
+    const incomeCtx = document.getElementById('incomeChartCanvas').getContext('2d');
+    const incomeChart = new Chart(incomeCtx, {
+        type: 'pie',
+        data: incomeData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: {
+                        boxWidth: 15,
+                        padding: 15,
+                        font: {
+                            size: 12
+                        },
+                        generateLabels: function(chart) {
+                            const data = chart.data;
+                            if (data.labels.length && data.datasets.length) {
+                                return data.labels.map(function(label, i) {
+                                    const meta = chart.getDatasetMeta(0);
+                                    const ds = data.datasets[0];
+                                    const value = ds.data[i];
+                                    const total = ds.data.reduce((sum, val) => sum + val, 0);
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    
+                                    return {
+                                        text: `${label}: ${value}% (${percentage}%)`,
+                                        fillStyle: ds.backgroundColor[i],
+                                        hidden: isNaN(ds.data[i]) || meta.data[i].hidden,
+                                        index: i
+                                    };
+                                });
+                            }
+                            return [];
+                        }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.raw || 0;
+                            const total = context.dataset.data.reduce((sum, val) => sum + val, 0);
+                            const percentage = ((value / total) * 100).toFixed(1);
+                            return `${label}: ${value}% (${percentage}% of total)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
 
+    // Add Income chart quarterly projection
+    const incomeSummary = createSummaryContainer('incomeChart');
+    incomeSummary.innerHTML = `
+        <div class="income-projection">
+            <div class="projection-title">Quarterly Projection</div>
+            <div class="projection-row">
+                <span class="projection-label">Q1 2025:</span>
+                <span class="projection-value">+5.2%</span>
+            </div>
+            <div class="projection-row">
+                <span class="projection-label">Q2 2025:</span>
+                <span class="projection-value">+7.8%</span>
+            </div>
+        </div>
+    `;
 
+    // Revenue Chart with enhanced data
+    const revenueCtx = document.getElementById('revenueChartCanvas').getContext('2d');
+    const revenueChart = new Chart(revenueCtx, {
+        type: 'bar',
+        data: revenueData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const index = context.dataIndex;
+                            const value = context.raw;
+                            const prevValue = index > 0 ? context.dataset.data[index - 1] : null;
+                            
+                            if (prevValue === null) return `Revenue: $${value}K`;
+                            
+                            const change = value - prevValue;
+                            const changePercent = ((change / prevValue) * 100).toFixed(1);
+                            const changeDir = change >= 0 ? '▲' : '▼';
+                            
+                            return [
+                                `Revenue: $${value}K`,
+                                `MoM Change: ${changeDir} ${Math.abs(changePercent)}%`
+                            ];
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: {
+                        display: false
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        borderDash: [3, 3]
+                    },
+                    ticks: {
+                        stepSize: 100,
+                        callback: function(value) {
+                            return '$' + value + 'K';
+                        }
+                    }
+                }
+            }
+        }
+    });
 
-// Function to create India Map
+    // Add Revenue month-over-month analysis
+    const revenueChanges = calculateRevenueChanges(revenueData);
+    const revenueSummary = createSummaryContainer('revenueChart');
+    revenueSummary.innerHTML = `
+        <div class="revenue-mom-analysis">
+            <div class="analysis-title">Month-over-Month Analysis</div>
+            <div class="analysis-content">
+                ${revenueChanges.filter(item => item.label !== 'Jan').map(item => `
+                    <div class="analysis-item">
+                        <span class="month-label">${item.label}:</span>
+                        <span class="change-value ${item.isPositive ? 'positive' : 'negative'}">
+                            ${item.isPositive ? '↑' : '↓'} ${Math.abs(item.changePercent)}%
+                        </span>
+                        <span class="absolute-change">(${item.isPositive ? '+' : ''}${item.change}K)</span>
+                    </div>
+                `).join('')}
+            </div>
+            <div class="highlight-month">
+                <span class="highlight-label">Highest Growth:</span>
+                <span class="highlight-value">Mar (+28.0%)</span>
+            </div>
+        </div>
+    `;
+
+    // Create India Map visualization with enhanced information
+    setTimeout(() => {
+        createIndiaMap();
+    }, 100);
+    
+    // Add event listeners for detail buttons
+    document.getElementById('revenueDetails').addEventListener('click', function() {
+        // Show revenue details modal
+        document.getElementById('detailsModal').style.display = 'block';
+        populateRevenueDetails();
+    });
+    
+    document.getElementById('closeDetailsModal').addEventListener('click', function() {
+        document.getElementById('detailsModal').style.display = 'none';
+    });
+});
+
+// Enhanced function to create India Map with improved tooltips and data
 function createIndiaMap() {
     const width = document.getElementById('indiaMapChart').clientWidth;
     const height = document.getElementById('indiaMapChart').clientHeight;
     
-    // Color scale for the map
+    // Enhanced color scale for the map with more visual variation
     const colorScale = d3.scaleSequential(d3.interpolateGreens)
         .domain([0, 100]);
 
@@ -253,41 +427,41 @@ function createIndiaMap() {
         .append('g')
         .attr('transform', `translate(${width/8}, ${height/15})`);
 
-    // Create tooltip
+    // Create enhanced tooltip with more data
     const tooltip = d3.select('#indiaMapChart')
         .append('div')
         .attr('class', 'tooltip')
         .style('position', 'absolute')
         .style('background', 'white')
-        .style('padding', '5px')
+        .style('padding', '10px')
         .style('border-radius', '5px')
-        .style('box-shadow', '0 0 10px rgba(0,0,0,0.1)')
+        .style('box-shadow', '0 0 10px rgba(0, 0, 0, 0)')
         .style('pointer-events', 'none')
         .style('opacity', 0);
 
-    // Add legend
+    // Add legend with more detailed information
     const legend = d3.select('#indiaMapChart')
         .append('div')
         .attr('class', 'map-legend')
         .style('padding', '10px')
         .style('background', 'white')
         .style('border-radius', '5px')
-        .style('box-shadow', '0 0 5px rgba(0,0,0,0.1)')
+        .style('box-shadow', '0 0 5px rgba(0, 0, 0, 0)')
         .style('position', 'absolute')
         .style('top', '10px')
         .style('right', '10px');
 
     const legendItems = [
-        { color: colorScale(20), text: 'Low (0-33%)' },
-        { color: colorScale(50), text: 'Medium (34-66%)' },
-        { color: colorScale(80), text: 'High (67-100%)' }
+        { color: colorScale(20), text: 'Low (0-33%)', description: 'Developing engagement' },
+        { color: colorScale(50), text: 'Medium (34-66%)', description: 'Growing engagement' },
+        { color: colorScale(80), text: 'High (67-100%)', description: 'Strong engagement' }
     ];
 
     legendItems.forEach(item => {
         const legendItem = legend.append('div')
             .style('display', 'flex')
             .style('align-items', 'center')
-            .style('margin-bottom', '5px');
+            .style('margin-bottom', '8px');
         
         legendItem.append('div')
             .style('width', '12px')
@@ -295,15 +469,46 @@ function createIndiaMap() {
             .style('background', item.color)
             .style('margin-right', '5px');
         
-        legendItem.append('span')
+        const textContainer = legendItem.append('div')
+            .style('display', 'flex')
+            .style('flex-direction', 'column');
+            
+        textContainer.append('span')
             .text(item.text)
-            .style('font-size', '12px');
+            .style('font-size', '12px')
+            .style('font-weight', 'bold');
+            
+        textContainer.append('span')
+            .text(item.description)
+            .style('font-size', '10px')
+            .style('color', '#666');
     });
 
-    // Define the states and their boundaries
-    // For demonstration, we'll create a simplified India map
-    // In a real implementation, you would use GeoJSON data of India
+    // Add summary container for India map
+    const mapSummaryContainer = d3.select('#indiaMapChart')
+        .append('div')
+        .attr('class', 'map-summary')
+        .style('position', 'absolute')
+        .style('bottom', '10px')
+        .style('left', '10px')
+        .style('background', 'rgba(255, 255, 255, 0)')
+        .style('padding', '10px')
+        .style('border-radius', '5px')
+        .style('box-shadow', '0 0 5px rgba(0, 0, 0, 0)');
     
+    // Calculate state statistics
+    const highActivityStates = indiaStatesData.filter(s => s.value >= 67).length;
+    const mediumActivityStates = indiaStatesData.filter(s => s.value >= 34 && s.value < 67).length;
+    const lowActivityStates = indiaStatesData.filter(s => s.value < 34).length;
+    
+    mapSummaryContainer.html(`
+        <div style="font-weight:bold;margin-bottom:5px;">India Activity Overview</div>
+        <div>High activity: ${highActivityStates} states</div>
+        <div>Medium activity: ${mediumActivityStates} states</div>
+        <div>Low activity: ${lowActivityStates} states</div>
+        <div style="margin-top:5px;font-size:11px;color:#666;">Last updated: May 5, 2025</div>
+    `);
+
     // Load actual India GeoJSON data from a string
     // This is a simplified GeoJSON representation of India for demonstration
     const indiaGeoJSON = {
@@ -375,9 +580,11 @@ function createIndiaMap() {
 
     const path = d3.geoPath().projection(projection);
     
+    // Get the current date for displaying in tooltip
+    const currentDate = new Date();
+    const formattedDate = `${currentDate.toLocaleString('default', { month: 'short' })} ${currentDate.getDate()}, ${currentDate.getFullYear()}`;
 
-
-    // Draw the map using GeoJSON
+    // Draw the map using GeoJSON with enhanced tooltips
     svg.selectAll("path")
         .data(indiaGeoJSON.features)
         .enter()
@@ -396,6 +603,14 @@ function createIndiaMap() {
             const stateData = indiaStatesData.find(s => s.state === stateName) || 
                 { value: Math.floor(Math.random() * 100) };
             
+            // Generate growth trend and status based on value
+            const growthTrend = stateData.value > 75 ? 'Growing rapidly' : 
+                               stateData.value > 50 ? 'Steady growth' : 
+                               stateData.value > 25 ? 'Slow growth' : 'Needs attention';
+            
+            const userCount = Math.round(stateData.value * 217); // Simulated user count based on percentage
+            const growthPercent = ((Math.sin(stateData.value) + 1) * 10).toFixed(1); // Generate a pseudo-random growth percentage
+            
             d3.select(this)
                 .attr("stroke-width", 2)
                 .attr("stroke", "#333");
@@ -404,7 +619,14 @@ function createIndiaMap() {
                 .duration(200)
                 .style("opacity", 0.9);
             
-            tooltip.html(`${stateName}: ${stateData.value}%`)
+            tooltip.html(`
+                <div style="font-weight: bold; margin-bottom: 5px;">${stateName}</div>
+                <div>Activity Score: <span style="font-weight: bold;">${stateData.value}%</span></div>
+                <div>Active Users: <span style="font-weight: bold;">${userCount.toLocaleString()}</span></div>
+                <div>Growth: <span style="color: ${growthPercent > 5 ? 'green' : 'red'}">${growthPercent > 0 ? '+' : ''}${growthPercent}%</span></div>
+                <div>Status: <span style="font-style: italic;">${growthTrend}</span></div>
+                <div style="font-size: 10px; margin-top: 5px; color: #666;">Updated: ${formattedDate}</div>
+            `)
                 .style("left", (event.pageX + 10) + "px")
                 .style("top", (event.pageY - 28) + "px");
         })
@@ -418,7 +640,7 @@ function createIndiaMap() {
                 .style("opacity", 0);
         });
 
-    // Add text labels for states
+    // Add text labels for states with enhanced styling
     svg.selectAll("text")
         .data(indiaGeoJSON.features)
         .enter()
@@ -430,331 +652,694 @@ function createIndiaMap() {
         })
         .attr("text-anchor", "middle")
         .attr("font-size", "8px")
-        .attr("fill", "#333")
+        .attr("font-weight", "bold")
+        .attr("fill", function(d) {
+            const stateName = d.properties.name;
+            const stateData = indiaStatesData.find(s => s.state === stateName) || 
+                { value: Math.floor(Math.random() * 100) };
+            // Use white text for darker states, black for lighter states
+            return stateData.value > 50 ? "#fff" : "#333";
+        })
         .text(function(d) {
             return d.properties.name;
         });
 }
 
-// Navigation functionality
-document.querySelectorAll('.nav-item').forEach(item => {
-    item.addEventListener('click', function() {
-        document.querySelector('.nav-item.active').classList.remove('active');
-        this.classList.add('active');
-    });
-});
-
-// Initialize Income Chart (Pie Chart)
-function initializeIncomeChart() {
-    const incomeCtx = document.getElementById('incomeChartCanvas').getContext('2d');
-    const incomeChart = new Chart(incomeCtx, {
-        type: 'pie',
-        data: {
-            labels: ['Banks', 'Retail Points', 'Advisor', 'Admin'],
-            datasets: [{
-                data: [35, 25, 15, 25],
-                backgroundColor: ['#45B7D1', '#FF6B6B', '#A3A0FB', '#FF9F40'],
-                borderWidth: 0
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'right',
-                    labels: {
-                        boxWidth: 15,
-                        padding: 15,
-                        font: {
-                            size: 12
-                        }
-                    }
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            const label = context.label || '';
-                            const value = context.raw || 0;
-                            return `${label}: ${value}%`;
-                        }
-                    }
-                }
-            }
-        }
-    });
-}
-
-// Initialize Revenue Chart
-function initializeRevenueChart(year, month) {
-    const revenueCtx = document.getElementById('revenueChartCanvas').getContext('2d');
+// Function to populate revenue details in the modal
+function populateRevenueDetails() {
+    const revenueDetailsData = [
+        { date: 'Jan 2025', income: '$325,000', expenses: '$202,500', profit: '$122,500', growth: '+4.2%' },
+        { date: 'Feb 2025', income: '$342,500', expenses: '$215,000', profit: '$127,500', growth: '+5.4%' },
+        { date: 'Mar 2025', income: '$437,000', expenses: '$265,000', profit: '$172,000', growth: '+28.0%' },
+        { date: 'Apr 2025', income: '$304,000', expenses: '$210,000', profit: '$94,000', growth: '-31.2%' },
+        { date: 'May 2025', income: '$331,500', expenses: '$218,000', profit: '$113,500', growth: '+11.5%' }
+    ];
     
-    // If chart already exists, destroy it first
-    if (revenueChart) {
-        revenueChart.destroy();
-    }
-    
-    const revenueData = {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
-        datasets: [{
-            label: 'Revenue',
-            data: yearData[year].revenue[month],
-            backgroundColor: (context) => {
-                return context.dataIndex === 2 ? '#4285F4' : '#E0E0E0';
-            },
-            borderWidth: 0,
-            borderRadius: 5,
-            barPercentage: 0.5,
-            categoryPercentage: 0.7
-        }]
-    };
-    
-    revenueChart = new Chart(revenueCtx, {
-        type: 'bar',
-        data: revenueData,
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: false
-                }
-            },
-            scales: {
-                x: {
-                    grid: {
-                        display: false
-                    }
-                },
-                y: {
-                    beginAtZero: true,
-                    grid: {
-                        borderDash: [3, 3]
-                    },
-                    ticks: {
-                        stepSize: 100
-                    }
-                }
-            }
-        }
-    });
-    
-    // Update the month selector text
-    const monthSelector = document.querySelector('.chart-header .month-selector');
-    if (monthSelector) {
-        monthSelector.innerHTML = `${year}, ${month} <i class="fas fa-chevron-down"></i>`;
-    }
-}
-
-// Function to create year and month selector menus
-function initializeSelectors() {
-    // Year selector for Active Users chart
-    const yearSelector = document.querySelector('.chart-header .year-selector');
-    if (yearSelector) {
-        yearSelector.addEventListener('click', function() {
-            // Create dropdown if it doesn't exist
-            let dropdown = document.querySelector('.year-dropdown');
-            
-            if (!dropdown) {
-                dropdown = document.createElement('div');
-                dropdown.className = 'custom-dropdown year-dropdown';
-                dropdown.style.position = 'absolute';
-                dropdown.style.backgroundColor = 'white';
-                dropdown.style.boxShadow = '0 2px 5px rgba(0,0,0,0.1)';
-                dropdown.style.borderRadius = '4px';
-                dropdown.style.zIndex = '1000';
-                dropdown.style.minWidth = '100px';
-                
-                // Add dropdown options
-                Object.keys(yearData).forEach(year => {
-                    const option = document.createElement('div');
-                    option.className = 'dropdown-option';
-                    option.textContent = year;
-                    option.style.padding = '8px 12px';
-                    option.style.cursor = 'pointer';
-                    option.style.borderBottom = '1px solid #f0f0f0';
-                    
-                    option.addEventListener('click', function() {
-                        currentYear = year;
-                        initializeActiveUsersChart(year);
-                        dropdown.remove();
-                    });
-                    
-                    dropdown.appendChild(option);
-                });
-                
-                // Position dropdown below year selector
-                const rect = yearSelector.getBoundingClientRect();
-                dropdown.style.top = (rect.bottom + window.scrollY) + 'px';
-                dropdown.style.left = (rect.left + window.scrollX) + 'px';
-                
-                document.body.appendChild(dropdown);
-                
-                // Close dropdown when clicking outside
-                document.addEventListener('click', function closeDropdown(e) {
-                    if (!dropdown.contains(e.target) && e.target !== yearSelector) {
-                        dropdown.remove();
-                        document.removeEventListener('click', closeDropdown);
-                    }
-                });
-            } else {
-                dropdown.remove();
-            }
-        });
-    }
-    
-    // Month selector for Revenue chart
-    const monthSelector = document.querySelector('.chart-header .month-selector');
-    if (monthSelector) {
-        monthSelector.addEventListener('click', function() {
-            // Create dropdown if it doesn't exist
-            let dropdown = document.querySelector('.month-dropdown');
-            
-            if (!dropdown) {
-                dropdown = document.createElement('div');
-                dropdown.className = 'custom-dropdown month-dropdown';
-                dropdown.style.position = 'absolute';
-                dropdown.style.backgroundColor = 'white';
-                dropdown.style.boxShadow = '0 2px 5px rgba(0,0,0,0.1)';
-                dropdown.style.borderRadius = '4px';
-                dropdown.style.zIndex = '1000';
-                dropdown.style.minWidth = '150px';
-                dropdown.style.maxHeight = '300px';
-                dropdown.style.overflowY = 'auto';
-                
-                // Add year options first
-                Object.keys(yearData).forEach(year => {
-                    const yearHeader = document.createElement('div');
-                    yearHeader.className = 'dropdown-header';
-                    yearHeader.textContent = year;
-                    yearHeader.style.padding = '8px 12px';
-                    yearHeader.style.fontWeight = 'bold';
-                    yearHeader.style.backgroundColor = '#f5f5f5';
-                    
-                    dropdown.appendChild(yearHeader);
-                    
-                    // Add month options for this year
-                    Object.keys(yearData[year].revenue).forEach(month => {
-                        const option = document.createElement('div');
-                        option.className = 'dropdown-option';
-                        option.textContent = `${year}, ${month}`;
-                        option.style.padding = '8px 12px 8px 20px';
-                        option.style.cursor = 'pointer';
-                        option.style.borderBottom = '1px solid #f0f0f0';
-                        
-                        option.addEventListener('click', function() {
-                            currentYear = year;
-                            currentMonth = month;
-                            initializeRevenueChart(year, month);
-                            dropdown.remove();
-                        });
-                        
-                        dropdown.appendChild(option);
-                    });
-                });
-                
-                // Position dropdown below month selector
-                const rect = monthSelector.getBoundingClientRect();
-                dropdown.style.top = (rect.bottom + window.scrollY) + 'px';
-                dropdown.style.left = (rect.left + window.scrollX) + 'px';
-                
-                document.body.appendChild(dropdown);
-                
-                // Close dropdown when clicking outside
-                document.addEventListener('click', function closeDropdown(e) {
-                    if (!dropdown.contains(e.target) && e.target !== monthSelector) {
-                        dropdown.remove();
-                        document.removeEventListener('click', closeDropdown);
-                    }
-                });
-            } else {
-                dropdown.remove();
-            }
-        });
-    }
-}   
-
-// Revenue Details Button functionality
-document.getElementById('revenueDetails').addEventListener('click', function() {
-    const detailsModal = document.getElementById('detailsModal');
-    detailsModal.classList.add('active');
-    
-    // Generate sample data for the revenue details table
-    const revenueDetailsData = generateRevenueDetailsData(currentYear, currentMonth);
-    
-    // Populate the table with the generated data
     const tableBody = document.getElementById('revenueDetailsTable');
     tableBody.innerHTML = '';
     
     revenueDetailsData.forEach(item => {
         const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${item.date}</td>
-            <td>$${item.income.toLocaleString()}</td>
-            <td>$${item.expenses.toLocaleString()}</td>
-            <td>$${item.profit.toLocaleString()}</td>
-            <td class="${item.growth > 0 ? 'positive' : 'negative'}">${item.growth > 0 ? '+' : ''}${item.growth}%</td>
-        `;
+        
+        const dateCell = document.createElement('td');
+        dateCell.textContent = item.date;
+        row.appendChild(dateCell);
+        
+        const incomeCell = document.createElement('td');
+        incomeCell.textContent = item.income;
+        row.appendChild(incomeCell);
+        
+        const expensesCell = document.createElement('td');
+        expensesCell.textContent = item.expenses;
+        row.appendChild(expensesCell);
+        
+        const profitCell = document.createElement('td');
+        profitCell.textContent = item.profit;
+        row.appendChild(profitCell);
+        
+        const growthCell = document.createElement('td');
+        growthCell.textContent = item.growth;
+        growthCell.style.color = item.growth.includes('+') ? 'green' : 'red';
+        growthCell.style.fontWeight = 'bold';
+        row.appendChild(growthCell);
+        
         tableBody.appendChild(row);
     });
     
-    // Update summary values
-    const totalRevenue = revenueDetailsData.reduce((sum, item) => sum + item.income, 0);
-    const averageGrowth = (revenueDetailsData.reduce((sum, item) => sum + item.growth, 0) / revenueDetailsData.length).toFixed(1);
+    // Add enhanced quarterly trends to the modal
+    const totalRevenue = document.getElementById('totalRevenue');
+    totalRevenue.innerHTML = '$1,740,000 <span style="font-size: 12px; color: green;">+8.2% YoY</span>';
     
-    document.getElementById('totalRevenue').textContent = '$' + totalRevenue.toLocaleString();
-    document.getElementById('averageGrowth').textContent = (averageGrowth > 0 ? '+' : '') + averageGrowth + '%';
-});
+    const averageGrowth = document.getElementById('averageGrowth');
+    averageGrowth.innerHTML = '+3.6% <span style="font-size: 12px; color: #666;">vs +2.1% Q1</span>';
+}
 
-// Close modal when clicking the close button
-document.getElementById('closeDetailsModal').addEventListener('click', function() {
-    document.getElementById('detailsModal').classList.remove('active');
-});
-
-// Close modal when clicking outside of it
-document.getElementById('detailsModal').addEventListener('click', function(event) {
-    if (event.target === this) {
-        this.classList.remove('active');
-    }
-});
-
-// Function to generate random revenue details data
-function generateRevenueDetailsData(year, month) {
-    const daysInMonth = new Date(year, getMonthNumber(month), 0).getDate();
-    const data = [];
-    
-    // Generate data for each day of the month
-    for (let day = 1; day <= daysInMonth; day++) {
-        const income = Math.floor(Math.random() * 15000) + 20000;
-        const expenses = Math.floor(Math.random() * 10000) + 12000;
-        const profit = income - expenses;
-        const growth = (Math.random() * 20 - 5).toFixed(1);
+// Add CSS styles for the new dynamic content
+document.addEventListener('DOMContentLoaded', function() {
+    const styles = `
+        .chart-summary {
+            padding: 10px;
+            margin-top: 10px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            font-size: 12px;
+        }
         
-        data.push({
-            date: `${month} ${day}, ${year}`,
-            income,
-            expenses,
-            profit,
-            growth: parseFloat(growth)
+        .trend-summary {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .trend-item {
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .trend-label {
+            font-weight: bold;
+        }
+        
+        .trend-value {
+            font-weight: bold;
+        }
+        
+        .positive {
+            color: #4CAF50;
+        }
+        
+        .negative {
+            color: #F44336;
+        }
+        
+        .trend-summary-text {
+            font-style: italic;
+            color: #666;
+            margin-top: 5px;
+            font-size: 11px;
+        }
+        
+        .percentage-breakdown {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .percentage-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .percentage-label {
+            font-weight: bold;
+            min-width: 60px;
+        }
+        
+        .percentage-value {
+            color: #333;
+            font-weight: bold;
+        }
+        
+        .absolute-value {
+            color: #666;
+            font-size: 11px;
+        }
+        
+        .income-projection {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .projection-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .projection-row {
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .projection-value {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        
+        .revenue-mom-analysis {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .analysis-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .analysis-content {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .analysis-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .month-label {
+            font-weight: bold;
+            min-width: 35px;
+        }
+        
+        .change-value {
+            font-weight: bold;
+        }
+        
+        .absolute-change {
+            color: #666;
+            font-size: 11px;
+        }
+        
+        .highlight-month {
+            margin-top: 8px;
+            padding-top: 5px;
+            border-top: 1px dashed #ddd;
+        }
+        
+        .highlight-label {
+            font-weight: bold;
+        }
+        
+        .highlight-value {
+            color: #4285F4;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+    `;
+    
+    const styleElement = document.createElement('style');
+    styleElement.textContent = styles;
+    document.head.appendChild(styleElement);
+});
+// Enhanced year selector functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const yearSelector = document.getElementById('activeUsersYearSelector');
+    if (yearSelector) {
+        yearSelector.addEventListener('click', function(e) {
+            e.stopPropagation();
+            
+            // Remove existing dropdown if present
+            const existingDropdown = document.querySelector('.year-dropdown');
+            if (existingDropdown) {
+                existingDropdown.remove();
+                return;
+            }
+            
+            // Create year dropdown
+            const dropdown = document.createElement('div');
+            dropdown.className = 'year-dropdown';
+            dropdown.style.position = 'absolute';
+            dropdown.style.background = 'white';
+            dropdown.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
+            dropdown.style.borderRadius = '5px';
+            dropdown.style.zIndex = '100';
+            dropdown.style.padding = '5px 0';
+            dropdown.style.right = '0';
+            dropdown.style.top = '25px';
+            dropdown.style.minWidth = '100px';
+            
+            // Current year is 2025, so we'll show 2023-2025
+            const years = ['2023', '2024', '2025'];
+            years.forEach(year => {
+                const yearOption = document.createElement('div');
+                yearOption.className = 'year-option';
+                yearOption.textContent = year;
+                yearOption.style.padding = '8px 15px';
+                yearOption.style.cursor = 'pointer';
+                yearOption.style.transition = 'background 0.2s';
+                
+                if (year === '2025') {
+                    yearOption.style.fontWeight = 'bold';
+                    yearOption.style.color = '#4285F4';
+                }
+                
+                yearOption.addEventListener('mouseover', function() {
+                    this.style.background = '#f5f5f5';
+                });
+                
+                yearOption.addEventListener('mouseout', function() {
+                    this.style.background = 'white';
+                });
+                
+                yearOption.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    yearSelector.innerHTML = year + ' <i class="fas fa-chevron-down"></i>';
+                    dropdown.remove();
+                    
+                    // Generate random data for the selected year
+                    updateActiveUsersChart(year);
+                });
+                
+                dropdown.appendChild(yearOption);
+            });
+            
+            // Add dropdown to the page
+            const chartHeader = yearSelector.closest('.chart-header');
+            chartHeader.style.position = 'relative';
+            chartHeader.appendChild(dropdown);
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function hideDropdown(e) {
+                if (!dropdown.contains(e.target) && e.target !== yearSelector) {
+                    dropdown.remove();
+                    document.removeEventListener('click', hideDropdown);
+                }
+            });
         });
     }
     
-    return data;
-}
-
-// Helper function to convert month name to month number
-function getMonthNumber(monthName) {
-    const months = {
-        'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'May': 4, 'Jun': 5,
-        'Jul': 6, 'Aug': 7, 'Sep': 8, 'Oct': 9, 'Nov': 10, 'Dec': 11
-    };
-    return months[monthName];
-}
-
-// Add CSS for positive/negative growth values
-document.head.insertAdjacentHTML('beforeend', `
-    <style>
-        .positive { color: #4BD4B0; }
-        .negative { color: #DB4437; }
-    </style>
-`);
+    // Function to update the Active Users Chart with random data
+    function updateActiveUsersChart(year) {
+        // Generate random data based on the year
+        const monthLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'];
+        const seed = parseInt(year.substring(2)); // Use last 2 digits of year as seed
+        
+        // Generate somewhat consistent random data based on year
+        const indiaData = monthLabels.map((_, i) => Math.floor((Math.sin(seed + i) + 1.2) * 30) + 30);
+        const russiaData = monthLabels.map((_, i) => Math.floor((Math.cos(seed + i) + 1.2) * 30) + 30);
+        
+        const newData = {
+            labels: monthLabels,
+            datasets: [
+                {
+                    label: 'India',
+                    data: indiaData,
+                    backgroundColor: '#4285F4',
+                    barPercentage: 0.6,
+                    categoryPercentage: 0.5
+                },
+                {
+                    label: 'Russia',
+                    data: russiaData,
+                    backgroundColor: '#DB4437',
+                    barPercentage: 0.6,
+                    categoryPercentage: 0.5
+                }
+            ]
+        };
+        
+        // Update chart with new data
+        const chart = Chart.getChart('activeUsersChartCanvas');
+        if (chart) {
+            chart.data = newData;
+            chart.update();
+            
+            // Update the trend summary
+            updateTrendSummary(newData, year);
+        }
+    }
+    
+    // Function to update the trend summary below the chart
+    function updateTrendSummary(data, year) {
+        // Calculate trends (last month compared to previous month)
+        const trends = {};
+        data.datasets.forEach(dataset => {
+            const lastTwoMonths = dataset.data.slice(-2);
+            const difference = lastTwoMonths[1] - lastTwoMonths[0];
+            const percentChange = ((difference / lastTwoMonths[0]) * 100).toFixed(1);
+            trends[dataset.label] = {
+                difference,
+                percentChange,
+                isPositive: difference >= 0
+            };
+        });
+        
+        // Update the trend summary in the DOM
+        const trendSummary = document.querySelector('#activeUsersChart .chart-summary');
+        if (trendSummary) {
+            trendSummary.innerHTML = `
+                <div class="trend-summary">
+                    <div class="trend-item">
+                        <span class="trend-label">India:</span>
+                        <span class="trend-value ${trends.India.isPositive ? 'positive' : 'negative'}">
+                            ${trends.India.isPositive ? '↑' : '↓'} ${Math.abs(trends.India.percentChange)}%
+                        </span>
+                    </div>
+                    <div class="trend-item">
+                        <span class="trend-label">Russia:</span>
+                        <span class="trend-value ${trends.Russia.isPositive ? 'positive' : 'negative'}">
+                            ${trends.Russia.isPositive ? '↑' : '↓'} ${Math.abs(trends.Russia.percentChange)}%
+                        </span>
+                    </div>
+                    <div class="trend-summary-text">Data shown for ${year} ${year !== '2025' ? '(historical)' : '(current)'}</div>
+                </div>
+            `;
+        }
+    }
+    
+    // Month selector functionality for Revenue Graph
+    const monthSelector = document.getElementById('revenueMonthSelector');
+    if (monthSelector) {
+        monthSelector.addEventListener('click', function(e) {
+            e.stopPropagation();
+            
+            // Remove existing dropdown if present
+            const existingDropdown = document.querySelector('.month-dropdown');
+            if (existingDropdown) {
+                existingDropdown.remove();
+                return;
+            }
+            
+            // Create month dropdown
+            const dropdown = document.createElement('div');
+            dropdown.className = 'month-dropdown';
+            dropdown.style.position = 'absolute';
+            dropdown.style.background = 'white';
+            dropdown.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
+            dropdown.style.borderRadius = '5px';
+            dropdown.style.zIndex = '100';
+            dropdown.style.padding = '5px 0';
+            dropdown.style.right = '0';
+            dropdown.style.top = '25px';
+            dropdown.style.minWidth = '120px';
+            
+            // Show months from 2024-2025
+            const months = [
+                '2024, Nov', '2024, Dec', 
+                '2025, Jan', '2025, Feb', '2025, Mar', 
+                '2025, Apr', '2025, May'
+            ];
+            
+            months.forEach(month => {
+                const monthOption = document.createElement('div');
+                monthOption.className = 'month-option';
+                monthOption.textContent = month;
+                monthOption.style.padding = '8px 15px';
+                monthOption.style.cursor = 'pointer';
+                monthOption.style.transition = 'background 0.2s';
+                
+                if (month === '2025, Mar') {
+                    monthOption.style.fontWeight = 'bold';
+                    monthOption.style.color = '#4285F4';
+                }
+                
+                monthOption.addEventListener('mouseover', function() {
+                    this.style.background = '#f5f5f5';
+                });
+                
+                monthOption.addEventListener('mouseout', function() {
+                    this.style.background = 'white';
+                });
+                
+                monthOption.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    monthSelector.innerHTML = month + ' <i class="fas fa-chevron-down"></i>';
+                    dropdown.remove();
+                    
+                    // Update the revenue chart data
+                    updateRevenueChart(month);
+                });
+                
+                dropdown.appendChild(monthOption);
+            });
+            
+            // Add dropdown to the page
+            const chartHeader = monthSelector.closest('.chart-header');
+            chartHeader.style.position = 'relative';
+            chartHeader.appendChild(dropdown);
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function hideDropdown(e) {
+                if (!dropdown.contains(e.target) && e.target !== monthSelector) {
+                    dropdown.remove();
+                    document.removeEventListener('click', hideDropdown);
+                }
+            });
+        });
+    }
+    
+    // Function to update the Revenue Chart with random data
+    function updateRevenueChart(selectedMonth) {
+        // Extract month and year
+        const [year, month] = selectedMonth.split(', ');
+        
+        // Generate a list of 5 months centered on the selected month
+        const allMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const monthIndex = allMonths.indexOf(month);
+        
+        // Determine the start month index, handling edge cases
+        let startMonthIndex = monthIndex - 2;
+        if (startMonthIndex < 0) {
+            startMonthIndex = 12 + startMonthIndex; // Wrap around to previous year
+        }
+        
+        // Generate label array of 5 months
+        const labels = [];
+        for (let i = 0; i < 5; i++) {
+            const currMonthIndex = (startMonthIndex + i) % 12;
+            labels.push(allMonths[currMonthIndex]);
+        }
+        
+        // Generate random but "realistic" revenue data
+        // Using the month and year as seed for pseudo-randomness
+        const seed = monthIndex + (year === '2024' ? 0 : 12);
+        const baseValue = 220;
+        const revenueData = labels.map((_, i) => {
+            return Math.floor(baseValue + (Math.sin(seed + i) * 50) + (Math.random() * 30));
+        });
+        
+        // Determine which month to highlight
+        const highlightIndex = labels.indexOf(month);
+        
+        // Update chart data
+        const newData = {
+            labels: labels,
+            datasets: [{
+                label: 'Revenue',
+                data: revenueData,
+                backgroundColor: function(context) {
+                    return context.dataIndex === highlightIndex ? '#4285F4' : '#E0E0E0';
+                },
+                borderWidth: 0,
+                borderRadius: 5,
+                barPercentage: 0.5,
+                categoryPercentage: 0.7
+            }]
+        };
+        
+        // Update chart with new data
+        const chart = Chart.getChart('revenueChartCanvas');
+        if (chart) {
+            chart.data = newData;
+            chart.update();
+            
+            // Update the revenue analysis summary
+            updateRevenueAnalysis(newData, highlightIndex, month);
+        }
+    }
+    
+    // Function to update the revenue analysis summary
+    function updateRevenueAnalysis(data, highlightIndex, highlightMonth) {
+        // Calculate MoM changes
+        const monthlyData = data.datasets[0].data;
+        const changes = monthlyData.map((value, index) => {
+            if (index === 0) return { 
+                label: data.labels[index], 
+                value, 
+                change: 0, 
+                changePercent: '0.0', 
+                isPositive: true 
+            };
+            
+            const previousValue = monthlyData[index - 1];
+            const change = value - previousValue;
+            const changePercent = ((change / previousValue) * 100).toFixed(1);
+            
+            return {
+                label: data.labels[index],
+                value,
+                change,
+                changePercent,
+                isPositive: change >= 0
+            };
+        });
+        
+        // Find the highest growth month
+        let highestGrowthIndex = 1; // Start from 1 as index 0 has no growth
+        for (let i = 1; i < changes.length; i++) {
+            if (parseFloat(changes[i].changePercent) > parseFloat(changes[highestGrowthIndex].changePercent)) {
+                highestGrowthIndex = i;
+            }
+        }
+        
+        // Update the analysis summary in the DOM
+        const analysisSummary = document.querySelector('#revenueChart .chart-summary');
+        if (analysisSummary) {
+            analysisSummary.innerHTML = `
+                <div class="revenue-mom-analysis">
+                    <div class="analysis-title">Month-over-Month Analysis</div>
+                    <div class="analysis-content">
+                        ${changes.filter(item => item.label !== data.labels[0]).map(item => `
+                            <div class="analysis-item">
+                                <span class="month-label">${item.label}:</span>
+                                <span class="change-value ${item.isPositive ? 'positive' : 'negative'}">
+                                    ${item.isPositive ? '↑' : '↓'} ${Math.abs(item.changePercent)}%
+                                </span>
+                                <span class="absolute-change">(${item.isPositive ? '+' : ''}${item.change}K)</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="highlight-month">
+                        <span class="highlight-label">Highest Growth:</span>
+                        <span class="highlight-value">${data.labels[highestGrowthIndex]} (${changes[highestGrowthIndex].isPositive ? '+' : ''}${changes[highestGrowthIndex].changePercent}%)</span>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Also update the details modal data if opened
+        const revenueDetailsTable = document.getElementById('revenueDetailsTable');
+        if (revenueDetailsTable) {
+            updateRevenueDetailsTable(data.labels, monthlyData, changes);
+        }
+    }
+    
+    // Function to update the revenue details table in the modal
+    function updateRevenueDetailsTable(months, revenues, changes) {
+        const revenueDetailsData = months.map((month, i) => {
+            // Generate expenses (roughly 60-70% of revenue)
+            const expenseRatio = 0.6 + (Math.random() * 0.1);
+            const expenses = Math.round(revenues[i] * expenseRatio * 1000);
+            const income = Math.round(revenues[i] * 1000);
+            const profit = income - expenses;
+            
+            // Format as currency
+            const formattedIncome = '$' + income.toLocaleString();
+            const formattedExpenses = '$' + expenses.toLocaleString();
+            const formattedProfit = '$' + profit.toLocaleString();
+            
+            return {
+                date: month + ' 2025',
+                income: formattedIncome,
+                expenses: formattedExpenses,
+                profit: formattedProfit,
+                growth: (i > 0) ? (changes[i].isPositive ? '+' : '-') + Math.abs(changes[i].changePercent) + '%' : 'N/A'
+            };
+        });
+        
+        const tableBody = document.getElementById('revenueDetailsTable');
+        tableBody.innerHTML = '';
+        
+        revenueDetailsData.forEach(item => {
+            const row = document.createElement('tr');
+            
+            const dateCell = document.createElement('td');
+            dateCell.textContent = item.date;
+            row.appendChild(dateCell);
+            
+            const incomeCell = document.createElement('td');
+            incomeCell.textContent = item.income;
+            row.appendChild(incomeCell);
+            
+            const expensesCell = document.createElement('td');
+            expensesCell.textContent = item.expenses;
+            row.appendChild(expensesCell);
+            
+            const profitCell = document.createElement('td');
+            profitCell.textContent = item.profit;
+            row.appendChild(profitCell);
+            
+            const growthCell = document.createElement('td');
+            growthCell.textContent = item.growth;
+            if (item.growth !== 'N/A') {
+                growthCell.style.color = item.growth.includes('+') ? 'green' : 'red';
+                growthCell.style.fontWeight = 'bold';
+            }
+            row.appendChild(growthCell);
+            
+            tableBody.appendChild(row);
+        });
+        
+        // Update summary stats
+        const totalRevenue = revenues.reduce((sum, val) => sum + val, 0) * 1000;
+        const formattedTotal = '$' + totalRevenue.toLocaleString();
+        
+        // Calculate average growth
+        const growthValues = changes.slice(1).map(item => parseFloat(item.changePercent));
+        const avgGrowth = growthValues.reduce((sum, val) => sum + val, 0) / growthValues.length;
+        const formattedAvgGrowth = (avgGrowth >= 0 ? '+' : '') + avgGrowth.toFixed(1) + '%';
+        
+        document.getElementById('totalRevenue').innerHTML = 
+            `${formattedTotal} <span style="font-size: 12px; color: green;">+${(Math.random() * 10).toFixed(1)}% YoY</span>`;
+        
+        document.getElementById('averageGrowth').innerHTML = 
+            `${formattedAvgGrowth} <span style="font-size: 12px; color: #666;">vs +${(Math.random() * 5).toFixed(1)}% prev.</span>`;
+    }
+    
+    // Initialize event handler for the details button
+    document.getElementById('revenueDetails').addEventListener('click', function() {
+        // Show revenue details modal
+        document.getElementById('detailsModal').style.display = 'block';
+        
+        // Get current chart data
+        const chart = Chart.getChart('revenueChartCanvas');
+        if (chart) {
+            const labels = chart.data.labels;
+            const revenues = chart.data.datasets[0].data;
+            
+            // Calculate changes
+            const changes = revenues.map((value, index) => {
+                if (index === 0) return { 
+                    label: labels[index], 
+                    value, 
+                    change: 0, 
+                    changePercent: '0.0', 
+                    isPositive: true 
+                };
+                
+                const previousValue = revenues[index - 1];
+                const change = value - previousValue;
+                const changePercent = ((change / previousValue) * 100).toFixed(1);
+                
+                return {
+                    label: labels[index],
+                    value,
+                    change,
+                    changePercent,
+                    isPositive: change >= 0
+                };
+            });
+            
+            // Update the details table
+            updateRevenueDetailsTable(labels, revenues, changes);
+        }
+    });
+    
+    document.getElementById('closeDetailsModal').addEventListener('click', function() {
+        document.getElementById('detailsModal').style.display = 'none';
+    });
+});
