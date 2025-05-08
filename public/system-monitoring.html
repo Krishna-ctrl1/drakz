@@ -73,9 +73,32 @@
                     <div class="dashboard-grid-item map-item">
                         <div class="chart-header">
                             <div class="chart-title">Active Users in India</div>
-                           
                         </div>
-                        <div class="chart-container" id="indiaMapChart"></div>
+                        <div class="chart-container" id="indiaMapChart" style="position: relative;">
+                            <!-- Map Image -->
+                            <img src="assets/images/Map.png" alt="Map of active users across India" width="100%" height="auto" style="display: block; max-height: 350px; object-fit: contain; margin: 0 auto;">
+                            
+                            <!-- Legend (Top Left) -->
+                            <div class="map-legend" style="padding: 10px; background: white; border-radius: 5px; position: absolute; top: 10px; left: 10px; z-index: -1;">
+                                <div style="margin-bottom: 5px; font-weight: bold;">User Density</div>
+                                <div style="display: flex; align-items: center; margin-bottom: 3px;">
+                                    <div style="width: 15px; height: 15px; background-color: #cdedc9; margin-right: 5px;"></div>
+                                    <span style="font-size: 12px;">0-100</span>
+                                </div>
+                                <div style="display: flex; align-items: center; margin-bottom: 3px;">
+                                    <div style="width: 15px; height: 15px; background-color: #b9e0b7; margin-right: 5px;"></div>
+                                    <span style="font-size: 12px;">100-500</span>
+                                </div>
+                                <div style="display: flex; align-items: center; margin-bottom: 3px;">
+                                    <div style="width: 15px; height: 15px; background-color: #5eb66e; margin-right: 5px;"></div>
+                                    <span style="font-size: 12px;">500-1000</span>
+                                </div>
+                                <div style="display: flex; align-items: center; margin-bottom: 3px;">
+                                    <div style="width: 15px; height: 15px; background-color: #34773f; margin-right: 5px;"></div>
+                                    <span style="font-size: 12px;">1000+</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="dashboard-grid-item">

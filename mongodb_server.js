@@ -7,7 +7,7 @@ const crypto = require("crypto");
 require("dotenv").config();
 const fs = require("fs");
 const multer = require("multer");
-const { exec } = require('child_process');
+const { exec } = require("child_process");
 
 const Advisor = require("./models/Advisor");
 const Admin = require("./models/Admin");
@@ -27,6 +27,9 @@ const UserInsurancePolicy = require("./models/UserInsurancePolicy");
 const UserPreciousHoldings = require("./models/UserPreciousHoldings");
 const UserProperty = require("./models/UserProperties");
 const UserStocks = require("./models/UserStocks");
+const Blog = require("./models/Blog");
+const BlogInteraction = require("./models/BlogInteraction");
+const BlogComment = require("./models/BlogComment");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -1910,36 +1913,451 @@ app.get("/api/credit-card-dues", async (req, res) => {
 // BLOGS
 // ---------------------------------------------------------------------------------------------------------------------------------------------
 
-app.get("/api/auth/current-user", async (req, res) => {
+// Get current user
+app.get("/api/auth/current-user", (req, res) => {
   if (req.session && req.session.userId) {
-    try {
-      const user = await User.findById(req.session.userId).select("-password"); // exclude password
+    console.log("User Authenticated");
+    return res.json({
+      authenticated: true,
+      userId: req.session.userId,
+    });
+  }
+  return res.json({ authenticated: false });
+});
 
-      if (!user) {
-        return res.status(404).json({
-          authenticated: false,
-          userId: null,
-          error: "User not found",
-        });
-      }
+// Get user by ID
+app.get("/api/users/:userId", async (req, res) => {
+  try {
+    const user = await User.findById(req.params.userId);
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+    res.json({ id: user._id, name: user.name });
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
 
-      res.json({
-        authenticated: true,
-        userId: user._id,
-        user: user, // or customize fields returned
-      });
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      res.status(500).json({
-        authenticated: false,
-        error: "Failed to fetch user data",
+// Create a new blog post
+app.post("/api/blogs", isAuthenticated, async (req, res) => {
+  try {
+    const { title, content } = req.body;
+    const author_id = req.session.userId;
+
+    // Validate request
+    if (!title || !content) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Title and content are required" });
+    }
+
+    // Create new blog
+    const newBlog = new Blog({
+      title,
+      content,
+      author_id,
+    });
+
+    await newBlog.save();
+    res.status(201).json({ success: true, blog: newBlog });
+  } catch (error) {
+    console.error("Error creating blog:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to create blog post" });
+  }
+});
+
+// Get all blogs with optional search
+app.get("/api/blogs", async (req, res) => {
+  try {
+    const searchQuery = req.query.search;
+    let query = {};
+
+    // If search query exists, add it to the MongoDB query
+    if (searchQuery) {
+      query = {
+        $or: [
+          { title: { $regex: searchQuery, $options: "i" } },
+          { content: { $regex: searchQuery, $options: "i" } },
+        ],
+      };
+    }
+
+    // Find blogs matching the query
+    const blogs = await Blog.find(query)
+      .sort({ created_at: -1 }) // Sort by newest first
+      .lean(); // Convert to plain JavaScript object
+
+    // Get author information for each blog
+    const blogsWithAuthor = await Promise.all(
+      blogs.map(async (blog) => {
+        const author = await User.findById(blog.author_id).lean();
+
+        return {
+          id: blog._id,
+          title: blog.title,
+          content: blog.content,
+          author_id: blog.author_id,
+          author_name: author ? author.name : "Unknown Author",
+          likes: blog.likes,
+          dislikes: blog.dislikes,
+          created_at: blog.created_at,
+        };
+      })
+    );
+
+    res.json(blogsWithAuthor);
+  } catch (error) {
+    console.error("Error fetching blogs:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+// Delete a blog post
+app.delete("/api/blogs/:blogId", isAuthenticated, async (req, res) => {
+  try {
+    const blogId = req.params.blogId;
+    const userId = req.session.userId;
+
+    // Find the blog
+    const blog = await Blog.findById(blogId);
+
+    if (!blog) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Blog not found" });
+    }
+
+    // Check if the user is the author
+    if (blog.author_id.toString() !== userId) {
+      return res.status(403).json({
+        success: false,
+        message: "Not authorized to delete this blog",
       });
     }
-  } else {
-    res.json({
-      authenticated: false,
-      userId: null,
+
+    // Delete the blog and its associated comments and interactions
+    await Promise.all([
+      Blog.findByIdAndDelete(blogId),
+      BlogComment.deleteMany({ blog_id: blogId }),
+      BlogInteraction.deleteMany({ blog_id: blogId }),
+    ]);
+
+    res.json({ success: true, message: "Blog deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting blog:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+// Check user interactions with a blog
+app.get("/api/blogs/:blogId/interactions", async (req, res) => {
+  try {
+    const { blogId } = req.params;
+    const userId = req.query.userId;
+
+    if (!userId) {
+      return res.json({ liked: false, disliked: false });
+    }
+
+    // Find interactions
+    const likeInteraction = await BlogInteraction.findOne({
+      blog_id: blogId,
+      user_id: userId,
+      interaction_type: "like",
     });
+
+    const dislikeInteraction = await BlogInteraction.findOne({
+      blog_id: blogId,
+      user_id: userId,
+      interaction_type: "dislike",
+    });
+
+    res.json({
+      liked: !!likeInteraction,
+      disliked: !!dislikeInteraction,
+    });
+  } catch (error) {
+    console.error("Error checking blog interactions:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+// Like a blog
+app.post("/api/blogs/:blogId/like", isAuthenticated, async (req, res) => {
+  try {
+    const { blogId } = req.params;
+    const userId = req.session.userId;
+
+    // Find the blog
+    const blog = await Blog.findById(blogId);
+
+    if (!blog) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Blog not found" });
+    }
+
+    // Check if user already liked this blog
+    const existingLike = await BlogInteraction.findOne({
+      blog_id: blogId,
+      user_id: userId,
+      interaction_type: "like",
+    });
+
+    // Check if user already disliked this blog
+    const existingDislike = await BlogInteraction.findOne({
+      blog_id: blogId,
+      user_id: userId,
+      interaction_type: "dislike",
+    });
+
+    // Start a session for transaction
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+      if (existingLike) {
+        // User already liked, remove the like
+        await BlogInteraction.findByIdAndDelete(existingLike._id, {
+          session,
+        });
+
+        // Decrement likes count
+        blog.likes = Math.max(0, blog.likes - 1);
+        await blog.save({ session });
+
+        await session.commitTransaction();
+        return res.json({ success: true, message: "Like removed" });
+      }
+
+      // If user had disliked, remove the dislike
+      if (existingDislike) {
+        await BlogInteraction.findByIdAndDelete(existingDislike._id, {
+          session,
+        });
+
+        // Decrement dislikes count
+        blog.dislikes = Math.max(0, blog.dislikes - 1);
+      }
+
+      // Create new like interaction
+      const newLike = new BlogInteraction({
+        blog_id: blogId,
+        user_id: userId,
+        interaction_type: "like",
+      });
+
+      await newLike.save({ session });
+
+      // Increment likes count
+      blog.likes += 1;
+      await blog.save({ session });
+
+      await session.commitTransaction();
+      res.json({ success: true, message: "Blog liked successfully" });
+    } catch (error) {
+      await session.abortTransaction();
+      throw error;
+    } finally {
+      session.endSession();
+    }
+  } catch (error) {
+    console.error("Error liking blog:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+// Dislike a blog
+app.post("/api/blogs/:blogId/dislike", isAuthenticated, async (req, res) => {
+  try {
+    const { blogId } = req.params;
+    const userId = req.session.userId;
+
+    // Find the blog
+    const blog = await Blog.findById(blogId);
+
+    if (!blog) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Blog not found" });
+    }
+
+    // Check if user already disliked this blog
+    const existingDislike = await BlogInteraction.findOne({
+      blog_id: blogId,
+      user_id: userId,
+      interaction_type: "dislike",
+    });
+
+    // Check if user already liked this blog
+    const existingLike = await BlogInteraction.findOne({
+      blog_id: blogId,
+      user_id: userId,
+      interaction_type: "like",
+    });
+
+    // Start a session for transaction
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+      if (existingDislike) {
+        // User already disliked, remove the dislike
+        await BlogInteraction.findByIdAndDelete(existingDislike._id, {
+          session,
+        });
+
+        // Decrement dislikes count
+        blog.dislikes = Math.max(0, blog.dislikes - 1);
+        await blog.save({ session });
+
+        await session.commitTransaction();
+        return res.json({ success: true, message: "Dislike removed" });
+      }
+
+      // If user had liked, remove the like
+      if (existingLike) {
+        await BlogInteraction.findByIdAndDelete(existingLike._id, {
+          session,
+        });
+
+        // Decrement likes count
+        blog.likes = Math.max(0, blog.likes - 1);
+      }
+
+      // Create new dislike interaction
+      const newDislike = new BlogInteraction({
+        blog_id: blogId,
+        user_id: userId,
+        interaction_type: "dislike",
+      });
+
+      await newDislike.save({ session });
+
+      // Increment dislikes count
+      blog.dislikes += 1;
+      await blog.save({ session });
+
+      await session.commitTransaction();
+      res.json({ success: true, message: "Blog disliked successfully" });
+    } catch (error) {
+      await session.abortTransaction();
+      throw error;
+    } finally {
+      session.endSession();
+    }
+  } catch (error) {
+    console.error("Error disliking blog:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+// Add a comment to a blog
+app.post("/api/blogs/:blogId/comments", isAuthenticated, async (req, res) => {
+  try {
+    const { blogId } = req.params;
+    const { text } = req.body;
+    const userId = req.session.userId;
+
+    // Validate request
+    if (!text) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Comment text is required" });
+    }
+
+    // Check if blog exists
+    const blog = await Blog.findById(blogId);
+    if (!blog) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Blog not found" });
+    }
+
+    // Create new comment
+    const newComment = new BlogComment({
+      blog_id: blogId,
+      user_id: userId,
+      text,
+    });
+
+    await newComment.save();
+
+    res.status(201).json({ success: true, comment: newComment });
+  } catch (error) {
+    console.error("Error adding comment:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+// Get comments for a blog
+app.get("/api/blogs/:blogId/comments", async (req, res) => {
+  try {
+    const { blogId } = req.params;
+
+    // Find comments for this blog
+    const comments = await BlogComment.find({ blog_id: blogId })
+      .sort({ created_at: -1 }) // Sort by newest first
+      .lean();
+
+    // Get username for each comment
+    const commentsWithUser = await Promise.all(
+      comments.map(async (comment) => {
+        const user = await User.findById(comment.user_id).lean();
+
+        return {
+          id: comment._id,
+          blog_id: comment.blog_id,
+          user_id: comment.user_id,
+          username: user ? user.name : "Unknown User",
+          text: comment.text,
+          created_at: comment.created_at,
+        };
+      })
+    );
+
+    res.json(commentsWithUser);
+  } catch (error) {
+    console.error("Error fetching comments:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+// Delete a comment
+app.delete("/api/comments/:commentId", isAuthenticated, async (req, res) => {
+  try {
+    const { commentId } = req.params;
+    const userId = req.session.userId;
+
+    // Find the comment
+    const comment = await BlogComment.findById(commentId);
+
+    if (!comment) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Comment not found" });
+    }
+
+    // Check if user is the comment author
+    if (comment.user_id.toString() !== userId) {
+      return res.status(403).json({
+        success: false,
+        message: "Not authorized to delete this comment",
+      });
+    }
+
+    // Delete the comment
+    await BlogComment.findByIdAndDelete(commentId);
+
+    res.json({ success: true, message: "Comment deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting comment:", error);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 });
 
@@ -2476,9 +2894,10 @@ app.delete("/properties/:id", async (req, res) => {
   }
 });
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////
+// ---------------------------------------------------------------------------------------------------------------------------------------------
 // LLM ChatBot
-//////////////////////////////////////////////////////////////////////////////////////////////////////
+// ---------------------------------------------------------------------------------------------------------------------------------------------
+
 app.post("/api/financial-advice", (req, res) => {
   const { query, userData = {} } = req.body;
 
@@ -2546,6 +2965,130 @@ app.post("/api/financial-advice", (req, res) => {
       });
     }
   );
+});
+
+// ---------------------------------------------------------------------------------------------------------------------------------------------
+// Settings Page
+// ---------------------------------------------------------------------------------------------------------------------------------------------
+
+// API endpoint to fetch user profile details
+app.get("/api/user/profile", async (req, res) => {
+  // Ensure the user is logged in
+  const userId = req.session.userId;
+  console.log("Session userId:", userId);
+
+  // Set content type
+  res.setHeader("Content-Type", "application/json");
+
+  if (!userId) {
+    return res
+      .status(401)
+      .json({ status: "error", message: "Unauthorized. Please log in." });
+  }
+
+  try {
+    // Find the user by ID
+    const user = await mongoose.model("User").findById(userId);
+
+    // If user not found, return 404
+    if (!user) {
+      return res
+        .status(404)
+        .json({ status: "error", message: "User not found" });
+    }
+
+    // Return user profile information with status and data structure
+    res.json({
+      status: "success",
+      data: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        monthly_income: user.monthly_income,
+        employment_status: user.employment_status,
+        financial_goals: user.financial_goals,
+        risk_tolerance: user.risk_tolerance,
+        aadhaar_number: user.aadhaar_number,
+        pan_number: user.pan_number,
+        created_at: user.created_at,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching user profile data:", error);
+    res.status(500).json({
+      status: "error",
+      message: "Database error",
+      details: error.message,
+    });
+  }
+});
+
+// API endpoint to update user profile
+app.put("/api/user/profile", async (req, res) => {
+  // Ensure the user is logged in
+  const userId = req.session.userId;
+
+  if (!userId) {
+    return res
+      .status(401)
+      .json({ status: "error", message: "Unauthorized. Please log in." });
+  }
+
+  try {
+    // Find the user by ID
+    const user = await mongoose.model("User").findById(userId);
+
+    if (!user) {
+      return res
+        .status(404)
+        .json({ status: "error", message: "User not found" });
+    }
+
+    // Update allowed fields
+    const allowedFields = [
+      "name",
+      "email",
+      "monthly_income",
+      "employment_status",
+      "financial_goals",
+      "risk_tolerance",
+    ];
+
+    allowedFields.forEach((field) => {
+      if (req.body[field] !== undefined) {
+        user[field] = req.body[field];
+      }
+    });
+
+    // Save the updated user
+    await user.save();
+
+    console.log("User profile updated:", user.name);
+
+    // Return the updated user data with status wrapper
+    res.json({
+      status: "success",
+      data: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        monthly_income: user.monthly_income,
+        employment_status: user.employment_status,
+        financial_goals: user.financial_goals,
+        risk_tolerance: user.risk_tolerance,
+        aadhaar_number: user.aadhaar_number,
+        pan_number: user.pan_number,
+        created_at: user.created_at,
+      },
+    });
+  } catch (error) {
+    console.error("Error updating user profile:", error);
+    res.status(500).json({
+      status: "error",
+      message: "Database error",
+      details: error.message,
+    });
+  }
 });
 
 // Start the server

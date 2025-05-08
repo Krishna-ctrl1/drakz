@@ -1,13 +1,34 @@
 let currentUserId = null;
 function initializeUser() {
-  fetch("/api/auth/current-user")
-    .then((response) => response.json())
+  // Add loading state if needed
+  console.log("Initializing user...");
+
+  return fetch("/api/auth/current-user")
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      return response.json();
+    })
     .then((data) => {
+      console.log("Auth data received:", data);
       if (data.authenticated) {
         currentUserId = data.userId;
+        console.log("User authenticated with ID:", currentUserId);
+        // You can trigger UI updates or load user-specific data here
+        return data.userId;
+      } else {
+        console.log("User not authenticated");
+        currentUserId = null;
+        // Maybe redirect to login page or update UI to show logged-out state
+        return null;
       }
     })
-    .catch((error) => console.error("Error getting current user:", error));
+    .catch((error) => {
+      console.error("Error getting current user:", error);
+      currentUserId = null;
+      return null;
+    });
 }
 
 // Call this when the page loads
@@ -443,38 +464,34 @@ async function deleteComment(commentId) {
 }
 
 // Delete a blog
-async function deleteBlog(blogId) {
-  const currentUserId = getCurrentUserId();
-
-  if (!currentUserId) {
-    alert("You must be logged in to delete a blog.");
-    return;
-  }
-
-  if (confirm("Are you sure you want to delete this blog?")) {
-    try {
-      const response = await fetch(`/api/blogs/${blogId}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ userId: currentUserId }),
-        credentials: "include",
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-        // Refresh the blogs list
-        displayBlogs();
-      } else {
-        alert(result.message || "Failed to delete blog");
+// Example of how your delete function might look
+function deleteBlog(blogId) {
+  fetch(`/api/blogs/${blogId}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    // No need to send userId in the body anymore as your new implementation uses session
+    // The credentials option ensures cookies (and thus session) are sent
+    credentials: "same-origin",
+  })
+    .then((response) => {
+      if (!response.ok) {
+        return response.json().then((data) => Promise.reject(data));
       }
-    } catch (error) {
+      return response.json();
+    })
+    .then((data) => {
+      if (data.success) {
+        // Remove blog from DOM or refresh the page
+        document.getElementById(`blog-${blogId}`).remove();
+        // Or: window.location.reload();
+      }
+    })
+    .catch((error) => {
       console.error("Error deleting blog:", error);
-      alert("Failed to delete blog. Please try again.");
-    }
-  }
+      alert("Failed to delete blog: " + (error.message || "Unknown error"));
+    });
 }
 
 // Filter blogs based on search query

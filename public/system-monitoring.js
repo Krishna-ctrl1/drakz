@@ -420,36 +420,36 @@ function createIndiaMap() {
         .domain([0, 100]);
 
     // Create SVG
-    const svg = d3.select('#indiaMapChart')
-        .append('svg')
-        .attr('width', width)
-        .attr('height', height)
-        .append('g')
-        .attr('transform', `translate(${width/8}, ${height/15})`);
+    // const svg = d3.select('#indiaMapChart')
+    //     .append('svg')
+    //     .attr('width', width)
+    //     .attr('height', height)
+    //     .append('g')
+    //     .attr('transform', `translate(${width/8}, ${height/15})`);
 
-    // Create enhanced tooltip with more data
-    const tooltip = d3.select('#indiaMapChart')
-        .append('div')
-        .attr('class', 'tooltip')
-        .style('position', 'absolute')
-        .style('background', 'white')
-        .style('padding', '10px')
-        .style('border-radius', '5px')
-        .style('box-shadow', '0 0 10px rgba(0, 0, 0, 0)')
-        .style('pointer-events', 'none')
-        .style('opacity', 0);
+    // // Create enhanced tooltip with more data
+    // const tooltip = d3.select('#indiaMapChart')
+    //     .append('div')
+    //     .attr('class', 'tooltip')
+    //     .style('position', 'absolute')
+    //     .style('background', 'white')
+    //     .style('padding', '10px')
+    //     .style('border-radius', '5px')
+    //     .style('box-shadow', '0 0 10px rgba(0, 0, 0, 0)')
+    //     .style('pointer-events', 'none')
+    //     .style('opacity', 0);
 
     // Add legend with more detailed information
-    const legend = d3.select('#indiaMapChart')
-        .append('div')
-        .attr('class', 'map-legend')
-        .style('padding', '10px')
-        .style('background', 'white')
-        .style('border-radius', '5px')
-        .style('box-shadow', '0 0 5px rgba(0, 0, 0, 0)')
-        .style('position', 'absolute')
-        .style('top', '10px')
-        .style('right', '10px');
+    // const legend = d3.select('#indiaMapChart')
+    //     .append('div')
+    //     .attr('class', 'map-legend')
+    //     .style('padding', '10px')
+    //     .style('background', 'white')
+    //     .style('border-radius', '5px')
+    //     .style('box-shadow', '0 0 5px rgba(0, 0, 0, 0)')
+    //     .style('position', 'absolute')
+    //     .style('top', '10px')
+    //     .style('right', '10px');
 
     const legendItems = [
         { color: colorScale(20), text: 'Low (0-33%)', description: 'Developing engagement' },

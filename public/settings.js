@@ -970,4 +970,292 @@ init2FAState();
     window.confirmDelete = confirmDelete;
 });
 
+// DOM elements
+const profileNameElement = document.getElementById('profile-name');
+const profileEmailElement = document.getElementById('profile-email');
+const profileEditBtn = document.getElementById('profile-edit-btn');
+
+// Function to fetch user profile data
+async function fetchUserProfile() {
+  try {
+    const response = await fetch('/api/user/profile');
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to fetch profile data');
+    }
+    
+    const responseData = await response.json();
+    console.log('Received user data:', responseData); // Debug log
+    
+    // Check if the response has a nested data structure
+    const userData = responseData.data || responseData;
+    
+    // Update the DOM elements with the fetched data
+    if (userData.name) {
+      profileNameElement.textContent = userData.name;
+      console.log('Updated name to:', userData.name); // Debug log
+    } else {
+      console.warn('Name not found in user data');
+    }
+    
+    if (userData.email) {
+      profileEmailElement.textContent = userData.email;
+      console.log('Updated email to:', userData.email); // Debug log
+    } else {
+      console.warn('Email not found in user data');
+    }
+    
+    console.log('Profile data loaded successfully');
+  } catch (error) {
+    console.error('Error loading profile data:', error);
+  }
+}
+
+// Function to handle edit button click
+function handleEditButtonClick() {
+  // const currentName = profileNameElement.textContent;
+  // const currentEmail = profileEmailElement.textContent;
   
+  // // Create a modal or inline form for editing
+  // const modalHTML = `
+  //   <div id="edit-profile-modal" class="modal">
+  //     <div class="modal-content">
+  //       <span class="close-modal">&times;</span>
+  //       <h3>Edit Profile</h3>
+  //       <form id="edit-profile-form">
+  //         <div class="form-group">
+  //           <label for="edit-name">Name:</label>
+  //           <input type="text" id="edit-name" value="${currentName}" required>
+  //         </div>
+  //         <div class="form-group">
+  //           <label for="edit-email">Email:</label>
+  //           <input type="email" id="edit-email" value="${currentEmail}" required>
+  //         </div>
+  //         <div class="form-actions">
+  //           <button type="button" id="cancel-edit">Cancel</button>
+  //           <button type="submit">Save Changes</button>
+  //         </div>
+  //       </form>
+  //     </div>
+  //   </div>
+  // `;
+  
+  // // Add modal to the page
+  // document.body.insertAdjacentHTML('beforeend', modalHTML);
+  
+  // const modal = document.getElementById('edit-profile-modal');
+  // const closeButton = document.querySelector('.close-modal');
+  // const cancelButton = document.getElementById('cancel-edit');
+  // const form = document.getElementById('edit-profile-form');
+  
+  // // Show the modal
+  // modal.style.display = 'block';
+  
+  // // Close modal function
+  // function closeModal() {
+  //   modal.style.display = 'none';
+  //   modal.remove();
+  // }
+  
+  // // Event listeners for closing the modal
+  // closeButton.addEventListener('click', closeModal);
+  // cancelButton.addEventListener('click', closeModal);
+  // window.addEventListener('click', (event) => {
+  //   if (event.target === modal) {
+  //     closeModal();
+  //   }
+  // });
+  
+  // // Form submission
+  // form.addEventListener('submit', async (event) => {
+  //   event.preventDefault();
+    
+  //   const nameInput = document.getElementById('edit-name');
+  //   const emailInput = document.getElementById('edit-email');
+    
+  //   // Check if input values actually changed
+  //   const nameChanged = nameInput.value !== currentName;
+  //   const emailChanged = emailInput.value !== currentEmail;
+    
+  //   if (!nameChanged && !emailChanged) {
+  //     closeModal();
+  //     return;
+  //   }
+    
+  //   try {
+  //     const response = await fetch('/api/user/profile', {
+  //       method: 'PUT',
+  //       headers: {
+  //         'Content-Type': 'application/json'
+  //       },
+  //       body: JSON.stringify({
+  //         name: nameInput.value,
+  //         email: emailInput.value
+  //       })
+  //     });
+      
+  //     if (!response.ok) {
+  //       const errorData = await response.json();
+  //       throw new Error(errorData.error || 'Failed to update profile');
+  //     }
+      
+  //     const updatedData = await response.json();
+      
+  //     // Update the DOM with new values
+  //     profileNameElement.textContent = updatedData.user.name;
+  //     profileEmailElement.textContent = updatedData.user.email;
+      
+  //     // Close the modal
+  //     closeModal();
+      
+  //     // Show success message
+  //     showNotification('Profile updated successfully', 'success');
+  //   } catch (error) {
+  //     console.error('Error updating profile:', error);
+  //     showNotification('Failed to update profile: ' + error.message, 'error');
+  //   }
+  // });
+}
+
+// Simple notification function
+function showNotification(message, type = 'info') {
+  const notification = document.createElement('div');
+  notification.className = `notification ${type}`;
+  notification.textContent = message;
+  
+  document.body.appendChild(notification);
+  
+  // Auto-remove after 3 seconds
+  setTimeout(() => {
+    notification.classList.add('fade-out');
+    setTimeout(() => {
+      notification.remove();
+    }, 500);
+  }, 3000);
+}
+
+// Add CSS for the modal and notifications
+function addStyles() {
+  const styleElement = document.createElement('style');
+  styleElement.textContent = `
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+    
+    .modal-content {
+      background-color: #fff;
+      margin: 10% auto;
+      padding: 20px;
+      border-radius: 5px;
+      width: 80%;
+      max-width: 500px;
+      position: relative;
+    }
+    
+    .close-modal {
+      position: absolute;
+      right: 15px;
+      top: 10px;
+      font-size: 24px;
+      cursor: pointer;
+    }
+    
+    .form-group {
+      margin-bottom: 15px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    
+    .form-group input {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    
+    .form-actions button {
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 10px 20px;
+      border-radius: 4px;
+      color: white;
+      z-index: 1001;
+      animation: slide-in 0.3s ease-out;
+    }
+    
+    .notification.success {
+      background-color: #4CAF50;
+    }
+    
+    .notification.error {
+      background-color: #f44336;
+    }
+    
+    .notification.info {
+      background-color: #2196F3;
+    }
+    
+    .fade-out {
+      opacity: 0;
+      transition: opacity 0.5s;
+    }
+    
+    @keyframes slide-in {
+      from { transform: translateX(100%); }
+      to { transform: translateX(0); }
+    }
+  `;
+  
+  document.head.appendChild(styleElement);
+}
+
+// Initialize everything when the DOM is fully loaded
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('DOM loaded, initializing profile...');
+  
+  // Verify DOM elements
+  console.log('Profile elements found:', {
+    name: profileNameElement ? true : false,
+    email: profileEmailElement ? true : false,
+    editBtn: profileEditBtn ? true : false
+  });
+  
+  // Add CSS styles
+  addStyles();
+  
+  // Fetch initial profile data
+  fetchUserProfile();
+  
+  // Add click event for edit button
+  if (profileEditBtn) {
+    profileEditBtn.addEventListener('click', handleEditButtonClick);
+  } else {
+    console.error('Edit button not found in the DOM');
+  }
+});
