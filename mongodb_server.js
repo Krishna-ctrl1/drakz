@@ -6,8 +6,22 @@ const cors = require("cors");
 const crypto = require("crypto");
 require("dotenv").config();
 const fs = require("fs");
+const app = express();
 const multer = require("multer");
 const { exec } = require("child_process");
+
+const mysql = require("mysql2");
+const bodyParser = require("body-parser");
+// const path = require("path");
+// const cors = require("cors");
+// const multer = require("multer");
+// const fs = require("fs");
+// const crypto = require("crypto");
+const nodemailer = require("nodemailer");
+// const session = require("express-session");
+const Razorpay = require("razorpay");
+const fetch = require("node-fetch");
+require("dotenv").config();
 
 const Advisor = require("./models/Advisor");
 const Admin = require("./models/Admin");
@@ -31,31 +45,53 @@ const Blog = require("./models/Blog");
 const BlogInteraction = require("./models/BlogInteraction");
 const BlogComment = require("./models/BlogComment");
 
-const app = express();
-const PORT = process.env.PORT || 3000;
+// Initialize express app first
+// const app = express();
 
-// Middleware
+// Then configure it
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "public"));
 app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+const port = 4000;
 
-// Session configuration
+// Use a more secure session configuration
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || "ziko120204",
+    secret: process.env.SESSION_SECRET || "ziko120204", // Use environment variable for production
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: process.env.NODE_ENV === "production",
+      secure: process.env.NODE_ENV === "production", // Use secure cookies in production
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
     },
   })
 );
 
-// Set view engine and static files
-app.set("view engine", "ejs");
-app.set("views", path.join(__dirname, "public"));
+// Serve static files (like HTML, CSS, images, etc.) from the "public" folder
 app.use(express.static(path.join(__dirname, "public")));
+
+// Middleware to parse form data (important for POST requests)
+app.use(bodyParser.urlencoded({ extended: true }));
+
+// Create MySQL connection
+const db = mysql.createConnection({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+});
+
+// Connect to MySQL
+db.connect((err) => {
+  if (err) {
+    console.error("Error connecting to the database: ", err.stack);
+    return;
+  }
+  console.log("Connected to MySQL database");
+});
+
+
 
 // MongoDB Connection
 mongoose
@@ -421,6 +457,52 @@ app.get("/api/client-investments/:userId", async (req, res) => {
     console.error("Error fetching investment data:", error);
     res.status(500).json({ error: "Database error" });
   }
+});
+
+// Route to get client image by user ID
+app.get("/api/client-image/:userId", (req, res) => {
+  const userId = req.params.userId;
+
+  // Query the database to find the image path for the given user ID
+  const query = "SELECT image_path FROM images WHERE user_id = ?";
+
+  db.query(query, [userId], (err, results) => {
+    if (err) {
+      console.error("Database query error:", err);
+      return res.status(500).json({ error: "Failed to retrieve image" });
+    }
+
+    // If no image found, send default profile image
+    if (results.length === 0) {
+      return res.sendFile(
+        path.join(
+          __dirname,
+          "public",
+          "assets",
+          "images",
+          "default-profile.png"
+        )
+      );
+    }
+
+    const localImagePath = results[0].image_path;
+
+    // Check if the file exists
+    if (!fs.existsSync(localImagePath)) {
+      return res.sendFile(
+        path.join(
+          __dirname,
+          "public",
+          "assets",
+          "images",
+          "default-profile.png"
+        )
+      );
+    }
+
+    // Serve the image
+    res.sendFile(localImagePath);
+  });
 });
 
 // Logout Route
@@ -1913,451 +1995,803 @@ app.get("/api/credit-card-dues", async (req, res) => {
 // BLOGS
 // ---------------------------------------------------------------------------------------------------------------------------------------------
 
-// Get current user
-app.get("/api/auth/current-user", (req, res) => {
-  if (req.session && req.session.userId) {
-    console.log("User Authenticated");
-    return res.json({
-      authenticated: true,
-      userId: req.session.userId,
+// // Get current user
+// app.get("/api/auth/current-user", (req, res) => {
+//   if (req.session && req.session.userId) {
+//     console.log("User Authenticated");
+//     return res.json({
+//       authenticated: true,
+//       userId: req.session.userId,
+//     });
+//   }
+//   return res.json({ authenticated: false });
+// });
+
+// // Get user by ID
+// app.get("/api/users/:userId", async (req, res) => {
+//   try {
+//     const user = await User.findById(req.params.userId);
+//     if (!user) {
+//       return res
+//         .status(404)
+//         .json({ success: false, message: "User not found" });
+//     }
+//     res.json({ id: user._id, name: user.name });
+//   } catch (error) {
+//     console.error("Error fetching user:", error);
+//     res.status(500).json({ success: false, message: "Server error" });
+//   }
+// });
+
+// // Create a new blog post
+// app.post("/api/blogs", isAuthenticated, async (req, res) => {
+//   try {
+//     const { title, content } = req.body;
+//     const author_id = req.session.userId;
+
+//     // Validate request
+//     if (!title || !content) {
+//       return res
+//         .status(400)
+//         .json({ success: false, message: "Title and content are required" });
+//     }
+
+//     // Create new blog
+//     const newBlog = new Blog({
+//       title,
+//       content,
+//       author_id,
+//     });
+
+//     await newBlog.save();
+//     res.status(201).json({ success: true, blog: newBlog });
+//   } catch (error) {
+//     console.error("Error creating blog:", error);
+//     res
+//       .status(500)
+//       .json({ success: false, message: "Failed to create blog post" });
+//   }
+// });
+
+// // Get all blogs with optional search
+// app.get("/api/blogs", async (req, res) => {
+//   try {
+//     const searchQuery = req.query.search;
+//     let query = {};
+
+//     // If search query exists, add it to the MongoDB query
+//     if (searchQuery) {
+//       query = {
+//         $or: [
+//           { title: { $regex: searchQuery, $options: "i" } },
+//           { content: { $regex: searchQuery, $options: "i" } },
+//         ],
+//       };
+//     }
+
+//     // Find blogs matching the query
+//     const blogs = await Blog.find(query)
+//       .sort({ created_at: -1 }) // Sort by newest first
+//       .lean(); // Convert to plain JavaScript object
+
+//     // Get author information for each blog
+//     const blogsWithAuthor = await Promise.all(
+//       blogs.map(async (blog) => {
+//         const author = await User.findById(blog.author_id).lean();
+
+//         return {
+//           id: blog._id,
+//           title: blog.title,
+//           content: blog.content,
+//           author_id: blog.author_id,
+//           author_name: author ? author.name : "Unknown Author",
+//           likes: blog.likes,
+//           dislikes: blog.dislikes,
+//           created_at: blog.created_at,
+//         };
+//       })
+//     );
+
+//     res.json(blogsWithAuthor);
+//   } catch (error) {
+//     console.error("Error fetching blogs:", error);
+//     res.status(500).json({ success: false, message: "Server error" });
+//   }
+// });
+
+// // Delete a blog post
+// app.delete("/api/blogs/:blogId", isAuthenticated, async (req, res) => {
+//   try {
+//     const blogId = req.params.blogId;
+//     const userId = req.session.userId;
+
+//     // Find the blog
+//     const blog = await Blog.findById(blogId);
+
+//     if (!blog) {
+//       return res
+//         .status(404)
+//         .json({ success: false, message: "Blog not found" });
+//     }
+
+//     // Check if the user is the author
+//     if (blog.author_id.toString() !== userId) {
+//       return res.status(403).json({
+//         success: false,
+//         message: "Not authorized to delete this blog",
+//       });
+//     }
+
+//     // Delete the blog and its associated comments and interactions
+//     await Promise.all([
+//       Blog.findByIdAndDelete(blogId),
+//       BlogComment.deleteMany({ blog_id: blogId }),
+//       BlogInteraction.deleteMany({ blog_id: blogId }),
+//     ]);
+
+//     res.json({ success: true, message: "Blog deleted successfully" });
+//   } catch (error) {
+//     console.error("Error deleting blog:", error);
+//     res.status(500).json({ success: false, message: "Server error" });
+//   }
+// });
+
+// // Check user interactions with a blog
+// app.get("/api/blogs/:blogId/interactions", async (req, res) => {
+//   try {
+//     const { blogId } = req.params;
+//     const userId = req.query.userId;
+
+//     if (!userId) {
+//       return res.json({ liked: false, disliked: false });
+//     }
+
+//     // Find interactions
+//     const likeInteraction = await BlogInteraction.findOne({
+//       blog_id: blogId,
+//       user_id: userId,
+//       interaction_type: "like",
+//     });
+
+//     const dislikeInteraction = await BlogInteraction.findOne({
+//       blog_id: blogId,
+//       user_id: userId,
+//       interaction_type: "dislike",
+//     });
+
+//     res.json({
+//       liked: !!likeInteraction,
+//       disliked: !!dislikeInteraction,
+//     });
+//   } catch (error) {
+//     console.error("Error checking blog interactions:", error);
+//     res.status(500).json({ success: false, message: "Server error" });
+//   }
+// });
+
+// // Like a blog
+// app.post("/api/blogs/:blogId/like", isAuthenticated, async (req, res) => {
+//   try {
+//     const { blogId } = req.params;
+//     const userId = req.session.userId;
+
+//     // Find the blog
+//     const blog = await Blog.findById(blogId);
+
+//     if (!blog) {
+//       return res
+//         .status(404)
+//         .json({ success: false, message: "Blog not found" });
+//     }
+
+//     // Check if user already liked this blog
+//     const existingLike = await BlogInteraction.findOne({
+//       blog_id: blogId,
+//       user_id: userId,
+//       interaction_type: "like",
+//     });
+
+//     // Check if user already disliked this blog
+//     const existingDislike = await BlogInteraction.findOne({
+//       blog_id: blogId,
+//       user_id: userId,
+//       interaction_type: "dislike",
+//     });
+
+//     // Start a session for transaction
+//     const session = await mongoose.startSession();
+//     session.startTransaction();
+
+//     try {
+//       if (existingLike) {
+//         // User already liked, remove the like
+//         await BlogInteraction.findByIdAndDelete(existingLike._id, {
+//           session,
+//         });
+
+//         // Decrement likes count
+//         blog.likes = Math.max(0, blog.likes - 1);
+//         await blog.save({ session });
+
+//         await session.commitTransaction();
+//         return res.json({ success: true, message: "Like removed" });
+//       }
+
+//       // If user had disliked, remove the dislike
+//       if (existingDislike) {
+//         await BlogInteraction.findByIdAndDelete(existingDislike._id, {
+//           session,
+//         });
+
+//         // Decrement dislikes count
+//         blog.dislikes = Math.max(0, blog.dislikes - 1);
+//       }
+
+//       // Create new like interaction
+//       const newLike = new BlogInteraction({
+//         blog_id: blogId,
+//         user_id: userId,
+//         interaction_type: "like",
+//       });
+
+//       await newLike.save({ session });
+
+//       // Increment likes count
+//       blog.likes += 1;
+//       await blog.save({ session });
+
+//       await session.commitTransaction();
+//       res.json({ success: true, message: "Blog liked successfully" });
+//     } catch (error) {
+//       await session.abortTransaction();
+//       throw error;
+//     } finally {
+//       session.endSession();
+//     }
+//   } catch (error) {
+//     console.error("Error liking blog:", error);
+//     res.status(500).json({ success: false, message: "Server error" });
+//   }
+// });
+
+// // Dislike a blog
+// app.post("/api/blogs/:blogId/dislike", isAuthenticated, async (req, res) => {
+//   try {
+//     const { blogId } = req.params;
+//     const userId = req.session.userId;
+
+//     // Find the blog
+//     const blog = await Blog.findById(blogId);
+
+//     if (!blog) {
+//       return res
+//         .status(404)
+//         .json({ success: false, message: "Blog not found" });
+//     }
+
+//     // Check if user already disliked this blog
+//     const existingDislike = await BlogInteraction.findOne({
+//       blog_id: blogId,
+//       user_id: userId,
+//       interaction_type: "dislike",
+//     });
+
+//     // Check if user already liked this blog
+//     const existingLike = await BlogInteraction.findOne({
+//       blog_id: blogId,
+//       user_id: userId,
+//       interaction_type: "like",
+//     });
+
+//     // Start a session for transaction
+//     const session = await mongoose.startSession();
+//     session.startTransaction();
+
+//     try {
+//       if (existingDislike) {
+//         // User already disliked, remove the dislike
+//         await BlogInteraction.findByIdAndDelete(existingDislike._id, {
+//           session,
+//         });
+
+//         // Decrement dislikes count
+//         blog.dislikes = Math.max(0, blog.dislikes - 1);
+//         await blog.save({ session });
+
+//         await session.commitTransaction();
+//         return res.json({ success: true, message: "Dislike removed" });
+//       }
+
+//       // If user had liked, remove the like
+//       if (existingLike) {
+//         await BlogInteraction.findByIdAndDelete(existingLike._id, {
+//           session,
+//         });
+
+//         // Decrement likes count
+//         blog.likes = Math.max(0, blog.likes - 1);
+//       }
+
+//       // Create new dislike interaction
+//       const newDislike = new BlogInteraction({
+//         blog_id: blogId,
+//         user_id: userId,
+//         interaction_type: "dislike",
+//       });
+
+//       await newDislike.save({ session });
+
+//       // Increment dislikes count
+//       blog.dislikes += 1;
+//       await blog.save({ session });
+
+//       await session.commitTransaction();
+//       res.json({ success: true, message: "Blog disliked successfully" });
+//     } catch (error) {
+//       await session.abortTransaction();
+//       throw error;
+//     } finally {
+//       session.endSession();
+//     }
+//   } catch (error) {
+//     console.error("Error disliking blog:", error);
+//     res.status(500).json({ success: false, message: "Server error" });
+//   }
+// });
+
+// // Add a comment to a blog
+// app.post("/api/blogs/:blogId/comments", isAuthenticated, async (req, res) => {
+//   try {
+//     const { blogId } = req.params;
+//     const { text } = req.body;
+//     const userId = req.session.userId;
+
+//     // Validate request
+//     if (!text) {
+//       return res
+//         .status(400)
+//         .json({ success: false, message: "Comment text is required" });
+//     }
+
+//     // Check if blog exists
+//     const blog = await Blog.findById(blogId);
+//     if (!blog) {
+//       return res
+//         .status(404)
+//         .json({ success: false, message: "Blog not found" });
+//     }
+
+//     // Create new comment
+//     const newComment = new BlogComment({
+//       blog_id: blogId,
+//       user_id: userId,
+//       text,
+//     });
+
+//     await newComment.save();
+
+//     res.status(201).json({ success: true, comment: newComment });
+//   } catch (error) {
+//     console.error("Error adding comment:", error);
+//     res.status(500).json({ success: false, message: "Server error" });
+//   }
+// });
+
+// // Get comments for a blog
+// app.get("/api/blogs/:blogId/comments", async (req, res) => {
+//   try {
+//     const { blogId } = req.params;
+
+//     // Find comments for this blog
+//     const comments = await BlogComment.find({ blog_id: blogId })
+//       .sort({ created_at: -1 }) // Sort by newest first
+//       .lean();
+
+//     // Get username for each comment
+//     const commentsWithUser = await Promise.all(
+//       comments.map(async (comment) => {
+//         const user = await User.findById(comment.user_id).lean();
+
+//         return {
+//           id: comment._id,
+//           blog_id: comment.blog_id,
+//           user_id: comment.user_id,
+//           username: user ? user.name : "Unknown User",
+//           text: comment.text,
+//           created_at: comment.created_at,
+//         };
+//       })
+//     );
+
+//     res.json(commentsWithUser);
+//   } catch (error) {
+//     console.error("Error fetching comments:", error);
+//     res.status(500).json({ success: false, message: "Server error" });
+//   }
+// });
+
+// // Delete a comment
+// app.delete("/api/comments/:commentId", isAuthenticated, async (req, res) => {
+//   try {
+//     const { commentId } = req.params;
+//     const userId = req.session.userId;
+
+//     // Find the comment
+//     const comment = await BlogComment.findById(commentId);
+
+//     if (!comment) {
+//       return res
+//         .status(404)
+//         .json({ success: false, message: "Comment not found" });
+//     }
+
+//     // Check if user is the comment author
+//     if (comment.user_id.toString() !== userId) {
+//       return res.status(403).json({
+//         success: false,
+//         message: "Not authorized to delete this comment",
+//       });
+//     }
+
+//     // Delete the comment
+//     await BlogComment.findByIdAndDelete(commentId);
+
+//     res.json({ success: true, message: "Comment deleted successfully" });
+//   } catch (error) {
+//     console.error("Error deleting comment:", error);
+//     res.status(500).json({ success: false, message: "Server error" });
+//   }
+// });
+
+
+// Helper function to execute queries with promises
+const query = (sql, params) => {
+  return new Promise((resolve, reject) => {
+    db.execute(sql, params, (err, results) => {
+      if (err) reject(err);
+      else resolve(results);
     });
-  }
-  return res.json({ authenticated: false });
-});
+  });
+};
 
-// Get user by ID
-app.get("/api/users/:userId", async (req, res) => {
-  try {
-    const user = await User.findById(req.params.userId);
-    if (!user) {
-      return res
-        .status(404)
-        .json({ success: false, message: "User not found" });
-    }
-    res.json({ id: user._id, name: user.name });
-  } catch (error) {
-    console.error("Error fetching user:", error);
-    res.status(500).json({ success: false, message: "Server error" });
-  }
-});
-
-// Create a new blog post
-app.post("/api/blogs", isAuthenticated, async (req, res) => {
-  try {
-    const { title, content } = req.body;
-    const author_id = req.session.userId;
-
-    // Validate request
-    if (!title || !content) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Title and content are required" });
-    }
-
-    // Create new blog
-    const newBlog = new Blog({
-      title,
-      content,
-      author_id,
-    });
-
-    await newBlog.save();
-    res.status(201).json({ success: true, blog: newBlog });
-  } catch (error) {
-    console.error("Error creating blog:", error);
-    res
-      .status(500)
-      .json({ success: false, message: "Failed to create blog post" });
-  }
-});
-
-// Get all blogs with optional search
+// GET all blogs
 app.get("/api/blogs", async (req, res) => {
   try {
-    const searchQuery = req.query.search;
-    let query = {};
+    const search = req.query.search || "";
+    let sql = `
+      SELECT b.*, u.name as author_name 
+      FROM blogs b
+      JOIN users u ON b.author_id = u.id
+    `;
 
-    // If search query exists, add it to the MongoDB query
-    if (searchQuery) {
-      query = {
-        $or: [
-          { title: { $regex: searchQuery, $options: "i" } },
-          { content: { $regex: searchQuery, $options: "i" } },
-        ],
-      };
+    let params = [];
+    if (search) {
+      sql += ` WHERE b.title LIKE ? OR b.content LIKE ? OR u.name LIKE ?`;
+      const searchParam = `%${search}%`;
+      params = [searchParam, searchParam, searchParam];
     }
 
-    // Find blogs matching the query
-    const blogs = await Blog.find(query)
-      .sort({ created_at: -1 }) // Sort by newest first
-      .lean(); // Convert to plain JavaScript object
-
-    // Get author information for each blog
-    const blogsWithAuthor = await Promise.all(
-      blogs.map(async (blog) => {
-        const author = await User.findById(blog.author_id).lean();
-
-        return {
-          id: blog._id,
-          title: blog.title,
-          content: blog.content,
-          author_id: blog.author_id,
-          author_name: author ? author.name : "Unknown Author",
-          likes: blog.likes,
-          dislikes: blog.dislikes,
-          created_at: blog.created_at,
-        };
-      })
-    );
-
-    res.json(blogsWithAuthor);
+    const rows = await query(sql, params);
+    res.json(rows);
   } catch (error) {
     console.error("Error fetching blogs:", error);
-    res.status(500).json({ success: false, message: "Server error" });
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
-// Delete a blog post
-app.delete("/api/blogs/:blogId", isAuthenticated, async (req, res) => {
+// POST a new blog
+app.post("/api/blogs", async (req, res) => {
   try {
-    const blogId = req.params.blogId;
-    const userId = req.session.userId;
+    const { title, content, author_id } = req.body;
 
-    // Find the blog
-    const blog = await Blog.findById(blogId);
+    // Validate input
+    if (!title || !content || !author_id) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Missing required fields" });
+    }
 
-    if (!blog) {
+    // Insert blog into database
+    const result = await query(
+      "INSERT INTO blogs (title, content, author_id) VALUES (?, ?, ?)",
+      [title, content, author_id]
+    );
+
+    res.json({ success: true, id: result.insertId });
+  } catch (error) {
+    console.error("Error creating blog:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
+
+// DELETE a blog
+app.delete("/api/blogs/:id", async (req, res) => {
+  try {
+    const blogId = req.params.id;
+    const userId = req.body.userId;
+
+    // Verify ownership
+    const blogs = await query("SELECT author_id FROM blogs WHERE id = ?", [
+      blogId,
+    ]);
+
+    if (blogs.length === 0) {
       return res
         .status(404)
         .json({ success: false, message: "Blog not found" });
     }
 
-    // Check if the user is the author
-    if (blog.author_id.toString() !== userId) {
-      return res.status(403).json({
-        success: false,
-        message: "Not authorized to delete this blog",
-      });
+    if (blogs[0].author_id != userId) {
+      return res.status(403).json({ success: false, message: "Unauthorized" });
     }
 
-    // Delete the blog and its associated comments and interactions
-    await Promise.all([
-      Blog.findByIdAndDelete(blogId),
-      BlogComment.deleteMany({ blog_id: blogId }),
-      BlogInteraction.deleteMany({ blog_id: blogId }),
-    ]);
+    // Delete blog
+    await query("DELETE FROM blogs WHERE id = ?", [blogId]);
 
-    res.json({ success: true, message: "Blog deleted successfully" });
+    res.json({ success: true });
   } catch (error) {
     console.error("Error deleting blog:", error);
-    res.status(500).json({ success: false, message: "Server error" });
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
 
-// Check user interactions with a blog
-app.get("/api/blogs/:blogId/interactions", async (req, res) => {
+// GET blog interactions for a user
+app.get("/api/blogs/:id/interactions", async (req, res) => {
   try {
-    const { blogId } = req.params;
+    const blogId = req.params.id;
     const userId = req.query.userId;
 
     if (!userId) {
       return res.json({ liked: false, disliked: false });
     }
 
-    // Find interactions
-    const likeInteraction = await BlogInteraction.findOne({
-      blog_id: blogId,
-      user_id: userId,
-      interaction_type: "like",
-    });
-
-    const dislikeInteraction = await BlogInteraction.findOne({
-      blog_id: blogId,
-      user_id: userId,
-      interaction_type: "dislike",
-    });
-
-    res.json({
-      liked: !!likeInteraction,
-      disliked: !!dislikeInteraction,
-    });
-  } catch (error) {
-    console.error("Error checking blog interactions:", error);
-    res.status(500).json({ success: false, message: "Server error" });
-  }
-});
-
-// Like a blog
-app.post("/api/blogs/:blogId/like", isAuthenticated, async (req, res) => {
-  try {
-    const { blogId } = req.params;
-    const userId = req.session.userId;
-
-    // Find the blog
-    const blog = await Blog.findById(blogId);
-
-    if (!blog) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Blog not found" });
-    }
-
-    // Check if user already liked this blog
-    const existingLike = await BlogInteraction.findOne({
-      blog_id: blogId,
-      user_id: userId,
-      interaction_type: "like",
-    });
-
-    // Check if user already disliked this blog
-    const existingDislike = await BlogInteraction.findOne({
-      blog_id: blogId,
-      user_id: userId,
-      interaction_type: "dislike",
-    });
-
-    // Start a session for transaction
-    const session = await mongoose.startSession();
-    session.startTransaction();
-
-    try {
-      if (existingLike) {
-        // User already liked, remove the like
-        await BlogInteraction.findByIdAndDelete(existingLike._id, {
-          session,
-        });
-
-        // Decrement likes count
-        blog.likes = Math.max(0, blog.likes - 1);
-        await blog.save({ session });
-
-        await session.commitTransaction();
-        return res.json({ success: true, message: "Like removed" });
-      }
-
-      // If user had disliked, remove the dislike
-      if (existingDislike) {
-        await BlogInteraction.findByIdAndDelete(existingDislike._id, {
-          session,
-        });
-
-        // Decrement dislikes count
-        blog.dislikes = Math.max(0, blog.dislikes - 1);
-      }
-
-      // Create new like interaction
-      const newLike = new BlogInteraction({
-        blog_id: blogId,
-        user_id: userId,
-        interaction_type: "like",
-      });
-
-      await newLike.save({ session });
-
-      // Increment likes count
-      blog.likes += 1;
-      await blog.save({ session });
-
-      await session.commitTransaction();
-      res.json({ success: true, message: "Blog liked successfully" });
-    } catch (error) {
-      await session.abortTransaction();
-      throw error;
-    } finally {
-      session.endSession();
-    }
-  } catch (error) {
-    console.error("Error liking blog:", error);
-    res.status(500).json({ success: false, message: "Server error" });
-  }
-});
-
-// Dislike a blog
-app.post("/api/blogs/:blogId/dislike", isAuthenticated, async (req, res) => {
-  try {
-    const { blogId } = req.params;
-    const userId = req.session.userId;
-
-    // Find the blog
-    const blog = await Blog.findById(blogId);
-
-    if (!blog) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Blog not found" });
-    }
-
-    // Check if user already disliked this blog
-    const existingDislike = await BlogInteraction.findOne({
-      blog_id: blogId,
-      user_id: userId,
-      interaction_type: "dislike",
-    });
-
-    // Check if user already liked this blog
-    const existingLike = await BlogInteraction.findOne({
-      blog_id: blogId,
-      user_id: userId,
-      interaction_type: "like",
-    });
-
-    // Start a session for transaction
-    const session = await mongoose.startSession();
-    session.startTransaction();
-
-    try {
-      if (existingDislike) {
-        // User already disliked, remove the dislike
-        await BlogInteraction.findByIdAndDelete(existingDislike._id, {
-          session,
-        });
-
-        // Decrement dislikes count
-        blog.dislikes = Math.max(0, blog.dislikes - 1);
-        await blog.save({ session });
-
-        await session.commitTransaction();
-        return res.json({ success: true, message: "Dislike removed" });
-      }
-
-      // If user had liked, remove the like
-      if (existingLike) {
-        await BlogInteraction.findByIdAndDelete(existingLike._id, {
-          session,
-        });
-
-        // Decrement likes count
-        blog.likes = Math.max(0, blog.likes - 1);
-      }
-
-      // Create new dislike interaction
-      const newDislike = new BlogInteraction({
-        blog_id: blogId,
-        user_id: userId,
-        interaction_type: "dislike",
-      });
-
-      await newDislike.save({ session });
-
-      // Increment dislikes count
-      blog.dislikes += 1;
-      await blog.save({ session });
-
-      await session.commitTransaction();
-      res.json({ success: true, message: "Blog disliked successfully" });
-    } catch (error) {
-      await session.abortTransaction();
-      throw error;
-    } finally {
-      session.endSession();
-    }
-  } catch (error) {
-    console.error("Error disliking blog:", error);
-    res.status(500).json({ success: false, message: "Server error" });
-  }
-});
-
-// Add a comment to a blog
-app.post("/api/blogs/:blogId/comments", isAuthenticated, async (req, res) => {
-  try {
-    const { blogId } = req.params;
-    const { text } = req.body;
-    const userId = req.session.userId;
-
-    // Validate request
-    if (!text) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Comment text is required" });
-    }
-
-    // Check if blog exists
-    const blog = await Blog.findById(blogId);
-    if (!blog) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Blog not found" });
-    }
-
-    // Create new comment
-    const newComment = new BlogComment({
-      blog_id: blogId,
-      user_id: userId,
-      text,
-    });
-
-    await newComment.save();
-
-    res.status(201).json({ success: true, comment: newComment });
-  } catch (error) {
-    console.error("Error adding comment:", error);
-    res.status(500).json({ success: false, message: "Server error" });
-  }
-});
-
-// Get comments for a blog
-app.get("/api/blogs/:blogId/comments", async (req, res) => {
-  try {
-    const { blogId } = req.params;
-
-    // Find comments for this blog
-    const comments = await BlogComment.find({ blog_id: blogId })
-      .sort({ created_at: -1 }) // Sort by newest first
-      .lean();
-
-    // Get username for each comment
-    const commentsWithUser = await Promise.all(
-      comments.map(async (comment) => {
-        const user = await User.findById(comment.user_id).lean();
-
-        return {
-          id: comment._id,
-          blog_id: comment.blog_id,
-          user_id: comment.user_id,
-          username: user ? user.name : "Unknown User",
-          text: comment.text,
-          created_at: comment.created_at,
-        };
-      })
+    // Check if user has liked/disliked this blog
+    const interactions = await query(
+      "SELECT * FROM blog_interactions WHERE blog_id = ? AND user_id = ?",
+      [blogId, userId]
     );
 
-    res.json(commentsWithUser);
+    if (interactions.length === 0) {
+      return res.json({ liked: false, disliked: false });
+    }
+
+    res.json({
+      liked: interactions[0].interaction_type === "like",
+      disliked: interactions[0].interaction_type === "dislike",
+    });
   } catch (error) {
-    console.error("Error fetching comments:", error);
-    res.status(500).json({ success: false, message: "Server error" });
+    console.error("Error fetching blog interactions:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
-// Delete a comment
-app.delete("/api/comments/:commentId", isAuthenticated, async (req, res) => {
+// POST like a blog
+app.post("/api/blogs/:id/like", async (req, res) => {
   try {
-    const { commentId } = req.params;
-    const userId = req.session.userId;
+    const blogId = req.params.id;
+    const userId = req.body.userId;
 
-    // Find the comment
-    const comment = await BlogComment.findById(commentId);
+    db.beginTransaction(async (err) => {
+      if (err) throw err;
 
-    if (!comment) {
+      try {
+        // Check if user has already interacted with this blog
+        const interactions = await query(
+          "SELECT * FROM blog_interactions WHERE blog_id = ? AND user_id = ?",
+          [blogId, userId]
+        );
+
+        if (interactions.length > 0) {
+          // User has already interacted with this blog
+          if (interactions[0].interaction_type === "like") {
+            // User has already liked this blog, so remove the like
+            await query(
+              "DELETE FROM blog_interactions WHERE blog_id = ? AND user_id = ?",
+              [blogId, userId]
+            );
+
+            await query("UPDATE blogs SET likes = likes - 1 WHERE id = ?", [
+              blogId,
+            ]);
+          } else {
+            // User has disliked this blog, so change to like
+            await query(
+              'UPDATE blog_interactions SET interaction_type = "like" WHERE blog_id = ? AND user_id = ?',
+              [blogId, userId]
+            );
+
+            await query(
+              "UPDATE blogs SET likes = likes + 1, dislikes = dislikes - 1 WHERE id = ?",
+              [blogId]
+            );
+          }
+        } else {
+          // User has not interacted with this blog yet
+          await query(
+            'INSERT INTO blog_interactions (blog_id, user_id, interaction_type) VALUES (?, ?, "like")',
+            [blogId, userId]
+          );
+
+          await query("UPDATE blogs SET likes = likes + 1 WHERE id = ?", [
+            blogId,
+          ]);
+        }
+
+        db.commit((err) => {
+          if (err) throw err;
+          res.json({ success: true });
+        });
+      } catch (error) {
+        db.rollback(() => {
+          throw error;
+        });
+      }
+    });
+  } catch (error) {
+    console.error("Error liking blog:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
+
+// POST dislike a blog
+app.post("/api/blogs/:id/dislike", async (req, res) => {
+  try {
+    const blogId = req.params.id;
+    const userId = req.body.userId;
+
+    db.beginTransaction(async (err) => {
+      if (err) throw err;
+
+      try {
+        // Check if user has already interacted with this blog
+        const interactions = await query(
+          "SELECT * FROM blog_interactions WHERE blog_id = ? AND user_id = ?",
+          [blogId, userId]
+        );
+
+        if (interactions.length > 0) {
+          // User has already interacted with this blog
+          if (interactions[0].interaction_type === "dislike") {
+            // User has already disliked this blog, so remove the dislike
+            await query(
+              "DELETE FROM blog_interactions WHERE blog_id = ? AND user_id = ?",
+              [blogId, userId]
+            );
+
+            await query(
+              "UPDATE blogs SET dislikes = dislikes - 1 WHERE id = ?",
+              [blogId]
+            );
+          } else {
+            // User has liked this blog, so change to dislike
+            await query(
+              'UPDATE blog_interactions SET interaction_type = "dislike" WHERE blog_id = ? AND user_id = ?',
+              [blogId, userId]
+            );
+
+            await query(
+              "UPDATE blogs SET dislikes = dislikes + 1, likes = likes - 1 WHERE id = ?",
+              [blogId]
+            );
+          }
+        } else {
+          // User has not interacted with this blog yet
+          await query(
+            'INSERT INTO blog_interactions (blog_id, user_id, interaction_type) VALUES (?, ?, "dislike")',
+            [blogId, userId]
+          );
+
+          await query("UPDATE blogs SET dislikes = dislikes + 1 WHERE id = ?", [
+            blogId,
+          ]);
+        }
+
+        db.commit((err) => {
+          if (err) throw err;
+          res.json({ success: true });
+        });
+      } catch (error) {
+        db.rollback(() => {
+          throw error;
+        });
+      }
+    });
+  } catch (error) {
+    console.error("Error disliking blog:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
+
+// GET comments for a blog
+app.get("/api/blogs/:id/comments", async (req, res) => {
+  try {
+    const blogId = req.params.id;
+
+    const comments = await query(
+      `SELECT c.*, u.name as username
+       FROM blog_comments c
+       JOIN users u ON c.user_id = u.id
+       WHERE c.blog_id = ?
+       ORDER BY c.created_at DESC;`,
+      [blogId]
+    );
+
+    res.json(comments);
+  } catch (error) {
+    console.error("Error fetching comments:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// POST a comment
+app.post("/api/blogs/:id/comments", async (req, res) => {
+  try {
+    const blogId = req.params.id;
+    const { userId, text } = req.body;
+
+    // Validate input
+    if (!userId || !text) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Missing required fields" });
+    }
+
+    // Insert comment into database
+    const result = await query(
+      "INSERT INTO blog_comments (blog_id, user_id, text) VALUES (?, ?, ?)",
+      [blogId, userId, text]
+    );
+
+    res.json({ success: true, id: result.insertId });
+  } catch (error) {
+    console.error("Error creating comment:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
+
+// DELETE a comment
+app.delete("/api/comments/:id", async (req, res) => {
+  try {
+    const commentId = req.params.id;
+    const userId = req.body.userId;
+
+    // Verify ownership
+    const comments = await query(
+      "SELECT user_id FROM blog_comments WHERE id = ?",
+      [commentId]
+    );
+
+    if (comments.length === 0) {
       return res
         .status(404)
         .json({ success: false, message: "Comment not found" });
     }
 
-    // Check if user is the comment author
-    if (comment.user_id.toString() !== userId) {
-      return res.status(403).json({
-        success: false,
-        message: "Not authorized to delete this comment",
-      });
+    if (comments[0].user_id != userId) {
+      return res.status(403).json({ success: false, message: "Unauthorized" });
     }
 
-    // Delete the comment
-    await BlogComment.findByIdAndDelete(commentId);
+    // Delete comment
+    await query("DELETE FROM blog_comments WHERE id = ?", [commentId]);
 
-    res.json({ success: true, message: "Comment deleted successfully" });
+    res.json({ success: true });
   } catch (error) {
     console.error("Error deleting comment:", error);
-    res.status(500).json({ success: false, message: "Server error" });
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+});
+
+app.get("/api/auth/current-user", (req, res) => {
+  if (req.session && req.session.userId) {
+    res.json({
+      authenticated: true,
+      userId: req.session.userId,
+    });
+  } else {
+    res.json({
+      authenticated: false,
+      userId: null,
+    });
   }
 });
 
@@ -3092,8 +3526,8 @@ app.put("/api/user/profile", async (req, res) => {
 });
 
 // Start the server
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+app.listen(process.env.PORT, () => {
+  console.log(`Server running on port ${process.env.PORT}`);
 });
 
 module.exports = app;

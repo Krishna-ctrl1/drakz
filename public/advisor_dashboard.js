@@ -739,11 +739,22 @@ async function displayClientDetails(client) {
 
     try {
       // Fetch the client's image based on user ID
-      const response = await fetch(`/api/client-image/${client.id}`);
+      let client_id;
+      if (client.id == "67e52a900823bba8b74d23fe") {client_id =  1;}
+      else if (client.id == "67e52a900823bba8b74d23ff") {client_id = 2;}
+      else if (client.id == "67e52a900823bba8b74d2400") {client_id = 3;}
+      else if (client.id == "67e52a900823bba8b74d2401") {client_id = 4;}
+      else if (client.id == "67e52a900823bba8b74d2402") {client_id = 5;}
+      else if (client.id == "67e52a900823bba8b74d2403") {client_id = 6;}
+      else if (client.id == "67e52a900823bba8b74d2404") {client_id = 7;}
+      else if (client.id == "67e52a900823bba8b74d2405") {client_id = 8;}
+      else if (client.id == "67e52a900823bba8b74d2406") {client_id = 9;}
+      else if (client.id == "67e52a900823bba8b74d2407") {client_id = 10;}
+      const response = await fetch(`/api/client-image/${client_id}`);
 
       if (response.ok) {
         // If image is found, set the source to the API endpoint
-        clientPhoto.src = `/api/client-image/${client.id}`;
+        clientPhoto.src = `/api/client-image/${client_id}`;
         clientPhoto.alt = `${client.firstName} ${client.lastName}'s profile picture`;
       } else {
         // Fallback to default image if no image found

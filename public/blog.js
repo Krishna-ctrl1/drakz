@@ -1,34 +1,13 @@
 let currentUserId = null;
 function initializeUser() {
-  // Add loading state if needed
-  console.log("Initializing user...");
-
-  return fetch("/api/auth/current-user")
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-      return response.json();
-    })
+  fetch("/api/auth/current-user")
+    .then((response) => response.json())
     .then((data) => {
-      console.log("Auth data received:", data);
       if (data.authenticated) {
         currentUserId = data.userId;
-        console.log("User authenticated with ID:", currentUserId);
-        // You can trigger UI updates or load user-specific data here
-        return data.userId;
-      } else {
-        console.log("User not authenticated");
-        currentUserId = null;
-        // Maybe redirect to login page or update UI to show logged-out state
-        return null;
       }
     })
-    .catch((error) => {
-      console.error("Error getting current user:", error);
-      currentUserId = null;
-      return null;
-    });
+    .catch((error) => console.error("Error getting current user:", error));
 }
 
 // Call this when the page loads
@@ -36,7 +15,17 @@ document.addEventListener("DOMContentLoaded", initializeUser);
 
 // Use this function to get the current user ID
 function getCurrentUserId() {
-  return currentUserId;
+  console.log("Current UserId = ", currentUserId);
+  if (currentUserId == "67e52a900823bba8b74d23fe") {return 1;}
+  else if (currentUserId == "67e52a900823bba8b74d23ff") {return 2;}
+  else if (currentUserId == "67e52a900823bba8b74d2400") {return 3;}
+  else if (currentUserId == "67e52a900823bba8b74d2401") {return 4;}
+  else if (currentUserId == "67e52a900823bba8b74d2402") {return 5;}
+  else if (currentUserId == "67e52a900823bba8b74d2403") {return 6;}
+  else if (currentUserId == "67e52a900823bba8b74d2404") {return 7;}
+  else if (currentUserId == "67e52a900823bba8b74d2405") {return 8;}
+  else if (currentUserId == "67e52a900823bba8b74d2406") {return 9;}
+  else if (currentUserId == "67e52a900823bba8b74d2407") {return 10;}
 }
 
 // Sidebar Functions
