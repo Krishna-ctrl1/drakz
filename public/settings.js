@@ -352,6 +352,9 @@ document.addEventListener('DOMContentLoaded', function() {
         errorElement.textContent = '';
     });
 });
+document.getElementById("2fa-phone").textContent = localStorage.getItem('userPhone') || "";
+document.getElementById("2fa-email").textContent = localStorage.getItem('userEmail') || "";
+
 let successMessageTimeout;
 document.addEventListener('DOMContentLoaded', function() {
   const toggle2FA = document.getElementById('2fa-toggle');
