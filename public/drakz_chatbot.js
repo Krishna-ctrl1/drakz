@@ -582,7 +582,7 @@ document.addEventListener("DOMContentLoaded", function () {
           '<div class="loading">Loading stock data...</div>';
 
         // Fetch stock data from Alpha Vantage API
-        const apiKey = "536CTHGRJTDSWQC3w";
+        const apiKey = "demo";
         const overviewUrl = `https://www.alphavantage.co/query?function=OVERVIEW&symbol=${symbol}&apikey=${apiKey}`;
         const priceUrl = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${apiKey}`;
         const timeseriesUrl = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${symbol}&apikey=${apiKey}`;
@@ -737,7 +737,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         // Fetch historical data from Alpha Vantage
-        const apiKey = "536CTHGRJTDSWQC3w";
+        const apiKey = "demo";
         const timeseriesUrl = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${symbol}&apikey=${apiKey}`;
 
         // Show loading indicator on canvas
@@ -1019,7 +1019,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const analyzeButton = document.getElementById("analyze-stocks");
   const loadingSpinner = document.getElementById("loading-spinner");
   const resultsContainer = document.getElementById("stock-analysis-results");
-  const ALPHA_VANTAGE_API_KEY = "536CTHGRJTDSWQC3w"; // Replace with your API key
+  const ALPHA_VANTAGE_API_KEY = "demo"; // Replace with your API key
 
   // Add event listener for the analyze button
   analyzeButton.addEventListener("click", async () => {
