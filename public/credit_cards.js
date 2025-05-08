@@ -22,6 +22,34 @@ function closeNav() {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
+
+  window.closeDetails = function () {
+    let detailsSection = document.querySelector(".sec");
+    let cardDetailsSection = document.getElementById("cardDetailsSection");
+
+    if (detailsSection) {
+        detailsSection.classList.remove("details-visible");
+    }
+
+    if (cardDetailsSection) {
+        cardDetailsSection.style.display = "none";
+    }
+
+    // Reset layout for smaller screens
+    if (window.innerWidth <= 1109) {
+        let cardList = document.getElementById("cardlist");
+        let cardStatistics = document.getElementById("Cardstatistics");
+        let tableSection = document.getElementById("table");
+
+        if (cardList && cardStatistics && tableSection) {
+            cardList.style.width = "100%";
+            cardStatistics.style.width = "100%";
+            tableSection.style.width = "100%";
+        }
+    }
+};
+
+
   // Function to create or update the expense chart
   function createExpenseChart(chartData) {
     const ctx = document.getElementById("expenseChart").getContext("2d");
