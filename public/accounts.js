@@ -249,19 +249,17 @@ function filterTransactions(type) {
 
 filterTransactions("all");
 
-function toggleDetails(id) {
-  const details = document.getElementById(`details-${id}`);
-  details.style.display = details.style.display === "none" ? "block" : "none";
-}
-
-// Function to toggle loan details
-function toggleDetails(id) {
-  const details = document.getElementById(`details-${id}`);
-  if (details) {
-    details.style.display = details.style.display === "none" ? "block" : "none";
+// Function to toggle loan details visibility
+function toggleDetails(loanId) {
+  // Remove any quotes from the ID if present
+  const cleanId = loanId.replace(/['"]/g, '');
+  const detailsElement = document.getElementById(`details-${cleanId}`);
+  
+  if (detailsElement) {
+    // Toggle display between none and block
+    detailsElement.style.display = detailsElement.style.display === 'none' ? 'block' : 'none';
   }
 }
-
 // Attach click event listeners to loan cards
 document.addEventListener("DOMContentLoaded", function () {
   const loanCards = document.querySelectorAll(".loan-card");
@@ -326,7 +324,6 @@ function getUserLoans() {
     })
     .then((data) => {
       console.log("User Loans:", data);
-      // Here you can update the UI with loans data
       displayUserLoans(data);
     })
     .catch((error) => {
@@ -407,11 +404,7 @@ function displayUserHoldings(response) {
 // Function to display user loans
 function displayUserLoans(response) {
   // Check if the response has the expected structure
-  if (
-    response &&
-    response.status === "success" &&
-    Array.isArray(response.data)
-  ) {
+  if (response && response.status === "success" && Array.isArray(response.data)) {
     const loans = response.data;
     const loanContainer = document.getElementById("loan-list");
 
@@ -448,11 +441,12 @@ function displayUserLoans(response) {
     }
 
     // Create loan cards for each loan
-    loans.forEach((loan, index) => {
+    loans.forEach((loan) => {
       // Create loan card
       const loanCard = document.createElement("div");
       loanCard.className = "loan-card account-item";
-      loanCard.setAttribute("onclick", `toggleDetails(${loan.id})`);
+      // Use the MongoDB _id field for toggling
+      loanCard.setAttribute("onclick", `toggleDetails('${loan._id}')`);
 
       // Create loan title
       const loanTitle = document.createElement("h3");
@@ -473,10 +467,11 @@ function displayUserLoans(response) {
       loanStatus.className = `status ${loan.status.toLowerCase()}`;
       loanStatus.textContent = loan.status;
 
-      // Create loan details container
+      // Create loan details container (initially hidden)
       const detailsContainer = document.createElement("div");
       detailsContainer.className = "details";
-      detailsContainer.id = `details-${loan.id}`;
+      detailsContainer.id = `details-${loan._id}`;
+      detailsContainer.style.display = "none";
 
       // Add loan details
       const interestRate = document.createElement("p");
@@ -529,7 +524,6 @@ function displayUserLoans(response) {
     console.error("Invalid response format for user loans:", response);
   }
 }
-
 // Function to display user transactions
 function displayUserTransactions(response) {
   // Check if the response has the expected structure
