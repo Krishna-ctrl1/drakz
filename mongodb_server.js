@@ -17,6 +17,7 @@ const nodemailer = require("nodemailer");
 const Razorpay = require("razorpay");
 const fetch = require("node-fetch");
 
+// Model Imports (assuming they are in a ./models directory)
 const Advisor = require("./models/Advisor");
 const Admin = require("./models/Admin");
 const User = require("./models/User");
@@ -38,6 +39,31 @@ const UserStocks = require("./models/UserStocks");
 const Blog = require("./models/Blog");
 const BlogInteraction = require("./models/BlogInteraction");
 const BlogComment = require("./models/BlogComment");
+
+
+// =========================================================================
+// NEW SCHEMAS FOR VIDEO SESSION
+// =========================================================================
+const sessionNoteSchema = new mongoose.Schema({
+    advisor_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Advisor', required: true },
+    user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    note: { type: String, required: true },
+    created_at: { type: Date, default: Date.now }
+});
+const SessionNote = mongoose.model('SessionNote', sessionNoteSchema);
+
+const videoSchema = new mongoose.Schema({
+    advisor_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Advisor', required: true },
+    title: { type: String, required: true },
+    // For YouTube videos
+    videoId: { type: String, sparse: true, unique: true }, // sparse allows multiple nulls
+    // For uploaded videos
+    filename: { type: String },
+    url: { type: String },
+    created_at: { type: Date, default: Date.now }
+});
+const Video = mongoose.model('Video', videoSchema);
+// =========================================================================
 
 // Initialize express app first
 const server = http.createServer(app);
@@ -66,6 +92,9 @@ app.use(
 
 // Serve static files (like HTML, CSS, images, etc.) from the "public" folder
 app.use(express.static(path.join(__dirname, "public")));
+// Statically serve uploaded videos
+app.use('/uploads/recorded-videos', express.static(path.join(__dirname, 'public', 'uploads', 'recorded-videos')));
+
 
 // Middleware to parse form data (important for POST requests)
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -75,7 +104,6 @@ wss.on('connection', ws => {
   console.log('Client connected for video session');
 
   ws.on('message', message => {
-    // We need to parse the message to prevent it from being a blob
     const messageString = message.toString();
     console.log(`Received message => ${messageString}`);
     
@@ -3522,9 +3550,124 @@ app.put("/api/user/profile", async (req, res) => {
   }
 });
 
-// Start the server
-app.listen(process.env.PORT, () => {
-  console.log(`Server running on port ${process.env.PORT}`);
+// =========================================================================
+// NEW APIS FOR VIDEO SESSION PAGE
+// =========================================================================
+
+// Middleware to check if the user is an authenticated advisor
+const isAdvisorAuthenticated = (req, res, next) => {
+  if (req.session && req.session.advisorId) {
+    return next();
+  }
+  return res.status(401).json({ status: "error", message: "Not authenticated as an advisor" });
+};
+
+// GET /api/videos - Fetch video library for the advisor
+app.get("/api/videos", isAdvisorAuthenticated, async (req, res) => {
+    try {
+        const advisorId = req.session.advisorId;
+        // Check if the advisor has any videos, if not, add some defaults
+        const videoCount = await Video.countDocuments({ advisor_id: advisorId });
+
+        if (videoCount === 0) {
+            await Video.insertMany([
+                { advisor_id: advisorId, title: "Beginner's Guide to Investing", videoId: "Cda-fUJ-GjE" },
+                { advisor_id: advisorId, title: "Understanding Mutual Funds", videoId: "k_gE4a-P57s" },
+                { advisor_id: advisorId, title: "How to Save Money", videoId: "3_kCsig2-oA" }
+            ]);
+        }
+        
+        const videos = await Video.find({ advisor_id: advisorId }).sort({ created_at: -1 });
+        res.json({ videos });
+    } catch (error) {
+        console.error("Error fetching video library:", error);
+        res.status(500).json({ error: "Server error while fetching videos." });
+    }
 });
 
-module.exports = app;
+// POST /api/session-notes - Save a note for a session
+app.post("/api/session-notes", isAdvisorAuthenticated, async (req, res) => {
+    const { userId, note } = req.body;
+    if (!userId || !note) {
+        return res.status(400).json({ success: false, error: "Client user ID and note content are required." });
+    }
+    try {
+        const newNote = new SessionNote({
+            advisor_id: req.session.advisorId,
+            user_id: userId,
+            note: note,
+        });
+        await newNote.save();
+        res.json({ success: true, message: "Note saved successfully." });
+    } catch (error) {
+        console.error("Error saving session note:", error);
+        res.status(500).json({ success: false, error: "Failed to save note." });
+    }
+});
+
+// GET /api/session-notes/:userId - Load notes for a client
+app.get("/api/session-notes/:userId", isAdvisorAuthenticated, async (req, res) => {
+    try {
+        const notes = await SessionNote.find({
+            advisor_id: req.session.advisorId,
+            user_id: req.params.userId
+        }).sort({ created_at: -1 });
+        res.json({ notes });
+    } catch (error) {
+        console.error("Error loading session notes:", error);
+        res.status(500).json({ error: "Failed to load notes." });
+    }
+});
+
+// --- Video Recording Upload ---
+// Configure multer for video uploads
+const videoStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadPath = path.join(__dirname, 'public', 'uploads', 'recorded-videos');
+    fs.mkdirSync(uploadPath, { recursive: true }); // Ensure directory exists
+    cb(null, uploadPath);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, file.fieldname + '-' + uniqueSuffix + '.webm'); // Save files as .webm
+  }
+});
+
+const videoUpload = multer({ storage: videoStorage });
+
+// POST /api/videos/upload - Upload a recorded video
+app.post('/api/videos/upload', isAdvisorAuthenticated, videoUpload.single('video'), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).send({ error: 'No video file uploaded.' });
+  }
+
+  const { title } = req.body;
+  if (!title) {
+    // If upload fails due to missing title, delete the orphaned file
+    fs.unlinkSync(req.file.path);
+    return res.status(400).send({ error: 'Video title is required.' });
+  }
+
+  try {
+    const newVideo = new Video({
+      advisor_id: req.session.advisorId,
+      title: title,
+      filename: req.file.filename,
+      url: `/uploads/recorded-videos/${req.file.filename}`, // Public URL to serve the file
+    });
+    await newVideo.save();
+    
+    res.status(201).json({ success: true, message: 'Video uploaded successfully!', video: newVideo });
+  } catch (error) {
+    console.error('Error saving video to database:', error);
+    res.status(500).json({ error: 'Failed to save video information.' });
+  }
+});
+
+// =========================================================================
+
+
+// Start the server
+server.listen(port, () => {
+    console.log(`Server running on http://localhost:${port}`);
+});
