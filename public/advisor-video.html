@@ -3,69 +3,85 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Vidos Live - Advisor Dashboard</title>
-  <!-- Base Dashboard Styles -->
+  <title>Vidos Live - Interactive Session Room</title>
   <link rel="stylesheet" href="advisor_dashboard.css">
-  <!-- Custom Styles for Videos | Live page -->
   <link rel="stylesheet" href="advisor-video.css">
 </head>
 <body>
-  <!-- Header (same as in your advisor_dashboard.html) -->
   <header>
-    <div class="search-container">
-      <input type="text" placeholder="Search for your clients">
-      <i class="fa fa-search"></i>
-    </div>
-    <nav>
-      <a href="advisor-dashboard.html">Your Clients</a>
-      <a href="advisor-video.html" class="active">Videos | Live</a>
-      <!-- <a href="update.html">Update</a> -->
-    </nav>
-    <div class="header-right">
-      <div class="user-icon">
-        <img src="assets/images/logo.png" alt="User Icon">
+      <div class="search-container">
+        <input type="text" placeholder="Search...">
+        <i class="fa fa-search"></i>
       </div>
-    </div>
+      <nav>
+        <a href="advisor-dashboard.html">Your Clients</a>
+        <a href="advisor-video.html" class="active">Session Room</a>
+      </nav>
+      <div class="header-right">
+        <div class="user-icon"><img src="assets/images/logo.png" alt="User Icon"></div>
+      </div>
   </header>
     
-    <!-- Content Area: Videos | Live -->
-    <div class="content">
-      <div class="videos-live-wrapper">
-        <!-- Video Section -->
-        <div class="video-panel">
-          <h3>My Videos</h3>
-          <div class="video-player">
-            <!-- Main video player (defaults to first video) -->
-            <iframe id="main-video" src="" frameborder="0" allowfullscreen></iframe>
+  <div class="session-wrapper">
+    <main class="session-main">
+      <div class="session-header">
+        <h3>Session with: <span id="client-name-display">No Client Selected</span></h3>
+        <button id="end-session-btn">End Session</button>
+      </div>
+      
+      <div class="video-container">
+        <div class="shared-player">
+          <iframe id="main-video" src="https://www.youtube.com/embed/Cda-fUJ-GjE" frameborder="0" allowfullscreen></iframe>
+        </div>
+        
+        <div class="video-chat">
+          <div class="video-box advisor-video" id="advisor-video-box">
+            <p>Advisor Cam</p>
           </div>
-          <div class="video-list" id="videoList">
-            <!-- List of added videos will be generated here -->
+          <div class="video-box client-video" id="client-video-box">
+            <p>Client Cam</p>
           </div>
         </div>
-        <!--  Live Section -->
-        <div class="live-panel">
-          <h3>Live Stream</h3>
-          <div class="live-stream">
-            <!-- Replace YOUR_CHANNEL_ID with your actual YouTube channel ID -->
-            <iframe src="https://www.youtube.com/embed/live_stream?channel=UCgu4tOsRgvENwqXKQ-xosUg" frameborder="0" allowfullscreen></iframe>
+      </div>
+
+      <div class="chat-container">
+        <h4>Live Chat</h4>
+        <div id="chat-messages" class="chat-messages">
           </div>
-          <!-- Notify Clients Button -->
-          <button id="notify-btn" class="notify-btn">Notify Clients</button>
-          <!-- Session Notes Section -->
-          <div class="session-notes">
-            <h4>Session Notes</h4>
-            <textarea id="notes-area" placeholder="Enter your session notes here..."></textarea>
-            <button id="save-notes-btn">Save Notes</button>
-            <!-- Container to display saved session notes -->
-            <div id="saved-notes-list"></div>
-          </div>
+        <div class="chat-input">
+          <input type="text" id="chat-message-input" placeholder="Type a message...">
+          <button id="send-chat-btn">Send</button>
         </div>
-      </div> <!-- End of vidos-live-wrapper -->
-    </div> <!-- End Content -->
-  
-  <!-- Scripts: your existing advisor_dashboard.js populates the client list -->
-  <script src="advisor_dashboard.js"></script>
-  <!-- Custom JS for Videos | Live functionalities -->
+      </div>
+    </main>
+
+    <aside class="session-sidebar">
+      <div class="sidebar-tabs">
+        <button class="tab-link active" data-tab="clients">Clients</button>
+        <button class="tab-link" data-tab="videos">Videos</button>
+        <button class="tab-link" data-tab="notes">Notes</button>
+      </div>
+      
+      <div id="clients" class="tab-content active">
+        <h4>Start Session With:</h4>
+        <ul id="client-list-sidebar">
+          </ul>
+      </div>
+
+      <div id="videos" class="tab-content">
+        <h4>Shared Video Library</h4>
+        <div id="video-library-sidebar">
+          </div>
+      </div>
+
+      <div id="notes" class="tab-content">
+        <h4>Session Notes</h4>
+        <textarea id="notes-area" placeholder="Private notes for this session..."></textarea>
+        <button id="save-notes-btn">Save Note</button>
+      </div>
+    </aside>
+  </div>
+
   <script src="advisor-video.js"></script>
 </body>
 </html>
