@@ -9,19 +9,13 @@ const fs = require("fs");
 const app = express();
 const multer = require("multer");
 const { exec } = require("child_process");
+const http = require('http');
+const WebSocket = require('ws');
 
-const mysql = require("mysql2");
 const bodyParser = require("body-parser");
-// const path = require("path");
-// const cors = require("cors");
-// const multer = require("multer");
-// const fs = require("fs");
-// const crypto = require("crypto");
 const nodemailer = require("nodemailer");
-// const session = require("express-session");
 const Razorpay = require("razorpay");
 const fetch = require("node-fetch");
-require("dotenv").config();
 
 const Advisor = require("./models/Advisor");
 const Admin = require("./models/Admin");
@@ -46,7 +40,9 @@ const BlogInteraction = require("./models/BlogInteraction");
 const BlogComment = require("./models/BlogComment");
 
 // Initialize express app first
-// const app = express();
+const server = http.createServer(app);
+const wss = new WebSocket.Server({ server });
+
 
 // Then configure it
 app.set("view engine", "ejs");
@@ -74,30 +70,32 @@ app.use(express.static(path.join(__dirname, "public")));
 // Middleware to parse form data (important for POST requests)
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Create MySQL connection
-const db = mysql.createConnection({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-});
+// WebSocket connection handling
+wss.on('connection', ws => {
+  console.log('Client connected for video session');
 
-// Connect to MySQL
-db.connect((err) => {
-  if (err) {
-    console.error("Error connecting to the database: ", err.stack);
-    return;
-  }
-  console.log("Connected to MySQL database");
-});
+  ws.on('message', message => {
+    // We need to parse the message to prevent it from being a blob
+    const messageString = message.toString();
+    console.log(`Received message => ${messageString}`);
+    
+    // Broadcast the message to all other clients
+    wss.clients.forEach(client => {
+      if (client !== ws && client.readyState === WebSocket.OPEN) {
+        client.send(messageString);
+      }
+    });
+  });
 
+  ws.on('close', () => {
+    console.log('Client disconnected from video session');
+  });
+});
 
 
 // MongoDB Connection
 mongoose
   .connect(process.env.MONGODB_ATLAS_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
   })
   .then(() => console.log("Connected to MongoDB Atlas"))
   .catch((error) => console.error("MongoDB connection error:", error));
@@ -230,7 +228,6 @@ app.get("/about", (req, res) => {
 
   res.render("about_us", data);
 });
-
 // ---------------------------------------------------------------------------------------------------------------------------------------------
 // ADVISOR
 // ---------------------------------------------------------------------------------------------------------------------------------------------

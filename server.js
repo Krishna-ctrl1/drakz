@@ -10,10 +10,15 @@ const nodemailer = require("nodemailer");
 const session = require("express-session");
 const Razorpay = require("razorpay");
 const fetch = require("node-fetch");
+const http = require('http');
+const WebSocket = require('ws');
+
 require("dotenv").config();
 
 // Initialize express app first
 const app = express();
+const server = http.createServer(app);
+const wss = new WebSocket.Server({ server });
 
 // Then configure it
 app.set("view engine", "ejs");
@@ -65,6 +70,25 @@ const transporter = nodemailer.createTransport({
     user: process.env.EMAIL_USER || "your-email@gmail.com",
     pass: process.env.EMAIL_PASSWORD || "your-email-password",
   },
+});
+
+// WebSocket connection handling
+wss.on('connection', ws => {
+  console.log('Client connected');
+
+  ws.on('message', message => {
+    console.log(`Received message => ${message}`);
+    // Broadcast the message to all clients
+    wss.clients.forEach(client => {
+      if (client !== ws && client.readyState === WebSocket.OPEN) {
+        client.send(message);
+      }
+    });
+  });
+
+  ws.on('close', () => {
+    console.log('Client disconnected');
+  });
 });
 
 // Function to send OTP via email
@@ -3644,6 +3668,6 @@ module.exports = app;
 module.exports = { app, db };
 
 // Start the server
-app.listen(port, () => {
+server.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });

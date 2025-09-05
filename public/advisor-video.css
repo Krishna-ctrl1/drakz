@@ -24,6 +24,11 @@
   margin-bottom: 15px;
 }
 
+.session-sidebar {
+  background: var(--white);
+  padding: 20px;
+}
+
 #end-session-btn {
   background: var(--red-error);
   color: var(--white);
@@ -175,6 +180,87 @@
     border: none;
     border-radius: var(--border-radius);
     cursor: pointer;
+}
+#save-notes-btn {
+    margin-top: 10px;
+    padding: 10px 20px;
+    background: var(--blue-primary);
+    color: var(--white);
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+}
+
+.record-btn {
+    width: 100%;
+    padding: 10px;
+    background: var(--green-success);
+    color: var(--white);
+    border: none;
+    border-radius: var(--border-radius);
+    margin-bottom: 15px;
+    cursor: pointer;
+    text-align: center;
+}
+
+/* Modal for recording */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1001;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: var(--white);
+    padding: 25px;
+    border-radius: var(--border-radius);
+    width: 90%;
+    max-width: 600px;
+    position: relative;
+}
+
+.close-modal-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+#recording-preview {
+    width: 100%;
+    height: 300px;
+    background: #000;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.recording-controls {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.recording-controls button {
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+}
+
+#start-recording { background-color: var(--green-success); color: white; }
+#stop-recording { background-color: var(--red-error); color: white; }
+#save-recording { background-color: var(--blue-primary); color: white; }
+#stop-recording:disabled, #save-recording:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
 }
 
 /* Responsive adjustments */
