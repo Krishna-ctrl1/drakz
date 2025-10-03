@@ -55,7 +55,7 @@ document.addEventListener("DOMContentLoaded", function () {
               grid: { display: false },
               title: {
                   display: true,
-                  text: 'Month'
+                  text: 'drakzzzzzz'
               }
           },
           y: {

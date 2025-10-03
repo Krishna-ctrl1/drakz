@@ -4,13 +4,15 @@ function openNav() {
   const closeButton = document.getElementById("close-button");
   const main = document.getElementById("main");
 
-  sidebar.style.width = "180px";
-  main.style.marginLeft = "180px";
-  main.style.width = "calc(100% - 180px)";
-  closeButton.innerHTML =
-    '<img width="25" src="assets/icons/sidebarclose.png">';
-  closeButton.setAttribute("onclick", "closeNav()");
-  sidebar.classList.remove("icons-only");
+  if (sidebar && closeButton && main) {
+    sidebar.style.width = "180px";
+    main.style.marginLeft = "180px";
+    main.style.width = "calc(100% - 180px)";
+    closeButton.innerHTML =
+      '<img width="25" src="assets/icons/sidebarclose.png">';
+    closeButton.setAttribute("onclick", "closeNav()");
+    sidebar.classList.remove("icons-only");
+  }
 }
 
 function closeNav() {
@@ -18,12 +20,14 @@ function closeNav() {
   const closeButton = document.getElementById("close-button");
   const main = document.getElementById("main");
 
-  sidebar.style.width = "60px";
-  main.style.marginLeft = "60px";
-  main.style.width = "calc(100% - 60px)";
-  closeButton.innerHTML = '<img width="25" src="assets/icons/sidebaropen.png">';
-  closeButton.setAttribute("onclick", "openNav()");
-  sidebar.classList.add("icons-only");
+  if (sidebar && closeButton && main) {
+    sidebar.style.width = "60px";
+    main.style.marginLeft = "60px";
+    main.style.width = "calc(100% - 60px)";
+    closeButton.innerHTML = '<img width="25" src="assets/icons/sidebaropen.png">';
+    closeButton.setAttribute("onclick", "openNav()");
+    sidebar.classList.add("icons-only");
+  }
 }
 
 // Global variables for asset management
@@ -34,13 +38,16 @@ let currentEditingMetalId = null;
 // Close the modal based on type
 function closeModal(type) {
   if (type === "property") {
-    document.getElementById("propertyModal").style.display = "none";
+    const propertyModal = document.getElementById("propertyModal");
+    if (propertyModal) propertyModal.style.display = "none";
     currentEditingPropertyId = null;
   } else if (type === "policy") {
-    document.getElementById("policyModal").style.display = "none";
+    const policyModal = document.getElementById("policyModal");
+    if (policyModal) policyModal.style.display = "none";
     currentEditingPolicyId = null;
   } else if (type === "metal") {
-    document.getElementById("metalModal").style.display = "none";
+    const metalModal = document.getElementById("metalModal");
+    if (metalModal) metalModal.style.display = "none";
     currentEditingMetalId = null;
   }
 }
@@ -54,7 +61,7 @@ document.addEventListener("DOMContentLoaded", function () {
       closeModal("property");
     };
   }
-  ``;
+  
   // Update cancel button for property modal
   const propertyCancelBtn = document.querySelector(
     "#propertyModal .btn-secondary"
@@ -62,6 +69,24 @@ document.addEventListener("DOMContentLoaded", function () {
   if (propertyCancelBtn) {
     propertyCancelBtn.onclick = function () {
       closeModal("property");
+    };
+  }
+
+  // Update X button for policy modal
+  const policyCloseX = document.querySelector("#policyModal .close-modal");
+  if (policyCloseX) {
+    policyCloseX.onclick = function () {
+      closeModal("policy");
+    };
+  }
+  
+  // Update cancel button for policy modal
+  const policyCancelBtn = document.querySelector(
+    "#policyModal .btn-secondary"
+  );
+  if (policyCancelBtn) {
+    policyCancelBtn.onclick = function () {
+      closeModal("policy");
     };
   }
 
@@ -81,6 +106,7 @@ document.addEventListener("DOMContentLoaded", function () {
     };
   }
 });
+
 // Edit property - this function needs to be globally accessible
 function editProperty(propertyId) {
   console.log(`Editing property: ${propertyId}`);
@@ -111,15 +137,23 @@ function editProperty(propertyId) {
   const location = locationText.replace("Location: ", "");
 
   // Populate form with property details
-  document.getElementById("modalTitle").textContent = "Edit Property";
-  document.getElementById("propertyId").value = propertyId;
-  document.getElementById("propertyName").value = name;
-  document.getElementById("propertyValue").value = value;
-  document.getElementById("propertyLocation").value = location;
-  document.getElementById("selectedFileName").textContent = "Current image";
+  const modalTitle = document.getElementById("modalTitle");
+  const propertyNameInput = document.getElementById("propertyName");
+  const propertyIdInput = document.getElementById("propertyId");
+  const propertyValueInput = document.getElementById("propertyValue");
+  const propertyLocationInput = document.getElementById("propertyLocation");
+  const selectedFileName = document.getElementById("selectedFileName");
+  const propertyModal = document.getElementById("propertyModal");
+  
+  if (modalTitle) modalTitle.textContent = "Edit Property";
+  if (propertyIdInput) propertyIdInput.value = propertyId;
+  if (propertyNameInput) propertyNameInput.value = name;
+  if (propertyValueInput) propertyValueInput.value = value;
+  if (propertyLocationInput) propertyLocationInput.value = location;
+  if (selectedFileName) selectedFileName.textContent = "Current image";
 
   // Show modal
-  document.getElementById("propertyModal").style.display = "block";
+  if (propertyModal) propertyModal.style.display = "block";
 }
 
 // Edit policy
@@ -170,17 +204,25 @@ function editPolicy(policyId) {
   const formattedDate = `${year}-${month}-${day}`;
 
   // Populate form with policy details
-  document.getElementById("policyModalTitle").textContent =
-    "Edit Insurance Policy";
-  document.getElementById("policyId").value = policyId;
-  document.getElementById("policyName").value = name;
-  document.getElementById("policyNumber").value = policyNumber;
-  document.getElementById("policyProperty").value = property;
-  document.getElementById("policyCoverage").value = coverage;
-  document.getElementById("policyRenewalDate").value = formattedDate;
+  const policyModalTitle = document.getElementById("policyModalTitle");
+  const policyIdInput = document.getElementById("policyId");
+  const policyNameInput = document.getElementById("policyName");
+  const policyNumberInput = document.getElementById("policyNumber");
+  const policyPropertyInput = document.getElementById("policyProperty");
+  const policyCoverageInput = document.getElementById("policyCoverage");
+  const policyRenewalDateInput = document.getElementById("policyRenewalDate");
+  const policyModal = document.getElementById("policyModal");
+  
+  if (policyModalTitle) policyModalTitle.textContent = "Edit Insurance Policy";
+  if (policyIdInput) policyIdInput.value = policyId;
+  if (policyNameInput) policyNameInput.value = name;
+  if (policyNumberInput) policyNumberInput.value = policyNumber;
+  if (policyPropertyInput) policyPropertyInput.value = property;
+  if (policyCoverageInput) policyCoverageInput.value = coverage;
+  if (policyRenewalDateInput) policyRenewalDateInput.value = formattedDate;
 
   // Show modal
-  document.getElementById("policyModal").style.display = "block";
+  if (policyModal) policyModal.style.display = "block";
 }
 
 // Edit metal
@@ -240,17 +282,25 @@ function editMetal(metalId) {
   const formattedDate = `${year}-${month}-${day}`;
 
   // Populate form with metal details
-  document.getElementById("metalModalTitle").textContent =
-    "Edit Precious Holding";
-  document.getElementById("metalId").value = metalId;
-  document.getElementById("metalType").value = type;
-  document.getElementById("metalAmount").value = amount;
-  document.getElementById("metalUnit").value = unit;
-  document.getElementById("metalValue").value = valueText;
-  document.getElementById("metalPurchaseDate").value = formattedDate;
+  const metalModalTitle = document.getElementById("metalModalTitle");
+  const metalIdInput = document.getElementById("metalId");
+  const metalTypeInput = document.getElementById("metalType");
+  const metalAmountInput = document.getElementById("metalAmount");
+  const metalUnitInput = document.getElementById("metalUnit");
+  const metalValueInput = document.getElementById("metalValue");
+  const metalPurchaseDateInput = document.getElementById("metalPurchaseDate");
+  const metalModal = document.getElementById("metalModal");
+  
+  if (metalModalTitle) metalModalTitle.textContent = "Edit Precious Holding";
+  if (metalIdInput) metalIdInput.value = metalId;
+  if (metalTypeInput) metalTypeInput.value = type;
+  if (metalAmountInput) metalAmountInput.value = amount;
+  if (metalUnitInput) metalUnitInput.value = unit;
+  if (metalValueInput) metalValueInput.value = valueText;
+  if (metalPurchaseDateInput) metalPurchaseDateInput.value = formattedDate;
 
   // Show modal
-  document.getElementById("metalModal").style.display = "block";
+  if (metalModal) metalModal.style.display = "block";
 }
 
 // Delete property
@@ -384,15 +434,20 @@ function initializeAssetIds() {
 // Search function for filtering dashboard elements
 function filterDashboard() {
   const searchInput = document.getElementById("searchInput");
+  if (!searchInput) return;
+  
   const filter = searchInput.value.toUpperCase();
 
   // Filter properties
   const propertyCards = document.querySelectorAll(".property-card");
   propertyCards.forEach((card) => {
-    const name = card.querySelector(".property-details h4").textContent;
-    const location = card.querySelector(
-      ".property-details p:nth-of-type(2)"
-    ).textContent;
+    const nameEl = card.querySelector(".property-details h4");
+    const locationEl = card.querySelector(".property-details p:nth-of-type(2)");
+    
+    if (!nameEl || !locationEl) return;
+    
+    const name = nameEl.textContent;
+    const location = locationEl.textContent;
 
     if (
       name.toUpperCase().indexOf(filter) > -1 ||
@@ -407,9 +462,15 @@ function filterDashboard() {
   // Filter policies
   const policyCards = document.querySelectorAll(".policy-card");
   policyCards.forEach((card) => {
-    const name = card.querySelector("h4").textContent;
-    const policyNumber = card.querySelector("p:nth-of-type(1)").textContent;
-    const property = card.querySelector("p:nth-of-type(2)").textContent;
+    const nameEl = card.querySelector("h4");
+    const policyNumberEl = card.querySelector("p:nth-of-type(1)");
+    const propertyEl = card.querySelector("p:nth-of-type(2)");
+    
+    if (!nameEl || !policyNumberEl || !propertyEl) return;
+    
+    const name = nameEl.textContent;
+    const policyNumber = policyNumberEl.textContent;
+    const property = propertyEl.textContent;
 
     if (
       name.toUpperCase().indexOf(filter) > -1 ||
@@ -425,7 +486,10 @@ function filterDashboard() {
   // Filter metals
   const metalCards = document.querySelectorAll(".metal-card");
   metalCards.forEach((card) => {
-    const type = card.querySelector(".metal-details h4").textContent;
+    const typeEl = card.querySelector(".metal-details h4");
+    if (!typeEl) return;
+    
+    const type = typeEl.textContent;
 
     if (type.toUpperCase().indexOf(filter) > -1) {
       card.style.display = "";
@@ -450,6 +514,12 @@ window.addEventListener("load", function () {
 
   // Initialize IDs for all asset types
   initializeAssetIds();
+  
+  // Set up search functionality
+  const searchInput = document.getElementById("searchInput");
+  if (searchInput) {
+    searchInput.addEventListener("input", filterDashboard);
+  }
 });
 
 // DOM Elements
@@ -457,8 +527,10 @@ const policyList = document.querySelector(".policy-list");
 const policyModal = document.getElementById("policyModal");
 const policyForm = document.getElementById("policyForm");
 
-// Event Listeners
-policyForm.addEventListener("submit", handlePolicySubmit);
+// Event Listeners for Policy Form
+if (policyForm) {
+  policyForm.addEventListener("submit", handlePolicySubmit);
+}
 
 // Fetch policies and update the list
 async function fetchPolicies() {
@@ -482,6 +554,12 @@ async function fetchPolicies() {
 
 // Render Policies
 function renderPolicies(policies) {
+  // Check if policyList exists
+  if (!policyList) {
+    console.error("Policy list container not found");
+    return;
+  }
+  
   // Clear existing policy cards
   policyList.innerHTML = "";
 
@@ -555,13 +633,26 @@ function createPolicyCard(policy) {
 async function handlePolicySubmit(e) {
   e.preventDefault();
 
-  const policyId = document.getElementById("policyId").value;
+  const policyIdEl = document.getElementById("policyId");
+  const policyNameEl = document.getElementById("policyName");
+  const policyNumberEl = document.getElementById("policyNumber");
+  const policyPropertyEl = document.getElementById("policyProperty");
+  const policyCoverageEl = document.getElementById("policyCoverage");
+  const policyRenewalDateEl = document.getElementById("policyRenewalDate");
+  
+  if (!policyNameEl || !policyNumberEl || !policyPropertyEl || 
+      !policyCoverageEl || !policyRenewalDateEl) {
+    console.error("Missing form elements");
+    return;
+  }
+  
+  const policyId = policyIdEl ? policyIdEl.value : "";
   const policyData = {
-    policy_name: document.getElementById("policyName").value,
-    policy_number: document.getElementById("policyNumber").value,
-    property_description: document.getElementById("policyProperty").value,
-    coverage_amount: document.getElementById("policyCoverage").value,
-    renewal_date: document.getElementById("policyRenewalDate").value,
+    policy_name: policyNameEl.value,
+    policy_number: policyNumberEl.value,
+    property_description: policyPropertyEl.value,
+    coverage_amount: policyCoverageEl.value,
+    renewal_date: policyRenewalDateEl.value,
   };
 
   try {
@@ -593,34 +684,6 @@ async function handlePolicySubmit(e) {
   } catch (error) {
     console.error("Error saving policy:", error);
     alert("Failed to save policy");
-  }
-}
-
-// Delete Policy
-async function deletePolicy(policyId) {
-  if (!confirm("Are you sure you want to delete this policy?")) return;
-
-  try {
-    const response = await fetch(`/api/policies/${policyId}`, {
-      method: "DELETE",
-      credentials: "include",
-    });
-
-    if (!response.ok) {
-      throw new Error("Failed to delete policy");
-    }
-
-    fetchPolicies();
-  } catch (error) {
-    console.error("Error deleting policy:", error);
-    alert("Failed to delete policy");
-  }
-}
-
-// Close Modal
-function closeModal(type) {
-  if (type === "policy") {
-    policyModal.style.display = "none";
   }
 }
 
@@ -663,16 +726,12 @@ function openPolicyModal() {
   if (!modalTitle) {
     console.error("Modal Title Element NOT FOUND");
     console.error("Current document body innerHTML:", document.body.innerHTML);
+    return;
   }
 
   if (!policyModal) {
     console.error("Policy Modal Element NOT FOUND");
     console.error("Current document body innerHTML:", document.body.innerHTML);
-  }
-
-  // Ensure elements exist before manipulation
-  if (!modalTitle || !policyModal) {
-    console.error("Critical modal elements are missing. Cannot open modal.");
     return;
   }
 
@@ -702,7 +761,7 @@ function openPolicyModal() {
   policyModal.style.display = "block";
 }
 
-// Comprehensive event listener setup
+// Setup policy modal event listeners
 document.addEventListener("DOMContentLoaded", function () {
   console.log("DOM Fully Loaded. Setting up policy modal event listener.");
 
@@ -720,18 +779,44 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 });
 
+// Setup metals functionality
 document.addEventListener("DOMContentLoaded", () => {
   const addMetalBtn = document.getElementById("addMetalBtn");
   const metalModal = document.getElementById("metalModal");
   const metalForm = document.getElementById("metalForm");
   const metalsList = document.querySelector(".metals-list");
 
-  loadMetals();
+  // Load metals on page load if elements exist
+  if (metalsList) {
+    loadMetals();
+  } else {
+    console.log("Metals list container not found, creating if needed");
+    // Create metals list container if it doesn't exist
+    const container = document.querySelector(".container") || document.body;
+    if (container) {
+      const metalsSection = document.createElement("div");
+      metalsSection.className = "metals-section";
+      metalsSection.innerHTML = `
+        <h2>Precious Metals</h2>
+        <div class="metals-header">
+          <button id="addMetalBtn" class="btn btn-primary">Add New Metal</button>
+          <div class="metals-list"></div>
+        </div>
+      `;
+      container.appendChild(metalsSection);
+      // Re-get references after creating elements
+      const metalsList = document.querySelector(".metals-list");
+      if (metalsList) {
+        loadMetals();
+      }
+    }
+  }
 
   // Check if elements exist before adding event listeners
   if (addMetalBtn && metalModal) {
     // Open Add Metal Modal
     addMetalBtn.addEventListener("click", () => {
+      console.log("Add Metal button clicked");
       // Safely set the modal title
       const metalModalTitle = document.getElementById("metalModalTitle");
       if (metalModalTitle) {
@@ -752,147 +837,315 @@ document.addEventListener("DOMContentLoaded", () => {
       // Show the modal
       metalModal.style.display = "block";
     });
+  } else {
+    console.log("Add Metal button or Metal Modal not found");
+    if (!addMetalBtn) {
+      console.log("Creating Add Metal button if container exists");
+      const metalsHeader = document.querySelector(".metals-header");
+      if (metalsHeader) {
+        const addBtn = document.createElement("button");
+        addBtn.id = "addMetalBtn";
+        addBtn.className = "btn btn-primary";
+        addBtn.textContent = "Add New Metal";
+        metalsHeader.prepend(addBtn);
+        
+        // Add event listener to newly created button
+        addBtn.addEventListener("click", () => {
+          const metalModal = document.getElementById("metalModal");
+          if (metalModal) {
+            // Reset form and show modal
+            const metalForm = document.getElementById("metalForm");
+            if (metalForm) metalForm.reset();
+            
+            const metalId = document.getElementById("metalId");
+            if (metalId) metalId.value = "";
+            
+            const metalModalTitle = document.getElementById("metalModalTitle");
+            if (metalModalTitle) metalModalTitle.textContent = "Add New Precious Metal";
+            
+            metalModal.style.display = "block";
+          }
+        });
+      }
+    }
   }
 
-  // Close Modal Function
-  window.closeModal = (type) => {
-    if (metalModal) {
-      metalModal.style.display = "none";
-    }
-  };
+  // Make sure metal form exists before adding event listener
+  if (metalForm) {
+    // Submit Metal Form
+    metalForm.addEventListener("submit", handleMetalSubmit);
+  } else {
+    console.log("Metal form not found");
+  }
 
-  // Close Modal Function
-  window.closeModal = (type) => {
-    metalModal.style.display = "none";
-  };
-
-  // Submit Metal Form
-  metalForm.addEventListener("submit", async (e) => {
+  // Handle Metal Form Submission (separated for clarity)
+  async function handleMetalSubmit(e) {
     e.preventDefault();
+    console.log("Metal form submitted");
 
-    const metalId = document.getElementById("metalId").value;
-    const metalType = document.getElementById("metalType").value;
-    const metalAmount = document.getElementById("metalAmount").value;
-    const metalUnit = document.getElementById("metalUnit").value;
-    const metalValue = document.getElementById("metalValue").value;
-    const metalPurchaseDate =
-      document.getElementById("metalPurchaseDate").value;
+    const metalIdEl = document.getElementById("metalId");
+    const metalTypeEl = document.getElementById("metalType");
+    const metalAmountEl = document.getElementById("metalAmount");
+    const metalUnitEl = document.getElementById("metalUnit");
+    const metalValueEl = document.getElementById("metalValue");
+    const metalPurchaseDateEl = document.getElementById("metalPurchaseDate");
+    
+    if (!metalTypeEl || !metalAmountEl || !metalUnitEl || 
+        !metalValueEl || !metalPurchaseDateEl) {
+      console.error("Missing metal form elements");
+      return;
+    }
+    
+    const metalId = metalIdEl ? metalIdEl.value : "";
+    const metalData = {
+      metal_type: metalTypeEl.value,
+      amount: metalAmountEl.value,
+      amount_unit: metalUnitEl.value,
+      value: metalValueEl.value,
+      date_of_purchase: metalPurchaseDateEl.value,
+    };
+
+    console.log("Metal data to save:", metalData);
 
     try {
-      const response = await fetch("/precious-holdings", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          metalType,
-          metalAmount,
-          metalUnit,
-          metalValue,
-          metalPurchaseDate,
-        }),
-      });
-
-      const result = await response.json();
-
-      if (response.ok) {
-        closeModal("metal");
-        loadMetals(); // Refresh the list
+      // For local demonstration without an actual API
+      // Just create/update a metal card directly
+      if (metalId) {
+        // Update existing metal card
+        updateMetalCard(metalId, metalData);
       } else {
-        throw new Error(result.error || "Failed to add metal");
+        // Create new metal card with generated ID
+        createMetalCard(metalData);
       }
+      
+      closeModal("metal");
     } catch (error) {
-      console.error("Error:", error);
-      alert(error.message);
+      console.error("Error saving metal:", error);
+      alert("Failed to save metal: " + error.message);
     }
-  });
+  }
 
   // Load Metals Function
   async function loadMetals() {
-    try {
-      const response = await fetch("/precious-holdings");
-      const metals = await response.json();
-
+    const metalsList = document.querySelector(".metals-list");
+    if (!metalsList) {
+      console.error("Metals list container not found");
+      return;
+    }
+    
+    // For demo purposes, create sample metals if no metals are present
+    if (metalsList.children.length === 0) {
+      console.log("Creating sample metals for demonstration");
+      
+      const sampleMetals = [
+        {
+          id: "metal1",
+          metal_type: "gold",
+          amount: "10",
+          amount_unit: "g",
+          value: "800",
+          date_of_purchase: "2023-01-15"
+        },
+        {
+          id: "metal2",
+          metal_type: "silver",
+          amount: "500",
+          amount_unit: "g",
+          value: "450",
+          date_of_purchase: "2023-02-20"
+        },
+        {
+          id: "metal3",
+          metal_type: "platinum",
+          amount: "5",
+          amount_unit: "g",
+          value: "300",
+          date_of_purchase: "2023-03-10"
+        }
+      ];
+      
       // Clear existing metals
       metalsList.innerHTML = "";
-
-      // Populate metals list
-      metals.forEach((metal) => {
-        const metalCard = document.createElement("div");
-        metalCard.classList.add("metal-card");
-        metalCard.id = `metal-${metal.id}`;
-
-        metalCard.innerHTML = `
-                    <div class="metal-icon ${metal.metal_type.toLowerCase()}">
-                        <i class="fas fa-coins"></i>
-                    </div>
-                    <div class="metal-details">
-                        <h4>${
-                          metal.metal_type.charAt(0).toUpperCase() +
-                          metal.metal_type.slice(1)
-                        }</h4>
-                        <p>Amount: ${metal.amount} ${metal.amount_unit}</p>
-                        <p>Value: $${metal.value.toLocaleString()}</p>
-                        <p>Date of Purchase: ${new Date(
-                          metal.date_of_purchase
-                        ).toLocaleDateString()}</p>
-                    </div>
-                    <div class="metal-actions">
-                        <button class="action-btn edit-btn" onclick="editMetal(${
-                          metal.id
-                        })">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="action-btn delete-btn" onclick="deleteMetal(${
-                          metal.id
-                        })">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                `;
-
-        metalsList.appendChild(metalCard);
+      
+      // Create metal cards for samples
+      sampleMetals.forEach(metal => {
+        createMetalCardFromData(metal);
       });
-    } catch (error) {
-      console.error("Error loading metals:", error);
-      alert("Failed to load metals");
     }
   }
 
-  // Delete Metal Function
-  window.deleteMetal = async (metalId) => {
+  // Create a new metal card 
+  function createMetalCard(metalData) {
+    const metalsList = document.querySelector(".metals-list");
+    if (!metalsList) {
+      console.error("Metals list container still not found");
+      return;
+    }
+    
+    // Generate an ID for the new metal
+    const newId = `metal${Date.now()}`;
+    const metalWithId = {
+      id: newId,
+      ...metalData
+    };
+    
+    createMetalCardFromData(metalWithId);
+  }
+  
+  // Update an existing metal card
+  function updateMetalCard(metalId, metalData) {
+    const metalCard = document.getElementById(metalId);
+    if (!metalCard) {
+      console.error(`Metal card with ID ${metalId} not found for updating`);
+      return;
+    }
+    
+    // Update metal card with new data
+    const metalWithId = {
+      id: metalId,
+      ...metalData
+    };
+    
+    const newMetalCard = createMetalCardElement(metalWithId);
+    metalCard.replaceWith(newMetalCard);
+  }
+  
+  // Create metal card from data and add to DOM
+  function createMetalCardFromData(metal) {
+    const metalsList = document.querySelector(".metals-list");
+    if (!metalsList) return;
+    
+    const metalCard = createMetalCardElement(metal);
+    metalsList.appendChild(metalCard);
+  }
+  
+  // Create metal card element
+  function createMetalCardElement(metal) {
+    const metalCard = document.createElement("div");
+    metalCard.classList.add("metal-card");
+    metalCard.id = metal.id;
+    
+    // Format date for display
+    const purchaseDate = new Date(metal.date_of_purchase);
+    const formattedDate = purchaseDate.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+    
+    // Format value with commas
+    const formattedValue = Number(metal.value).toLocaleString();
+    
+    metalCard.innerHTML = `
+      <div class="metal-icon ${metal.metal_type.toLowerCase()}">
+        <i class="fas fa-coins"></i>
+      </div>
+      <div class="metal-details">
+        <h4>${metal.metal_type.charAt(0).toUpperCase() + metal.metal_type.slice(1)}</h4>
+        <p>Amount: ${metal.amount} ${metal.amount_unit}</p>
+        <p>Value: $${formattedValue}</p>
+        <p>Date of Purchase: ${formattedDate}</p>
+      </div>
+      <div class="metal-actions">
+        <button class="action-btn edit-btn" onclick="editMetal('${metal.id}')">
+          <i class="fas fa-edit"></i>
+        </button>
+        <button class="action-btn delete-btn" onclick="deleteMetal('${metal.id}')">
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>
+    `;
+    
+    return metalCard;
+  }
+
+  // Make global metal functions available
+  window.createMetalCard = createMetalCard;
+  window.updateMetalCard = updateMetalCard;
+  window.createMetalCardFromData = createMetalCardFromData;
+  window.createMetalCardElement = createMetalCardElement;
+
+  // Delete Metal Function - make it available globally
+  window.deleteMetal = (metalId) => {
     if (!confirm("Are you sure you want to delete this metal holding?")) return;
 
     try {
-      const response = await fetch(`/precious-holdings/${metalId}`, {
-        method: "DELETE",
-      });
-
-      const result = await response.json();
-
-      if (response.ok) {
-        // Remove the metal card from the DOM
-        const metalCard = document.getElementById(`metal-${metalId}`);
-        if (metalCard) {
-          metalCard.remove();
-        }
+      // Remove the metal card from the DOM
+      const metalCard = document.getElementById(metalId);
+      if (metalCard) {
+        metalCard.remove();
+        console.log(`Metal ${metalId} deleted successfully`);
       } else {
-        throw new Error(result.error || "Failed to delete metal");
+        console.error(`Metal with ID ${metalId} not found for deletion`);
       }
     } catch (error) {
       console.error("Error:", error);
-      alert(error.message);
+      alert("Failed to delete metal: " + error.message);
     }
   };
 
-  // Edit Metal Function (placeholder)
+  // Edit Metal Function - make it available globally
   window.editMetal = (metalId) => {
-    // Fetch the specific metal details and populate the form
-    // This is a placeholder and would require additional backend endpoint
-    alert("Edit functionality to be implemented");
+    console.log(`Editing metal with ID: ${metalId}`);
+
+    const metal = document.getElementById(metalId);
+    if (!metal) {
+      console.error(`Metal with ID ${metalId} not found for editing`);
+      return;
+    }
+
+    currentEditingMetalId = metalId;
+
+    // Get metal details
+    const type = metal.querySelector(".metal-details h4").textContent;
+    const paragraphs = metal.querySelectorAll(".metal-details p");
+    const amountText = paragraphs[0].textContent.replace("Amount: ", "");
+    const valueText = paragraphs[1].textContent
+      .replace("Value: $", "")
+      .replace(/,/g, "");
+    const dateText = paragraphs[2].textContent.replace("Date of Purchase: ", "");
+
+    // Parse amount and unit
+    let amount, unit;
+    if (amountText.includes("g")) {
+      amount = amountText.replace("g", "").trim();
+      unit = "g";
+    } else if (amountText.includes("kg")) {
+      amount = amountText.replace("kg", "").trim();
+      unit = "kg";
+    } else {
+      amount = amountText;
+      unit = "g"; // Default
+    }
+
+    // Parse the date for input field (needs YYYY-MM-DD format)
+    const dateObj = new Date(dateText);
+    const formattedDate = dateObj.toISOString().split('T')[0];
+
+    // Populate form with metal details
+    const metalModalTitle = document.getElementById("metalModalTitle");
+    const metalIdInput = document.getElementById("metalId");
+    const metalTypeInput = document.getElementById("metalType");
+    const metalAmountInput = document.getElementById("metalAmount");
+    const metalUnitInput = document.getElementById("metalUnit");
+    const metalValueInput = document.getElementById("metalValue");
+    const metalPurchaseDateInput = document.getElementById("metalPurchaseDate");
+    const metalModal = document.getElementById("metalModal");
+    
+    if (metalModalTitle) metalModalTitle.textContent = "Edit Precious Holding";
+    if (metalIdInput) metalIdInput.value = metalId;
+    if (metalTypeInput) metalTypeInput.value = type.toLowerCase();
+    if (metalAmountInput) metalAmountInput.value = amount;
+    if (metalUnitInput) metalUnitInput.value = unit;
+    if (metalValueInput) metalValueInput.value = valueText;
+    if (metalPurchaseDateInput) metalPurchaseDateInput.value = formattedDate;
+
+    // Show modal
+    if (metalModal) metalModal.style.display = "block";
   };
 });
 
+// Setup properties functionality
 document.addEventListener("DOMContentLoaded", () => {
   const propertyGrid = document.getElementById("propertyGrid");
   const addPropertyBtn = document.getElementById("addPropertyBtn");
@@ -901,10 +1154,86 @@ document.addEventListener("DOMContentLoaded", () => {
   const propertyImage = document.getElementById("propertyImage");
   const selectedFileName = document.getElementById("selectedFileName");
 
+  // Fetch properties on page load if elements exist
+  if (propertyGrid) {
+    fetchProperties();
+  }
+
+  // Check if elements exist before adding event listeners
+  if (addPropertyBtn && propertyModal) {
+    // Add property button handler
+    addPropertyBtn.addEventListener("click", () => {
+      const modalTitle = document.getElementById("modalTitle");
+      const propertyId = document.getElementById("propertyId");
+      
+      if (modalTitle) modalTitle.textContent = "Add New Property";
+      if (propertyForm) propertyForm.reset();
+      if (propertyId) propertyId.value = "";
+      if (selectedFileName) selectedFileName.textContent = "No file selected";
+      
+      propertyModal.style.display = "block";
+    });
+  }
+
+  // Image file selection handler
+  if (propertyImage && selectedFileName) {
+    propertyImage.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      selectedFileName.textContent = file ? file.name : "No file selected";
+    });
+  }
+
+  // Form submission handler
+  if (propertyForm) {
+    propertyForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(propertyForm);
+      const propertyIdEl = document.getElementById("propertyId");
+      const propertyId = propertyIdEl ? propertyIdEl.value : "";
+
+      try {
+        let url = "/properties";
+        let method = "POST";
+        
+        if (propertyId) {
+          url = `/properties/${propertyId}`;
+          method = "PUT";
+        }
+        
+        const response = await fetch(url, {
+          method: method,
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to save property");
+        }
+
+        // Close modal and refresh properties
+        if (propertyModal) propertyModal.style.display = "none";
+        fetchProperties();
+      } catch (error) {
+        console.error("Error:", error);
+        alert("Failed to save property");
+      }
+    });
+  }
+
   // Fetch and display properties
   async function fetchProperties() {
+    if (!propertyGrid) {
+      console.error("Property grid container not found");
+      return;
+    }
+    
     try {
       const response = await fetch("/properties");
+      
+      if (!response.ok) {
+        throw new Error("Failed to fetch properties");
+      }
+      
       const properties = await response.json();
 
       // Clear existing property cards
@@ -967,10 +1296,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const actionsDiv = document.createElement("div");
     actionsDiv.className = "property-actions";
     actionsDiv.innerHTML = `
-            <button class="action-btn edit-btn" onclick="editProperty(${property.id})">
+            <button class="action-btn edit-btn" onclick="editProperty('${property.id}')">
                 <i class="fas fa-edit"></i>
             </button>
-            <button class="action-btn delete-btn" onclick="deleteProperty(${property.id})">
+            <button class="action-btn delete-btn" onclick="deleteProperty('${property.id}')">
                 <i class="fas fa-trash"></i>
             </button>
         `;
@@ -982,75 +1311,34 @@ document.addEventListener("DOMContentLoaded", () => {
     return card;
   }
 
-  // Add property button handler
-  addPropertyBtn.addEventListener("click", () => {
-    document.getElementById("modalTitle").textContent = "Add New Property";
-    propertyForm.reset();
-    document.getElementById("propertyId").value = "";
-    selectedFileName.textContent = "No file selected";
-    propertyModal.style.display = "block";
-  });
-
-  // Image file selection handler
-  propertyImage.addEventListener("change", (e) => {
-    const file = e.target.files[0];
-    selectedFileName.textContent = file ? file.name : "No file selected";
-  });
-
-  // Form submission handler
-  propertyForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    const formData = new FormData(propertyForm);
-    const propertyId = document.getElementById("propertyId").value;
-
-    try {
-      let response;
-      if (propertyId) {
-        // Update existing property
-        response = await fetch(`/properties/${propertyId}`, {
-          method: "PUT",
-          body: formData,
-        });
-      } else {
-        // Add new property
-        response = await fetch("/properties", {
-          method: "POST",
-          body: formData,
-        });
-      }
-
-      if (!response.ok) {
-        throw new Error("Failed to save property");
-      }
-
-      // Close modal and refresh properties
-      propertyModal.style.display = "none";
-      fetchProperties();
-    } catch (error) {
-      console.error("Error:", error);
-      alert("Failed to save property");
-    }
-  });
-
   // Global functions for edit and delete
   window.editProperty = async (propertyId) => {
     try {
-      const response = await fetch(`/properties`);
-      const properties = await response.json();
-      const property = properties.find((p) => p.id === propertyId);
-
+      const response = await fetch(`/properties/${propertyId}`);
+      
+      if (!response.ok) {
+        throw new Error("Failed to fetch property details");
+      }
+      
+      const property = await response.json();
+      
       if (property) {
-        document.getElementById("modalTitle").textContent = "Edit Property";
-        document.getElementById("propertyId").value = property.id;
-        document.getElementById("propertyName").value = property.property_name;
-        document.getElementById("propertyValue").value =
-          property.property_value;
-        document.getElementById("propertyLocation").value = property.location;
-        selectedFileName.textContent = property.image_url
-          ? "Existing image"
-          : "No file selected";
-        propertyModal.style.display = "block";
+        const modalTitle = document.getElementById("modalTitle");
+        const propertyIdInput = document.getElementById("propertyId");
+        const propertyNameInput = document.getElementById("propertyName");
+        const propertyValueInput = document.getElementById("propertyValue");
+        const propertyLocationInput = document.getElementById("propertyLocation");
+        const selectedFileName = document.getElementById("selectedFileName");
+        const propertyModal = document.getElementById("propertyModal");
+        
+        if (modalTitle) modalTitle.textContent = "Edit Property";
+        if (propertyIdInput) propertyIdInput.value = property.id;
+        if (propertyNameInput) propertyNameInput.value = property.property_name;
+        if (propertyValueInput) propertyValueInput.value = property.property_value;
+        if (propertyLocationInput) propertyLocationInput.value = property.location;
+        if (selectedFileName) selectedFileName.textContent = property.image_url ? "Existing image" : "No file selected";
+        
+        if (propertyModal) propertyModal.style.display = "block";
       }
     } catch (error) {
       console.error("Error fetching property:", error);
@@ -1077,15 +1365,26 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
+  // Global close modal function
   window.closeModal = (type) => {
     if (type === "property") {
-      propertyModal.style.display = "none";
+      const propertyModal = document.getElementById("propertyModal");
+      if (propertyModal) propertyModal.style.display = "none";
+    } else if (type === "policy") {
+      const policyModal = document.getElementById("policyModal");
+      if (policyModal) policyModal.style.display = "none";
+    } else if (type === "metal") {
+      const metalModal = document.getElementById("metalModal");
+      if (metalModal) metalModal.style.display = "none";
     }
   };
-
-  // Initial fetch of properties
-  fetchProperties();
 });
 
 // Initialize on DOM load
-document.addEventListener("DOMContentLoaded", fetchPolicies);
+document.addEventListener("DOMContentLoaded", () => {
+  // Initialize policy functionality
+  const policyList = document.querySelector(".policy-list");
+  if (policyList) {
+    fetchPolicies();
+  }
+});

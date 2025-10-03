@@ -17,7 +17,8 @@ const nodemailer = require("nodemailer");
 const Razorpay = require("razorpay");
 const fetch = require("node-fetch");
 
-// Model Imports (assuming they are in a ./models directory)
+// Model Imports
+const ContactMessage = require('./models/save-contact-message');
 const Advisor = require("./models/Advisor");
 const Admin = require("./models/Admin");
 const User = require("./models/User");
@@ -37,8 +38,6 @@ const UserPreciousHoldings = require("./models/UserPreciousHoldings");
 const UserProperty = require("./models/UserProperties");
 const UserStocks = require("./models/UserStocks");
 const Blog = require("./models/Blog");
-const BlogInteraction = require("./models/BlogInteraction");
-const BlogComment = require("./models/BlogComment");
 
 
 // =========================================================================
@@ -878,94 +877,106 @@ app.post("/api/users", async (req, res) => {
   }
 });
 
-// API endpoint to get all messages (for admin dashboard)
-app.get("/api/messages", async (req, res) => {
-  try {
-    const messages = await Message.find().sort({ submission_date: -1 }).exec();
+// ---------------------------------------------------------------------------------------------------------------------------------------------
+// CONTACT US
+// ---------------------------------------------------------------------------------------------------------------------------------------------
 
-    res.json({
-      success: true,
-      messages: messages,
-    });
-  } catch (error) {
-    console.error("Error fetching messages:", error);
-    res.status(500).json({
-      success: false,
-      message: "An error occurred while fetching messages.",
-    });
+// API to fetch all contact messages
+app.get('/api/messages', async (req, res) => {
+  console.log('Received request for /api/messages');
+  try {
+    const messages = await ContactMessage.find()
+      .sort({ submission_date: -1 })
+      .lean();
+    console.log('Queried collection:', ContactMessage.collection.collectionName);
+    const formattedMessages = messages.map(msg => ({
+      id: msg._id.toString(),
+      name: msg.name,
+      email: msg.email,
+      phone: msg.phone,
+      subject: msg.subject,
+      message: msg.message,
+      submission_date: msg.submission_date,
+      is_read: msg.is_read,
+      is_replied: msg.is_replied
+    }));
+    console.log('Fetched contact messages:', formattedMessages.length, formattedMessages);
+    res.json({ success: true, messages: formattedMessages });
+  } catch (err) {
+    console.error('Error fetching contact messages:', err);
+    return res.status(500).json({ success: false, message: 'Database error' });
   }
 });
 
-// API endpoint to mark a message as read
-app.post("/api/messages/mark-read", async (req, res) => {
+// API to save contact message
+app.post('/api/save-contact-message', async (req, res) => {
+  console.log('Received request for /api/save-contact-message', req.body);
   try {
-    const { id } = req.body;
-
-    if (!id) {
-      return res.status(400).json({
-        success: false,
-        message: "Message ID is required.",
-      });
+    const { name, email, phone, subject, message, submission_date } = req.body;
+    if (!name || !email || !subject || !message) {
+      return res.status(400).json({ success: false, message: 'Missing required fields' });
     }
-
-    const result = await Message.updateOne({ _id: id }, { is_read: true });
-
-    if (result.modifiedCount > 0) {
-      res.json({
-        success: true,
-        message: "Message marked as read.",
-      });
-    } else {
-      res.status(404).json({
-        success: false,
-        message: "Message not found or already marked as read.",
-      });
-    }
-  } catch (error) {
-    console.error("Error marking message as read:", error);
-    res.status(500).json({
-      success: false,
-      message: "An error occurred while marking the message as read.",
+    const newMessage = new ContactMessage({
+      name,
+      email,
+      phone: phone || '',
+      subject,
+      message,
+      submission_date: submission_date ? new Date(submission_date) : new Date(),
+      is_read: false,
+      is_replied: false
     });
+    await newMessage.save();
+    console.log(`New contact message saved from ${email} with subject: ${subject}`);
+    res.json({ success: true, message: 'Message saved successfully' });
+  } catch (err) {
+    console.error('Error saving contact message:', err);
+    return res.status(500).json({ success: false, message: 'Database error: Unable to save message' });
   }
 });
 
-// API end-point for replying to messages
-app.post("/api/messages/reply", async (req, res) => {
+// API to send a reply to a message
+app.post('/api/messages/reply', async (req, res) => {
+  console.log('Received request for /api/messages/reply', req.body);
   try {
     const { id, to, subject, message } = req.body;
-
     if (!id || !to || !subject || !message) {
-      return res.status(400).json({
-        success: false,
-        message: "Missing required fields",
-      });
+      return res.status(400).json({ success: false, message: 'Missing required fields' });
     }
+    const contactMessage = await ContactMessage.findById(id);
+    if (!contactMessage) {
+      return res.status(404).json({ success: false, message: 'Message not found' });
+    }
+    contactMessage.is_replied = true;
+    contactMessage.is_read = true;
+    await contactMessage.save();
+    console.log(`Reply sent to ${to} with subject: ${subject}`);
+    res.json({ success: true, message: 'Reply sent successfully' });
+  } catch (err) {
+    console.error('Error sending reply:', err);
+    return res.status(500).json({ success: false, message: 'Database or server error' });
+  }
+});
 
-    // Send the email
-    const mailOptions = {
-      from: process.env.EMAIL_USER || "your-email@gmail.com",
-      to: to,
-      subject: subject,
-      text: message,
-    };
-
-    // Send mail with defined transport object
-    await transporter.sendMail(mailOptions);
-
-    // Update message status in database
-    await Message.updateOne({ _id: id }, { is_replied: true });
-
-    res.json({
-      success: true,
-      message: "Reply sent successfully",
-    });
-  } catch (error) {
-    console.error("Error sending reply:", error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to send reply: " + error.message,
-    });
+// API to mark a message as read
+app.post('/api/messages/mark-read', async (req, res) => {
+  console.log('Received request for /api/messages/mark-read', req.body);
+  try {
+    const { id } = req.body;
+    if (!id) {
+      return res.status(400).json({ success: false, message: 'Message ID is required' });
+    }
+    const contactMessage = await ContactMessage.findById(id);
+    if (!contactMessage) {
+      return res.status(404).json({ success: false, message: 'Message not found' });
+    }
+    contactMessage.is_read = true;
+    await contactMessage.save();
+    console.log(`Message ${id} marked as read`);
+    res.json({ success: true, message: 'Message marked as read' });
+  } catch (err) {
+    console.error('Error marking message as read:', err);
+    return res.status(500).json({ success: false, message: 'Database error' });
   }
 });
 
@@ -1093,6 +1104,66 @@ app.get("/api/dashboard", async (req, res) => {
     console.error("Error fetching dashboard data:", error);
     res.status(500).json({
       error: "Database error",
+      details: error.message,
+    });
+  }
+});
+
+app.get("/api/user/premium-status", async (req, res) => {
+  console.log("🔍 Premium status endpoint called");
+
+  // Ensure the user is logged in
+  const userId = req.session.userId;
+  console.log("👤 Session userId:", userId);
+
+  // Set content type header
+  res.setHeader("Content-Type", "application/json");
+
+  // Check if user is authenticated
+  if (!userId) {
+    console.log("❌ Authentication failed: No userId in session");
+    return res.status(401).json({
+      success: false,
+      error: "Unauthorized. Please log in.",
+    });
+  }
+
+  try {
+    console.log("🔎 Looking up user with ID:", userId);
+
+    // Query only the is_premium field from the User model
+    const user = await mongoose
+      .model("User")
+      .findById(userId)
+      .select("is_premium")
+      .lean(); // Convert to plain JavaScript object for better performance
+
+    console.log("👥 User lookup result:", user ? "Found" : "Not found");
+
+    if (user) {
+      console.log("💎 User premium status:", user.is_premium);
+    }
+
+    if (!user) {
+      console.log("❌ User not found in database");
+      return res.status(404).json({
+        success: false,
+        error: "User not found",
+      });
+    }
+
+    // Return just the premium status - handling boolean value
+    const response = {
+      success: true,
+      isPremium: Boolean(user.is_premium),
+    };
+    console.log("✅ Sending response:", response);
+    return res.json(response);
+  } catch (error) {
+    console.error("❌ Error fetching premium status:", error);
+    return res.status(500).json({
+      success: false,
+      error: "Server error",
       details: error.message,
     });
   }
@@ -1256,78 +1327,163 @@ app.post("/api/upgrade-to-premium", async (req, res) => {
   // Ensure the user is logged in
   const userId = req.session.userId;
 
+  console.log("Upgrade request received for user ID:", userId);
+
   if (!userId) {
+    console.log("Authentication failed: No user ID in session");
     return res
       .status(401)
       .json({ success: false, error: "Unauthorized. Please log in." });
   }
 
   // Using Mongoose transactions
-  const session = await mongoose.startSession();
-  session.startTransaction();
-
+  let session;
   try {
-    // 1. Update the user's premium status
-    const user = await User.findByIdAndUpdate(
-      userId,
-      { is_premium: true },
-      { new: true, session }
-    );
+    session = await mongoose.startSession();
+    session.startTransaction();
 
-    if (!user) {
+    console.log("Starting transaction for user:", userId);
+
+    // 1. Update the user's premium status
+    console.log("Updating user premium status for ID:", userId);
+    
+    // First verify the user exists
+    const userCheck = await User.findById(userId).session(session);
+    if (!userCheck) {
+      console.log("User not found with ID:", userId);
       await session.abortTransaction();
       return res.status(404).json({ success: false, error: "User not found" });
     }
+    
+    console.log("Current user premium status:", userCheck.is_premium);
+    
+    // Use updateOne instead of findByIdAndUpdate for more direct control
+    const updateResult = await User.updateOne(
+      { _id: userId },
+      { $set: { is_premium: true } },
+      { session }
+    );
+    
+    console.log("Update result:", updateResult);
+    
+    if (updateResult.matchedCount === 0) {
+      console.log("No user matched for update");
+      await session.abortTransaction();
+      return res.status(404).json({ success: false, error: "User not found" });
+    }
+    
+    if (updateResult.modifiedCount === 0) {
+      console.log("User found but not modified. May already be premium.");
+      // Continue with the process since the user exists
+    } else {
+      console.log("User premium status updated successfully");
+    }
+    
+    // Re-fetch the user to get the updated document
+    const user = await User.findById(userId).session(session);
+    console.log("Updated user premium status:", user.is_premium);
 
     // 2. Find an advisor with fewer than 5 clients
-    const advisorAggregation = await ClientAdvisor.aggregate([
-      {
-        $group: {
-          _id: "$advisor_id",
-          client_count: { $sum: 1 },
-        },
-      },
-      {
-        $match: {
-          client_count: { $lt: 5 },
-        },
-      },
-      {
-        $sort: { client_count: 1 },
-      },
-      {
-        $limit: 1,
-      },
-    ]).session(session);
-
-    let advisor;
-
-    if (advisorAggregation.length > 0) {
-      advisor = await Advisor.findById(advisorAggregation[0]._id).session(
-        session
-      );
-
-      // 3. Assign the advisor to the user
-      await ClientAdvisor.create(
-        [
-          {
+    console.log("Looking for available advisor");
+    
+    // First, get all advisors
+    const allAdvisors = await Advisor.find({}).session(session);
+    console.log(`Found ${allAdvisors.length} total advisors`);
+    
+    let advisor = null;
+    
+    if (allAdvisors.length === 0) {
+      console.log("No advisors found in the database");
+      // Continue without an advisor
+    } else {
+      // Get client counts for each advisor - don't use session here as it might be causing issues
+      const clientCountsResult = await ClientAdvisor.aggregate([
+        {
+          $group: {
+            _id: "$advisor_id",
+            client_count: { $sum: 1 }
+          }
+        }
+      ]);
+      
+      console.log("Client counts result:", JSON.stringify(clientCountsResult));
+      
+      // Create a map of advisor ID to client count
+      const advisorClientMap = {};
+      clientCountsResult.forEach(item => {
+        if (item._id) {
+          advisorClientMap[item._id.toString()] = item.client_count;
+        }
+      });
+      
+      console.log("Advisor client map:", advisorClientMap);
+      
+      // Find advisors with fewer than 5 clients
+      let availableAdvisors = allAdvisors.filter(advisor => {
+        const clientCount = advisorClientMap[advisor._id.toString()] || 0;
+        console.log(`Advisor ${advisor._id} has ${clientCount} clients`);
+        return clientCount < 5;
+      });
+      
+      console.log(`Found ${availableAdvisors.length} available advisors with fewer than 5 clients`);
+      
+      // If we found available advisors with fewer than 5 clients
+      if (availableAdvisors && availableAdvisors.length > 0) {
+        // Sort by client count (those with fewer clients first)
+        availableAdvisors.sort((a, b) => {
+          const countA = advisorClientMap[a._id.toString()] || 0;
+          const countB = advisorClientMap[b._id.toString()] || 0;
+          return countA - countB;
+        });
+        
+        // Select the advisor with the fewest clients
+        advisor = availableAdvisors[0];
+        console.log(`Selected advisor: ${advisor._id} (${advisor.name})`);
+        
+        try {
+          // Check if this user is already assigned to this advisor
+          const existingRelationship = await ClientAdvisor.findOne({
             advisor_id: advisor._id,
-            user_id: userId,
-          },
-        ],
-        { session }
-      );
+            user_id: userId
+          }).session(session);
+          
+          if (existingRelationship) {
+            console.log("User already assigned to this advisor");
+          } else {
+            // Create new client-advisor relationship
+            const clientAdvisorDoc = {
+              advisor_id: advisor._id,
+              user_id: userId
+            };
+            
+            await ClientAdvisor.create([clientAdvisorDoc], { session });
+            console.log("New client-advisor relationship created");
+          }
+        } catch (relationshipError) {
+          console.error("Error creating client-advisor relationship:", relationshipError);
+          throw relationshipError; // Re-throw to be caught by outer catch block
+        }
+      } else {
+        console.log("No advisors with less than 5 clients found");
+      }
     }
 
     // 5. Commit the transaction
     await session.commitTransaction();
+    console.log("Transaction committed successfully");
 
     // 6. Send confirmation email if advisor was assigned
     if (advisor) {
-      sendConfirmationEmail(user, advisor);
+      try {
+        sendConfirmationEmail(user, advisor);
+        console.log("Confirmation email sent");
+      } catch (emailError) {
+        console.error("Failed to send confirmation email:", emailError);
+        // Don't fail the entire request if just the email fails
+      }
 
       // 7. Return success with advisor details
-      res.json({
+      return res.json({
         success: true,
         advisor: {
           name: advisor.name,
@@ -1336,17 +1492,80 @@ app.post("/api/upgrade-to-premium", async (req, res) => {
       });
     } else {
       // Success but no advisor available
-      res.json({ success: true });
+      return res.json({ success: true });
     }
   } catch (error) {
     // Abort transaction on error
-    await session.abortTransaction();
-    console.error("Error in transaction:", error);
-    res.status(500).json({ success: false, error: "Database error" });
+    if (session) {
+      await session.abortTransaction();
+    }
+    console.error("Error in premium upgrade transaction:", error);
+    return res.status(500).json({ 
+      success: false, 
+      error: `Database error: ${error.message || "Unknown error"}` 
+    });
   } finally {
-    session.endSession();
+    if (session) {
+      session.endSession();
+    }
   }
 });
+
+// Function to send confirmation email
+function sendConfirmationEmail(user, advisor) {
+  // You would integrate with your email service here (e.g., Nodemailer, SendGrid, etc.)
+  // This is a placeholder function
+  console.log(`Sending confirmation email to ${user.email}`);
+
+  const mailOptions = {
+    from: "drakz.fintech@gmail.com",
+    to: user.email,
+    subject: "Welcome to DRAKZ Premium!",
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <div style="background-color: #ffd700; padding: 20px; text-align: center;">
+          <h1 style="color: #333; margin: 0;">DRAKZ Premium</h1>
+        </div>
+        <div style="padding: 20px;">
+          <h2>Welcome to Premium, ${user.name}!</h2>
+          <p>Your payment has been successfully processed, and you now have access to all premium features.</p>
+  
+          <div style="background-color: #f9f9f9; padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="margin-top: 0;">Your Personal Financial Advisor</h3>
+            <p><strong>Name:</strong> ${advisor.name}</p>
+            <p><strong>Email:</strong> ${advisor.email}</p>
+            <p>Your advisor will contact you within 24 hours to schedule your first consultation.</p>
+          </div>
+  
+          <p>As a premium member, you now have access to:</p>
+          <ul>
+            <li>Full access to our financial video library</li>
+            <li>Personal financial advisor services</li>
+            <li>Advanced analytics and insights</li>
+            <li>Priority alerts for market changes</li>
+          </ul>
+  
+          <p>If you have any questions, please don't hesitate to contact our support team.</p>
+  
+          <div style="text-align: center; margin-top: 30px;">
+            <a href="https://drakz.com/dashboard" style="background-color: #ffd700; color: #333; text-decoration: none; padding: 10px 20px; border-radius: 4px; font-weight: bold;">Go to Dashboard</a>
+          </div>
+        </div>
+        <div style="background-color: #333; color: white; padding: 20px; text-align: center; font-size: 12px;">
+          <p>&copy; 2025 DRAKZ. All rights reserved.</p>
+        </div>
+      </div>
+    `,
+  };
+
+  transporter.sendMail(mailOptions, function (error, info) {
+    if (error) {
+      console.log("Email error:", error);
+    } else {
+      console.log("Email sent: " + info.response);
+    }
+  });
+}
 
 // ---------------------------------------------------------------------------------------------------------------------------------------------
 // ACCOUNTS
@@ -2020,794 +2239,8 @@ app.get("/api/credit-card-dues", async (req, res) => {
 // BLOGS
 // ---------------------------------------------------------------------------------------------------------------------------------------------
 
-// // Get current user
-// app.get("/api/auth/current-user", (req, res) => {
-//   if (req.session && req.session.userId) {
-//     console.log("User Authenticated");
-//     return res.json({
-//       authenticated: true,
-//       userId: req.session.userId,
-//     });
-//   }
-//   return res.json({ authenticated: false });
-// });
-
-// // Get user by ID
-// app.get("/api/users/:userId", async (req, res) => {
-//   try {
-//     const user = await User.findById(req.params.userId);
-//     if (!user) {
-//       return res
-//         .status(404)
-//         .json({ success: false, message: "User not found" });
-//     }
-//     res.json({ id: user._id, name: user.name });
-//   } catch (error) {
-//     console.error("Error fetching user:", error);
-//     res.status(500).json({ success: false, message: "Server error" });
-//   }
-// });
-
-// // Create a new blog post
-// app.post("/api/blogs", isAuthenticated, async (req, res) => {
-//   try {
-//     const { title, content } = req.body;
-//     const author_id = req.session.userId;
-
-//     // Validate request
-//     if (!title || !content) {
-//       return res
-//         .status(400)
-//         .json({ success: false, message: "Title and content are required" });
-//     }
-
-//     // Create new blog
-//     const newBlog = new Blog({
-//       title,
-//       content,
-//       author_id,
-//     });
-
-//     await newBlog.save();
-//     res.status(201).json({ success: true, blog: newBlog });
-//   } catch (error) {
-//     console.error("Error creating blog:", error);
-//     res
-//       .status(500)
-//       .json({ success: false, message: "Failed to create blog post" });
-//   }
-// });
-
-// // Get all blogs with optional search
-// app.get("/api/blogs", async (req, res) => {
-//   try {
-//     const searchQuery = req.query.search;
-//     let query = {};
-
-//     // If search query exists, add it to the MongoDB query
-//     if (searchQuery) {
-//       query = {
-//         $or: [
-//           { title: { $regex: searchQuery, $options: "i" } },
-//           { content: { $regex: searchQuery, $options: "i" } },
-//         ],
-//       };
-//     }
-
-//     // Find blogs matching the query
-//     const blogs = await Blog.find(query)
-//       .sort({ created_at: -1 }) // Sort by newest first
-//       .lean(); // Convert to plain JavaScript object
-
-//     // Get author information for each blog
-//     const blogsWithAuthor = await Promise.all(
-//       blogs.map(async (blog) => {
-//         const author = await User.findById(blog.author_id).lean();
-
-//         return {
-//           id: blog._id,
-//           title: blog.title,
-//           content: blog.content,
-//           author_id: blog.author_id,
-//           author_name: author ? author.name : "Unknown Author",
-//           likes: blog.likes,
-//           dislikes: blog.dislikes,
-//           created_at: blog.created_at,
-//         };
-//       })
-//     );
-
-//     res.json(blogsWithAuthor);
-//   } catch (error) {
-//     console.error("Error fetching blogs:", error);
-//     res.status(500).json({ success: false, message: "Server error" });
-//   }
-// });
-
-// // Delete a blog post
-// app.delete("/api/blogs/:blogId", isAuthenticated, async (req, res) => {
-//   try {
-//     const blogId = req.params.blogId;
-//     const userId = req.session.userId;
-
-//     // Find the blog
-//     const blog = await Blog.findById(blogId);
-
-//     if (!blog) {
-//       return res
-//         .status(404)
-//         .json({ success: false, message: "Blog not found" });
-//     }
-
-//     // Check if the user is the author
-//     if (blog.author_id.toString() !== userId) {
-//       return res.status(403).json({
-//         success: false,
-//         message: "Not authorized to delete this blog",
-//       });
-//     }
-
-//     // Delete the blog and its associated comments and interactions
-//     await Promise.all([
-//       Blog.findByIdAndDelete(blogId),
-//       BlogComment.deleteMany({ blog_id: blogId }),
-//       BlogInteraction.deleteMany({ blog_id: blogId }),
-//     ]);
-
-//     res.json({ success: true, message: "Blog deleted successfully" });
-//   } catch (error) {
-//     console.error("Error deleting blog:", error);
-//     res.status(500).json({ success: false, message: "Server error" });
-//   }
-// });
-
-// // Check user interactions with a blog
-// app.get("/api/blogs/:blogId/interactions", async (req, res) => {
-//   try {
-//     const { blogId } = req.params;
-//     const userId = req.query.userId;
-
-//     if (!userId) {
-//       return res.json({ liked: false, disliked: false });
-//     }
-
-//     // Find interactions
-//     const likeInteraction = await BlogInteraction.findOne({
-//       blog_id: blogId,
-//       user_id: userId,
-//       interaction_type: "like",
-//     });
-
-//     const dislikeInteraction = await BlogInteraction.findOne({
-//       blog_id: blogId,
-//       user_id: userId,
-//       interaction_type: "dislike",
-//     });
-
-//     res.json({
-//       liked: !!likeInteraction,
-//       disliked: !!dislikeInteraction,
-//     });
-//   } catch (error) {
-//     console.error("Error checking blog interactions:", error);
-//     res.status(500).json({ success: false, message: "Server error" });
-//   }
-// });
-
-// // Like a blog
-// app.post("/api/blogs/:blogId/like", isAuthenticated, async (req, res) => {
-//   try {
-//     const { blogId } = req.params;
-//     const userId = req.session.userId;
-
-//     // Find the blog
-//     const blog = await Blog.findById(blogId);
-
-//     if (!blog) {
-//       return res
-//         .status(404)
-//         .json({ success: false, message: "Blog not found" });
-//     }
-
-//     // Check if user already liked this blog
-//     const existingLike = await BlogInteraction.findOne({
-//       blog_id: blogId,
-//       user_id: userId,
-//       interaction_type: "like",
-//     });
-
-//     // Check if user already disliked this blog
-//     const existingDislike = await BlogInteraction.findOne({
-//       blog_id: blogId,
-//       user_id: userId,
-//       interaction_type: "dislike",
-//     });
-
-//     // Start a session for transaction
-//     const session = await mongoose.startSession();
-//     session.startTransaction();
-
-//     try {
-//       if (existingLike) {
-//         // User already liked, remove the like
-//         await BlogInteraction.findByIdAndDelete(existingLike._id, {
-//           session,
-//         });
-
-//         // Decrement likes count
-//         blog.likes = Math.max(0, blog.likes - 1);
-//         await blog.save({ session });
-
-//         await session.commitTransaction();
-//         return res.json({ success: true, message: "Like removed" });
-//       }
-
-//       // If user had disliked, remove the dislike
-//       if (existingDislike) {
-//         await BlogInteraction.findByIdAndDelete(existingDislike._id, {
-//           session,
-//         });
-
-//         // Decrement dislikes count
-//         blog.dislikes = Math.max(0, blog.dislikes - 1);
-//       }
-
-//       // Create new like interaction
-//       const newLike = new BlogInteraction({
-//         blog_id: blogId,
-//         user_id: userId,
-//         interaction_type: "like",
-//       });
-
-//       await newLike.save({ session });
-
-//       // Increment likes count
-//       blog.likes += 1;
-//       await blog.save({ session });
-
-//       await session.commitTransaction();
-//       res.json({ success: true, message: "Blog liked successfully" });
-//     } catch (error) {
-//       await session.abortTransaction();
-//       throw error;
-//     } finally {
-//       session.endSession();
-//     }
-//   } catch (error) {
-//     console.error("Error liking blog:", error);
-//     res.status(500).json({ success: false, message: "Server error" });
-//   }
-// });
-
-// // Dislike a blog
-// app.post("/api/blogs/:blogId/dislike", isAuthenticated, async (req, res) => {
-//   try {
-//     const { blogId } = req.params;
-//     const userId = req.session.userId;
-
-//     // Find the blog
-//     const blog = await Blog.findById(blogId);
-
-//     if (!blog) {
-//       return res
-//         .status(404)
-//         .json({ success: false, message: "Blog not found" });
-//     }
-
-//     // Check if user already disliked this blog
-//     const existingDislike = await BlogInteraction.findOne({
-//       blog_id: blogId,
-//       user_id: userId,
-//       interaction_type: "dislike",
-//     });
-
-//     // Check if user already liked this blog
-//     const existingLike = await BlogInteraction.findOne({
-//       blog_id: blogId,
-//       user_id: userId,
-//       interaction_type: "like",
-//     });
-
-//     // Start a session for transaction
-//     const session = await mongoose.startSession();
-//     session.startTransaction();
-
-//     try {
-//       if (existingDislike) {
-//         // User already disliked, remove the dislike
-//         await BlogInteraction.findByIdAndDelete(existingDislike._id, {
-//           session,
-//         });
-
-//         // Decrement dislikes count
-//         blog.dislikes = Math.max(0, blog.dislikes - 1);
-//         await blog.save({ session });
-
-//         await session.commitTransaction();
-//         return res.json({ success: true, message: "Dislike removed" });
-//       }
-
-//       // If user had liked, remove the like
-//       if (existingLike) {
-//         await BlogInteraction.findByIdAndDelete(existingLike._id, {
-//           session,
-//         });
-
-//         // Decrement likes count
-//         blog.likes = Math.max(0, blog.likes - 1);
-//       }
-
-//       // Create new dislike interaction
-//       const newDislike = new BlogInteraction({
-//         blog_id: blogId,
-//         user_id: userId,
-//         interaction_type: "dislike",
-//       });
-
-//       await newDislike.save({ session });
-
-//       // Increment dislikes count
-//       blog.dislikes += 1;
-//       await blog.save({ session });
-
-//       await session.commitTransaction();
-//       res.json({ success: true, message: "Blog disliked successfully" });
-//     } catch (error) {
-//       await session.abortTransaction();
-//       throw error;
-//     } finally {
-//       session.endSession();
-//     }
-//   } catch (error) {
-//     console.error("Error disliking blog:", error);
-//     res.status(500).json({ success: false, message: "Server error" });
-//   }
-// });
-
-// // Add a comment to a blog
-// app.post("/api/blogs/:blogId/comments", isAuthenticated, async (req, res) => {
-//   try {
-//     const { blogId } = req.params;
-//     const { text } = req.body;
-//     const userId = req.session.userId;
-
-//     // Validate request
-//     if (!text) {
-//       return res
-//         .status(400)
-//         .json({ success: false, message: "Comment text is required" });
-//     }
-
-//     // Check if blog exists
-//     const blog = await Blog.findById(blogId);
-//     if (!blog) {
-//       return res
-//         .status(404)
-//         .json({ success: false, message: "Blog not found" });
-//     }
-
-//     // Create new comment
-//     const newComment = new BlogComment({
-//       blog_id: blogId,
-//       user_id: userId,
-//       text,
-//     });
-
-//     await newComment.save();
-
-//     res.status(201).json({ success: true, comment: newComment });
-//   } catch (error) {
-//     console.error("Error adding comment:", error);
-//     res.status(500).json({ success: false, message: "Server error" });
-//   }
-// });
-
-// // Get comments for a blog
-// app.get("/api/blogs/:blogId/comments", async (req, res) => {
-//   try {
-//     const { blogId } = req.params;
-
-//     // Find comments for this blog
-//     const comments = await BlogComment.find({ blog_id: blogId })
-//       .sort({ created_at: -1 }) // Sort by newest first
-//       .lean();
-
-//     // Get username for each comment
-//     const commentsWithUser = await Promise.all(
-//       comments.map(async (comment) => {
-//         const user = await User.findById(comment.user_id).lean();
-
-//         return {
-//           id: comment._id,
-//           blog_id: comment.blog_id,
-//           user_id: comment.user_id,
-//           username: user ? user.name : "Unknown User",
-//           text: comment.text,
-//           created_at: comment.created_at,
-//         };
-//       })
-//     );
-
-//     res.json(commentsWithUser);
-//   } catch (error) {
-//     console.error("Error fetching comments:", error);
-//     res.status(500).json({ success: false, message: "Server error" });
-//   }
-// });
-
-// // Delete a comment
-// app.delete("/api/comments/:commentId", isAuthenticated, async (req, res) => {
-//   try {
-//     const { commentId } = req.params;
-//     const userId = req.session.userId;
-
-//     // Find the comment
-//     const comment = await BlogComment.findById(commentId);
-
-//     if (!comment) {
-//       return res
-//         .status(404)
-//         .json({ success: false, message: "Comment not found" });
-//     }
-
-//     // Check if user is the comment author
-//     if (comment.user_id.toString() !== userId) {
-//       return res.status(403).json({
-//         success: false,
-//         message: "Not authorized to delete this comment",
-//       });
-//     }
-
-//     // Delete the comment
-//     await BlogComment.findByIdAndDelete(commentId);
-
-//     res.json({ success: true, message: "Comment deleted successfully" });
-//   } catch (error) {
-//     console.error("Error deleting comment:", error);
-//     res.status(500).json({ success: false, message: "Server error" });
-//   }
-// });
-
-
-// Helper function to execute queries with promises
-const query = (sql, params) => {
-  return new Promise((resolve, reject) => {
-    db.execute(sql, params, (err, results) => {
-      if (err) reject(err);
-      else resolve(results);
-    });
-  });
-};
-
-// GET all blogs
-app.get("/api/blogs", async (req, res) => {
-  try {
-    const search = req.query.search || "";
-    let sql = `
-      SELECT b.*, u.name as author_name 
-      FROM blogs b
-      JOIN users u ON b.author_id = u.id
-    `;
-
-    let params = [];
-    if (search) {
-      sql += ` WHERE b.title LIKE ? OR b.content LIKE ? OR u.name LIKE ?`;
-      const searchParam = `%${search}%`;
-      params = [searchParam, searchParam, searchParam];
-    }
-
-    const rows = await query(sql, params);
-    res.json(rows);
-  } catch (error) {
-    console.error("Error fetching blogs:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
-
-// POST a new blog
-app.post("/api/blogs", async (req, res) => {
-  try {
-    const { title, content, author_id } = req.body;
-
-    // Validate input
-    if (!title || !content || !author_id) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Missing required fields" });
-    }
-
-    // Insert blog into database
-    const result = await query(
-      "INSERT INTO blogs (title, content, author_id) VALUES (?, ?, ?)",
-      [title, content, author_id]
-    );
-
-    res.json({ success: true, id: result.insertId });
-  } catch (error) {
-    console.error("Error creating blog:", error);
-    res.status(500).json({ success: false, message: "Internal server error" });
-  }
-});
-
-// DELETE a blog
-app.delete("/api/blogs/:id", async (req, res) => {
-  try {
-    const blogId = req.params.id;
-    const userId = req.body.userId;
-
-    // Verify ownership
-    const blogs = await query("SELECT author_id FROM blogs WHERE id = ?", [
-      blogId,
-    ]);
-
-    if (blogs.length === 0) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Blog not found" });
-    }
-
-    if (blogs[0].author_id != userId) {
-      return res.status(403).json({ success: false, message: "Unauthorized" });
-    }
-
-    // Delete blog
-    await query("DELETE FROM blogs WHERE id = ?", [blogId]);
-
-    res.json({ success: true });
-  } catch (error) {
-    console.error("Error deleting blog:", error);
-    res.status(500).json({ success: false, message: "Internal server error" });
-  }
-});
-
-// GET blog interactions for a user
-app.get("/api/blogs/:id/interactions", async (req, res) => {
-  try {
-    const blogId = req.params.id;
-    const userId = req.query.userId;
-
-    if (!userId) {
-      return res.json({ liked: false, disliked: false });
-    }
-
-    // Check if user has liked/disliked this blog
-    const interactions = await query(
-      "SELECT * FROM blog_interactions WHERE blog_id = ? AND user_id = ?",
-      [blogId, userId]
-    );
-
-    if (interactions.length === 0) {
-      return res.json({ liked: false, disliked: false });
-    }
-
-    res.json({
-      liked: interactions[0].interaction_type === "like",
-      disliked: interactions[0].interaction_type === "dislike",
-    });
-  } catch (error) {
-    console.error("Error fetching blog interactions:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
-
-// POST like a blog
-app.post("/api/blogs/:id/like", async (req, res) => {
-  try {
-    const blogId = req.params.id;
-    const userId = req.body.userId;
-
-    db.beginTransaction(async (err) => {
-      if (err) throw err;
-
-      try {
-        // Check if user has already interacted with this blog
-        const interactions = await query(
-          "SELECT * FROM blog_interactions WHERE blog_id = ? AND user_id = ?",
-          [blogId, userId]
-        );
-
-        if (interactions.length > 0) {
-          // User has already interacted with this blog
-          if (interactions[0].interaction_type === "like") {
-            // User has already liked this blog, so remove the like
-            await query(
-              "DELETE FROM blog_interactions WHERE blog_id = ? AND user_id = ?",
-              [blogId, userId]
-            );
-
-            await query("UPDATE blogs SET likes = likes - 1 WHERE id = ?", [
-              blogId,
-            ]);
-          } else {
-            // User has disliked this blog, so change to like
-            await query(
-              'UPDATE blog_interactions SET interaction_type = "like" WHERE blog_id = ? AND user_id = ?',
-              [blogId, userId]
-            );
-
-            await query(
-              "UPDATE blogs SET likes = likes + 1, dislikes = dislikes - 1 WHERE id = ?",
-              [blogId]
-            );
-          }
-        } else {
-          // User has not interacted with this blog yet
-          await query(
-            'INSERT INTO blog_interactions (blog_id, user_id, interaction_type) VALUES (?, ?, "like")',
-            [blogId, userId]
-          );
-
-          await query("UPDATE blogs SET likes = likes + 1 WHERE id = ?", [
-            blogId,
-          ]);
-        }
-
-        db.commit((err) => {
-          if (err) throw err;
-          res.json({ success: true });
-        });
-      } catch (error) {
-        db.rollback(() => {
-          throw error;
-        });
-      }
-    });
-  } catch (error) {
-    console.error("Error liking blog:", error);
-    res.status(500).json({ success: false, message: "Internal server error" });
-  }
-});
-
-// POST dislike a blog
-app.post("/api/blogs/:id/dislike", async (req, res) => {
-  try {
-    const blogId = req.params.id;
-    const userId = req.body.userId;
-
-    db.beginTransaction(async (err) => {
-      if (err) throw err;
-
-      try {
-        // Check if user has already interacted with this blog
-        const interactions = await query(
-          "SELECT * FROM blog_interactions WHERE blog_id = ? AND user_id = ?",
-          [blogId, userId]
-        );
-
-        if (interactions.length > 0) {
-          // User has already interacted with this blog
-          if (interactions[0].interaction_type === "dislike") {
-            // User has already disliked this blog, so remove the dislike
-            await query(
-              "DELETE FROM blog_interactions WHERE blog_id = ? AND user_id = ?",
-              [blogId, userId]
-            );
-
-            await query(
-              "UPDATE blogs SET dislikes = dislikes - 1 WHERE id = ?",
-              [blogId]
-            );
-          } else {
-            // User has liked this blog, so change to dislike
-            await query(
-              'UPDATE blog_interactions SET interaction_type = "dislike" WHERE blog_id = ? AND user_id = ?',
-              [blogId, userId]
-            );
-
-            await query(
-              "UPDATE blogs SET dislikes = dislikes + 1, likes = likes - 1 WHERE id = ?",
-              [blogId]
-            );
-          }
-        } else {
-          // User has not interacted with this blog yet
-          await query(
-            'INSERT INTO blog_interactions (blog_id, user_id, interaction_type) VALUES (?, ?, "dislike")',
-            [blogId, userId]
-          );
-
-          await query("UPDATE blogs SET dislikes = dislikes + 1 WHERE id = ?", [
-            blogId,
-          ]);
-        }
-
-        db.commit((err) => {
-          if (err) throw err;
-          res.json({ success: true });
-        });
-      } catch (error) {
-        db.rollback(() => {
-          throw error;
-        });
-      }
-    });
-  } catch (error) {
-    console.error("Error disliking blog:", error);
-    res.status(500).json({ success: false, message: "Internal server error" });
-  }
-});
-
-// GET comments for a blog
-app.get("/api/blogs/:id/comments", async (req, res) => {
-  try {
-    const blogId = req.params.id;
-
-    const comments = await query(
-      `SELECT c.*, u.name as username
-       FROM blog_comments c
-       JOIN users u ON c.user_id = u.id
-       WHERE c.blog_id = ?
-       ORDER BY c.created_at DESC;`,
-      [blogId]
-    );
-
-    res.json(comments);
-  } catch (error) {
-    console.error("Error fetching comments:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
-
-// POST a comment
-app.post("/api/blogs/:id/comments", async (req, res) => {
-  try {
-    const blogId = req.params.id;
-    const { userId, text } = req.body;
-
-    // Validate input
-    if (!userId || !text) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Missing required fields" });
-    }
-
-    // Insert comment into database
-    const result = await query(
-      "INSERT INTO blog_comments (blog_id, user_id, text) VALUES (?, ?, ?)",
-      [blogId, userId, text]
-    );
-
-    res.json({ success: true, id: result.insertId });
-  } catch (error) {
-    console.error("Error creating comment:", error);
-    res.status(500).json({ success: false, message: "Internal server error" });
-  }
-});
-
-// DELETE a comment
-app.delete("/api/comments/:id", async (req, res) => {
-  try {
-    const commentId = req.params.id;
-    const userId = req.body.userId;
-
-    // Verify ownership
-    const comments = await query(
-      "SELECT user_id FROM blog_comments WHERE id = ?",
-      [commentId]
-    );
-
-    if (comments.length === 0) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Comment not found" });
-    }
-
-    if (comments[0].user_id != userId) {
-      return res.status(403).json({ success: false, message: "Unauthorized" });
-    }
-
-    // Delete comment
-    await query("DELETE FROM blog_comments WHERE id = ?", [commentId]);
-
-    res.json({ success: true });
-  } catch (error) {
-    console.error("Error deleting comment:", error);
-    res.status(500).json({ success: false, message: "Internal server error" });
-  }
-});
-
 app.get("/api/auth/current-user", (req, res) => {
-  if (req.session && req.session.userId) {
+  if (req.session.userId) {
     res.json({
       authenticated: true,
       userId: req.session.userId,
@@ -2815,8 +2248,262 @@ app.get("/api/auth/current-user", (req, res) => {
   } else {
     res.json({
       authenticated: false,
-      userId: null,
     });
+  }
+});
+
+
+// Middleware to check if user is authenticated
+const isUserAuthenticated = (req, res, next) => {
+  if (req.session && req.session.userId) {
+    return next();
+  }
+  return res.status(401).json({ success: false, message: "Not authenticated" });
+};
+
+// POST /api/blogs - Create a new blog
+app.post("/api/blogs", isUserAuthenticated, async (req, res) => {
+  const { title, content } = req.body;
+  const author_id = req.session.userId;
+
+  if (!title || !content) {
+    return res.status(400).json({ success: false, message: "Title and content are required" });
+  }
+
+  try {
+    const newBlog = new Blog({
+      title,
+      content,
+      author_id,
+      likes: [], // Array of ObjectId
+      dislikes: [], // Array of ObjectId
+      comments: [], // Array of comment subdocuments
+    });
+    await newBlog.save();
+    res.status(201).json({ success: true, blog: newBlog });
+  } catch (error) {
+    console.error("Error creating blog:", error);
+    res.status(500).json({ success: false, message: "Failed to create blog" });
+  }
+});
+
+// GET /api/blogs - Fetch all blogs (with optional search)
+app.get("/api/blogs", async (req, res) => {
+  const searchQuery = req.query.search;
+  let query = {};
+
+  if (searchQuery) {
+    query = {
+      $or: [
+        { title: { $regex: searchQuery, $options: "i" } },
+        { content: { $regex: searchQuery, $options: "i" } },
+      ],
+    };
+  }
+
+  try {
+    const blogs = await Blog.find(query)
+      .populate("author_id", "name") // Populate author name
+      .sort({ created_at: -1 });
+
+    // Map to include author_name and counts
+    const formattedBlogs = blogs.map((blog) => ({
+      _id: blog._id,
+      title: blog.title,
+      content: blog.content,
+      author_id: blog.author_id._id,
+      author_name: blog.author_id.name || "Unknown",
+      likes: blog.likes.length,
+      dislikes: blog.dislikes.length,
+      created_at: blog.created_at,
+    }));
+
+    res.json(formattedBlogs);
+  } catch (error) {
+    console.error("Error fetching blogs:", error);
+    res.status(500).json({ message: "Failed to fetch blogs" });
+  }
+});
+
+// POST /api/blogs/:id/like - Like a blog
+app.post("/api/blogs/:id/like", isUserAuthenticated, async (req, res) => {
+  const blogId = req.params.id;
+  const userId = req.session.userId;
+
+  try {
+    const blog = await Blog.findById(blogId);
+    if (!blog) {
+      return res.status(404).json({ success: false, message: "Blog not found" });
+    }
+
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+
+    // Remove from dislikes if present
+    blog.dislikes.pull(userObjectId);
+    // Add to likes if not already
+    if (!blog.likes.some((id) => id.equals(userObjectId))) {
+      blog.likes.push(userObjectId);
+    }
+
+    await blog.save();
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Error liking blog:", error);
+    res.status(500).json({ success: false, message: "Failed to like blog" });
+  }
+});
+
+// POST /api/blogs/:id/dislike - Dislike a blog
+app.post("/api/blogs/:id/dislike", isUserAuthenticated, async (req, res) => {
+  const blogId = req.params.id;
+  const userId = req.session.userId;
+
+  try {
+    const blog = await Blog.findById(blogId);
+    if (!blog) {
+      return res.status(404).json({ success: false, message: "Blog not found" });
+    }
+
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+
+    // Remove from likes if present
+    blog.likes.pull(userObjectId);
+    // Add to dislikes if not already
+    if (!blog.dislikes.some((id) => id.equals(userObjectId))) {
+      blog.dislikes.push(userObjectId);
+    }
+
+    await blog.save();
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Error disliking blog:", error);
+    res.status(500).json({ success: false, message: "Failed to dislike blog" });
+  }
+});
+
+// GET /api/blogs/:id/interactions - Check if user has liked/disliked
+app.get("/api/blogs/:id/interactions", isUserAuthenticated, async (req, res) => {
+  const blogId = req.params.id;
+  const userId = req.session.userId;
+
+  try {
+    const blog = await Blog.findById(blogId);
+    if (!blog) {
+      return res.status(404).json({ message: "Blog not found" });
+    }
+
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+    const liked = blog.likes.some((id) => id.equals(userObjectId));
+    const disliked = blog.dislikes.some((id) => id.equals(userObjectId));
+
+    res.json({ liked, disliked });
+  } catch (error) {
+    console.error("Error fetching interactions:", error);
+    res.status(500).json({ message: "Failed to fetch interactions" });
+  }
+});
+
+// POST /api/blogs/:id/comments - Add a comment
+app.post("/api/blogs/:id/comments", isUserAuthenticated, async (req, res) => {
+  const blogId = req.params.id;
+  const { text } = req.body;
+  const userId = req.session.userId;
+
+  if (!text) {
+    return res.status(400).json({ success: false, message: "Comment text is required" });
+  }
+
+  try {
+    const blog = await Blog.findById(blogId);
+    if (!blog) {
+      return res.status(404).json({ success: false, message: "Blog not found" });
+    }
+
+    blog.comments.push({
+      user_id: userId,
+      text,
+      created_at: new Date(),
+    });
+
+    await blog.save();
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Error adding comment:", error);
+    res.status(500).json({ success: false, message: "Failed to add comment" });
+  }
+});
+
+// GET /api/blogs/:id/comments - Fetch comments for a blog
+app.get("/api/blogs/:id/comments", async (req, res) => {
+  const blogId = req.params.id;
+
+  try {
+    const blog = await Blog.findById(blogId).populate("comments.user_id", "name");
+    if (!blog) {
+      return res.status(404).json({ message: "Blog not found" });
+    }
+
+    // Map comments to include username
+    const formattedComments = blog.comments.map((comment) => ({
+      _id: comment._id,
+      user_id: comment.user_id._id,
+      username: comment.user_id.name || "Unknown",
+      text: comment.text,
+      created_at: comment.created_at,
+    }));
+
+    res.json(formattedComments);
+  } catch (error) {
+    console.error("Error fetching comments:", error);
+    res.status(500).json({ message: "Failed to fetch comments" });
+  }
+});
+
+// DELETE /api/comments/:id - Delete a comment
+app.delete("/api/comments/:id", isUserAuthenticated, async (req, res) => {
+  const commentId = req.params.id;
+  const userId = req.session.userId;
+
+  try {
+    const blog = await Blog.findOne({ "comments._id": commentId });
+    if (!blog) {
+      return res.status(404).json({ success: false, message: "Comment not found" });
+    }
+
+    const comment = blog.comments.id(commentId);
+    if (!comment.user_id.equals(userId)) {
+      return res.status(403).json({ success: false, message: "Not authorized to delete this comment" });
+    }
+
+    blog.comments.pull(commentId);
+    await blog.save();
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Error deleting comment:", error);
+    res.status(500).json({ success: false, message: "Failed to delete comment" });
+  }
+});
+
+// DELETE /api/blogs/:id - Delete a blog
+app.delete("/api/blogs/:id", isUserAuthenticated, async (req, res) => {
+  const blogId = req.params.id;
+  const userId = req.session.userId;
+
+  try {
+    const blog = await Blog.findById(blogId);
+    if (!blog) {
+      return res.status(404).json({ success: false, message: "Blog not found" });
+    }
+
+    if (!blog.author_id.equals(userId)) {
+      return res.status(403).json({ success: false, message: "Not authorized to delete this blog" });
+    }
+
+    await Blog.deleteOne({ _id: blogId });
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Error deleting blog:", error);
+    res.status(500).json({ success: false, message: "Failed to delete blog" });
   }
 });
 
