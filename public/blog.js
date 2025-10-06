@@ -69,7 +69,7 @@ function closeForm() {
   document.getElementById("blogTitle").value = "";
   document.getElementById("blogContent").value = "";
   document.getElementById("titleCharCount").textContent = "0/50";
-  document.getElementById("contentCharCount").textContent = "0/1000";
+  document.getElementById("contentCharCount").textContent = "0/10000";
 }
 
 // Handle form submission

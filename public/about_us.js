@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Team member image placeholder generation
     const memberImgs = document.querySelectorAll('.member-img');
     const colors = ['#3498db', '#2980b9', '#1abc9c', '#16a085', '#9b59b6'];
-    const icons = ['👨‍💼', '👩‍💼', '👨‍💻', '👩‍💻', '👨‍🏫'];
+    const icons = ['👨‍💼', '👩‍💼', '👩‍💻', '👨‍💻', '👨‍🏫'];
     
     memberImgs.forEach((img, index) => {
         // Create gradient background with team colors
