@@ -74,7 +74,7 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "public"));
 app.use(cors());
 app.use(bodyParser.json());
-const port = 4000;
+const port = 3000;
 
 // Use a more secure session configuration
 app.use(
