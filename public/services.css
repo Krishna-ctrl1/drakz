@@ -330,3 +330,129 @@ body {
         top: 10px;
     }
 }
+/* === NEW AND IMPROVED MODAL CONTENT STYLES === */
+
+.service-detail-title {
+    color: #1e293b;
+    margin-bottom: 25px;
+    font-size: 26px;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 15px;
+}
+
+/* Flex container for summary details */
+.account-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+    margin-bottom: 25px;
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.summary-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.summary-item .label {
+    font-size: 14px;
+    color: #64748b;
+    margin-bottom: 4px;
+}
+
+.summary-item .value {
+    font-size: 16px;
+    font-weight: 500;
+    color: #334155;
+}
+
+/* Section headers (like "Recent Payment History") */
+.payment-history h4,
+.documents h4 {
+    font-size: 18px;
+    color: #3b82f6;
+    margin-bottom: 15px;
+    margin-top: 25px;
+}
+
+/* Table styling for payment history */
+.history-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.history-table th, .history-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.history-table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+
+.history-table tbody tr:hover {
+    background-color: #f1f5f9;
+}
+
+.status-badge {
+    background-color: #d1fae5;
+    color: #059669;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* Documents list styling */
+.document-list {
+    list-style: none;
+    padding: 0;
+}
+
+.document-list li {
+    background-color: #f8f9fa;
+    padding: 12px 15px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #334155;
+    transition: background-color 0.2s ease;
+}
+
+.document-list li:hover {
+    background-color: #eef2ff;
+}
+
+.document-list i {
+    color: #ef4444; /* Red icon for PDF */
+}
+
+/* Action button at the bottom */
+.service-action {
+    margin-top: 30px;
+    text-align: right;
+}
+
+.action-button {
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.action-button:hover {
+    background-color: #2563eb;
+    transform: translateY(-2px);
+}
