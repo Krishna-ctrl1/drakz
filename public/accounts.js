@@ -101,7 +101,7 @@ function createChart() {
               weight: 'bold'
             }
           }
-    
+
         },
         y: {
           beginAtZero: true,
@@ -238,9 +238,8 @@ function filterTransactions(type) {
             <td>${tx.description}</td>
             <td>${tx.type}</td>
             <td>${tx.date}</td>
-            <td class="amount ${tx.amount > 0 ? "positive" : "negative"}">${
-      tx.amount > 0 ? "+" + tx.amount : tx.amount
-    }</td>
+            <td class="amount ${tx.amount > 0 ? "positive" : "negative"}">${tx.amount > 0 ? "+" + tx.amount : tx.amount
+      }</td>
             <td><button class="button">Download</button></td>
         </tr>`;
     tbody.innerHTML += row;
@@ -254,7 +253,7 @@ function toggleDetails(loanId) {
   // Remove any quotes from the ID if present
   const cleanId = loanId.replace(/['"]/g, '');
   const detailsElement = document.getElementById(`details-${cleanId}`);
-  
+
   if (detailsElement) {
     // Toggle display between none and block
     detailsElement.style.display = detailsElement.style.display === 'none' ? 'block' : 'none';
