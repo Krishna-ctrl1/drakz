@@ -37,37 +37,66 @@ function closeNav() {
 
 document.addEventListener("DOMContentLoaded", function () {
 
-    // --- 1. DATA STORE & PERSISTENCE ---
+    // --- 1. DATA STORE (No localStorage; data fetched from server) ---
 
-    // Load data from localStorage or initialize with default data if none exists.
-    let properties = JSON.parse(localStorage.getItem('properties')) || [{ id: 'prop1', name: 'Sunset Villa', value: 750000, location: '123 Sunset Boulevard', image: 'assets/images/apartment jpg for assets 2.jpg' }];
-    let policies = JSON.parse(localStorage.getItem('policies')) || [{ id: 'pol1', name: 'Home Insurance', number: 'HM-2024-089', property: 'Sunset Villa', coverage: 800000, renewalDate: '2024-12-31' }];
-    let metals = JSON.parse(localStorage.getItem('metals')) || [{ id: 'met1', type: 'Gold', amount: '250', unit: 'g', value: 15750, purchaseDate: '2023-06-15' }];
-    let newPropertyImage = null;
+    let properties = [];
+    let policies = [];
+    let metals = [];
 
-    // Function to save all data to localStorage
-    const saveData = () => {
-        localStorage.setItem('properties', JSON.stringify(properties));
-        localStorage.setItem('policies', JSON.stringify(policies));
-        localStorage.setItem('metals', JSON.stringify(metals));
-    };
+    // --- 2. FETCH FUNCTIONS (To load data from server) ---
 
-    // --- 2. RENDER FUNCTIONS (To draw data onto the page) ---
+    async function fetchProperties() {
+        try {
+            const res = await fetch('/properties');
+            if (!res.ok) throw new Error('Failed to fetch properties');
+            properties = await res.json();
+            renderProperties();
+        } catch (error) {
+            console.error('Error fetching properties:', error);
+            alert('Failed to load properties. Please try again.');
+        }
+    }
+
+    async function fetchPolicies() {
+        try {
+            const res = await fetch('/api/policies');
+            if (!res.ok) throw new Error('Failed to fetch policies');
+            policies = await res.json();
+            renderPolicies();
+        } catch (error) {
+            console.error('Error fetching policies:', error);
+            alert('Failed to load policies. Please try again.');
+        }
+    }
+
+    async function fetchMetals() {
+        try {
+            const res = await fetch('/precious-holdings');
+            if (!res.ok) throw new Error('Failed to fetch precious holdings');
+            metals = await res.json();
+            renderMetals();
+        } catch (error) {
+            console.error('Error fetching precious holdings:', error);
+            alert('Failed to load precious holdings. Please try again.');
+        }
+    }
+
+    // --- 3. RENDER FUNCTIONS (To draw data onto the page) ---
 
     const renderProperties = () => {
         const grid = document.getElementById('propertyGrid');
         if (!grid) return;
         grid.innerHTML = properties.map(prop => `
-            <div class="property-card" id="${prop.id}">
-                <div class="property-image"><img src="${prop.image || 'assets/images/default-property.jpg'}" alt="${prop.name}"></div>
+            <div class="property-card" id="${prop._id}">
+                <div class="property-image"><img src="${prop.image_url || 'assets/images/default-property.jpg'}" alt="${prop.property_name}"></div>
                 <div class="property-details">
-                    <h4>${prop.name}</h4>
-                    <p>Value: $${prop.value.toLocaleString()}</p>
+                    <h4>${prop.property_name}</h4>
+                    <p>Value: $${prop.property_value.toLocaleString()}</p>
                     <p>Location: ${prop.location}</p>
                 </div>
                 <div class="property-actions">
-                    <button class="action-btn edit-btn" onclick="editProperty('${prop.id}')"><i class="fas fa-edit"></i></button>
-                    <button class="action-btn delete-btn" onclick="deleteProperty('${prop.id}')"><i class="fas fa-trash"></i></button>
+                    <button class="action-btn edit-btn" onclick="editProperty('${prop._id}')"><i class="fas fa-edit"></i></button>
+                    <button class="action-btn delete-btn" onclick="deleteProperty('${prop._id}')"><i class="fas fa-trash"></i></button>
                 </div>
             </div>`).join('');
     };
@@ -76,18 +105,18 @@ document.addEventListener("DOMContentLoaded", function () {
         const list = document.querySelector('.policy-list');
         if (!list) return;
         list.innerHTML = policies.map(pol => `
-            <div class="policy-card" id="${pol.id}">
+            <div class="policy-card" id="${pol._id}">
                 <div class="policy-icon"><i class="fas fa-shield-alt"></i></div>
                 <div class="policy-content">
-                    <h4>${pol.name}</h4>
-                    <p>Policy Number: ${pol.number}</p>
-                    <p>Property: ${pol.property}</p>
-                    <p>Coverage: $${pol.coverage.toLocaleString()}</p>
-                    <p>Renewal Date: ${new Date(pol.renewalDate).toLocaleDateString()}</p>
+                    <h4>${pol.policy_name}</h4>
+                    <p>Policy Number: ${pol.policy_number}</p>
+                    <p>Property: ${pol.property_description}</p>
+                    <p>Coverage: $${pol.coverage_amount.toLocaleString()}</p>
+                    <p>Renewal Date: ${new Date(pol.renewal_date).toLocaleDateString()}</p>
                 </div>
                 <div class="policy-actions">
-                    <button class="action-btn edit-btn" onclick="editPolicy('${pol.id}')"><i class="fas fa-edit"></i></button>
-                    <button class="action-btn delete-btn" onclick="deletePolicy('${pol.id}')"><i class="fas fa-trash"></i></button>
+                    <button class="action-btn edit-btn" onclick="editPolicy('${pol._id}')"><i class="fas fa-edit"></i></button>
+                    <button class="action-btn delete-btn" onclick="deletePolicy('${pol._id}')"><i class="fas fa-trash"></i></button>
                 </div>
             </div>`).join('');
     };
@@ -96,22 +125,22 @@ document.addEventListener("DOMContentLoaded", function () {
         const list = document.querySelector('.metals-list');
         if (!list) return;
         list.innerHTML = metals.map(met => `
-            <div class="metal-card" id="${met.id}">
-                <div class="metal-icon ${met.type.toLowerCase()}"><i class="fas fa-coins"></i></div>
+            <div class="metal-card" id="${met._id}">
+                <div class="metal-icon ${met.metal_type.toLowerCase()}"><i class="fas fa-coins"></i></div>
                 <div class="metal-details">
-                    <h4>${met.type}</h4>
-                    <p>Amount: ${met.amount} ${met.unit}</p>
+                    <h4>${met.metal_type.charAt(0).toUpperCase() + met.metal_type.slice(1)}</h4>
+                    <p>Amount: ${met.amount} ${met.amount_unit}</p>
                     <p>Value: $${met.value.toLocaleString()}</p>
-                    <p>Date of Purchase: ${new Date(met.purchaseDate).toLocaleDateString()}</p>
+                    <p>Date of Purchase: ${new Date(met.date_of_purchase).toLocaleDateString()}</p>
                 </div>
                 <div class="metal-actions">
-                    <button class="action-btn edit-btn" onclick="editMetal('${met.id}')"><i class="fas fa-edit"></i></button>
-                    <button class="action-btn delete-btn" onclick="deleteMetal('${met.id}')"><i class="fas fa-trash"></i></button>
+                    <button class="action-btn edit-btn" onclick="editMetal('${met._id}')"><i class="fas fa-edit"></i></button>
+                    <button class="action-btn delete-btn" onclick="deleteMetal('${met._id}')"><i class="fas fa-trash"></i></button>
                 </div>
             </div>`).join('');
     };
 
-    // --- 3. MODAL AND FORM HANDLING ---
+    // --- 4. MODAL AND FORM HANDLING ---
 
     // Function to close any modal
     window.closeModal = (type) => {
@@ -126,7 +155,7 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById('modalTitle').innerText = 'Add New Property';
         document.getElementById('selectedFileName').textContent = 'No file selected';
         document.getElementById('propertyImagePreview').src = 'assets/images/default-property.jpg';
-        newPropertyImage = null;
+        document.getElementById('propertyImage').value = '';
         document.getElementById('propertyModal').style.display = 'block';
     });
 
@@ -144,14 +173,13 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById('metalModal').style.display = 'block';
     });
 
-    // Handle file input change
+    // Handle file input change for preview
     document.getElementById('propertyImage').addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (file) {
             const reader = new FileReader();
             reader.onload = (event) => {
-                newPropertyImage = event.target.result;
-                document.getElementById('propertyImagePreview').src = newPropertyImage;
+                document.getElementById('propertyImagePreview').src = event.target.result;
                 document.getElementById('selectedFileName').textContent = file.name;
             };
             reader.readAsDataURL(file);
@@ -159,141 +187,168 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // Attach event listeners for form submissions
-    document.getElementById('propertyForm').addEventListener('submit', (e) => {
+    document.getElementById('propertyForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const id = document.getElementById('propertyId').value;
-        const existingProperty = properties.find(p => p.id === id);
-
-        const assetData = {
-            id: id || `prop${Date.now()}`,
-            name: document.getElementById('propertyName').value,
-            value: parseFloat(document.getElementById('propertyValue').value) || 0,
-            location: document.getElementById('propertyLocation').value,
-            image: newPropertyImage || (existingProperty ? existingProperty.image : 'assets/images/default-property.jpg')
-        };
-
-        if (id) {
-            properties = properties.map(p => p.id === id ? assetData : p);
-        } else {
-            properties.push(assetData);
+        const formData = new FormData();
+        formData.append('propertyName', document.getElementById('propertyName').value);
+        formData.append('propertyValue', document.getElementById('propertyValue').value);
+        formData.append('propertyLocation', document.getElementById('propertyLocation').value);
+        const fileInput = document.getElementById('propertyImage');
+        if (fileInput.files[0]) {
+            formData.append('propertyImage', fileInput.files[0]);
         }
-
-        saveData();
-        renderProperties();
-        closeModal('property');
+        const url = id ? `/properties/${id}` : '/properties';
+        const method = id ? 'PUT' : 'POST';
+        try {
+            const res = await fetch(url, { method, body: formData });
+            if (!res.ok) throw new Error('Failed to save property');
+            closeModal('property');
+            await fetchProperties();
+        } catch (error) {
+            console.error('Error saving property:', error);
+            alert('Failed to save property. Please try again.');
+        }
     });
 
-    document.getElementById('policyForm').addEventListener('submit', (e) => {
+    document.getElementById('policyForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const id = document.getElementById('policyId').value;
-        const assetData = {
-            id: id || `pol${Date.now()}`,
-            name: document.getElementById('policyName').value,
-            number: document.getElementById('policyNumber').value,
-            property: document.getElementById('policyProperty').value,
-            coverage: parseFloat(document.getElementById('policyCoverage').value) || 0,
-            renewalDate: document.getElementById('policyRenewalDate').value,
+        const data = {
+            policy_name: document.getElementById('policyName').value,
+            policy_number: document.getElementById('policyNumber').value,
+            property_description: document.getElementById('policyProperty').value,
+            coverage_amount: parseFloat(document.getElementById('policyCoverage').value) || 0,
+            renewal_date: document.getElementById('policyRenewalDate').value,
         };
-
-        if (id) { policies = policies.map(p => p.id === id ? assetData : p); }
-        else { policies.push(assetData); }
-
-        saveData();
-        renderPolicies();
-        closeModal('policy');
+        const url = id ? `/api/policies/${id}` : '/api/policies';
+        const method = id ? 'PUT' : 'POST';
+        try {
+            const res = await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            if (!res.ok) throw new Error('Failed to save policy');
+            closeModal('policy');
+            await fetchPolicies();
+        } catch (error) {
+            console.error('Error saving policy:', error);
+            alert('Failed to save policy. Please try again.');
+        }
     });
 
-    document.getElementById('metalForm').addEventListener('submit', (e) => {
+    document.getElementById('metalForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const id = document.getElementById('metalId').value;
-        const assetData = {
-            id: id || `met${Date.now()}`,
-            type: document.getElementById('metalType').value,
-            amount: document.getElementById('metalAmount').value,
-            unit: document.getElementById('metalUnit').value,
-            value: parseFloat(document.getElementById('metalValue').value) || 0,
-            purchaseDate: document.getElementById('metalPurchaseDate').value,
+        const data = {
+            metalType: document.getElementById('metalType').value,
+            metalAmount: document.getElementById('metalAmount').value,
+            metalUnit: document.getElementById('metalUnit').value,
+            metalValue: parseFloat(document.getElementById('metalValue').value) || 0,
+            metalPurchaseDate: document.getElementById('metalPurchaseDate').value,
         };
-
-        if (id) { metals = metals.map(m => m.id === id ? assetData : m); }
-        else { metals.push(assetData); }
-
-        saveData();
-        renderMetals();
-        closeModal('metal');
+        const url = id ? `/precious-holdings/${id}` : '/precious-holdings';
+        const method = id ? 'PUT' : 'POST';
+        try {
+            const res = await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            if (!res.ok) throw new Error('Failed to save precious holding');
+            closeModal('metal');
+            await fetchMetals();
+        } catch (error) {
+            console.error('Error saving precious holding:', error);
+            alert('Failed to save precious holding. Please try again.');
+        }
     });
 
-    // --- 4. GLOBAL FUNCTIONS for inline onclick attributes ---
+    // --- 5. GLOBAL FUNCTIONS for inline onclick attributes ---
 
     // Property Functions
     window.editProperty = (id) => {
-        const prop = properties.find(p => p.id === id);
+        const prop = properties.find(p => p._id === id);
         if (prop) {
-            document.getElementById('propertyId').value = prop.id;
-            document.getElementById('propertyName').value = prop.name;
-            document.getElementById('propertyValue').value = prop.value;
+            document.getElementById('propertyId').value = prop._id;
+            document.getElementById('propertyName').value = prop.property_name;
+            document.getElementById('propertyValue').value = prop.property_value;
             document.getElementById('propertyLocation').value = prop.location;
-            document.getElementById('propertyImagePreview').src = prop.image || 'assets/images/default-property.jpg';
+            document.getElementById('propertyImagePreview').src = prop.image_url || 'assets/images/default-property.jpg';
             document.getElementById('selectedFileName').textContent = 'No new file selected';
-            newPropertyImage = null;
+            document.getElementById('propertyImage').value = '';
             document.getElementById('modalTitle').innerText = 'Edit Property';
             document.getElementById('propertyModal').style.display = 'block';
         }
     };
-    window.deleteProperty = (id) => {
+    window.deleteProperty = async (id) => {
         if (confirm('Are you sure you want to delete this property?')) {
-            properties = properties.filter(p => p.id !== id);
-            saveData();
-            renderProperties();
+            try {
+                const res = await fetch(`/properties/${id}`, { method: 'DELETE' });
+                if (!res.ok) throw new Error('Failed to delete property');
+                await fetchProperties();
+            } catch (error) {
+                console.error('Error deleting property:', error);
+                alert('Failed to delete property. Please try again.');
+            }
         }
     };
 
     // Policy Functions
     window.editPolicy = (id) => {
-        const pol = policies.find(p => p.id === id);
+        const pol = policies.find(p => p._id === id);
         if (pol) {
-            document.getElementById('policyId').value = pol.id;
-            document.getElementById('policyName').value = pol.name;
-            document.getElementById('policyNumber').value = pol.number;
-            document.getElementById('policyProperty').value = pol.property;
-            document.getElementById('policyCoverage').value = pol.coverage;
-            document.getElementById('policyRenewalDate').value = pol.renewalDate;
+            document.getElementById('policyId').value = pol._id;
+            document.getElementById('policyName').value = pol.policy_name;
+            document.getElementById('policyNumber').value = pol.policy_number;
+            document.getElementById('policyProperty').value = pol.property_description;
+            document.getElementById('policyCoverage').value = pol.coverage_amount;
+            document.getElementById('policyRenewalDate').value = pol.renewal_date.split('T')[0]; // Format for input
             document.getElementById('policyModalTitle').innerText = 'Edit Insurance Policy';
             document.getElementById('policyModal').style.display = 'block';
         }
     };
-    window.deletePolicy = (id) => {
+    window.deletePolicy = async (id) => {
         if (confirm('Are you sure you want to delete this policy?')) {
-            policies = policies.filter(p => p.id !== id);
-            saveData();
-            renderPolicies();
+            try {
+                const res = await fetch(`/api/policies/${id}`, { method: 'DELETE' });
+                if (!res.ok) throw new Error('Failed to delete policy');
+                await fetchPolicies();
+            } catch (error) {
+                console.error('Error deleting policy:', error);
+                alert('Failed to delete policy. Please try again.');
+            }
         }
     };
 
     // Metal Functions
     window.editMetal = (id) => {
-        const met = metals.find(m => m.id === id);
+        const met = metals.find(m => m._id === id);
         if (met) {
-            document.getElementById('metalId').value = met.id;
-            document.getElementById('metalType').value = met.type;
+            document.getElementById('metalId').value = met._id;
+            document.getElementById('metalType').value = met.metal_type.charAt(0).toUpperCase() + met.metal_type.slice(1);
             document.getElementById('metalAmount').value = met.amount;
-            document.getElementById('metalUnit').value = met.unit;
+            document.getElementById('metalUnit').value = met.amount_unit;
             document.getElementById('metalValue').value = met.value;
-            document.getElementById('metalPurchaseDate').value = met.purchaseDate;
+            document.getElementById('metalPurchaseDate').value = met.date_of_purchase.split('T')[0]; // Format for input
             document.getElementById('metalModalTitle').innerText = 'Edit Precious Holding';
             document.getElementById('metalModal').style.display = 'block';
         }
     };
-    window.deleteMetal = (id) => {
+    window.deleteMetal = async (id) => {
         if (confirm('Are you sure you want to delete this precious holding?')) {
-            metals = metals.filter(m => m.id !== id);
-            saveData();
-            renderMetals();
+            try {
+                const res = await fetch(`/precious-holdings/${id}`, { method: 'DELETE' });
+                if (!res.ok) throw new Error('Failed to delete precious holding');
+                await fetchMetals();
+            } catch (error) {
+                console.error('Error deleting precious holding:', error);
+                alert('Failed to delete precious holding. Please try again.');
+            }
         }
     };
 
-    // --- 5. INITIAL PAGE RENDER ---
-    renderProperties();
-    renderPolicies();
-    renderMetals();
+    // --- 6. INITIAL PAGE LOAD ---
+    Promise.all([fetchProperties(), fetchPolicies(), fetchMetals()]);
 });
