@@ -98,7 +98,7 @@ document.addEventListener("DOMContentLoaded", function () {
     return labels;
   }
 
-  function generateData(timeframe) {
+  /* function generateData(timeframe) {
     if (timeframe === "1D")
       return Array(24)
         .fill()
@@ -115,7 +115,31 @@ document.addEventListener("DOMContentLoaded", function () {
       return Array(12)
         .fill()
         .map(() => Math.floor(Math.random() * 200) + 100);
-  }
+  } */
+ function generateData(timeframe) {
+  const dataSets = {
+    "1D": [
+      120, 135, 150, 160, 180, 200, 210, 190,
+      170, 160, 150, 145, 155, 165, 175, 185,
+      195, 205, 215, 220, 210, 190, 170, 150
+    ],
+    "1M": [
+      150, 152, 148, 160, 165, 170, 172, 168, 175, 178,
+      180, 182, 179, 185, 190, 188, 192, 195, 198, 200,
+      205, 207, 210, 212, 208, 215, 218, 220, 225, 230, 235
+    ],
+    "6M": [
+      180, 195, 210, 205, 220, 240
+    ],
+    "1Y": [
+      150, 155, 160, 170, 180, 175, 190, 200, 195, 210, 220, 230
+    ]
+  };
+
+  return dataSets[timeframe] || [];
+}
+
+
 
   function updateChart(timeframe) {
     investmentChart.data.labels = generateLabels(timeframe);

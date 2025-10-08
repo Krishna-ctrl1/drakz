@@ -807,24 +807,24 @@ function displayCreditScore(creditScores) {
     console.error("No credit scores available");
     return;
   }
-  
+
   // Get the most recent credit score
   const latestScore = creditScores[creditScores.length - 1];
   const score = parseInt(latestScore.credit_score);
-  
+
   // Get all the necessary elements based on your actual HTML structure
   const scoreMarker = document.querySelector(".credit-score-marker");
   const gaugeValue = document.querySelector(".gauge-value");
   const scoreValueText = document.querySelector(".credit-score-value");
   const scoreStatusElement = document.querySelector(".credit-score-status");
-  
+
   console.log("DOM Elements found:", {
     scoreMarker,
     gaugeValue, // Include this in the log
     scoreValueText,
     scoreStatusElement,
   });
-  
+
   // Check if ALL required elements exist
   if (!scoreMarker || !gaugeValue || !scoreValueText || !scoreStatusElement) {
     console.error("Required DOM elements not found!");
@@ -834,30 +834,30 @@ function displayCreditScore(creditScores) {
       scoreMarker: !scoreMarker,
       gaugeValue: !gaugeValue,
       scoreValueText: !scoreValueText,
-      scoreStatusElement: !scoreStatusElement
+      scoreStatusElement: !scoreStatusElement,
     });
-    
+
     if (container) {
       console.log("Container HTML:", container.outerHTML);
     }
     return;
   }
-  
+
   // Update the Gauge Value
   gaugeValue.textContent = score;
-  
+
   // Rest of your code remains the same...
   const minScore = 300;
   const maxScore = 850;
   const scoreRange = maxScore - minScore;
   const scorePercentage = ((score - minScore) / scoreRange) * 100;
-  
+
   try {
     // Update the marker position
     scoreMarker.style.left = `${scorePercentage}%`;
     scoreValueText.style.left = `${scorePercentage}%`;
     scoreValueText.textContent = `${score}`;
-    
+
     // Determine credit score status
     let status;
     if (score >= 800) {
@@ -871,19 +871,18 @@ function displayCreditScore(creditScores) {
     } else {
       status = "POOR";
     }
-    
+
     scoreStatusElement.textContent = status;
-    
+
     // Update the container class based on status
     const containerStatusDiv = scoreStatusElement.parentElement;
     containerStatusDiv.className = status.toLowerCase();
-    
+
     console.log("Credit score updated successfully:", {
       score,
       status,
-      percentagePosition: `${scorePercentage}%`
+      percentagePosition: `${scorePercentage}%`,
     });
-    
   } catch (error) {
     console.error("Error updating credit score display:", error);
   }
@@ -1189,20 +1188,48 @@ document.head.insertAdjacentHTML(
 
 // Function to check premium status and show/hide button
 function checkPremiumStatus() {
-  fetch("/api/dashboard")
-    .then((response) => response.json())
+  console.log("🚀 Checking premium status...");
+
+  fetch("/api/user/premium-status")
+    .then((response) => {
+      console.log("📡 Response status:", response.status);
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      return response.json();
+    })
     .then((data) => {
-      const isPremium = data.user.is_premium === 1;
+      console.log("📊 Response data:", data);
+
+      if (!data.success) {
+        console.error("❌ Error fetching premium status:", data.error);
+        return;
+      }
+
+      const isPremium = data.isPremium;
+      console.log("💎 Is premium user:", isPremium);
+
       const premiumButton = document.getElementById("premiumButton");
+
+      if (!premiumButton) {
+        console.error(
+          "❌ Premium button element not found! Make sure an element with id='premiumButton' exists in your HTML"
+        );
+        return;
+      }
 
       // Show button only for non-premium users
       if (!isPremium) {
+        console.log("👀 Showing premium button");
         premiumButton.style.display = "inline-block";
       } else {
+        console.log("🙈 Hiding premium button");
         premiumButton.style.display = "none";
       }
     })
-    .catch((error) => console.error("Error fetching user data:", error));
+    .catch((error) => {
+      console.error("❌ Fetch error:", error);
+    });
 }
 
 // Check premium status when page loads
@@ -1645,13 +1672,21 @@ function processPayment(modalOverlay) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({}),
+    credentials: "include", // Important: include cookies for session
   })
-    .then((response) => {
+    .then(async (response) => {
       console.log("Response status:", response.status);
+
+      // Get the response data regardless of status code
+      const data = await response.json();
+      console.log("Response data:", data);
+
+      // Now check if response was ok
       if (!response.ok) {
-        throw new Error("Failed to upgrade to premium");
+        throw new Error(data.error || `Server error: ${response.status}`);
       }
-      return response.json();
+
+      return data;
     })
     .then((data) => {
       console.log("Success data:", data);
@@ -1671,7 +1706,8 @@ function processPayment(modalOverlay) {
     })
     .catch((error) => {
       console.error("Error:", error);
-      alert("Unable to complete premium upgrade. Please try again.");
+      // Show more specific error message
+      alert(`Unable to complete premium upgrade: ${error.message}`);
       completePaymentBtn.innerHTML = "Complete Payment";
       completePaymentBtn.disabled = false;
     });

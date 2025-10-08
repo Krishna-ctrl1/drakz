@@ -3668,6 +3668,6 @@ module.exports = app;
 module.exports = { app, db };
 
 // Start the server
-server.listen(port, () => {
+app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
