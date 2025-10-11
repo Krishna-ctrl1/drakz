@@ -10,11 +10,9 @@
     <link rel="stylesheet" href="services.css">
 </head>
 <body>
-    <!-- Top Navigation -->
     <header class="header">
         <div class="left">
             <span class="logo">D R A K Z</span>
-            
         </div>
         <div class="search-bar">
             <i class="fas fa-search"></i>
@@ -27,150 +25,124 @@
                 <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="User">
             </div>
         </div>
-        
     </header>
     
     <div class="main-container">
         <div class="sidebar" id="mySidebar">
-            <!-- Close Button (visible when sidebar is open) -->
             <a href="javascript:void(0)" class="closebtn" id="close-button" onclick="closeNav()">
-                <img width="25" src="assets/icons/sidebarclose.png">
+                <img width="25" src="assets/icons/sidebarclose.png" alt="Close Sidebar">
             </a>
            
             <ul class="sidebar-list">
-                <a href="dashboard.html">
-                    <li><i class="fas fa-home"></i> <span>Dashboard</span></li>
-                </a>
-                <a href="accounts.html">
-                    <li><i class="fas fa-user"></i> <span>Accounts</span></li>
-                </a>
-                <a href="investments.html">
-                    <li><i class="fa-solid fa-chart-column"></i></i> <span>Investments</span></li>
-                </a>
-                <a href="credit_cards.html">
-                    <li><i class="fas fa-credit-card"></i> <span>Credit Cards</span></li>
-                </a>
-                <a href="blog.html">
-                    <li><i class="fa-solid fa-blog"></i> <span>Blog</span></li>
-                </a>
-                <a href="#">
-                    <li class="active"><i class="fas fa-tools"></i> <span>Services</span></li>
-                </a>
-                <a href="My_privilege.html">
-                    <li><i class="fas fa-gift"></i> <span>My Privileges</span></li>
-                </a>
-                <a href="drakz_chatbot.html">
-                    <li><i class="fas fa-robot"></i>  <span>FinBot</span></li>
-                  </a>
-                <a href="settings.html">
-                    <li><i class="fas fa-cog"></i> <span>Settings</span></li>
-                </a>
+                <a href="dashboard.html"><li><i class="fas fa-home"></i> <span>Dashboard</span></li></a>
+                <a href="accounts.html"><li><i class="fas fa-user"></i> <span>Accounts</span></li></a>
+                <a href="investments.html"><li><i class="fa-solid fa-chart-column"></i> <span>Investments</span></li></a>
+                <a href="credit_cards.html"><li><i class="fas fa-credit-card"></i> <span>Credit Cards</span></li></a>
+                <a href="blog.html"><li><i class="fa-solid fa-blog"></i> <span>Blog</span></li></a>
+                <a href="#"><li class="active"><i class="fas fa-tools"></i> <span>Services</span></li></a>
+                <a href="My_privilege.html"><li><i class="fas fa-gift"></i> <span>My Privileges</span></li></a>
+                <a href="drakz_chatbot.html"><li><i class="fas fa-robot"></i> <span>FinBot</span></li></a>
+                <a href="settings.html"><li><i class="fas fa-cog"></i> <span>Settings</span></li></a>
             </ul>
         </div>
     
-        <!-- Main Content -->
         <div class="content" id="main">
-            <!-- Moved heading to top -->
             <h2 class="services-heading">Need any Service</h2>
             
             <div class="service-cards">
                 <div class="service-card" onclick="showServiceDetails('bill-pay')">
-                    <div class="service-icon blue">
-                        <i class="fas fa-file-invoice-dollar"></i>
-                    </div>
+                    <div class="service-icon blue"><i class="fas fa-file-invoice-dollar"></i></div>
                     <h3>Bill Pay</h3>
                     <p>Pay your bills online</p>
                 </div>
                 <div class="service-card" onclick="showServiceDetails('merchant-services')">
-                    <div class="service-icon yellow">
-                        <i class="fas fa-store"></i>
-                    </div>
+                    <div class="service-icon yellow"><i class="fas fa-store"></i></div>
                     <h3>Merchant Services</h3>
                     <p>Payment solutions for businesses</p>
                 </div>
                 <div class="service-card" onclick="showServiceDetails('treasury-services')">
-                    <div class="service-icon green">
-                        <i class="fas fa-landmark"></i>
-                    </div>
+                    <div class="service-icon green"><i class="fas fa-landmark"></i></div>
                     <h3>Treasury Services</h3>
                     <p>Cash management solutions</p>
                 </div>
             </div>
 
-            <!-- Services List -->
             <div class="services-list">
-                <!-- Removed "Bank Services List" heading -->
-                
-                <!-- Service Items -->
                 <h2 class="services-heading">Your Services</h2>
-                <div class="service-item">
-                    <div class="service-icon" style="background-color: #fee2e2;">
-                        <i class="fas fa-briefcase" style="color: #ef4444;"></i>
-                    </div>
-
+                
+                <div class="service-item" onclick="showUserLoanDetails()">
+                    <div class="service-icon" style="background-color: #fee2e2;"><i class="fas fa-briefcase" style="color: #ef4444;"></i></div>
                     <div class="service-details">
-                        <div class="service-info">
-                            <h3>Your Loans</h3>
-                            <p>View your active loans</p>
-                        </div>
-                        <div class="service-info">
-                            <p>Home Loan: $240,000</p>
-                            <p>Next payment: 04/15/2025</p>
-                        </div>
-                        <div class="service-info">
-                            <p>Auto Loan: $18,500</p>
-                            <p>Next payment: 03/28/2025</p>
-                        </div>
-                        <a href="#" class="view-details" onclick="showUserLoanDetails()">View Details</a>
+                        <div class="service-info"><h3>Your Loans</h3><p>View your active loans</p></div>
+                        <div class="service-info"><p>Home Loan: ₹2,400,000</p><p>Next payment: 15/10/2025</p></div>
+                        <div class="service-info"><p>Auto Loan: ₹185,000</p><p>Next payment: 28/10/2025</p></div>
+                        <a href="#" class="view-details">View Details</a>
                     </div>
                 </div>
 
-                <div class="service-item">
-                    <div class="service-icon" style="background-color: #fef3c7;">
-                        <i class="fas fa-wallet" style="color: #d97706;"></i>
-                    </div>
+                <div class="service-item" onclick="showAccountReceipts()">
+                    <div class="service-icon" style="background-color: #fef3c7;"><i class="fas fa-wallet" style="color: #d97706;"></i></div>
                     <div class="service-details">
-                        <div class="service-info">
-                            <h3>Account Receipts</h3>
-                            <p>Your transaction history</p>
-                        </div>
-                        <div class="service-info">
-                            <p>Recent transactions: 24</p>
-                            <p>Last month: 86 transactions</p>
-                        </div>
-                        <div class="service-info">
-                            <p>Statements: 6 available</p>
-                            <p>Last statement: 03/01/2025</p>
-                        </div>
-                        <a href="#" class="view-details" onclick="showAccountReceipts()">View Details</a>
+                        <div class="service-info"><h3>Account Receipts</h3><p>Your transaction history</p></div>
+                        <div class="service-info"><p>Recent transactions: 24</p><p>Last month: 86 transactions</p></div>
+                        <div class="service-info"><p>Statements: 6 available</p><p>Last statement: 01/10/2025</p></div>
+                        <a href="#" class="view-details">View Details</a>
                     </div>
                 </div>
 
-                <div class="service-item">
-                    <div class="service-icon" style="background-color: #dbeafe;">
-                        <i class="fas fa-piggy-bank" style="color: #3b82f6;"></i>
-                    </div>
+                <div class="service-item" onclick="showSavingsDetails()">
+                    <div class="service-icon" style="background-color: #dbeafe;"><i class="fas fa-piggy-bank" style="color: #3b82f6;"></i></div>
                     <div class="service-details">
-                        <div class="service-info">
-                            <h3>Your Savings</h3>
-                            <p>Track your savings goals</p>
-                        </div>
-                        <div class="service-info">
-                            <p>Balance: $12,345.67</p>
-                            <p>Interest rate: 2.85%</p>
-                        </div>
-                        <div class="service-info">
-                            <p>Goal progress: 68%</p>
-                            <p>Next milestone: $15,000</p>
-                        </div>
-                        <a href="#" class="view-details" onclick="showSavingsDetails()">View Details</a>
+                        <div class="service-info"><h3>Your Savings</h3><p>Track your savings goals</p></div>
+                        <div class="service-info"><p>Balance: ₹1,234,567</p><p>Interest rate: 2.85%</p></div>
+                        <div class="service-info"><p>Goal progress: 68%</p><p>Next milestone: ₹1,500,000</p></div>
+                        <a href="#" class="view-details">View Details</a>
+                    </div>
+                </div>
+
+                <div class="service-item" onclick="showInsuranceDetails()">
+                    <div class="service-icon" style="background-color: #e0f2f1;"><i class="fas fa-shield-alt" style="color: #00796b;"></i></div>
+                    <div class="service-details">
+                        <div class="service-info"><h3>Insurance Policies</h3><p>View and manage your policies</p></div>
+                        <div class="service-info"><p>Active Policies: 3</p><p>Total Premium: ₹45,000/year</p></div>
+                        <div class="service-info"><p>Next Renewal: 01/12/2025</p><p>Life, Auto, Home</p></div>
+                        <a href="#" class="view-details">View Details</a>
+                    </div>
+                </div>
+
+                <div class="service-item" onclick="showInvestmentDetails()">
+                    <div class="service-icon" style="background-color: #fce4ec;"><i class="fas fa-chart-line" style="color: #d81b60;"></i></div>
+                    <div class="service-details">
+                        <div class="service-info"><h3>Investment Portfolio</h3><p>Track your investments</p></div>
+                        <div class="service-info"><p>Total Value: ₹7,582,000</p><p>24h Change: +₹23,000 (+0.3%)</p></div>
+                        <div class="service-info"><p>Top Performer: Tech Stocks</p><p>Risk Level: Medium</p></div>
+                        <a href="#" class="view-details">View Details</a>
+                    </div>
+                </div>
+
+                <div class="service-item" onclick="showCreditScoreDetails()">
+                    <div class="service-icon" style="background-color: #ede7f6;"><i class="fas fa-tachometer-alt" style="color: #5e35b1;"></i></div>
+                    <div class="service-details">
+                        <div class="service-info"><h3>Credit Score</h3><p>Monitor your credit health</p></div>
+                        <div class="service-info"><p>Current Score: 780</p><p>Rating: Excellent</p></div>
+                        <div class="service-info"><p>Last Updated: 01/10/2025</p><p>Change: +5 points</p></div>
+                        <a href="#" class="view-details">View Details</a>
+                    </div>
+                </div>
+
+                <div class="service-item" onclick="showAdvisoryDetails()">
+                    <div class="service-icon" style="background-color: #e3f2fd;"><i class="fas fa-user-tie" style="color: #1e88e5;"></i></div>
+                    <div class="service-details">
+                        <div class="service-info"><h3>Financial Advisory</h3><p>Connect with your advisor</p></div>
+                        <div class="service-info"><p>Advisor: Jane Doe</p><p>Status: Available</p></div>
+                        <div class="service-info"><p>Next Meeting: 15/11/2025</p><p>Specialty: Retirement</p></div>
+                        <a href="#" class="view-details">View Details</a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Modal for service details -->
     <div id="serviceModal" class="modal">
         <div class="modal-content">
             <span class="close-modal">&times;</span>
@@ -179,6 +151,5 @@
     </div>
 
     <script src="services.js"></script>
-    
 </body>
 </html>
