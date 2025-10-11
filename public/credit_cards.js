@@ -79,7 +79,7 @@ document.addEventListener("DOMContentLoaded", function () {
                   return data.labels.map((label, index) => {
                     const value = data.datasets[0].data[index];
                     return {
-                      text: `${label} (₹${value.toLocaleString()})`,
+                      text: `${label || "Unknown"} (₹${value.toLocaleString()})`,
                       fillStyle: data.datasets[0].backgroundColor[index],
                       hidden: false,
                       index: index,
