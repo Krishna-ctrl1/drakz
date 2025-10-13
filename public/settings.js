@@ -624,7 +624,6 @@ document.addEventListener("DOMContentLoaded", function () {
   init2FAState();
 });
 
-// settings.js
 document.addEventListener("DOMContentLoaded", () => {
   // DOM elements for goals
   const addGoalBtn = document.getElementById("add-goal");
@@ -646,18 +645,30 @@ document.addEventListener("DOMContentLoaded", () => {
   const filterCategory = document.getElementById("filter-category");
   const sortBy = document.getElementById("sort-by");
 
+  // DOM elements for bank accounts
+  const linkNewAccountBtn = document.getElementById("link-new-account");
+  const linkAccountModal = document.getElementById("link-account-modal");
+  const linkAccountForm = document.getElementById("link-account-form");
+  const bankAccountsList = document.getElementById("bank-accounts-list");
+  const closeLinkModalBtn = linkAccountModal?.querySelector(".close-modal");
+
   let editingGoalId = null;
   let contributingGoalId = null;
+  let editingAccountId = null;
 
   // Check if critical elements exist
-  if (!goalsList || !addGoalBtn || !goalModal || !goalForm) {
-    console.error("Critical goal elements missing:", {
+  if (!goalsList || !addGoalBtn || !goalModal || !goalForm || !bankAccountsList || !linkNewAccountBtn || !linkAccountModal || !linkAccountForm) {
+    console.error("Critical elements missing:", {
       goalsList: !goalsList,
       addGoalBtn: !addGoalBtn,
       goalModal: !goalModal,
       goalForm: !goalForm,
+      bankAccountsList: !bankAccountsList,
+      linkNewAccountBtn: !linkNewAccountBtn,
+      linkAccountModal: !linkAccountModal,
+      linkAccountForm: !linkAccountForm
     });
-    showNotification("Error: Goal management UI elements not found", "error");
+    showNotification("Error: UI elements not found", "error");
     return;
   }
 
@@ -681,6 +692,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 3000);
   }
 
+  // --- Financial Goals ---
   async function fetchGoals() {
     try {
       const response = await fetch("/api/goals");
@@ -700,10 +712,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function renderGoals(goals) {
-    if (!goalsList) {
-      console.error("goalsList element is missing");
-      return;
-    }
     goalsList.innerHTML = goals.length === 0
       ? '<p class="no-goals">No financial goals set</p>'
       : goals.map(goal => `
@@ -907,7 +915,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       try {
-        // Fetch the specific goal to get current savings
         const response = await fetch(`/api/goals`);
         if (!response.ok) {
           throw new Error((await response.json()).message || "Failed to fetch goals");
@@ -918,10 +925,8 @@ document.addEventListener("DOMContentLoaded", () => {
           throw new Error("Goal not found");
         }
 
-        // Add new contribution to existing savings
         const newSavings = (goal.current_savings || 0) + amount;
 
-        // Update the goal with the new savings
         const updateResponse = await fetch(`/api/goals/${contributingGoalId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -1012,11 +1017,172 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function clearValidationErrors() {
     // If you add validation error elements in HTML, clear them here
-    // For now, relying on showNotification for errors
   }
 
-  // Fetch goals on page load
+  // --- Linked Bank Accounts ---
+  async function fetchBankAccounts() {
+    try {
+      const response = await fetch("/api/bank-accounts");
+      if (!response.ok) {
+        throw new Error((await response.json()).message || "Failed to fetch bank accounts");
+      }
+      const { data } = await response.json();
+      renderBankAccounts(data);
+    } catch (error) {
+      console.error("Error fetching bank accounts:", error);
+      showNotification("Failed to load bank accounts: " + error.message, "error");
+    }
+  }
+
+  function renderBankAccounts(accounts) {
+    bankAccountsList.innerHTML = accounts.length === 0
+      ? '<p class="no-accounts">No linked accounts</p>'
+      : accounts.map(account => `
+          <div class="bank-account-item" data-id="${account.id}">
+            <div class="bank-account-info">
+              <img src="assets/bank-logos/${account.bank_name.replace(/\s/g, '').toLowerCase()}.png" class="bank-logo" alt="${account.bank_name}" onerror="this.src='assets/bank-logos/default.png'">
+              <div class="account-meta">
+                <span class="bank-name">${account.bank_name}</span>
+                <span class="account-number">**** **** **** ${account.last_four_digits}</span>
+              </div>
+            </div>
+            <div class="account-actions">
+              <button class="edit-btn" onclick="editBankAccount('${account.id}')"><i class="fas fa-edit"></i></button>
+              <button class="unlink-btn" onclick="deleteBankAccount('${account.id}')"><i class="fas fa-trash"></i></button>
+            </div>
+          </div>
+        `).join("");
+  }
+
+  if (linkNewAccountBtn) {
+    linkNewAccountBtn.addEventListener("click", () => {
+      editingAccountId = null;
+      linkAccountForm.reset();
+      linkAccountModal.querySelector("h3").textContent = "Link Bank Account";
+      linkAccountModal.style.display = "block";
+    });
+  }
+
+  function closeLinkAccountModal() {
+    linkAccountModal.style.display = "none";
+    editingAccountId = null;
+    linkAccountForm.reset();
+  }
+
+  if (closeLinkModalBtn) {
+    closeLinkModalBtn.addEventListener("click", closeLinkAccountModal);
+  }
+  window.addEventListener("click", (event) => {
+    if (event.target === linkAccountModal) {
+      closeLinkAccountModal();
+    }
+  });
+
+  if (linkAccountForm) {
+    linkAccountForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const bank_name = document.getElementById("bank-name").value;
+      const account_number = document.getElementById("account-number").value;
+      const account_type = document.getElementById("account-type").value;
+      const last_four_digits = document.getElementById("last-four-digits").value;
+
+      if (!bank_name || !account_number || !account_type || !last_four_digits) {
+        showNotification("All fields are required", "error");
+        return;
+      }
+
+      if (!/^\d{4}$/.test(last_four_digits)) {
+        showNotification("Last four digits must be exactly 4 digits", "error");
+        return;
+      }
+
+      // Basic validation for account number
+      if (!/^\d{9,18}$/.test(account_number)) {
+        showNotification("Account number must be 9-18 digits", "error");
+        return;
+      }
+
+      // Verify last four digits match the account number
+      if (account_number.slice(-4) !== last_four_digits) {
+        showNotification("Last four digits must match the end of the account number", "error");
+        return;
+      }
+
+      const accountData = {
+        bank_name,
+        account_number,
+        account_type,
+        last_four_digits
+      };
+
+      try {
+        const url = editingAccountId ? `/api/bank-accounts/${editingAccountId}` : "/api/bank-accounts";
+        const method = editingAccountId ? "PUT" : "POST";
+        const response = await fetch(url, {
+          method,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(accountData)
+        });
+
+        if (!response.ok) {
+          throw new Error((await response.json()).message || "Failed to save bank account");
+        }
+
+        await fetchBankAccounts();
+        closeLinkAccountModal();
+        showNotification(editingAccountId ? "Bank account updated successfully" : "Bank account added successfully", "success");
+      } catch (error) {
+        console.error("Error saving bank account:", error);
+        showNotification("Failed to save bank account: " + error.message, "error");
+      }
+    });
+  }
+
+  window.editBankAccount = async function (accountId) {
+    try {
+      const response = await fetch("/api/bank-accounts");
+      if (!response.ok) {
+        throw new Error((await response.json()).message || "Failed to fetch bank accounts");
+      }
+      const { data } = await response.json();
+      const account = data.find(a => a.id === accountId);
+      if (!account) {
+        showNotification("Bank account not found", "error");
+        return;
+      }
+
+      editingAccountId = accountId;
+      linkAccountModal.querySelector("h3").textContent = "Edit Bank Account";
+      document.getElementById("bank-name").value = account.bank_name;
+      document.getElementById("account-number").value = account.account_number;
+      document.getElementById("account-type").value = account.account_type;
+      document.getElementById("last-four-digits").value = account.last_four_digits;
+      linkAccountModal.style.display = "block";
+    } catch (error) {
+      console.error("Error loading bank account for edit:", error);
+      showNotification("Failed to load bank account: " + error.message, "error");
+    }
+  };
+
+  window.deleteBankAccount = async function (accountId) {
+    if (!confirm("Are you sure you want to unlink this bank account?")) return;
+
+    try {
+      const response = await fetch(`/api/bank-accounts/${accountId}`, { method: "DELETE" });
+      if (!response.ok) {
+        throw new Error((await response.json()).message || "Failed to delete bank account");
+      }
+      await fetchBankAccounts();
+      showNotification("Bank account unlinked successfully", "success");
+    } catch (error) {
+      console.error("Error deleting bank account:", error);
+      showNotification("Failed to unlink bank account: " + error.message, "error");
+    }
+  };
+
+  // Fetch initial data
   fetchGoals();
+  fetchBankAccounts();
 });
 
 // linking accounts

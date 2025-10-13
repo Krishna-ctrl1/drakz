@@ -38,6 +38,7 @@ const UserProperty = require("./models/UserProperties");
 const UserStocks = require("./models/UserStocks");
 const Blog = require("./models/Blog");
 const Goal = require("./models/Goal");
+const UserBankAccount = require("./models/UserBankAccount");
 
 // =========================================================================
 // NEW SCHEMAS FOR VIDEO SESSION
@@ -1771,6 +1772,172 @@ app.delete("/api/goals/:id", isUserAuthenticated, async (req, res) => {
       status: "error",
       message: "Failed to delete goal",
       details: error.message,
+    });
+  }
+});
+
+// -----------------------------------------------------------------------------
+// USER BANK ACCOUNTS
+// -----------------------------------------------------------------------------
+
+// GET /api/bank-accounts - Fetch all bank accounts for the authenticated user
+app.get("/api/bank-accounts", isUserAuthenticated, async (req, res) => {
+  try {
+    const bankAccounts = await UserBankAccount.find({ user_id: req.session.userId }).sort({ created_at: -1 });
+    res.json({
+      status: "success",
+      data: bankAccounts.map(account => ({
+        id: account._id,
+        bank_name: account.bank_name,
+        account_number: account.account_number,
+        account_type: account.account_type,
+        last_four_digits: account.last_four_digits,
+        created_at: account.created_at
+      }))
+    });
+  } catch (error) {
+    console.error("Error fetching bank accounts:", error);
+    res.status(500).json({
+      status: "error",
+      message: "Failed to fetch bank accounts",
+      details: error.message
+    });
+  }
+});
+
+// POST /api/bank-accounts - Create a new bank account
+app.post("/api/bank-accounts", isUserAuthenticated, async (req, res) => {
+  const { bank_name, account_number, account_type, last_four_digits } = req.body;
+
+  if (!bank_name || !account_number || !account_type || !last_four_digits) {
+    return res.status(400).json({
+      status: "error",
+      message: "All fields are required"
+    });
+  }
+
+  if (!/^\d{4}$/.test(last_four_digits)) {
+    return res.status(400).json({
+      status: "error",
+      message: "Last four digits must be exactly 4 digits"
+    });
+  }
+
+  if (account_number.slice(-4) !== last_four_digits) {
+    return res.status(400).json({
+      status: "error",
+      message: "Last four digits must match the end of the account number"
+    });
+  }
+
+  try {
+    const newAccount = new UserBankAccount({
+      user_id: req.session.userId,
+      bank_name,
+      account_number,
+      account_type,
+      last_four_digits
+    });
+
+    await newAccount.save();
+    res.status(201).json({
+      status: "success",
+      data: {
+        id: newAccount._id,
+        bank_name: newAccount.bank_name,
+        account_number: newAccount.account_number,
+        account_type: newAccount.account_type,
+        last_four_digits: newAccount.last_four_digits,
+        created_at: newAccount.created_at
+      }
+    });
+  } catch (error) {
+    console.error("Error creating bank account:", error);
+    res.status(500).json({
+      status: "error",
+      message: "Failed to create bank account",
+      details: error.message
+    });
+  }
+});
+
+// PUT /api/bank-accounts/:id - Update an existing bank account
+app.put("/api/bank-accounts/:id", isUserAuthenticated, async (req, res) => {
+  const accountId = req.params.id;
+  const { bank_name, account_number, account_type, last_four_digits } = req.body;
+
+  try {
+    const account = await UserBankAccount.findOne({ _id: accountId, user_id: req.session.userId });
+    if (!account) {
+      return res.status(404).json({
+        status: "error",
+        message: "Bank account not found or not authorized"
+      });
+    }
+
+    if (bank_name) account.bank_name = bank_name;
+    if (account_number) account.account_number = account_number;
+    if (account_type) account.account_type = account_type;
+    if (last_four_digits) {
+      if (!/^\d{4}$/.test(last_four_digits)) {
+        return res.status(400).json({
+          status: "error",
+          message: "Last four digits must be exactly 4 digits"
+        });
+      }
+      if (account_number && account_number.slice(-4) !== last_four_digits) {
+        return res.status(400).json({
+          status: "error",
+          message: "Last four digits must match the end of the account number"
+        });
+      }
+      account.last_four_digits = last_four_digits;
+    }
+
+    await account.save();
+    res.json({
+      status: "success",
+      data: {
+        id: account._id,
+        bank_name: account.bank_name,
+        account_number: account.account_number,
+        account_type: account.account_type,
+        last_four_digits: account.last_four_digits,
+        created_at: account.created_at
+      }
+    });
+  } catch (error) {
+    console.error("Error updating bank account:", error);
+    res.status(500).json({
+      status: "error",
+      message: "Failed to update bank account",
+      details: error.message
+    });
+  }
+});
+
+// DELETE /api/bank-accounts/:id - Delete a bank account
+app.delete("/api/bank-accounts/:id", isUserAuthenticated, async (req, res) => {
+  const accountId = req.params.id;
+
+  try {
+    const account = await UserBankAccount.findOneAndDelete({ _id: accountId, user_id: req.session.userId });
+    if (!account) {
+      return res.status(404).json({
+        status: "error",
+        message: "Bank account not found or not authorized"
+      });
+    }
+    res.json({
+      status: "success",
+      message: "Bank account deleted successfully"
+    });
+  } catch (error) {
+    console.error("Error deleting bank account:", error);
+    res.status(500).json({
+      status: "error",
+      message: "Failed to delete bank account",
+      details: error.message
     });
   }
 });

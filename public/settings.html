@@ -404,61 +404,56 @@
                                     <span class="close-modal" >&times;</span>
                                     <h3>Link Bank Account</h3>
                                     <form id="link-account-form">
-                                        <div class="form-group">
-                                            <label>Bank Name</label>
-                                            <select id="bank-name" required>
-                                                <option value="">Select Bank</option>
-                                                <!-- Public Sector Banks -->
-                                                <optgroup label="Public Sector Banks">
-                                                    <option value="State Bank of India">State Bank of India</option>
-                                                    <option value="Punjab National Bank">Punjab National Bank</option>
-                                                    <option value="Bank of Baroda">Bank of Baroda</option>
-                                                    <option value="Canara Bank">Canara Bank</option>
-                                                    <option value="Union Bank of India">Union Bank of India</option>
-                                                    <option value="Bank of India">Bank of India</option>
-                                                    <option value="Indian Bank">Indian Bank</option>
-                                                    <option value="Central Bank of India">Central Bank of India</option>
-                                                </optgroup>
-                                                
-                                                <!-- Private Banks -->
-                                                <optgroup label="Private Banks">
-                                                    <option value="HDFC Bank">HDFC Bank</option>
-                                                    <option value="ICICI Bank">ICICI Bank</option>
-                                                    <option value="Axis Bank">Axis Bank</option>
-                                                    <option value="Kotak Mahindra Bank">Kotak Mahindra Bank</option>
-                                                    <option value="IndusInd Bank">IndusInd Bank</option>
-                                                    <option value="Yes Bank">Yes Bank</option>
-                                                    <option value="IDFC First Bank">IDFC First Bank</option>
-                                                </optgroup>
-                                                
-                                                <!-- Payment Banks -->
-                                                <optgroup label="Payment Banks">
-                                                    <option value="Paytm Payments Bank">Paytm Payments Bank</option>
-                                                    <option value="Airtel Payments Bank">Airtel Payments Bank</option>
-                                                </optgroup>
-                                            </select>
-                                            
-                                            <!-- Change account number input to full digits -->
-                                            <div class="form-group">
-                                                <label>Account Number</label>
-                                                <input type="text" id="account-number" pattern="[0-9]{9,18}" 
-                                                       title="9-18 digit account number" required>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Account Type</label>
-                                            <select id="account-type" required>
-                                                <option value="">Select Type</option>
-                                                <option value="Checking">Checking</option>
-                                                <option value="Savings">Savings</option>
-                                                <option value="Credit Card">Credit Card</option>
-                                            </select>
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Last 4 Digits of Account Number</label>
-                                            <input type="text" id="account-number" pattern="\d{4}" maxlength="4" required>
-                                        </div>
-                                        <button type="submit" class="save-btn">Link Account</button>
+                                      <div class="form-group">
+                                        <label>Bank Name</label>
+                                        <select id="bank-name" required>
+                                          <option value="">Select Bank</option>
+                                          <!-- Public Sector Banks -->
+                                          <optgroup label="Public Sector Banks">
+                                            <option value="State Bank of India">State Bank of India</option>
+                                            <option value="Punjab National Bank">Punjab National Bank</option>
+                                            <option value="Bank of Baroda">Bank of Baroda</option>
+                                            <option value="Canara Bank">Canara Bank</option>
+                                            <option value="Union Bank of India">Union Bank of India</option>
+                                            <option value="Bank of India">Bank of India</option>
+                                            <option value="Indian Bank">Indian Bank</option>
+                                            <option value="Central Bank of India">Central Bank of India</option>
+                                          </optgroup>
+                                          <!-- Private Banks -->
+                                          <optgroup label="Private Banks">
+                                            <option value="HDFC Bank">HDFC Bank</option>
+                                            <option value="ICICI Bank">ICICI Bank</option>
+                                            <option value="Axis Bank">Axis Bank</option>
+                                            <option value="Kotak Mahindra Bank">Kotak Mahindra Bank</option>
+                                            <option value="IndusInd Bank">IndusInd Bank</option>
+                                            <option value="Yes Bank">Yes Bank</option>
+                                            <option value="IDFC First Bank">IDFC First Bank</option>
+                                          </optgroup>
+                                          <!-- Payment Banks -->
+                                          <optgroup label="Payment Banks">
+                                            <option value="Paytm Payments Bank">Paytm Payments Bank</option>
+                                            <option value="Airtel Payments Bank">Airtel Payments Bank</option>
+                                          </optgroup>
+                                        </select>
+                                      </div>
+                                      <div class="form-group">
+                                        <label>Account Number</label>
+                                        <input type="text" id="account-number" pattern="[0-9]{9,18}" title="9-18 digit account number" required>
+                                      </div>
+                                      <div class="form-group">
+                                        <label>Account Type</label>
+                                        <select id="account-type" required>
+                                          <option value="">Select Type</option>
+                                          <option value="Savings">Savings</option>
+                                          <option value="Checking">Checking</option>
+                                          <option value="Credit Card">Credit Card</option>
+                                        </select>
+                                      </div>
+                                      <div class="form-group">
+                                        <label>Last 4 Digits of Account Number</label>
+                                        <input type="text" id="last-four-digits" pattern="\d{4}" maxlength="4" title="Exactly 4 digits" required>
+                                      </div>
+                                      <button type="submit" class="save-btn">Link Account</button>
                                     </form>
                                 </div>
                             </div>
