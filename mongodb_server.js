@@ -39,7 +39,6 @@ const UserProperty = require("./models/UserProperties");
 const UserStocks = require("./models/UserStocks");
 const Blog = require("./models/Blog");
 
-
 // =========================================================================
 // NEW SCHEMAS FOR VIDEO SESSION
 // =========================================================================
