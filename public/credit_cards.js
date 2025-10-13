@@ -109,26 +109,29 @@ document.addEventListener("DOMContentLoaded", function () {
     fetch("/api/bank-expenses")
       .then((response) => {
         if (!response.ok) {
-          throw new Error("Failed to fetch bank expenses");
+          throw new Error(
+            "Failed to fetch bank expenses: " + response.statusText
+          );
         }
         return response.json();
       })
       .then((chartData) => {
+        console.log("Fetched expense data:", chartData); // Add logging for debugging
         // Check if there's data to display
         if (chartData.labels.length === 0) {
-          // Handle no data scenario
-          document.getElementById("expenseChart").innerHTML =
-            '<div class="text-center text-gray-500">No expense data available</div>';
+          document.getElementById("expenseChart").parentElement.innerHTML =
+            '<div class="text-center text-gray-500">No expense data available for the last 30 days</div>'; // More specific message
           return;
         }
-
         // Create chart with fetched data
         createExpenseChart(chartData);
       })
       .catch((error) => {
         console.error("Error fetching expense chart data:", error);
-        document.getElementById("expenseChart").innerHTML =
-          '<div class="text-center text-red-500">Unable to load expense chart</div>';
+        document.getElementById("expenseChart").parentElement.innerHTML =
+          '<div class="text-center text-red-500">Unable to load expense chart: ' +
+          error.message +
+          "</div>";
       });
   }
 

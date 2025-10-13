@@ -1986,74 +1986,52 @@ app.get("/api/credit-card-bill", async (req, res) => {
   }
 });
 
+// API to get bank expenses for doughnut chart (grouped by category, last 30 days)
 app.get("/api/bank-expenses", async (req, res) => {
+  if (!req.session.userId) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  const userId = req.session.userId;
+  const colors = [
+    "#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF",
+    "#FF9F40", "#C9CBCF", "#E7E9ED", "#ADFF2F", "#FFD700", "#808080"
+  ]; // Predefined colors for segments (add more if needed)
+
   try {
-    if (!req.session || !req.session.userId) {
-      return res.status(401).json({ error: "Unauthorized" });
-    }
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    const userId = new mongoose.Types.ObjectId(req.session.userId);
-
-    const results = await CreditCardBill.aggregate([
-      {
-        $match: { user_id: userId },
-      },
-      {
-        $lookup: {
-          from: "credit_card_bills",
-          localField: "card_number",
-          foreignField: "card_number",
-          as: "card_details",
-        },
-      },
-      {
-        $unwind: "$card_details",
-      },
+    const expenses = await Expense.aggregate([
       {
         $match: {
-          "card_details.user_id": userId,
-        },
+          user_id: new mongoose.Types.ObjectId(userId),
+          date: { $gte: thirtyDaysAgo } // Filter for last 30 days
+        }
       },
       {
         $group: {
-          _id: "$card_details.bank_name",
-          total_expense: { $sum: "$current_bill" },
-        },
+          _id: "$category", // Group by category (adjust if grouping by bank_name)
+          total: { $sum: "$amount" }
+        }
       },
-      {
-        $sort: { total_expense: -1 },
-      },
+      { $sort: { total: -1 } } // Sort by highest amount descending
     ]);
 
-    const bankNames = results.map((item) => item._id);
-    const expenses = results.map((item) => item.total_expense);
+    const labels = expenses.map(e => e._id || "Unknown");
+    const data = expenses.map(e => e.total);
+    const backgroundColor = labels.map((_, index) => colors[index % colors.length]);
 
-    const colors = [
-      "#3b82f6",
-      "#38bdf8",
-      "#06b6d4",
-      "#4f46e5",
-      "#6366f1",
-      "#a855f7",
-      "#ec4899",
-    ];
-
-    res.status(200).json({
-      labels: bankNames,
-      datasets: [
-        {
-          data: expenses,
-          backgroundColor: colors.slice(0, bankNames.length),
-          borderWidth: 2,
-        },
-      ],
+    res.json({
+      labels,
+      datasets: [{
+        data,
+        backgroundColor
+      }]
     });
   } catch (error) {
-    console.error("MongoDB error fetching bank expenses:", error);
-    res.status(500).json({
-      error: "Failed to retrieve bank expenses",
-      details: error.message,
-    });
+    console.error("Error fetching bank expenses:", error);
+    res.status(500).json({ error: "Server error" });
   }
 });
 
