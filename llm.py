@@ -1,82 +1,49 @@
-def get_financial_advice_llm(query):
-    """Generate financial advice using open source LLM."""
-    try:
-        # Load the model
-        model = load_llm_model()
-        if model is None:
-            return "I'm sorry, the language model could not be loaded. Please try again later."
-        
-        # Add context about the user's financial situation if available
-        context = ""
-        if st.session_state.user_data['monthly_income'] > 0:
-            income = st.session_state.user_data['monthly_income']
-            savings = st.session_state.user_data['savings']
-            
-            if st.session_state.currency == "INR":
-                # Convert to INR for display
-                income_inr = convert_currency(income, 'INR')
-                savings_inr = convert_currency(savings, 'INR')
-                context = f"With a monthly income of ₹{income_inr:,.2f} and savings of ₹{savings_inr:,.2f}: "
-            else:
-                context = f"With a monthly income of ${income:,.2f} and savings of ${savings:,.2f}: "
-
-        # Create a prompt with financial advisor context
-        prompt = f"""
-        <|system|>
-        You are a knowledgeable financial advisor assistant. Provide clear, accurate, and helpful advice on personal finance topics. 
-        Keep responses concise but informative. Don't recommend specific investments or make promises about returns.
-        </|system|>
-        
-        <|user|>
-        {context}{query}
-        </|user|>
-        
-        <|assistant|>
-        """
-        
-        # Generate response
-        response = model(prompt, max_length=400, temperature=0.7, num_return_sequences=1)
-        
-        # Extract the response text
-        generated_text = response[0]['generated_text']
-        
-        # Extract only the assistant's response
-        assistant_response = generated_text.split("<|assistant|>")[-1].strip()
-        
-        # Clean up the response if needed
-        if "<|" in assistant_response:
-            assistant_response = assistant_response.split("<|")[0].strip()
-            
-        return assistant_response
-        
-    except Exception as e:
-        st.error(f"Error with LLM service: {e}")
-        return "I'm sorry, I couldn't process your request. Please try again or ask a different question."
-    
-def load_llm_model():
-    try:
-        return pipeline("text-generation", model="TinyLlama/TinyLlama-1.1B-Chat-v1.0")
-    except Exception as e:
-        st.error(f"Error loading LLM model: {e}")
-        return None
+from flask import Flask, request, jsonify
+from transformers import pipeline
 import sys
 
-if __name__ == "__main__":
-    query = sys.argv[1] if len(sys.argv) > 1 else ""
-    if query:
-        from transformers import pipeline
+# --- Load the model ONCE when the server starts ---
+print("Loading financial advisor LLM...")
+try:
+    # Load the text-generation pipeline with your chosen model
+    model = pipeline("text-generation", model="TinyLlama/TinyLlama-1.1B-Chat-v1.0")
+    print("Model loaded successfully!")
+except Exception as e:
+    print(f"Error loading model: {e}")
+    model = None
 
-        def load_llm_model():
-            return pipeline("text-generation", model="TinyLlama/TinyLlama-1.1B-Chat-v1.0")
+# Create a Flask web server
+app = Flask(__name__)
 
-        def get_response(prompt):
-            model = load_llm_model()
-            response = model(prompt, max_length=400, temperature=0.7)[0]['generated_text']
-            assistant_response = response.split("<|assistant|>")[-1].strip()
-            if "<|" in assistant_response:
-                assistant_response = assistant_response.split("<|")[0].strip()
-            print(assistant_response)
+@app.route('/get-advice', methods=['POST'])
+def get_advice():
+    """
+    This endpoint receives a prompt and returns financial advice from the LLM.
+    """
+    if model is None:
+        return jsonify({"error": "Model is not available."}), 500
 
-        get_response(query)
-    else:
-        print("Error: No query provided.")
+    data = request.get_json()
+    if not data or 'prompt' not in data:
+        return jsonify({"error": "Prompt not provided."}), 400
+
+    prompt = data['prompt']
+
+    try:
+        # --- Generate response using the pre-loaded model ---
+        response = model(prompt, max_length=400, temperature=0.7)[0]['generated_text']
+
+        # Extract only the assistant's response from the generated text
+        assistant_response = response.split("<|assistant|>")[-1].strip()
+        if "<|" in assistant_response:
+            assistant_response = assistant_response.split("<|")[0].strip()
+
+        return jsonify({"response": assistant_response})
+
+    except Exception as e:
+        print(f"Error during text generation: {e}")
+        return jsonify({"error": "Failed to generate response."}), 500
+
+if __name__ == '__main__':
+    # Run the Flask server on port 5000, accessible from any IP
+    app.run(host='0.0.0.0', port=5000)

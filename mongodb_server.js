@@ -3044,7 +3044,7 @@ app.delete("/properties/:id", async (req, res) => {
 // LLM ChatBot
 // ---------------------------------------------------------------------------------------------------------------------------------------------
 
-app.post("/api/financial-advice", (req, res) => {
+app.post("/api/financial-advice", async (req, res) => {
   const { query, userData = {} } = req.body;
 
   if (!query) {
@@ -3082,37 +3082,32 @@ app.post("/api/financial-advice", (req, res) => {
   <|assistant|>
   `;
 
-  // Call your Python script that loads and runs the LLM model
-  exec(
-    `python llm.py "${fullPrompt.replace(/"/g, '\\"')}"`,
-    (error, stdout, stderr) => {
-      if (error) {
-        console.error(`LLM execution error: ${error}`);
-        return res
-          .status(500)
-          .json({ error: "Error processing request with LLM" });
-      }
+  try {
+    // Send an HTTP POST request to your new Python Flask server
+    const llmServiceResponse = await fetch("http://localhost:5000/get-advice", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ prompt: fullPrompt }),
+    });
 
-      if (stderr) {
-        console.error(`LLM stderr: ${stderr}`);
-      }
-
-      // Extract response from the LLM output
-      let llmResponse = stdout.trim();
-
-      // Clean up the response if needed
-      if (llmResponse.includes("<|")) {
-        llmResponse = llmResponse.split("<|")[0].trim();
-      }
-
-      res.json({
-        response: llmResponse,
-        timestamp: new Date(),
-      });
+    if (!llmServiceResponse.ok) {
+      throw new Error(`LLM service responded with status: ${llmServiceResponse.status}`);
     }
-  );
-});
 
+    const data = await llmServiceResponse.json();
+
+    res.json({
+      response: data.response,
+      timestamp: new Date(),
+    });
+
+  } catch (error) {
+    console.error("Error communicating with LLM service:", error);
+    res.status(500).json({ error: "Error processing request with LLM" });
+  }
+});
 // ---------------------------------------------------------------------------------------------------------------------------------------------
 // Settings Page
 // ---------------------------------------------------------------------------------------------------------------------------------------------
