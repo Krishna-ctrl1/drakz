@@ -110,7 +110,7 @@ document.addEventListener("DOMContentLoaded", function () {
       .then((response) => {
         if (!response.ok) {
           throw new Error(
-            "Failed to fetch bank expenses: " + response.statusText
+            "Failed to fetch bank expenses: " + response.statusText,
           );
         }
         return response.json();
@@ -235,7 +235,7 @@ document.addEventListener("DOMContentLoaded", function () {
           let detailCardNumber = document.getElementById("detailCardNumber");
           let detailValidFrom = document.getElementById("detailValidFrom");
           let detailExpirationDate = document.getElementById(
-            "detailExpirationDate"
+            "detailExpirationDate",
           );
           let detailBillAmount = document.getElementById("detailBillAmount");
           let detailDueDate = document.getElementById("detailDueDate");
@@ -291,7 +291,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 const currentBill = Number(billDetails.current_bill);
                 const minimumAmountDue = Number(billDetails.minimum_amount_due);
 
-                detailBillAmount.innerText = `₹${
+                detailBillAmount.innerText = `${
                   !isNaN(currentBill)
                     ? currentBill.toLocaleString("en-IN", {
                         minimumFractionDigits: 2,
@@ -299,7 +299,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     : "0.00"
                 }`;
                 detailDueDate.innerText = billDetails.due_date || "N/A";
-                detailMinDue.innerText = `₹${
+                detailMinDue.innerText = `${
                   !isNaN(minimumAmountDue)
                     ? minimumAmountDue.toLocaleString("en-IN", {
                         minimumFractionDigits: 2,
@@ -492,14 +492,14 @@ document.addEventListener("DOMContentLoaded", function () {
                     <td>${due.masked_card_number}</td>
                     <td>₹${parseFloat(due.current_bill).toLocaleString(
                       "en-IN",
-                      { minimumFractionDigits: 2, maximumFractionDigits: 2 }
+                      { minimumFractionDigits: 2, maximumFractionDigits: 2 },
                     )}</td>
                     <td>${due.formatted_due_date}</td>
                     <td data-status="${
                       due.status.charAt(0).toUpperCase() + due.status.slice(1)
                     }">${
-          due.status.charAt(0).toUpperCase() + due.status.slice(1)
-        }</td>
+                      due.status.charAt(0).toUpperCase() + due.status.slice(1)
+                    }</td>
                 `;
         dueDatesTableBody.appendChild(row);
       });

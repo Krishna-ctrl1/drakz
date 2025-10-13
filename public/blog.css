@@ -1,34 +1,42 @@
-
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
   font-family: Arial, sans-serif;
-  }
-  
-  
+}
+
 .page {
-  margin-left: 170px; 
+  margin-left: 170px;
   padding: 20px;
   margin-top: 70px;
-  margin-right:0;
+  margin-right: 0;
   transition: width 0.3s;
-  }
+}
 /* Container */
 .container {
   display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  height:auto;
+  height: auto;
   width: 100%;
   animation: fadeIn 1.5s ease-in-out;
-  gap:20px;
+  gap: 20px;
   padding-top: 0;
   margin-top: 0;
   /* padding-bottom:200px; */
-  max-height:500px;
+  max-height: 500px;
 }
+
+#gobackbutton {
+  border: none;
+  background-color: transparent;
+  font-size: larger;
+}
+#gobackbutton a {
+  text-decoration: none;
+}
+
 .container button {
   background: #3b82f6;
   color: white;
@@ -75,26 +83,36 @@ h1 {
   padding: 20px;
   border-radius: 10px;
   width: 90%;
- /*  max-width: 600px; */
- height:80%;
+  /*  max-width: 600px; */
+  height: 80%;
   animation: slideDown 0.3s ease-in-out;
 }
 /* Animations */
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideDown {
-  from { transform: translateY(-20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 .blog-form-container h2 {
   color: #2e2e2e;
   margin-bottom: 20px;
 }
-.blog-form-container p{
-  color:gray;
+.blog-form-container p {
+  color: gray;
   text-align: right;
 }
 .blog-form-container label {
@@ -112,7 +130,7 @@ h1 {
   border: 1px solid #ccc;
   border-radius: 5px;
   font-size: 16px;
-  height:80%;
+  height: 80%;
 }
 
 .blog-form-container button {
@@ -200,19 +218,19 @@ h1 {
   cursor: pointer;
   margin-bottom: 15px;
 }
-.blog-actions{
-  display:flex;
+.blog-actions {
+  display: flex;
   flex-direction: column;
   gap: 10px;
 }
-.buttons{
-  display:flex;
+.buttons {
+  display: flex;
   flex-direction: row;
- gap:20px;
+  gap: 20px;
 }
-.buttons button{
-  background:white;
-  color:black;
+.buttons button {
+  background: white;
+  color: black;
   border: none;
   padding: 10px 20px;
   border-radius: 5px;
@@ -222,17 +240,17 @@ h1 {
   height: 35px;
   transition: background 0.3s ease;
 }
-.open{
-  display:flex;
+.open {
+  display: flex;
   flex-direction: row;
   padding: 0;
   margin: 0;
-  gap:20px;
+  gap: 20px;
 }
-.animation{
-  height:auto;
-  width:100%;
-  max-height:700px;
+.animation {
+  height: auto;
+  width: 100%;
+  max-height: 700px;
 }
 
 /**/
@@ -248,7 +266,9 @@ h1 {
   gap: 8px;
   padding: 8px 12px;
   border-radius: 4px;
-  transition: background-color 0.3s, color 0.3s;
+  transition:
+    background-color 0.3s,
+    color 0.3s;
 }
 
 /* Liked button style */
@@ -278,7 +298,9 @@ h1 {
   gap: 8px;
   padding: 8px 12px;
   border-radius: 4px;
-  transition: background-color 0.3s, color 0.3s;
+  transition:
+    background-color 0.3s,
+    color 0.3s;
 }
 
 /* Disliked button style */
@@ -295,16 +317,14 @@ h1 {
 .fa-thumbs-down {
   font-size: 18px;
 }
-@media(max-width:920px){
-  
-  .animation{
-      width:0%;
-      visibility:hidden;
+@media (max-width: 920px) {
+  .animation {
+    width: 0%;
+    visibility: hidden;
   }
-  .page{
-      display:flex;
-      flex-direction:column;
-      gap:20px;
+  .page {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
   }
-  
-}   
+}
