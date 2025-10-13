@@ -2057,6 +2057,68 @@ app.get("/api/user-credit-cards", async (req, res) => {
   }
 });
 
+// Get credit card bill for a specific card
+// Get credit card bill for a specific card
+app.get("/api/credit-card-bill", async (req, res) => {
+  const userId = req.session.userId;
+  const { cardNumber } = req.query;
+
+  if (!userId) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+  if (!cardNumber) {
+    return res.status(400).json({ error: "Card number is required" });
+  }
+
+  try {
+    console.log("Session userId:", userId, "Requested cardNumber:", cardNumber);
+
+    // Validate userId format
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      console.log("Invalid userId format:", userId);
+      return res.status(400).json({ error: "Invalid user ID format" });
+    }
+
+    // Convert userId to ObjectId
+    const objectId = new mongoose.Types.ObjectId(userId);
+
+    // Trim cardNumber to handle potential whitespace
+    const cleanedCardNumber = cardNumber.trim();
+
+    console.log("Querying with userId:", objectId.toString(), "cleanedCardNumber:", cleanedCardNumber);
+
+    // Query user_id as ObjectId
+    const bill = await CreditCardBill.findOne({
+      user_id: objectId,
+      card_number: cleanedCardNumber,
+    });
+
+    if (!bill) {
+      console.log("No bill found for userId:", userId, "cardNumber:", cleanedCardNumber);
+      // Debug: Try regex query for card_number
+      const regexBill = await CreditCardBill.findOne({
+        user_id: objectId,
+        card_number: { $regex: `^${cleanedCardNumber}$`, $options: "i" }
+      });
+      console.log("Regex query result:", regexBill ? regexBill : "No match with regex");
+      // Debug: Log all bills for this user
+      const userBills = await CreditCardBill.find({ user_id: objectId });
+      console.log("All bills for userId:", userId, userBills);
+      return res.status(404).json({ error: "Bill not found for this card" });
+    }
+
+    res.json({
+      current_bill: bill.current_bill,
+      minimum_amount_due: bill.minimum_amount_due,
+      due_date: bill.due_date.toISOString().split("T")[0],
+      status: bill.status,
+    });
+  } catch (error) {
+    console.error("Error fetching credit card bill:", error);
+    res.status(500).json({ error: "Failed to fetch bill details" });
+  }
+});
+
 app.get("/api/bank-expenses", async (req, res) => {
   try {
     if (!req.session || !req.session.userId) {
@@ -3044,7 +3106,7 @@ app.delete("/properties/:id", async (req, res) => {
 // LLM ChatBot
 // ---------------------------------------------------------------------------------------------------------------------------------------------
 
-app.post("/api/financial-advice", async (req, res) => {
+app.post("/api/financial-advice", (req, res) => {
   const { query, userData = {} } = req.body;
 
   if (!query) {
@@ -3082,32 +3144,37 @@ app.post("/api/financial-advice", async (req, res) => {
   <|assistant|>
   `;
 
-  try {
-    // Send an HTTP POST request to your new Python Flask server
-    const llmServiceResponse = await fetch("http://localhost:5000/get-advice", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ prompt: fullPrompt }),
-    });
+  // Call your Python script that loads and runs the LLM model
+  exec(
+    `python llm.py "${fullPrompt.replace(/"/g, '\\"')}"`,
+    (error, stdout, stderr) => {
+      if (error) {
+        console.error(`LLM execution error: ${error}`);
+        return res
+          .status(500)
+          .json({ error: "Error processing request with LLM" });
+      }
 
-    if (!llmServiceResponse.ok) {
-      throw new Error(`LLM service responded with status: ${llmServiceResponse.status}`);
+      if (stderr) {
+        console.error(`LLM stderr: ${stderr}`);
+      }
+
+      // Extract response from the LLM output
+      let llmResponse = stdout.trim();
+
+      // Clean up the response if needed
+      if (llmResponse.includes("<|")) {
+        llmResponse = llmResponse.split("<|")[0].trim();
+      }
+
+      res.json({
+        response: llmResponse,
+        timestamp: new Date(),
+      });
     }
-
-    const data = await llmServiceResponse.json();
-
-    res.json({
-      response: data.response,
-      timestamp: new Date(),
-    });
-
-  } catch (error) {
-    console.error("Error communicating with LLM service:", error);
-    res.status(500).json({ error: "Error processing request with LLM" });
-  }
+  );
 });
+
 // ---------------------------------------------------------------------------------------------------------------------------------------------
 // Settings Page
 // ---------------------------------------------------------------------------------------------------------------------------------------------

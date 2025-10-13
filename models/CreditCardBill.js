@@ -1,11 +1,11 @@
-// Define the schemas for your MongoDB models
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 // Schema for credit card bills
 const creditCardBillSchema = new Schema({
   user_id: { 
-    type: String, 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'User',
     required: true,
     index: true  // Add index for faster queries
   },
@@ -37,7 +37,6 @@ const creditCardBillSchema = new Schema({
   collection: 'credit_card_bills' 
 });
 
-// Create compound index for faster lookup on user_id + card_number combinations
 creditCardBillSchema.index({ user_id: 1, card_number: 1, due_date: -1 });
 
 // Register models

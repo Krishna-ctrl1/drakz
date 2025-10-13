@@ -22,33 +22,31 @@ function closeNav() {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-
   window.closeDetails = function () {
     let detailsSection = document.querySelector(".sec");
     let cardDetailsSection = document.getElementById("cardDetailsSection");
 
     if (detailsSection) {
-        detailsSection.classList.remove("details-visible");
+      detailsSection.classList.remove("details-visible");
     }
 
     if (cardDetailsSection) {
-        cardDetailsSection.style.display = "none";
+      cardDetailsSection.style.display = "none";
     }
 
     // Reset layout for smaller screens
     if (window.innerWidth <= 1109) {
-        let cardList = document.getElementById("cardlist");
-        let cardStatistics = document.getElementById("Cardstatistics");
-        let tableSection = document.getElementById("table");
+      let cardList = document.getElementById("cardlist");
+      let cardStatistics = document.getElementById("Cardstatistics");
+      let tableSection = document.getElementById("table");
 
-        if (cardList && cardStatistics && tableSection) {
-            cardList.style.width = "100%";
-            cardStatistics.style.width = "100%";
-            tableSection.style.width = "100%";
-        }
+      if (cardList && cardStatistics && tableSection) {
+        cardList.style.width = "100%";
+        cardStatistics.style.width = "100%";
+        tableSection.style.width = "100%";
+      }
     }
-};
-
+  };
 
   // Function to create or update the expense chart
   function createExpenseChart(chartData) {
@@ -79,7 +77,9 @@ document.addEventListener("DOMContentLoaded", function () {
                   return data.labels.map((label, index) => {
                     const value = data.datasets[0].data[index];
                     return {
-                      text: `${label || "Unknown"} (₹${value.toLocaleString()})`,
+                      text: `${
+                        label || "Unknown"
+                      } (₹${value.toLocaleString()})`,
                       fillStyle: data.datasets[0].backgroundColor[index],
                       hidden: false,
                       index: index,
@@ -270,48 +270,57 @@ document.addEventListener("DOMContentLoaded", function () {
           fetch(`/api/credit-card-bill?cardNumber=${cardNumber}`)
             .then((response) => {
               if (!response.ok) {
+                if (response.status === 404) {
+                  // Handle no bill found
+                  throw new Error("No bill found for this card");
+                }
                 throw new Error("Failed to fetch bill details");
               }
               return response.json();
             })
             .then((billDetails) => {
-              // Update bill-related elements with API data
               let detailBillAmount =
                 document.getElementById("detailBillAmount");
               let detailDueDate = document.getElementById("detailDueDate");
               let detailMinDue = document.getElementById("detailMinDue");
 
               if (detailBillAmount && detailDueDate && detailMinDue) {
-                // Convert to number first, then use toFixed
                 const currentBill = Number(billDetails.current_bill);
                 const minimumAmountDue = Number(billDetails.minimum_amount_due);
 
-                // Update bill amount
-                detailBillAmount.innerText = `${
-                  !isNaN(currentBill) ? currentBill.toFixed(2) : "0.00"
+                detailBillAmount.innerText = `₹${
+                  !isNaN(currentBill)
+                    ? currentBill.toLocaleString("en-IN", {
+                        minimumFractionDigits: 2,
+                      })
+                    : "0.00"
                 }`;
-
-                // Update due date (assuming due_date is in YYYY-MM-DD format)
-                detailDueDate.innerText = billDetails.due_date;
-
-                // Update minimum due amount
-                detailMinDue.innerText = `${
+                detailDueDate.innerText = billDetails.due_date || "N/A";
+                detailMinDue.innerText = `₹${
                   !isNaN(minimumAmountDue)
-                    ? minimumAmountDue.toFixed(2)
+                    ? minimumAmountDue.toLocaleString("en-IN", {
+                        minimumFractionDigits: 2,
+                      })
                     : "0.00"
                 }`;
 
-                // Log to console for debugging
                 console.log("Bill Details:", billDetails);
               }
             })
             .catch((error) => {
               console.error("Error fetching bill details:", error);
-              // Show an error message to the user
               let detailBillAmount =
                 document.getElementById("detailBillAmount");
-              if (detailBillAmount) {
-                detailBillAmount.innerText = "Unable to fetch bill details";
+              let detailDueDate = document.getElementById("detailDueDate");
+              let detailMinDue = document.getElementById("detailMinDue");
+
+              if (detailBillAmount && detailDueDate && detailMinDue) {
+                detailBillAmount.innerText =
+                  error.message === "No bill found for this card"
+                    ? "No bill available"
+                    : "N/A";
+                detailDueDate.innerText = "N/A";
+                detailMinDue.innerText = "N/A";
               }
             });
 
