@@ -127,7 +127,25 @@ if (blogForm) {
       });
   });
 }
+// ===================== CHARACTER COUNTERS =====================
+document.addEventListener("DOMContentLoaded", function () {
+  const titleInput = document.getElementById("blogTitle");
+  const titleCharCount = document.getElementById("titleCharCount");
+  const contentInput = document.getElementById("blogContent");
+  const contentCharCount = document.getElementById("contentCharCount");
 
+  if (titleInput && titleCharCount) {
+    titleInput.addEventListener("input", function () {
+      titleCharCount.textContent = `${this.value.length}/50`;
+    });
+  }
+
+  if (contentInput && contentCharCount) {
+    contentInput.addEventListener("input", function () {
+      contentCharCount.textContent = `${this.value.length}/10000`;
+    });
+  }
+});
 // Function to save blog to database
 async function saveBlogToDatabase(blogPost) {
   try {
