@@ -98,7 +98,7 @@ document.addEventListener("DOMContentLoaded", () => {
       clientForm.addEventListener("submit", function (e) {
         e.preventDefault();
         const inputs = Array.from(clientForm.elements).filter(
-          (el) => el.tagName === "INPUT" || el.tagName === "SELECT"
+          (el) => el.tagName === "INPUT" || el.tagName === "SELECT",
         );
         let isValid = true;
 
@@ -178,7 +178,6 @@ function updateClientSidebar(clients) {
   if (!clientList) return;
 
   // Add the modern styles if they don't exist
-  addClientListStyles();
 
   if (clients.length === 0) {
     clientList.innerHTML = `
@@ -244,139 +243,6 @@ function updateClientSidebar(clients) {
       fetchClientDetails(userId);
     });
   });
-}
-
-// Function to add the client list styles
-function addClientListStyles() {
-  // Check if styles already exist
-  if (document.getElementById("client-list-styles")) return;
-
-  const styleSheet = document.createElement("style");
-  styleSheet.id = "client-list-styles";
-  styleSheet.textContent = `
-    /* Client list container styles */
-    #clientList {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      overflow-y: auto;
-    }
-    
-    /* Client item styles */
-    .client-item {
-      display: flex;
-      align-items: center;
-      padding: 12px 16px;
-      border-radius: 8px;
-      margin: 4px 8px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    
-    .client-item:hover {
-      background-color: #f2f5f9;
-    }
-    
-    .client-item.active {
-      background-color: #e6f2ff;
-    }
-    
-    /* Client avatar styles */
-    .client-avatar {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background-color: #e1e8f0;
-      color: #4a5568;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 14px;
-      font-weight: 600;
-      margin-right: 12px;
-      flex-shrink: 0;
-    }
-    
-    .client-item.active .client-avatar {
-      background-color: #3182ce;
-      color: white;
-    }
-    
-    /* Client link styles */
-    .client-link {
-      text-decoration: none;
-      color: #2d3748;
-      font-size: 14px;
-      font-weight: 500;
-      flex: 1;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      padding: 4px 0;
-    }
-    
-    .client-item.active .client-link {
-      color: #2c5282;
-      font-weight: 600;
-    }
-    
-    /* Empty state styles */
-    .empty-clients {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 40px 20px;
-      text-align: center;
-    }
-    
-    .empty-icon {
-      font-size: 24px;
-      margin-bottom: 12px;
-      opacity: 0.7;
-    }
-    
-    .empty-clients p {
-      color: #718096;
-      margin: 0;
-      font-size: 14px;
-    }
-    
-    /* Dark mode support */
-    @media (prefers-color-scheme: dark) {
-      .client-item:hover {
-        background-color: #2d3748;
-      }
-      
-      .client-item.active {
-        background-color: #2c5282;
-      }
-      
-      .client-avatar {
-        background-color: #4a5568;
-        color: #e2e8f0;
-      }
-      
-      .client-item.active .client-avatar {
-        background-color: #4299e1;
-        color: white;
-      }
-      
-      .client-link {
-        color: #e2e8f0;
-      }
-      
-      .client-item.active .client-link {
-        color: #ebf8ff;
-      }
-      
-      .empty-clients p {
-        color: #a0aec0;
-      }
-    }
-  `;
-
-  document.head.appendChild(styleSheet);
 }
 
 // Enhance the fetchClientDetails function to also fetch investments
@@ -471,8 +337,8 @@ function displayInvestments(investments) {
       createInvestmentCard(
         investment.symbol,
         investment.price,
-        investment.type || "stock"
-      )
+        investment.type || "stock",
+      ),
     );
   });
 
@@ -740,16 +606,27 @@ async function displayClientDetails(client) {
     try {
       // Fetch the client's image based on user ID
       let client_id;
-      if (client.id == "67e52a900823bba8b74d23fe") {client_id =  1;}
-      else if (client.id == "67e52a900823bba8b74d23ff") {client_id = 2;}
-      else if (client.id == "67e52a900823bba8b74d2400") {client_id = 3;}
-      else if (client.id == "67e52a900823bba8b74d2401") {client_id = 4;}
-      else if (client.id == "67e52a900823bba8b74d2402") {client_id = 5;}
-      else if (client.id == "67e52a900823bba8b74d2403") {client_id = 6;}
-      else if (client.id == "67e52a900823bba8b74d2404") {client_id = 7;}
-      else if (client.id == "67e52a900823bba8b74d2405") {client_id = 8;}
-      else if (client.id == "67e52a900823bba8b74d2406") {client_id = 9;}
-      else if (client.id == "67e52a900823bba8b74d2407") {client_id = 10;}
+      if (client.id == "67e52a900823bba8b74d23fe") {
+        client_id = 1;
+      } else if (client.id == "67e52a900823bba8b74d23ff") {
+        client_id = 2;
+      } else if (client.id == "67e52a900823bba8b74d2400") {
+        client_id = 3;
+      } else if (client.id == "67e52a900823bba8b74d2401") {
+        client_id = 4;
+      } else if (client.id == "67e52a900823bba8b74d2402") {
+        client_id = 5;
+      } else if (client.id == "67e52a900823bba8b74d2403") {
+        client_id = 6;
+      } else if (client.id == "67e52a900823bba8b74d2404") {
+        client_id = 7;
+      } else if (client.id == "67e52a900823bba8b74d2405") {
+        client_id = 8;
+      } else if (client.id == "67e52a900823bba8b74d2406") {
+        client_id = 9;
+      } else if (client.id == "67e52a900823bba8b74d2407") {
+        client_id = 10;
+      }
       const response = await fetch(`/api/client-image/${client_id}`);
 
       if (response.ok) {

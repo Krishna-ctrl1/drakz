@@ -109,26 +109,29 @@ document.addEventListener("DOMContentLoaded", function () {
     fetch("/api/bank-expenses")
       .then((response) => {
         if (!response.ok) {
-          throw new Error("Failed to fetch bank expenses");
+          throw new Error(
+            "Failed to fetch bank expenses: " + response.statusText,
+          );
         }
         return response.json();
       })
       .then((chartData) => {
+        console.log("Fetched expense data:", chartData); // Add logging for debugging
         // Check if there's data to display
         if (chartData.labels.length === 0) {
-          // Handle no data scenario
-          document.getElementById("expenseChart").innerHTML =
-            '<div class="text-center text-gray-500">No expense data available</div>';
+          document.getElementById("expenseChart").parentElement.innerHTML =
+            '<div class="text-center text-gray-500">No expense data available for the last 30 days</div>'; // More specific message
           return;
         }
-
         // Create chart with fetched data
         createExpenseChart(chartData);
       })
       .catch((error) => {
         console.error("Error fetching expense chart data:", error);
-        document.getElementById("expenseChart").innerHTML =
-          '<div class="text-center text-red-500">Unable to load expense chart</div>';
+        document.getElementById("expenseChart").parentElement.innerHTML =
+          '<div class="text-center text-red-500">Unable to load expense chart: ' +
+          error.message +
+          "</div>";
       });
   }
 
@@ -232,7 +235,7 @@ document.addEventListener("DOMContentLoaded", function () {
           let detailCardNumber = document.getElementById("detailCardNumber");
           let detailValidFrom = document.getElementById("detailValidFrom");
           let detailExpirationDate = document.getElementById(
-            "detailExpirationDate"
+            "detailExpirationDate",
           );
           let detailBillAmount = document.getElementById("detailBillAmount");
           let detailDueDate = document.getElementById("detailDueDate");
@@ -288,7 +291,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 const currentBill = Number(billDetails.current_bill);
                 const minimumAmountDue = Number(billDetails.minimum_amount_due);
 
-                detailBillAmount.innerText = `₹${
+                detailBillAmount.innerText = `${
                   !isNaN(currentBill)
                     ? currentBill.toLocaleString("en-IN", {
                         minimumFractionDigits: 2,
@@ -296,7 +299,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     : "0.00"
                 }`;
                 detailDueDate.innerText = billDetails.due_date || "N/A";
-                detailMinDue.innerText = `₹${
+                detailMinDue.innerText = `${
                   !isNaN(minimumAmountDue)
                     ? minimumAmountDue.toLocaleString("en-IN", {
                         minimumFractionDigits: 2,
@@ -489,14 +492,14 @@ document.addEventListener("DOMContentLoaded", function () {
                     <td>${due.masked_card_number}</td>
                     <td>₹${parseFloat(due.current_bill).toLocaleString(
                       "en-IN",
-                      { minimumFractionDigits: 2, maximumFractionDigits: 2 }
+                      { minimumFractionDigits: 2, maximumFractionDigits: 2 },
                     )}</td>
                     <td>${due.formatted_due_date}</td>
                     <td data-status="${
                       due.status.charAt(0).toUpperCase() + due.status.slice(1)
                     }">${
-          due.status.charAt(0).toUpperCase() + due.status.slice(1)
-        }</td>
+                      due.status.charAt(0).toUpperCase() + due.status.slice(1)
+                    }</td>
                 `;
         dueDatesTableBody.appendChild(row);
       });

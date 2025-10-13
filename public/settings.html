@@ -20,7 +20,6 @@
             <input type="text" id="searchInput" placeholder="Search for something" onkeyup="filterDashboard()">
         </div> -->
         <div class="icons">
-            <i class="fas fa-cog"></i>
             <i class="fas fa-bell"></i>
             <div class="profile">
                 <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="User">
@@ -194,143 +193,113 @@
                                         <input type="email" id="2fa-email" placeholder="your@email.com" >
                                     </div>
                                     
-                                    <div class="form-group" id="phone-verification" style="display: none;">
+                                    <div class="form-group" id="sms-verification" style="display: none;">
                                         <label>Phone Number</label>
-                                        <input type="tel" id="2fa-phone" placeholder="+91 **********" >
+                                        <input type="tel" id="2fa-phone" placeholder="+1 (555) 123-4567">
                                     </div>
-                                    
                                     
                                     <div class="form-actions">
                                         <button class="cancel-btn" id="cancel-2fa-setup">Cancel</button>
-                                        <button class="save-btn" id="confirm-2fa-setup">Enable 2FA</button>
+                                        <button class="save-btn" id="save-2fa-setup">Set Up 2FA</button>
                                     </div>
                                 </div>
-                                <!-- Success message -->
-                                <div id="2fa-success-message" style="display: none; margin-top: 15px;">
-                                    <p style="color: #4CAF50; font-weight: bold;">✓ Two-Factor Authentication set up successfully!</p>
-                                </div>
-
-                                <!-- Change settings button (always visible when 2FA is enabled) -->
-                                <div id="2fa-change-settings" style="display: none; margin-top: 10px;">
-                                    <button id="change-2fa-settings" class="save-btn">Change 2FA Settings</button>
-                                </div>
-                               
+                            
                         </div>
                     </section>
             
-                    <!-- 2. Notification Settings -->
+                    <!-- 2. Notifications -->
                     <section class="settings-section">
                         <h2><i class="fas fa-bell"></i> Notifications</h2>
                         <div class="settings-card">
                             <div class="setting-item">
                                 <label>Email Notifications</label>
                                 <label class="switch">
-                                    <input type="checkbox" id="email-notifications" checked>
+                                    <input type="checkbox" checked>
                                     <span class="slider"></span>
                                 </label>
                             </div>
                             <div class="setting-item">
                                 <label>Push Notifications</label>
                                 <label class="switch">
-                                    <input type="checkbox" id="push-notifications" checked>
+                                    <input type="checkbox" checked>
                                     <span class="slider"></span>
                                 </label>
                             </div>
                             <div class="setting-item">
                                 <label>SMS Alerts</label>
                                 <label class="switch">
-                                    <input type="checkbox" id="sms-alerts">
+                                    <input type="checkbox">
                                     <span class="slider"></span>
                                 </label>
                             </div>
                         </div>
                     </section>
             
+                    <!-- 3. Financial Preferences -->
                     <section class="settings-section">
                         <h2><i class="fas fa-bullseye"></i> Financial Goals</h2>
                         <div class="settings-card">
-                          <!-- Goals Summary -->
-                          <div class="goals-summary">
-                            <div class="summary-card">
-                              <i class="fas fa-bullseye"></i>
-                              <h3>Active Goals</h3>
+                          <div class="goal-stats">
+                            <div class="stat">
+                              <span>Active Goals</span>
                               <span id="active-goals-count">0</span>
                             </div>
-                            <div class="summary-card">
-                              <i class="fas fa-check-circle"></i>
-                              <h3>Completed</h3>
+                            <div class="stat">
+                              <span>Completed</span>
                               <span id="completed-goals-count">0</span>
                             </div>
-                            <div class="summary-card">
-                              <i class="fas fa-piggy-bank"></i>
-                              <h3>Total Saved</h3>
+                            <div class="stat">
+                              <span>Total Saved</span>
                               <span id="total-saved">₹0.00</span>
                             </div>
                           </div>
-                      
-                          <!-- Goals Filter/Sort -->
-                          <div class="goals-controls">
-                            <div class="filter-control">
-                              <label><i class="fas fa-filter"></i> Filter:</label>
-                              <select id="goal-filter">
-                                <option value="all">All Goals</option>
-                                <option value="active">Active</option>
-                                <option value="completed">Completed</option>
-                                <option value="high">High Priority</option>
+                          <div class="goal-controls">
+                            <div class="filter-sort">
+                              <select id="filter-category">
+                                <option value="">All Categories</option>
+                                <option value="house">House</option>
+                                <option value="car">Car</option>
+                                <option value="travel">Travel</option>
+                                <option value="education">Education</option>
+                                <option value="other">Other</option>
+                              </select>
+                              <select id="sort-by">
+                                <option value="">Sort By</option>
+                                <option value="date">Target Date</option>
+                                <option value="amount">Target Amount</option>
+                                <option value="priority">Priority</option>
                               </select>
                             </div>
-                            <div class="sort-control">
-                              <label><i class="fas fa-sort"></i> Sort:</label>
-                              <select id="goal-sort">
-                                <option value="priority-desc">Priority (High-Low)</option>
-                                <option value="date-asc">Date (Soonest)</option>
-                                <option value="progress-desc">Progress (Most)</option>
-                              </select>
-                            </div>
-                            <button class="add-goal-btn" id="add-goal-btn">
-                              <i class="fas fa-plus"></i> New Goal
-                            </button>
+                            <button id="add-goal" class="add-goal-btn"><i class="fas fa-plus"></i> New Goal</button>
                           </div>
-                      
-                          <!-- Goals Display -->
-                          <div id="goals-display" class="goals-display">
-                            <!-- Goals will be rendered here -->
+                          <div id="goals-list">
+                            <!-- Dynamically rendered goals will appear here -->
+                            <p class="no-goals">No financial goals set</p>
                           </div>
-                      
-                          <!-- Empty State -->
-                          <div id="no-goals" class="no-goals">
-                            <img src="https://cdn-icons-png.flaticon.com/512/4076/4076478.png" alt="No goals" width="100">
-                            <h3>No goals yet</h3>
-                            <p>Start by setting your first financial goal</p>
-                            <button class="primary-btn" id="empty-add-goal">Add Goal</button>
-                          </div>
-                      
-                          <!-- Goal Form Modal -->
+                          <!-- Goal Modal -->
                           <div class="modal" id="goal-modal">
                             <div class="modal-content">
                               <div class="modal-header">
-                                <h3><span id="modal-title">Add New Goal</span></h3>
+                                <h3>Add New Goal</h3>
                                 <button class="close-modal">&times;</button>
                               </div>
                               <div class="modal-body">
-                                <div class="form-group">
-                                  <label>Goal Name</label>
-                                  <input type="text" id="goal-name" placeholder="e.g., Buy a house, Vacation fund">
-                                </div>
-                                <div class="form-row">
+                                <form>
                                   <div class="form-group">
-                                    <label>Target Amount ($)</label>
-                                    <input type="number" id="goal-amount" placeholder="0.00" min="0" step="0.01">
+                                    <label>Goal Name</label>
+                                    <input type="text" id="goal-name" placeholder="e.g., Buy a House" required>
                                   </div>
                                   <div class="form-group">
-                                    <label>Current Amount ($)</label>
+                                    <label>Target Amount (₹)</label>
+                                    <input type="number" id="target-amount" placeholder="0.00" min="0.01" step="0.01" required>
+                                  </div>
+                                  <div class="form-group">
+                                    <label>Current Amount (₹)</label>
                                     <input type="number" id="current-amount" placeholder="0.00" min="0" step="0.01">
                                   </div>
-                                </div>
-                                <div class="form-row">
                                   <div class="form-group">
                                     <label>Target Date</label>
-                                    <input type="date" id="goal-date">
+                                    <input type="date" id="goal-date" required>
                                   </div>
                                   <div class="form-group">
                                     <label>Priority</label>
@@ -340,51 +309,51 @@
                                       <option value="low">Low</option>
                                     </select>
                                   </div>
-                                </div>
-                                <div class="form-group">
-                                  <label>Category</label>
-                                  <div class="category-options">
-                                    <label class="category-option">
-                                      <input type="radio" name="category" value="house" checked>
-                                      <div class="category-icon">
-                                        <i class="fas fa-home"></i>
-                                        <span>House</span>
-                                      </div>
-                                    </label>
-                                    <label class="category-option">
-                                      <input type="radio" name="category" value="car">
-                                      <div class="category-icon">
-                                        <i class="fas fa-car"></i>
-                                        <span>Car</span>
-                                      </div>
-                                    </label>
-                                    <label class="category-option">
-                                      <input type="radio" name="category" value="travel">
-                                      <div class="category-icon">
-                                        <i class="fas fa-plane"></i>
-                                        <span>Travel</span>
-                                      </div>
-                                    </label>
-                                    <label class="category-option">
-                                      <input type="radio" name="category" value="education">
-                                      <div class="category-icon">
-                                        <i class="fas fa-graduation-cap"></i>
-                                        <span>Education</span>
-                                      </div>
-                                    </label>
-                                    <label class="category-option">
-                                      <input type="radio" name="category" value="other">
-                                      <div class="category-icon">
-                                        <i class="fas fa-star"></i>
-                                        <span>Other</span>
-                                      </div>
-                                    </label>
+                                  <div class="form-group">
+                                    <label>Category</label>
+                                    <div class="category-options">
+                                      <label class="category-option">
+                                        <input type="radio" name="category" value="house">
+                                        <div class="category-icon">
+                                          <i class="fas fa-home"></i>
+                                          <span>House</span>
+                                        </div>
+                                      </label>
+                                      <label class="category-option">
+                                        <input type="radio" name="category" value="car">
+                                        <div class="category-icon">
+                                          <i class="fas fa-car"></i>
+                                          <span>Car</span>
+                                        </div>
+                                      </label>
+                                      <label class="category-option">
+                                        <input type="radio" name="category" value="travel">
+                                        <div class="category-icon">
+                                          <i class="fas fa-plane"></i>
+                                          <span>Travel</span>
+                                        </div>
+                                      </label>
+                                      <label class="category-option">
+                                        <input type="radio" name="category" value="education">
+                                        <div class="category-icon">
+                                          <i class="fas fa-graduation-cap"></i>
+                                          <span>Education</span>
+                                        </div>
+                                      </label>
+                                      <label class="category-option">
+                                        <input type="radio" name="category" value="other" checked>
+                                        <div class="category-icon">
+                                          <i class="fas fa-star"></i>
+                                          <span>Other</span>
+                                        </div>
+                                      </label>
+                                    </div>
                                   </div>
-                                </div>
-                                <div class="form-group">
-                                  <label>Notes</label>
-                                  <textarea id="goal-notes" placeholder="Any additional notes..."></textarea>
-                                </div>
+                                  <div class="form-group">
+                                    <label>Notes</label>
+                                    <textarea id="goal-notes" placeholder="Any additional notes..."></textarea>
+                                  </div>
+                                </form>
                               </div>
                               <div class="modal-footer">
                                 <button class="cancel-btn" id="cancel-goal">Cancel</button>
@@ -392,7 +361,6 @@
                               </div>
                             </div>
                           </div>
-                      
                           <!-- Contribution Modal -->
                           <div class="modal" id="contribution-modal">
                             <div class="modal-content small">
@@ -402,7 +370,7 @@
                               </div>
                               <div class="modal-body">
                                 <div class="form-group">
-                                  <label>Amount to Add ($)</label>
+                                  <label>Amount to Add (₹)</label>
                                   <input type="number" id="contribution-amount" placeholder="0.00" min="0.01" step="0.01">
                                 </div>
                                 <div class="form-group">
@@ -435,61 +403,56 @@
                                     <span class="close-modal" >&times;</span>
                                     <h3>Link Bank Account</h3>
                                     <form id="link-account-form">
-                                        <div class="form-group">
-                                            <label>Bank Name</label>
-                                            <select id="bank-name" required>
-                                                <option value="">Select Bank</option>
-                                                <!-- Public Sector Banks -->
-                                                <optgroup label="Public Sector Banks">
-                                                    <option value="State Bank of India">State Bank of India</option>
-                                                    <option value="Punjab National Bank">Punjab National Bank</option>
-                                                    <option value="Bank of Baroda">Bank of Baroda</option>
-                                                    <option value="Canara Bank">Canara Bank</option>
-                                                    <option value="Union Bank of India">Union Bank of India</option>
-                                                    <option value="Bank of India">Bank of India</option>
-                                                    <option value="Indian Bank">Indian Bank</option>
-                                                    <option value="Central Bank of India">Central Bank of India</option>
-                                                </optgroup>
-                                                
-                                                <!-- Private Banks -->
-                                                <optgroup label="Private Banks">
-                                                    <option value="HDFC Bank">HDFC Bank</option>
-                                                    <option value="ICICI Bank">ICICI Bank</option>
-                                                    <option value="Axis Bank">Axis Bank</option>
-                                                    <option value="Kotak Mahindra Bank">Kotak Mahindra Bank</option>
-                                                    <option value="IndusInd Bank">IndusInd Bank</option>
-                                                    <option value="Yes Bank">Yes Bank</option>
-                                                    <option value="IDFC First Bank">IDFC First Bank</option>
-                                                </optgroup>
-                                                
-                                                <!-- Payment Banks -->
-                                                <optgroup label="Payment Banks">
-                                                    <option value="Paytm Payments Bank">Paytm Payments Bank</option>
-                                                    <option value="Airtel Payments Bank">Airtel Payments Bank</option>
-                                                </optgroup>
-                                            </select>
-                                            
-                                            <!-- Change account number input to full digits -->
-                                            <div class="form-group">
-                                                <label>Account Number</label>
-                                                <input type="text" id="account-number" pattern="[0-9]{9,18}" 
-                                                       title="9-18 digit account number" required>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Account Type</label>
-                                            <select id="account-type" required>
-                                                <option value="">Select Type</option>
-                                                <option value="Checking">Checking</option>
-                                                <option value="Savings">Savings</option>
-                                                <option value="Credit Card">Credit Card</option>
-                                            </select>
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Last 4 Digits of Account Number</label>
-                                            <input type="text" id="account-number" pattern="\d{4}" maxlength="4" required>
-                                        </div>
-                                        <button type="submit" class="save-btn">Link Account</button>
+                                      <div class="form-group">
+                                        <label>Bank Name</label>
+                                        <select id="bank-name" required>
+                                          <option value="">Select Bank</option>
+                                          <!-- Public Sector Banks -->
+                                          <optgroup label="Public Sector Banks">
+                                            <option value="State Bank of India">State Bank of India</option>
+                                            <option value="Punjab National Bank">Punjab National Bank</option>
+                                            <option value="Bank of Baroda">Bank of Baroda</option>
+                                            <option value="Canara Bank">Canara Bank</option>
+                                            <option value="Union Bank of India">Union Bank of India</option>
+                                            <option value="Bank of India">Bank of India</option>
+                                            <option value="Indian Bank">Indian Bank</option>
+                                            <option value="Central Bank of India">Central Bank of India</option>
+                                          </optgroup>
+                                          <!-- Private Banks -->
+                                          <optgroup label="Private Banks">
+                                            <option value="HDFC Bank">HDFC Bank</option>
+                                            <option value="ICICI Bank">ICICI Bank</option>
+                                            <option value="Axis Bank">Axis Bank</option>
+                                            <option value="Kotak Mahindra Bank">Kotak Mahindra Bank</option>
+                                            <option value="IndusInd Bank">IndusInd Bank</option>
+                                            <option value="Yes Bank">Yes Bank</option>
+                                            <option value="IDFC First Bank">IDFC First Bank</option>
+                                          </optgroup>
+                                          <!-- Payment Banks -->
+                                          <optgroup label="Payment Banks">
+                                            <option value="Paytm Payments Bank">Paytm Payments Bank</option>
+                                            <option value="Airtel Payments Bank">Airtel Payments Bank</option>
+                                          </optgroup>
+                                        </select>
+                                      </div>
+                                      <div class="form-group">
+                                        <label>Account Number</label>
+                                        <input type="text" id="account-number" pattern="[0-9]{9,18}" title="9-18 digit account number" required>
+                                      </div>
+                                      <div class="form-group">
+                                        <label>Account Type</label>
+                                        <select id="account-type" required>
+                                          <option value="">Select Type</option>
+                                          <option value="Savings">Savings</option>
+                                          <option value="Checking">Checking</option>
+                                          <option value="Credit Card">Credit Card</option>
+                                        </select>
+                                      </div>
+                                      <div class="form-group">
+                                        <label>Last 4 Digits of Account Number</label>
+                                        <input type="text" id="last-four-digits" pattern="\d{4}" maxlength="4" title="Exactly 4 digits" required>
+                                      </div>
+                                      <button type="submit" class="save-btn">Link Account</button>
                                     </form>
                                 </div>
                             </div>

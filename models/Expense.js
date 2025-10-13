@@ -1,21 +1,35 @@
-// First, define MongoDB schemas needed for these endpoints
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-// Expense schema
-const ExpenseSchema = new Schema({
+const expenseSchema = new Schema({
   user_id: {
-    type: Schema.Types.ObjectId,
-    ref: 'User'
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+    index: true
   },
-  amount: Number,
-  category: String,
-  date: { type: Date, default: Date.now }
-  // Add other expense fields
+  category: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  amount: {
+    type: Number,
+    required: true,
+    min: 0 
+  },
+  date: {
+    type: Date,
+    required: true,
+    default: Date.now
+  }
 }, {
-  collection: 'user_expenses'
+  timestamps: true,
+  collection: 'expenses' 
 });
 
-const Expense = mongoose.model('Expense', ExpenseSchema);
+expenseSchema.index({ user_id: 1, date: -1 });
+
+const Expense = mongoose.model('Expense', expenseSchema);
 
 module.exports = Expense;

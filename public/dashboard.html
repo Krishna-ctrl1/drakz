@@ -51,9 +51,8 @@
         >
           Upgrade to Premium
         </button>
-        <i class="fas fa-cog"></i>
         <i class="fas fa-bell"></i>
-        <div class="profile">
+        <div class="profile" onclick="window.location.href='settings.html';">
           <img
             src="https://randomuser.me/api/portraits/women/44.jpg"
             alt="User"
@@ -520,7 +519,7 @@
         // Function to extract data from the global scope
         function initializeFromGlobalData() {
           // Try to find the data in the page
-          // Option 1: Direct access to current data
+          
           if (window.dashboardData && window.dashboardData.expenses) {
             console.log("Found dashboard data in window.dashboardData");
             createExpenseChart(window.dashboardData.expenses);
