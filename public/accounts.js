@@ -41,8 +41,9 @@ function closeNav() {
 // Helper function to get dynamic labels for the last 7 days (oldest to newest)
 function getLast7DaysLabels() {
   const labels = [];
-  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  for (let i = 6; i >= 0; i--) { // From 6 days ago to today
+  const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  for (let i = 6; i >= 0; i--) {
+    // From 6 days ago to today
     const date = new Date();
     date.setDate(date.getDate() - i);
     const dayName = days[date.getDay()];
@@ -114,9 +115,9 @@ function createChart() {
             text: "Day of the Last 7 Days",
             font: {
               size: 12,
-              weight: 'bold'
-            }
-          }
+              weight: "bold",
+            },
+          },
         },
         y: {
           beginAtZero: true,
@@ -136,9 +137,9 @@ function createChart() {
             text: "Amount (₹)",
             font: {
               size: 12,
-              weight: 'bold'
-            }
-          }
+              weight: "bold",
+            },
+          },
         },
       },
       plugins: {
@@ -253,8 +254,9 @@ function filterTransactions(type) {
             <td>${tx.description}</td>
             <td>${tx.type}</td>
             <td>${tx.date}</td>
-            <td class="amount ${tx.amount > 0 ? "positive" : "negative"}">${tx.amount > 0 ? "+" + tx.amount : tx.amount
-      }</td>
+            <td class="amount ${tx.amount > 0 ? "positive" : "negative"}">${
+              tx.amount > 0 ? "+" + tx.amount : tx.amount
+            }</td>
             <td><button class="button">Download</button></td>
         </tr>`;
     tbody.innerHTML += row;
@@ -266,12 +268,13 @@ filterTransactions("all");
 // Function to toggle loan details visibility
 function toggleDetails(loanId) {
   // Remove any quotes from the ID if present
-  const cleanId = loanId.replace(/['"]/g, '');
+  const cleanId = loanId.replace(/['"]/g, "");
   const detailsElement = document.getElementById(`details-${cleanId}`);
 
   if (detailsElement) {
     // Toggle display between none and block
-    detailsElement.style.display = detailsElement.style.display === 'none' ? 'block' : 'none';
+    detailsElement.style.display =
+      detailsElement.style.display === "none" ? "block" : "none";
   }
 }
 // Attach click event listeners to loan cards
@@ -358,6 +361,25 @@ function getUserTransactions(limit = 10) {
       console.log("User Transactions:", data);
       // Here you can update the UI with transaction data
       displayUserTransactions(data);
+      if (data && data.status === "success" && Array.isArray(data.data)) {
+        let totalIncome = 0;
+        let totalExpense = 0;
+
+        // Loop through each transaction to sum up income and expenses
+        data.data.forEach((transaction) => {
+          const amount = parseFloat(transaction.amount);
+          if (amount >= 0) {
+            // Positive amounts are income
+            totalIncome += amount;
+          } else {
+            // Negative amounts are expenses (use Math.abs to add a positive number)
+            totalExpense += Math.abs(amount);
+          }
+        });
+
+        // Now, call the new function to update the cards with the calculated values
+        updateHoldingsCards(totalIncome, totalExpense);
+      }
     })
     .catch((error) => {
       console.error("Error fetching user transactions:", error);
@@ -365,60 +387,155 @@ function getUserTransactions(limit = 10) {
 }
 
 // Update the displayUserHoldings function to target specific HTML elements
-function displayUserHoldings(response) {
-  // Check if the response has the expected structure
-  if (response && response.status === "success" && response.data) {
-    const data = response.data;
+// function displayUserHoldings(response) {
+//   // Check if the response has the expected structure
+//   if (response && response.status === "success" && response.data) {
+//     const data = response.data;
 
-    // Format currency values
-    const formatCurrency = (value) => {
-      // Convert string to number and format as currency
-      return new Intl.NumberFormat("en-IN", {
-        style: "currency",
-        currency: "INR",
-        maximumFractionDigits: 0,
-      }).format(parseFloat(value));
-    };
+//     // Format currency values
+//     const formatCurrency = (value) => {
+//       // Convert string to number and format as currency
+//       return new Intl.NumberFormat("en-IN", {
+//         style: "currency",
+//         currency: "INR",
+//         maximumFractionDigits: 0,
+//       }).format(parseFloat(value));
+//     };
 
-    // Update Income card
-    const incomeElement = document.querySelector(".card.income .amount");
-    if (incomeElement) {
-      incomeElement.textContent = formatCurrency(data.income);
-    }
+//     // Update Income card
+//     const incomeElement = document.querySelector(".card.income .amount");
+//     if (incomeElement) {
+//       incomeElement.textContent = formatCurrency(data.income);
+//     }
 
-    // Update Expense card
-    const expenseElement = document.querySelector(".card.expense .amount");
-    if (expenseElement) {
-      expenseElement.textContent = formatCurrency(data.expense);
-    }
+//     // Update Expense card
+//     const expenseElement = document.querySelector(".card.expense .amount");
+//     if (expenseElement) {
+//       expenseElement.textContent = formatCurrency(data.expense);
+//     }
 
-    // Update Total Saving card
-    const savingElement = document.querySelector(".card.saving .amount");
-    if (savingElement) {
-      savingElement.textContent = formatCurrency(data.savings_account_balance);
-    }
+//     // Update Total Saving card
+//     const savingElement = document.querySelector(".card.saving .amount");
+//     if (savingElement) {
+//       savingElement.textContent = formatCurrency(data.savings_account_balance);
+//     }
 
-    // Optional: You can also update the total balance elsewhere if needed
-    const totalBalanceElement = document.getElementById("total-balance");
-    if (totalBalanceElement) {
-      totalBalanceElement.textContent = formatCurrency(data.total_balance);
-    }
+//     // Optional: You can also update the total balance elsewhere if needed
+//     const totalBalanceElement = document.getElementById("total-balance");
+//     if (totalBalanceElement) {
+//       totalBalanceElement.textContent = formatCurrency(data.total_balance);
+//     }
 
-    // Optional: Update last updated timestamp
-    const lastUpdatedElement = document.getElementById("last-updated");
-    if (lastUpdatedElement) {
-      const date = new Date(data.last_updated);
-      lastUpdatedElement.textContent = `Last updated: ${date.toLocaleString()}`;
-    }
-  } else {
-    console.error("Invalid response format for user holdings:", response);
+//     // Optional: Update last updated timestamp
+//     const lastUpdatedElement = document.getElementById("last-updated");
+//     if (lastUpdatedElement) {
+//       const date = new Date(data.last_updated);
+//       lastUpdatedElement.textContent = `Last updated: ${date.toLocaleString()}`;
+//     }
+//   } else {
+//     console.error("Invalid response format for user holdings:", response);
+//   }
+// }
+
+// // Update the displayUserHoldings function to target specific HTML elements
+// function displayUserHoldings(response) {
+//   // Check if the response has the expected structure
+//   if (response && response.status === "success" && response.data) {
+//     const data = response.data;
+
+//     // Format currency values
+//     const formatCurrency = (value) => {
+//       // Convert string to number and format as currency
+//       return new Intl.NumberFormat("en-IN", {
+//         style: "currency",
+//         currency: "INR",
+//         maximumFractionDigits: 0,
+//       }).format(parseFloat(value));
+//     };
+
+//     // Get numeric values for income and expense
+//     const incomeValue = parseFloat(data.income) || 0;
+//     const expenseValue = parseFloat(data.expense) || 0;
+
+//     // Update Income card
+//     const incomeElement = document.querySelector(".card.income .amount");
+//     if (incomeElement) {
+//       incomeElement.textContent = formatCurrency(incomeValue);
+//     }
+
+//     // Update Expense card
+//     const expenseElement = document.querySelector(".card.expense .amount");
+//     if (expenseElement) {
+//       expenseElement.textContent = formatCurrency(expenseValue);
+//     }
+
+//     // --- MODIFICATION START ---
+//     // Calculate savings as the difference between income and expense
+//     const calculatedSavings = incomeValue - expenseValue;
+
+//     // Update Total Saving card with the calculated value
+//     const savingElement = document.querySelector(".card.saving .amount");
+//     if (savingElement) {
+//       savingElement.textContent = formatCurrency(calculatedSavings);
+//     }
+//     // --- MODIFICATION END ---
+
+//     // Optional: You can also update the total balance elsewhere if needed
+//     const totalBalanceElement = document.getElementById("total-balance");
+//     if (totalBalanceElement) {
+//       totalBalanceElement.textContent = formatCurrency(data.total_balance);
+//     }
+
+//     // Optional: Update last updated timestamp
+//     const lastUpdatedElement = document.getElementById("last-updated");
+//     if (lastUpdatedElement) {
+//       const date = new Date(data.last_updated);
+//       lastUpdatedElement.textContent = `Last updated: ${date.toLocaleString()}`;
+//     }
+//   } else {
+//     console.error("Invalid response format for user holdings:", response);
+//   }
+// }
+// New function to update the holdings cards based on calculated totals
+function updateHoldingsCards(income, expense) {
+  // Helper to format numbers as Indian Rupees (INR)
+  const formatCurrency = (value) => {
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      maximumFractionDigits: 0,
+    }).format(parseFloat(value));
+  };
+
+  // Calculate savings from the provided income and expense
+  const calculatedSavings = income - expense;
+
+  // Update the Income card in the HTML
+  const incomeElement = document.querySelector(".card.income .amount");
+  if (incomeElement) {
+    incomeElement.textContent = formatCurrency(income);
+  }
+
+  // Update the Expense card in the HTML
+  const expenseElement = document.querySelector(".card.expense .amount");
+  if (expenseElement) {
+    expenseElement.textContent = formatCurrency(expense);
+  }
+
+  // Update the Total Saving card in the HTML
+  const savingElement = document.querySelector(".card.saving .amount");
+  if (savingElement) {
+    savingElement.textContent = formatCurrency(calculatedSavings);
   }
 }
-
 // Function to display user loans
 function displayUserLoans(response) {
   // Check if the response has the expected structure
-  if (response && response.status === "success" && Array.isArray(response.data)) {
+  if (
+    response &&
+    response.status === "success" &&
+    Array.isArray(response.data)
+  ) {
     const loans = response.data;
     const loanContainer = document.getElementById("loan-list");
 
@@ -469,7 +586,7 @@ function displayUserLoans(response) {
       // Create loan summary
       const loanSummary = document.createElement("p");
       loanSummary.textContent = `Principal: ${formatCurrency(
-        loan.principal_amount
+        loan.principal_amount,
       )} | Balance: ${formatCurrency(loan.remaining_balance)}`;
 
       // Create loan date
@@ -504,7 +621,7 @@ function displayUserLoans(response) {
       if (loan.status !== "Paid") {
         const nextPayment = document.createElement("p");
         nextPayment.textContent = `Next Payment Due: ${formatDate(
-          loan.next_payment_due
+          loan.next_payment_due,
         )}`;
         detailsContainer.appendChild(nextPayment);
       } else {

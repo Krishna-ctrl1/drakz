@@ -520,7 +520,7 @@
         // Function to extract data from the global scope
         function initializeFromGlobalData() {
           // Try to find the data in the page
-          // Option 1: Direct access to current data
+          
           if (window.dashboardData && window.dashboardData.expenses) {
             console.log("Found dashboard data in window.dashboardData");
             createExpenseChart(window.dashboardData.expenses);
