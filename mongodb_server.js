@@ -1581,197 +1581,64 @@ const isAuthenticated = (req, res, next) => {
     .json({ status: "error", message: "Not authenticated" });
 };
 
-app.get("/api/user/weekly-activity", isAuthenticated, async (req, res) => {
-  try {
-    const userId = req.session.userId;
-    console.log("Processing weekly activity request for user:", userId);
+// API to get weekly activity for the last 7 days
+app.get("/api/user/weekly-activity", async (req, res) => {
+  const userId = req.session.userId;
 
-    // Get current week's date range (Sunday to Saturday)
-    const today = new Date();
-    const startOfWeek = new Date(today);
-    startOfWeek.setDate(today.getDate() - today.getDay()); // Start from Sunday
-    startOfWeek.setHours(0, 0, 0, 0); // Set to beginning of day
-
-    const endOfWeek = new Date(startOfWeek);
-    endOfWeek.setDate(startOfWeek.getDate() + 6); // End on Saturday
-    endOfWeek.setHours(23, 59, 59, 999); // Set to end of day
-
-    console.log(
-      "Week date range:",
-      startOfWeek.toISOString(),
-      "to",
-      endOfWeek.toISOString()
-    );
-
-    // Get the UserTransaction model
-    const UserTransaction = mongoose.model("UserTransaction");
-
-    // Query all transactions for this user within the date range
-    const transactions = await UserTransaction.find({
-      user_id: new mongoose.Types.ObjectId(userId),
-      transaction_datetime: { $gte: startOfWeek, $lte: endOfWeek },
-    });
-
-    console.log(`Found ${transactions.length} transactions for the week`);
-
-    // Initialize arrays for the whole week (Sunday to Saturday)
-    const depositValues = [0, 0, 0, 0, 0, 0, 0];
-    const withdrawValues = [0, 0, 0, 0, 0, 0, 0];
-    const weekDates = [];
-
-    // Generate dates for the week
-    for (let i = 0; i < 7; i++) {
-      const date = new Date(startOfWeek);
-      date.setDate(startOfWeek.getDate() + i);
-      weekDates.push(date.toISOString().split("T")[0]); // Format as YYYY-MM-DD
-    }
-
-    // Process the transactions
-    transactions.forEach((transaction) => {
-      const txDate = new Date(transaction.transaction_datetime);
-      const dayOfWeek = txDate.getDay(); // 0 = Sunday, 1 = Monday, etc.
-
-      if (transaction.amount > 0) {
-        depositValues[dayOfWeek] += transaction.amount;
-      } else {
-        withdrawValues[dayOfWeek] += Math.abs(transaction.amount);
-      }
-    });
-
-    console.log("Processed deposit values:", depositValues);
-    console.log("Processed withdraw values:", withdrawValues);
-
-    // Check if there's any data for the week
-    const hasTransactions =
-      depositValues.some((val) => val > 0) ||
-      withdrawValues.some((val) => val > 0);
-
-    if (!hasTransactions) {
-      console.log("No transactions found for the week");
-      // If you want to add test data for visualization, you could do it here
-    }
-
-    // Send the data
-    res.json({
-      status: "success",
-      data: {
-        weekDates,
-        depositValues,
-        withdrawValues,
-      },
-    });
-  } catch (err) {
-    console.error("Error processing weekly activity:", err);
-    res.status(500).json({
-      status: "error",
-      message: "Failed to process weekly activity",
-    });
+  if (!userId) {
+    return res.status(401).json({ status: "error", message: "Unauthorized" });
   }
-});
 
-// Alternative implementation using Mongoose aggregation
-app.get("/api/user/weekly-activity", isAuthenticated, async (req, res) => {
   try {
-    const userId = req.session.userId;
-    console.log("Processing weekly activity request for user:", userId);
-
-    // Get current week's date range (Sunday to Saturday)
     const today = new Date();
-    const startOfWeek = new Date(today);
-    startOfWeek.setDate(today.getDate() - today.getDay()); // Start from Sunday
-    startOfWeek.setHours(0, 0, 0, 0); // Set to beginning of day
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(today.getDate() - 6); // Last 7 days including today
 
-    const endOfWeek = new Date(startOfWeek);
-    endOfWeek.setDate(startOfWeek.getDate() + 6); // End on Saturday
-    endOfWeek.setHours(23, 59, 59, 999); // Set to end of day
-
-    console.log(
-      "Week date range:",
-      startOfWeek.toISOString(),
-      "to",
-      endOfWeek.toISOString()
-    );
-
-    // Get the UserTransaction model
-    const UserTransaction = mongoose.model("UserTransaction");
-
-    // MongoDB aggregation pipeline to get daily totals
-    const dailyTotals = await UserTransaction.aggregate([
-      // Match transactions for this user in the date range
+    // Aggregate deposits and withdraws per day
+    const transactions = await UserTransaction.aggregate([
       {
         $match: {
           user_id: new mongoose.Types.ObjectId(userId),
-          transaction_datetime: { $gte: startOfWeek, $lte: endOfWeek },
+          transaction_datetime: { $gte: sevenDaysAgo, $lte: today },
         },
       },
-      // Group by date and calculate deposit and withdrawal totals
       {
         $group: {
-          _id: {
-            $dateToString: {
-              format: "%Y-%m-%d",
-              date: "$transaction_datetime",
-            },
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$transaction_datetime" } },
+          totalDeposit: {
+            $sum: { $cond: [{ $gt: ["$amount", 0] }, "$amount", 0] },
           },
-          depositTotal: {
-            $sum: {
-              $cond: [{ $gt: ["$amount", 0] }, "$amount", 0],
-            },
-          },
-          withdrawTotal: {
-            $sum: {
-              $cond: [{ $lt: ["$amount", 0] }, { $abs: "$amount" }, 0],
-            },
+          totalWithdraw: {
+            $sum: { $cond: [{ $lt: ["$amount", 0] }, { $abs: "$amount" }, 0] }, // Absolute for withdraw display
           },
         },
       },
-      // Sort by date
-      {
-        $sort: { _id: 1 },
-      },
+      { $sort: { _id: 1 } }, // Sort by date ascending (oldest to newest)
     ]);
 
-    console.log("Aggregation results:", dailyTotals);
+    // Generate full 7-day array, filling missing days with 0
+    const depositValues = [];
+    const withdrawValues = [];
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toISOString().split('T')[0]; // YYYY-MM-DD
 
-    // Initialize arrays for the whole week (Sunday to Saturday)
-    const depositValues = [0, 0, 0, 0, 0, 0, 0];
-    const withdrawValues = [0, 0, 0, 0, 0, 0, 0];
-    const weekDates = [];
-
-    // Generate dates for the week
-    for (let i = 0; i < 7; i++) {
-      const date = new Date(startOfWeek);
-      date.setDate(startOfWeek.getDate() + i);
-      weekDates.push(date.toISOString().split("T")[0]); // Format as YYYY-MM-DD
+      const dayData = transactions.find((t) => t._id === dateStr) || { totalDeposit: 0, totalWithdraw: 0 };
+      depositValues.push(dayData.totalDeposit);
+      withdrawValues.push(dayData.totalWithdraw);
     }
 
-    // Map the aggregation results to the correct day of the week
-    dailyTotals.forEach((day) => {
-      const dayDate = new Date(day._id);
-      const dayOfWeek = dayDate.getDay();
-
-      depositValues[dayOfWeek] = day.depositTotal;
-      withdrawValues[dayOfWeek] = day.withdrawTotal;
-    });
-
-    console.log("Processed deposit values:", depositValues);
-    console.log("Processed withdraw values:", withdrawValues);
-
-    // Send the data
     res.json({
       status: "success",
       data: {
-        weekDates,
         depositValues,
         withdrawValues,
       },
     });
-  } catch (err) {
-    console.error("Error processing weekly activity:", err);
-    res.status(500).json({
-      status: "error",
-      message: "Failed to process weekly activity",
-    });
+  } catch (error) {
+    console.error("Error fetching weekly activity:", error);
+    res.status(500).json({ status: "error", message: "Database error" });
   }
 });
 

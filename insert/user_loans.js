@@ -100,7 +100,7 @@ const insertUserLoans = async () => {
     
     console.log(`Found ${users.length} users in the database`);
 
-    // Create an array of user emails to map with the SQL data
+    // Create an array of user emails to map with the data
     const userEmails = [
       'xdphantom1202@gmail.com',
       'ragamaie.n23@iiits.in',
@@ -114,82 +114,73 @@ const insertUserLoans = async () => {
       'arun.kumar@outlook.com'
     ];
 
-    // Create mapping of index to user _id
+    // Create mapping of email to user _id
     const userMap = {};
-    userEmails.forEach((email, index) => {
+    userEmails.forEach(email => {
       const user = users.find(u => u.email === email);
       if (user) {
-        userMap[index + 1] = user._id;
+        userMap[email] = user._id;
       }
     });
 
-    // SQL data converted to MongoDB format
-    const userLoansData = [
-      { user_id: 1, loan_type: 'Personal Loan', principal_amount: 500000.00, remaining_balance: 350000.00, interest_rate: 9.50, loan_term: 5, emi_amount: 11500.00, loan_taken_on: '2022-03-15', next_payment_due: '2025-03-15', total_paid: 150000.00, status: 'Active' },
-      { user_id: 1, loan_type: 'Home Improvement Loan', principal_amount: 250000.00, remaining_balance: 180000.00, interest_rate: 8.75, loan_term: 3, emi_amount: 8500.00, loan_taken_on: '2023-01-10', next_payment_due: '2025-01-10', total_paid: 70000.00, status: 'Paid' },
-      { user_id: 1, loan_type: 'Car Loan', principal_amount: 750000.00, remaining_balance: 500000.00, interest_rate: 7.25, loan_term: 7, emi_amount: 13000.00, loan_taken_on: '2021-07-20', next_payment_due: '2026-07-20', total_paid: 250000.00, status: 'Paid' },
-      { user_id: 1, loan_type: 'Education Loan', principal_amount: 300000.00, remaining_balance: 100000.00, interest_rate: 6.50, loan_term: 4, emi_amount: 7500.00, loan_taken_on: '2022-11-05', next_payment_due: '2024-11-05', total_paid: 200000.00, status: 'Overdue' },
-      
-      { user_id: 2, loan_type: 'Personal Loan', principal_amount: 400000.00, remaining_balance: 280000.00, interest_rate: 9.25, loan_term: 5, emi_amount: 9500.00, loan_taken_on: '2022-04-01', next_payment_due: '2025-04-01', total_paid: 120000.00, status: 'Paid' },
-      { user_id: 2, loan_type: 'Home Loan', principal_amount: 2000000.00, remaining_balance: 1500000.00, interest_rate: 8.50, loan_term: 20, emi_amount: 18000.00, loan_taken_on: '2020-06-15', next_payment_due: '2040-06-15', total_paid: 500000.00, status: 'Active' },
-      { user_id: 2, loan_type: 'Business Loan', principal_amount: 600000.00, remaining_balance: 400000.00, interest_rate: 10.00, loan_term: 6, emi_amount: 12500.00, loan_taken_on: '2023-02-20', next_payment_due: '2026-02-20', total_paid: 200000.00, status: 'Active' },
-      { user_id: 2, loan_type: 'Vehicle Loan', principal_amount: 500000.00, remaining_balance: 350000.00, interest_rate: 7.75, loan_term: 5, emi_amount: 11000.00, loan_taken_on: '2021-09-10', next_payment_due: '2026-09-10', total_paid: 150000.00, status: 'Overdue' },
-      
-      { user_id: 3, loan_type: 'Business Expansion Loan', principal_amount: 1000000.00, remaining_balance: 700000.00, interest_rate: 11.50, loan_term: 7, emi_amount: 18000.00, loan_taken_on: '2021-12-01', next_payment_due: '2028-12-01', total_paid: 300000.00, status: 'Active' },
-      { user_id: 3, loan_type: 'Equipment Financing', principal_amount: 500000.00, remaining_balance: 350000.00, interest_rate: 9.00, loan_term: 5, emi_amount: 12000.00, loan_taken_on: '2022-08-15', next_payment_due: '2025-08-15', total_paid: 150000.00, status: 'Overdue' },
-      { user_id: 3, loan_type: 'Personal Loan', principal_amount: 300000.00, remaining_balance: 150000.00, interest_rate: 8.75, loan_term: 3, emi_amount: 9500.00, loan_taken_on: '2023-03-10', next_payment_due: '2025-03-10', total_paid: 150000.00, status: 'Paid' },
-      { user_id: 3, loan_type: 'Working Capital Loan', principal_amount: 750000.00, remaining_balance: 500000.00, interest_rate: 10.25, loan_term: 6, emi_amount: 15500.00, loan_taken_on: '2022-05-20', next_payment_due: '2026-05-20', total_paid: 250000.00, status: 'Paid' },
-      
-      { user_id: 4, loan_type: 'Home Loan', principal_amount: 1500000.00, remaining_balance: 1200000.00, interest_rate: 8.25, loan_term: 15, emi_amount: 16000.00, loan_taken_on: '2020-10-01', next_payment_due: '2035-10-01', total_paid: 300000.00, status: 'Paid' },
-      { user_id: 4, loan_type: 'Personal Loan', principal_amount: 350000.00, remaining_balance: 200000.00, interest_rate: 9.00, loan_term: 4, emi_amount: 9000.00, loan_taken_on: '2022-11-15', next_payment_due: '2024-11-15', total_paid: 150000.00, status: 'Overdue' },
-      { user_id: 4, loan_type: 'Car Loan', principal_amount: 600000.00, remaining_balance: 400000.00, interest_rate: 7.50, loan_term: 5, emi_amount: 13000.00, loan_taken_on: '2021-06-10', next_payment_due: '2026-06-10', total_paid: 200000.00, status: 'Active' },
-      { user_id: 4, loan_type: 'Education Loan', principal_amount: 250000.00, remaining_balance: 100000.00, interest_rate: 6.75, loan_term: 3, emi_amount: 7500.00, loan_taken_on: '2023-01-20', next_payment_due: '2025-01-20', total_paid: 150000.00, status: 'Active' },
-      
-      { user_id: 5, loan_type: 'Business Loan', principal_amount: 800000.00, remaining_balance: 600000.00, interest_rate: 10.50, loan_term: 6, emi_amount: 17000.00, loan_taken_on: '2022-02-15', next_payment_due: '2026-02-15', total_paid: 200000.00, status: 'Active' },
-      { user_id: 5, loan_type: 'Home Improvement Loan', principal_amount: 400000.00, remaining_balance: 250000.00, interest_rate: 8.50, loan_term: 4, emi_amount: 11000.00, loan_taken_on: '2023-04-01', next_payment_due: '2025-04-01', total_paid: 150000.00, status: 'Paid' },
-      { user_id: 5, loan_type: 'Personal Loan', principal_amount: 300000.00, remaining_balance: 180000.00, interest_rate: 9.25, loan_term: 3, emi_amount: 9500.00, loan_taken_on: '2022-09-20', next_payment_due: '2024-09-20', total_paid: 120000.00, status: 'Active' },
-      { user_id: 5, loan_type: 'Vehicle Loan', principal_amount: 550000.00, remaining_balance: 400000.00, interest_rate: 7.75, loan_term: 5, emi_amount: 12500.00, loan_taken_on: '2021-07-05', next_payment_due: '2026-07-05', total_paid: 150000.00, status: 'Active' },
-      
-      { user_id: 6, loan_type: 'Personal Loan', principal_amount: 400000.00, remaining_balance: 250000.00, interest_rate: 9.00, loan_term: 4, emi_amount: 10500.00, loan_taken_on: '2022-12-10', next_payment_due: '2024-12-10', total_paid: 150000.00, status: 'Active' },
-      { user_id: 6, loan_type: 'Home Loan', principal_amount: 1200000.00, remaining_balance: 900000.00, interest_rate: 8.00, loan_term: 12, emi_amount: 14500.00, loan_taken_on: '2020-08-15', next_payment_due: '2032-08-15', total_paid: 300000.00, status: 'Overdue' },
-      { user_id: 6, loan_type: 'Business Equipment Loan', principal_amount: 600000.00, remaining_balance: 450000.00, interest_rate: 10.25, loan_term: 5, emi_amount: 15000.00, loan_taken_on: '2023-01-05', next_payment_due: '2026-01-05', total_paid: 150000.00, status: 'Paid' },
-      { user_id: 6, loan_type: 'Education Loan', principal_amount: 250000.00, remaining_balance: 120000.00, interest_rate: 6.50, loan_term: 3, emi_amount: 7500.00, loan_taken_on: '2022-06-20', next_payment_due: '2024-06-20', total_paid: 130000.00, status: 'Active' },
-      
-      { user_id: 7, loan_type: 'Home Loan', principal_amount: 1800000.00, remaining_balance: 1400000.00, interest_rate: 8.50, loan_term: 18, emi_amount: 17500.00, loan_taken_on: '2019-11-01', next_payment_due: '2037-11-01', total_paid: 400000.00, status: 'Active' },
-      { user_id: 7, loan_type: 'Personal Loan', principal_amount: 350000.00, remaining_balance: 220000.00, interest_rate: 9.25, loan_term: 4, emi_amount: 9500.00, loan_taken_on: '2022-10-15', next_payment_due: '2024-10-15', total_paid: 130000.00, status: 'Paid' },
-      { user_id: 7, loan_type: 'Car Loan', principal_amount: 500000.00, remaining_balance: 350000.00, interest_rate: 7.25, loan_term: 5, emi_amount: 11500.00, loan_taken_on: '2021-05-20', next_payment_due: '2026-05-20', total_paid: 150000.00, status: 'Paid' },
-      { user_id: 7, loan_type: 'Business Expansion Loan', principal_amount: 700000.00, remaining_balance: 500000.00, interest_rate: 10.75, loan_term: 6, emi_amount: 16000.00, loan_taken_on: '2023-02-10', next_payment_due: '2026-02-10', total_paid: 200000.00, status: 'Active' },
-      
-      { user_id: 8, loan_type: 'Personal Loan', principal_amount: 400000.00, remaining_balance: 280000.00, interest_rate: 9.00, loan_term: 4, emi_amount: 10500.00, loan_taken_on: '2022-11-01', next_payment_due: '2024-11-01', total_paid: 120000.00, status: 'Active' },
-      { user_id: 8, loan_type: 'Home Improvement Loan', principal_amount: 500000.00, remaining_balance: 350000.00, interest_rate: 8.25, loan_term: 5, emi_amount: 12000.00, loan_taken_on: '2023-03-15', next_payment_due: '2025-03-15', total_paid: 150000.00, status: 'Overdue' },
-      { user_id: 8, loan_type: 'Vehicle Loan', principal_amount: 450000.00, remaining_balance: 300000.00, interest_rate: 7.50, loan_term: 4, emi_amount: 11500.00, loan_taken_on: '2021-08-20', next_payment_due: '2025-08-20', total_paid: 150000.00, status: 'Active' },
-      { user_id: 8, loan_type: 'Education Loan', principal_amount: 250000.00, remaining_balance: 130000.00, interest_rate: 6.75, loan_term: 3, emi_amount: 7500.00, loan_taken_on: '2022-05-10', next_payment_due: '2024-05-10', total_paid: 120000.00, status: 'Overdue' },
-      
-      { user_id: 9, loan_type: 'Business Loan', principal_amount: 600000.00, remaining_balance: 450000.00, interest_rate: 10.25, loan_term: 5, emi_amount: 15000.00, loan_taken_on: '2022-07-15', next_payment_due: '2025-07-15', total_paid: 150000.00, status: 'Active' },
-      { user_id: 9, loan_type: 'Home Loan', principal_amount: 1400000.00, remaining_balance: 1100000.00, interest_rate: 8.25, loan_term: 15, emi_amount: 16500.00, loan_taken_on: '2020-09-01', next_payment_due: '2035-09-01', total_paid: 300000.00, status: 'Paid' },
-      { user_id: 9, loan_type: 'Personal Loan', principal_amount: 300000.00, remaining_balance: 180000.00, interest_rate: 9.25, loan_term: 3, emi_amount: 9500.00, loan_taken_on: '2023-01-20', next_payment_due: '2024-01-20', total_paid: 120000.00, status: 'Active' },
-      { user_id: 9, loan_type: 'Equipment Financing', principal_amount: 400000.00, remaining_balance: 280000.00, interest_rate: 9.50, loan_term: 4, emi_amount: 11000.00, loan_taken_on: '2022-04-10', next_payment_due: '2025-04-10', total_paid: 120000.00, status: 'Overdue' },
-      
-      { user_id: 10, loan_type: 'Home Loan', principal_amount: 2000000.00, remaining_balance: 1600000.00, interest_rate: 8.50, loan_term: 20, emi_amount: 18500.00, loan_taken_on: '2019-12-15', next_payment_due: '2039-12-15', total_paid: 400000.00, status: 'Active' },
-      { user_id: 10, loan_type: 'Personal Loan', principal_amount: 450000.00, remaining_balance: 300000.00, interest_rate: 9.50, loan_term: 5, emi_amount: 12000.00, loan_taken_on: '2022-09-01', next_payment_due: '2025-09-01', total_paid: 150000.00, status: 'Paid' },
-      { user_id: 10, loan_type: 'Business Expansion Loan', principal_amount: 800000.00, remaining_balance: 600000.00, interest_rate: 10.75, loan_term: 6, emi_amount: 17000.00, loan_taken_on: '2023-02-20', next_payment_due: '2026-02-20', total_paid: 200000.00, status: 'Overdue' },
-      { user_id: 10, loan_type: 'Vehicle Loan', principal_amount: 550000.00, remaining_balance: 400000.00, interest_rate: 7.75, loan_term: 5, emi_amount: 13000.00, loan_taken_on: '2021-06-15', next_payment_due: '2026-06-15', total_paid: 150000.00, status: 'Active' }
-    ];
+    // Generate dates within the last 7 days (October 7, 2025, to October 13, 2025)
+    const startDate = new Date('2025-10-07');
+    const endDate = new Date('2025-10-13');
+    const getRandomDate = (start, end) => {
+      const timestamp = start.getTime() + Math.random() * (end.getTime() - start.getTime());
+      return new Date(timestamp);
+    };
 
-    // Convert SQL IDs to MongoDB ObjectIds and format dates
+    // Loan types and parameters for variety
+    const loanTypes = ['Personal Loan', 'Home Loan', 'Car Loan', 'Education Loan', 'Business Loan', 'Home Improvement Loan', 'Vehicle Loan', 'Business Expansion Loan', 'Equipment Financing', 'Working Capital Loan'];
+    const statuses = ['Active', 'Paid', 'Overdue'];
+
+    // Generate user loans data
+    const userLoansData = [];
+    userEmails.forEach((email, index) => {
+      const numLoans = email === 'xdphantom1202@gmail.com' || email === 'ragamaie.n23@iiits.in' ? 10 : 3;
+      for (let i = 0; i < numLoans; i++) {
+        const principal_amount = Math.floor(Math.random() * 950000) + 50000; // 50,000 to 1,000,000
+        const loan_term = Math.floor(Math.random() * 10) + 1; // 1 to 10 years
+        const interest_rate = (Math.random() * 5) + 5; // 5% to 10%
+        const emi_amount = Math.floor(principal_amount * (interest_rate / 1200) / (1 - Math.pow(1 + interest_rate / 1200, -loan_term * 12))) * 100; // Approximate EMI
+        const total_paid = Math.floor(Math.random() * principal_amount * 0.5); // Up to 50% paid
+        const remaining_balance = principal_amount - total_paid;
+        const loan_taken_on = getRandomDate(startDate, endDate);
+        const next_payment_due = new Date(loan_taken_on);
+        next_payment_due.setDate(loan_taken_on.getDate() + 30); // Next payment 30 days later
+
+        userLoansData.push({
+          user_id: index + 1, // Temporary ID for mapping
+          loan_type: loanTypes[Math.floor(Math.random() * loanTypes.length)],
+          principal_amount,
+          remaining_balance,
+          interest_rate: parseFloat(interest_rate.toFixed(2)),
+          loan_term,
+          emi_amount,
+          loan_taken_on,
+          next_payment_due,
+          total_paid,
+          status: statuses[Math.floor(Math.random() * statuses.length)],
+          created_at: new Date()
+        });
+      }
+    });
+
+    // Convert temporary user_id to MongoDB ObjectIds
     const mongoUserLoans = userLoansData.map(loan => ({
-      user_id: userMap[loan.user_id],
+      user_id: userMap[userEmails[loan.user_id - 1]],
       loan_type: loan.loan_type,
       principal_amount: loan.principal_amount,
       remaining_balance: loan.remaining_balance,
       interest_rate: loan.interest_rate,
       loan_term: loan.loan_term,
       emi_amount: loan.emi_amount,
-      loan_taken_on: new Date(loan.loan_taken_on),
-      next_payment_due: new Date(loan.next_payment_due),
+      loan_taken_on: loan.loan_taken_on,
+      next_payment_due: loan.next_payment_due,
       total_paid: loan.total_paid,
       status: loan.status,
-      created_at: new Date()
+      created_at: loan.created_at
     }));
 
     // Filter out any entries with undefined user_id
@@ -197,11 +188,13 @@ const insertUserLoans = async () => {
     
     if (validUserLoans.length !== mongoUserLoans.length) {
       console.warn(`Warning: ${mongoUserLoans.length - validUserLoans.length} loan(s) have users not found in the database`);
-      const missingUserIds = userLoansData
-        .filter(loan => !userMap[loan.user_id])
-        .map(loan => loan.user_id);
-      console.log('Missing user IDs:', missingUserIds);
+      const missingEmails = userEmails.filter(email => !userMap[email]);
+      console.log('Missing user emails:', missingEmails);
     }
+
+    // Clear existing loans to avoid duplicates (optional, comment out if you want to append)
+    await UserLoan.deleteMany({ loan_taken_on: { $gte: startDate, $lte: endDate } });
+    console.log('Cleared existing loans from October 7, 2025, to October 13, 2025');
 
     // Insert user loans
     const result = await UserLoan.insertMany(validUserLoans);

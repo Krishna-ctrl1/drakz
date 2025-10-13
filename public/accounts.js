@@ -38,6 +38,19 @@ function closeNav() {
   sidebar.classList.add("icons-only"); // Hide text
 }
 
+// Helper function to get dynamic labels for the last 7 days (oldest to newest)
+function getLast7DaysLabels() {
+  const labels = [];
+  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  for (let i = 6; i >= 0; i--) { // From 6 days ago to today
+    const date = new Date();
+    date.setDate(date.getDate() - i);
+    const dayName = days[date.getDay()];
+    labels.push(dayName);
+  }
+  return labels;
+}
+
 // Define chartInstance at the top level scope
 let chartInstance;
 
@@ -57,16 +70,19 @@ function createChart() {
     chartInstance.destroy();
   }
 
+  // Get dynamic labels for last 7 days
+  const dynamicLabels = getLast7DaysLabels();
+
   // Set default data (in case API fails)
-  let depositValues = [0, 0, 0, 0, 0, 0, 0];
-  let withdrawValues = [0, 0, 0, 0, 0, 0, 0];
+  let depositValues = Array(7).fill(0);
+  let withdrawValues = Array(7).fill(0);
 
   console.log("Initializing chart with default values");
   // Create the chart with default data first
   chartInstance = new Chart(ctx, {
     type: "bar",
     data: {
-      labels: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+      labels: dynamicLabels, // Use dynamic labels
       datasets: [
         {
           label: "Deposit",
@@ -95,13 +111,12 @@ function createChart() {
           grid: { display: false },
           title: {
             display: true,
-            text: "Day of the Week",
+            text: "Day of the Last 7 Days",
             font: {
               size: 12,
               weight: 'bold'
             }
           }
-
         },
         y: {
           beginAtZero: true,
@@ -715,7 +730,7 @@ function renderInvoices(invoices) {
     invoiceElement.innerHTML = `
       <p class="name">${escapeHTML(invoice.storeName)}</p>
       <p class="time">${escapeHTML(invoice.timeAgo)}</p>
-      <p class="amount">$${formatAmount(invoice.amount)}</p>
+      <p class="amount">₹${formatAmount(invoice.amount)}</p>
     `;
 
     // Add click event if you want to show invoice details
