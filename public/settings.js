@@ -55,8 +55,6 @@ function confirmDelete() {
   }
 }
 
-// profile
-// Profile Management
 // Profile Management with Validation
 document.addEventListener("DOMContentLoaded", function () {
   // Load saved profile data
@@ -303,7 +301,7 @@ function clearValidationErrors() {
 const encryptData = async (data, secretKey) => {
   const encoder = new TextEncoder();
   const dataBuffer = encoder.encode(data);
-  const keyBuffer = encoder.encode(secretKey.slice(0, 32)); // Ensure 256-bit key
+  const keyBuffer = encoder.encode(secretKey.slice(0, 32));
   const cryptoKey = await crypto.subtle.importKey(
     "raw",
     keyBuffer,
@@ -626,204 +624,399 @@ document.addEventListener("DOMContentLoaded", function () {
   init2FAState();
 });
 
-// budgeting preferences
+// settings.js
 document.addEventListener("DOMContentLoaded", () => {
-  const goals = [];
-  let editingIndex = null;
-
-  const addGoalBtn = document.getElementById("add-goal-btn");
-  const emptyAddGoalBtn = document.getElementById("empty-add-goal");
+  // DOM elements for goals
+  const addGoalBtn = document.getElementById("add-goal");
   const goalModal = document.getElementById("goal-modal");
-  const contributionModal = document.getElementById("contribution-modal");
-  const closeModalBtns = document.querySelectorAll(".close-modal");
+  const goalForm = goalModal?.querySelector("form");
   const cancelGoalBtn = document.getElementById("cancel-goal");
   const saveGoalBtn = document.getElementById("save-goal");
-  const saveContributionBtn = document.getElementById("save-contribution");
-  const cancelContributionBtn = document.getElementById("cancel-contribution");
-
-  const goalsDisplay = document.getElementById("goals-display");
-  const noGoals = document.getElementById("no-goals");
-
-  const goalFilter = document.getElementById("goal-filter");
-  const goalSort = document.getElementById("goal-sort");
-
+  const closeModalBtn = goalModal?.querySelector(".close-modal");
+  const goalsList = document.getElementById("goals-list");
+  const modalTitle = goalModal?.querySelector("h3");
   const activeGoalsCount = document.getElementById("active-goals-count");
   const completedGoalsCount = document.getElementById("completed-goals-count");
   const totalSaved = document.getElementById("total-saved");
+  const contributionModal = document.getElementById("contribution-modal");
+  const contributionForm = contributionModal?.querySelector("form");
+  const cancelContribution = document.getElementById("cancel-contribution");
+  const saveContribution = document.getElementById("save-contribution");
+  const closeContributionBtn = contributionModal?.querySelector(".close-modal");
+  const filterCategory = document.getElementById("filter-category");
+  const sortBy = document.getElementById("sort-by");
 
-  // Modal open/close
-  function toggleModal(modal, show) {
-    modal.style.display = show ? "block" : "none";
+  let editingGoalId = null;
+  let contributingGoalId = null;
+
+  // Check if critical elements exist
+  if (!goalsList || !addGoalBtn || !goalModal || !goalForm) {
+    console.error("Critical goal elements missing:", {
+      goalsList: !goalsList,
+      addGoalBtn: !addGoalBtn,
+      goalModal: !goalModal,
+      goalForm: !goalForm,
+    });
+    showNotification("Error: Goal management UI elements not found", "error");
+    return;
   }
 
-  [addGoalBtn, emptyAddGoalBtn].forEach((btn) =>
-    btn.addEventListener("click", () => {
-      editingIndex = null;
-      document.getElementById("modal-title").innerText = "Add New Goal";
-      document.getElementById("goal-name").value = "";
-      document.getElementById("goal-amount").value = "";
-      document.getElementById("current-amount").value = "";
-      document.getElementById("goal-date").value = "";
-      document.getElementById("goal-priority").value = "medium";
-      document.querySelector("input[name='category'][value='house']").checked =
-        true;
-      document.getElementById("goal-notes").value = "";
-      toggleModal(goalModal, true);
-    }),
-  );
+  // Notification function
+  function showNotification(message, type) {
+    const notification = document.createElement("div");
+    notification.className = `notification ${type}`;
+    notification.textContent = message;
+    notification.style.position = "fixed";
+    notification.style.top = "20px";
+    notification.style.right = "20px";
+    notification.style.padding = "10px 20px";
+    notification.style.backgroundColor = type === "error" ? "#e74c3c" : "#2ecc71";
+    notification.style.color = "#fff";
+    notification.style.borderRadius = "4px";
+    notification.style.zIndex = "10000";
+    document.body.appendChild(notification);
+    setTimeout(() => {
+      notification.style.opacity = "0";
+      setTimeout(() => notification.remove(), 300);
+    }, 3000);
+  }
 
-  closeModalBtns.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      toggleModal(goalModal, false);
-      toggleModal(contributionModal, false);
-    });
-  });
+  async function fetchGoals() {
+    try {
+      const response = await fetch("/api/goals");
+      if (!response.ok) {
+        throw new Error((await response.json()).message || "Failed to fetch goals");
+      }
+      const { data } = await response.json();
+      if (!Array.isArray(data)) {
+        throw new Error("Invalid goals data format");
+      }
+      renderGoals(data);
+      updateSummaries(data);
+    } catch (error) {
+      console.error("Error fetching goals:", error);
+      showNotification("Failed to load goals: " + error.message, "error");
+    }
+  }
 
-  cancelGoalBtn.addEventListener("click", () => toggleModal(goalModal, false));
-  cancelContributionBtn.addEventListener("click", () =>
-    toggleModal(contributionModal, false),
-  );
+  function renderGoals(goals) {
+    if (!goalsList) {
+      console.error("goalsList element is missing");
+      return;
+    }
+    goalsList.innerHTML = goals.length === 0
+      ? '<p class="no-goals">No financial goals set</p>'
+      : goals.map(goal => `
+          <div class="goal-item" data-id="${goal.id}" data-category="${goal.category}" data-priority="${goal.priority}">
+            <div class="goal-header">
+              <div class="goal-title">
+                <i class="fas fa-${getCategoryIcon(goal.category)}"></i>
+                <h4>${goal.goal_name}</h4>
+              </div>
+              <span class="priority ${goal.priority}">${goal.priority.charAt(0).toUpperCase() + goal.priority.slice(1)}</span>
+            </div>
+            <div class="goal-progress">
+              <div class="progress-bar">
+                <div class="progress" style="width: ${(goal.current_savings / goal.target_amount * 100)}%"></div>
+              </div>
+              <div class="progress-info">
+                <span>₹${goal.current_savings.toFixed(2)}</span>
+                <span>of ₹${goal.target_amount.toFixed(2)}</span>
+              </div>
+            </div>
+            <div class="goal-footer">
+              <span>Due: ${new Date(goal.target_date).toLocaleDateString()}</span>
+              <div class="goal-actions">
+                <button class="edit-btn" onclick="editGoal('${goal.id}')"><i class="fas fa-edit"></i></button>
+                <button class="delete-btn" onclick="deleteGoal('${goal.id}')"><i class="fas fa-trash"></i></button>
+                <button class="contribute-btn" onclick="openContribution('${goal.id}')"><i class="fas fa-plus"></i> Contribute</button>
+              </div>
+            </div>
+            ${goal.description ? `<p class="goal-notes">${goal.description}</p>` : ''}
+          </div>
+        `).join("");
+  }
 
-  // Save new goal
-  saveGoalBtn.addEventListener("click", () => {
-    const name = document.getElementById("goal-name").value.trim();
-    const amount = parseFloat(document.getElementById("goal-amount").value);
-    const current = parseFloat(document.getElementById("current-amount").value);
-    const date = document.getElementById("goal-date").value;
-    const priority = document.getElementById("goal-priority").value;
-    const notes = document.getElementById("goal-notes").value;
-    const category = document.querySelector(
-      "input[name='category']:checked",
-    ).value;
+  function updateSummaries(goals) {
+    if (!activeGoalsCount || !completedGoalsCount || !totalSaved) return;
+    const active = goals.filter(g => g.current_savings < g.target_amount).length;
+    const completed = goals.length - active;
+    const saved = goals.reduce((sum, g) => sum + g.current_savings, 0);
 
-    if (!name || isNaN(amount))
-      return alert("Please fill out required fields.");
+    activeGoalsCount.textContent = active;
+    completedGoalsCount.textContent = completed;
+    totalSaved.textContent = `₹${saved.toFixed(2)}`;
+  }
 
-    const goal = {
-      name,
-      amount,
-      current: isNaN(current) ? 0 : current,
-      date,
-      priority,
-      notes,
-      category,
+  function getCategoryIcon(category) {
+    const icons = {
+      house: 'home',
+      car: 'car',
+      travel: 'plane',
+      education: 'graduation-cap',
+      other: 'star'
     };
+    return icons[category] || 'star';
+  }
 
-    if (editingIndex !== null) {
-      goals[editingIndex] = goal;
-    } else {
-      goals.push(goal);
-    }
-
-    toggleModal(goalModal, false);
-    renderGoals();
-  });
-
-  function renderGoals() {
-    goalsDisplay.innerHTML = "";
-
-    const filter = goalFilter.value;
-    const sort = goalSort.value;
-
-    let filteredGoals = [...goals];
-
-    if (filter === "active") {
-      filteredGoals = filteredGoals.filter((g) => g.current < g.amount);
-    } else if (filter === "completed") {
-      filteredGoals = filteredGoals.filter((g) => g.current >= g.amount);
-    } else if (filter === "high") {
-      filteredGoals = filteredGoals.filter((g) => g.priority === "high");
-    }
-
-    if (sort === "priority-desc") {
-      const priorityRank = { high: 3, medium: 2, low: 1 };
-      filteredGoals.sort(
-        (a, b) => priorityRank[b.priority] - priorityRank[a.priority],
-      );
-    } else if (sort === "date-asc") {
-      filteredGoals.sort((a, b) => new Date(a.date) - new Date(b.date));
-    } else if (sort === "progress-desc") {
-      filteredGoals.sort((a, b) => b.current / b.amount - a.current / a.amount);
-    }
-
-    filteredGoals.forEach((goal, index) => {
-      const card = document.createElement("div");
-      card.className = "goal-card";
-      const progress = Math.min(
-        100,
-        Math.round((goal.current / goal.amount) * 100),
-      );
-      const completed = goal.current >= goal.amount;
-
-      card.innerHTML = `
-      <h4>${goal.name} (${goal.priority})</h4>
-      <p>Target: $${goal.amount.toFixed(2)} | Saved: $${goal.current.toFixed(2)}</p>
-      <progress value="${progress}" max="100"></progress>
-      <p>${progress}% ${completed ? "- Completed" : ""}</p>
-      <button onclick="editGoal(${index})" style="background-color: #4CAF50; color: white; padding: 5px 10px; border: none; border-radius: 5px;">Edit</button>
-      <button onclick="openContribution(${index})" style="background-color: #4CAF50; color: white; padding: 5px 10px; border: none; border-radius: 5px;">Add Contribution</button>
-    `;
-
-      goalsDisplay.appendChild(card);
+  if (addGoalBtn) {
+    addGoalBtn.addEventListener("click", () => {
+      editingGoalId = null;
+      modalTitle.textContent = "Add New Goal";
+      goalForm.reset();
+      goalModal.querySelector('input[name="category"][value="other"]').checked = true;
+      clearValidationErrors();
+      goalModal.style.display = "block";
     });
-
-    noGoals.style.display = goals.length === 0 ? "block" : "none";
-    updateSummary();
   }
 
-  function updateSummary() {
-    const active = goals.filter((g) => g.current < g.amount).length;
-    const completed = goals.filter((g) => g.current >= g.amount).length;
-    const saved = goals.reduce((sum, g) => sum + g.current, 0);
-
-    activeGoalsCount.innerText = active;
-    completedGoalsCount.innerText = completed;
-    totalSaved.innerText = `₹${saved.toFixed(2)}`;
+  function closeGoalModal() {
+    goalModal.style.display = "none";
+    editingGoalId = null;
+    goalForm.reset();
+    clearValidationErrors();
   }
 
-  // Filter and sort listeners
-  goalFilter.addEventListener("change", renderGoals);
-  goalSort.addEventListener("change", renderGoals);
-
-  // Global for inline onclick
-  window.editGoal = function (index) {
-    editingIndex = index;
-    const goal = goals[index];
-    document.getElementById("modal-title").innerText = "Edit Goal";
-    document.getElementById("goal-name").value = goal.name;
-    document.getElementById("goal-amount").value = goal.amount;
-    document.getElementById("current-amount").value = goal.current;
-    document.getElementById("goal-date").value = goal.date;
-    document.getElementById("goal-priority").value = goal.priority;
-    document.querySelector(
-      `input[name='category'][value='${goal.category}']`,
-    ).checked = true;
-    document.getElementById("goal-notes").value = goal.notes;
-
-    toggleModal(goalModal, true);
-  };
-
-  window.openContribution = function (index) {
-    contributionModal.dataset.index = index;
-    document.getElementById("contribution-amount").value = "";
-    document.getElementById("contribution-date").value = "";
-    toggleModal(contributionModal, true);
-  };
-
-  saveContributionBtn.addEventListener("click", () => {
-    const amount = parseFloat(
-      document.getElementById("contribution-amount").value,
-    );
-    const index = parseInt(contributionModal.dataset.index, 10);
-    if (isNaN(amount) || amount <= 0) return alert("Enter a valid amount.");
-
-    goals[index].current += amount;
-    toggleModal(contributionModal, false);
-    renderGoals();
+  if (cancelGoalBtn) {
+    cancelGoalBtn.addEventListener("click", closeGoalModal);
+  }
+  if (closeModalBtn) {
+    closeModalBtn.addEventListener("click", closeGoalModal);
+  }
+  window.addEventListener("click", (event) => {
+    if (event.target === goalModal) {
+      closeGoalModal();
+    }
   });
 
-  // Initial render
-  renderGoals();
+  if (saveGoalBtn) {
+    saveGoalBtn.addEventListener("click", async (event) => {
+      event.preventDefault();
+      if (!validateGoalForm()) return;
+
+      const selectedCategory = goalModal.querySelector('input[name="category"]:checked')?.value || 'other';
+      const goalData = {
+        goal_name: document.getElementById("goal-name").value.trim(),
+        target_amount: parseFloat(document.getElementById("target-amount").value),
+        current_savings: parseFloat(document.getElementById("current-amount").value) || 0,
+        target_date: document.getElementById("goal-date").value,
+        description: document.getElementById("goal-notes").value.trim(),
+        priority: document.getElementById("goal-priority").value,
+        category: selectedCategory
+      };
+
+      try {
+        const url = editingGoalId ? `/api/goals/${editingGoalId}` : "/api/goals";
+        const method = editingGoalId ? "PUT" : "POST";
+        const response = await fetch(url, {
+          method,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(goalData)
+        });
+
+        if (!response.ok) {
+          throw new Error((await response.json()).message || "Failed to save goal");
+        }
+
+        await fetchGoals();
+        closeGoalModal();
+        showNotification(editingGoalId ? "Goal updated successfully" : "Goal added successfully", "success");
+      } catch (error) {
+        console.error("Error saving goal:", error);
+        showNotification("Failed to save goal: " + error.message, "error");
+      }
+    });
+  }
+
+  window.editGoal = async function (goalId) {
+    try {
+      const response = await fetch(`/api/goals`);
+      if (!response.ok) {
+        throw new Error((await response.json()).message || "Failed to fetch goals");
+      }
+      const { data } = await response.json();
+      const goal = data.find(g => g.id === goalId);
+      if (!goal) {
+        showNotification("Goal not found", "error");
+        return;
+      }
+
+      editingGoalId = goalId;
+      modalTitle.textContent = "Edit Goal";
+      document.getElementById("goal-name").value = goal.goal_name;
+      document.getElementById("target-amount").value = goal.target_amount;
+      document.getElementById("current-amount").value = goal.current_savings;
+      document.getElementById("goal-date").value = new Date(goal.target_date).toISOString().split('T')[0];
+      document.getElementById("goal-notes").value = goal.description || "";
+      document.getElementById("goal-priority").value = goal.priority;
+      goalModal.querySelector(`input[name="category"][value="${goal.category}"]`).checked = true;
+      goalModal.style.display = "block";
+    } catch (error) {
+      console.error("Error loading goal for edit:", error);
+      showNotification("Failed to load goal: " + error.message, "error");
+    }
+  };
+
+  window.deleteGoal = async function (goalId) {
+    if (!confirm("Are you sure you want to delete this goal?")) return;
+
+    try {
+      const response = await fetch(`/api/goals/${goalId}`, { method: "DELETE" });
+      if (!response.ok) {
+        throw new Error((await response.json()).message || "Failed to delete goal");
+      }
+      await fetchGoals();
+      showNotification("Goal deleted successfully", "success");
+    } catch (error) {
+      console.error("Error deleting goal:", error);
+      showNotification("Failed to delete goal: " + error.message, "error");
+    }
+  };
+
+  window.openContribution = function (goalId) {
+    contributingGoalId = goalId;
+    document.getElementById("contribution-amount").value = "";
+    document.getElementById("contribution-date").value = new Date().toISOString().split('T')[0];
+    contributionModal.style.display = "block";
+  };
+
+  function closeContributionModal() {
+    contributionModal.style.display = "none";
+    contributingGoalId = null;
+  }
+
+  if (cancelContribution) {
+    cancelContribution.addEventListener("click", closeContributionModal);
+  }
+  if (closeContributionBtn) {
+    closeContributionBtn.addEventListener("click", closeContributionModal);
+  }
+  window.addEventListener("click", (event) => {
+    if (event.target === contributionModal) {
+      closeContributionModal();
+    }
+  });
+
+  if (saveContribution) {
+    saveContribution.addEventListener("click", async (event) => {
+      event.preventDefault();
+      const amount = parseFloat(document.getElementById("contribution-amount").value);
+      if (!amount || amount <= 0) {
+        showNotification("Valid amount required", "error");
+        return;
+      }
+
+      try {
+        // Fetch the specific goal to get current savings
+        const response = await fetch(`/api/goals`);
+        if (!response.ok) {
+          throw new Error((await response.json()).message || "Failed to fetch goals");
+        }
+        const { data } = await response.json();
+        const goal = data.find(g => g.id === contributingGoalId);
+        if (!goal) {
+          throw new Error("Goal not found");
+        }
+
+        // Add new contribution to existing savings
+        const newSavings = (goal.current_savings || 0) + amount;
+
+        // Update the goal with the new savings
+        const updateResponse = await fetch(`/api/goals/${contributingGoalId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ current_savings: newSavings })
+        });
+
+        if (!updateResponse.ok) {
+          throw new Error((await updateResponse.json()).message || "Failed to add contribution");
+        }
+
+        await fetchGoals();
+        closeContributionModal();
+        showNotification("Contribution added successfully", "success");
+      } catch (error) {
+        console.error("Error adding contribution:", error);
+        showNotification("Failed to add contribution: " + error.message, "error");
+      }
+    });
+  }
+
+  if (filterCategory) {
+    filterCategory.addEventListener("change", applyFilters);
+  }
+  if (sortBy) {
+    sortBy.addEventListener("change", applyFilters);
+  }
+
+  async function applyFilters() {
+    try {
+      const response = await fetch("/api/goals");
+      const { data } = await response.json();
+      
+      let filtered = data;
+      const category = filterCategory.value;
+      if (category) {
+        filtered = filtered.filter(g => g.category === category);
+      }
+
+      const sort = sortBy.value;
+      if (sort === 'date') {
+        filtered.sort((a, b) => new Date(a.target_date) - new Date(b.target_date));
+      } else if (sort === 'amount') {
+        filtered.sort((a, b) => a.target_amount - b.target_amount);
+      } else if (sort === 'priority') {
+        const prioMap = { high: 1, medium: 2, low: 3 };
+        filtered.sort((a, b) => prioMap[a.priority] - prioMap[b.priority]);
+      }
+
+      renderGoals(filtered);
+      updateSummaries(filtered);
+    } catch (error) {
+      console.error("Error applying filters:", error);
+      showNotification("Failed to apply filters: " + error.message, "error");
+    }
+  }
+
+  function validateGoalForm() {
+    clearValidationErrors();
+    let isValid = true;
+
+    const name = document.getElementById("goal-name").value.trim();
+    const targetAmount = parseFloat(document.getElementById("target-amount").value);
+    const targetDate = document.getElementById("goal-date").value;
+
+    if (!name) {
+      showNotification("Goal name is required", "error");
+      isValid = false;
+    }
+    if (!targetAmount || targetAmount <= 0) {
+      showNotification("Valid target amount is required", "error");
+      isValid = false;
+    }
+    if (!targetDate) {
+      showNotification("Target date is required", "error");
+      isValid = false;
+    } else {
+      const date = new Date(targetDate);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (date < today) {
+        showNotification("Target date must be in the future", "error");
+        isValid = false;
+      }
+    }
+
+    return isValid;
+  }
+
+  function clearValidationErrors() {
+    // If you add validation error elements in HTML, clear them here
+    // For now, relying on showNotification for errors
+  }
+
+  // Fetch goals on page load
+  fetchGoals();
 });
 
 // linking accounts

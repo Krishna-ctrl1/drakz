@@ -9,16 +9,15 @@ const fs = require("fs");
 const app = express();
 const multer = require("multer");
 const { exec } = require("child_process");
-const http = require('http');
-const WebSocket = require('ws');
-
+const http = require("http");
+const WebSocket = require("ws");
 const bodyParser = require("body-parser");
 const nodemailer = require("nodemailer");
 const Razorpay = require("razorpay");
 const fetch = require("node-fetch");
 
 // Model Imports
-const ContactMessage = require('./models/save-contact-message');
+const ContactMessage = require("./models/save-contact-message");
 const Advisor = require("./models/Advisor");
 const Admin = require("./models/Admin");
 const User = require("./models/User");
@@ -38,36 +37,47 @@ const UserPreciousHoldings = require("./models/UserPreciousHoldings");
 const UserProperty = require("./models/UserProperties");
 const UserStocks = require("./models/UserStocks");
 const Blog = require("./models/Blog");
-
+const Goal = require("./models/Goal");
 
 // =========================================================================
 // NEW SCHEMAS FOR VIDEO SESSION
 // =========================================================================
 const sessionNoteSchema = new mongoose.Schema({
-    advisor_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Advisor', required: true },
-    user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    note: { type: String, required: true },
-    created_at: { type: Date, default: Date.now }
+  advisor_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Advisor",
+    required: true,
+  },
+  user_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
+  note: { type: String, required: true },
+  created_at: { type: Date, default: Date.now },
 });
-const SessionNote = mongoose.model('SessionNote', sessionNoteSchema);
+const SessionNote = mongoose.model("SessionNote", sessionNoteSchema);
 
 const videoSchema = new mongoose.Schema({
-    advisor_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Advisor', required: true },
-    title: { type: String, required: true },
-    // For YouTube videos
-    videoId: { type: String, sparse: true, unique: true }, // sparse allows multiple nulls
-    // For uploaded videos
-    filename: { type: String },
-    url: { type: String },
-    created_at: { type: Date, default: Date.now }
+  advisor_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Advisor",
+    required: true,
+  },
+  title: { type: String, required: true },
+  // For YouTube videos
+  videoId: { type: String, sparse: true, unique: true }, // sparse allows multiple nulls
+  // For uploaded videos
+  filename: { type: String },
+  url: { type: String },
+  created_at: { type: Date, default: Date.now },
 });
-const Video = mongoose.model('Video', videoSchema);
+const Video = mongoose.model("Video", videoSchema);
 // =========================================================================
 
 // Initialize express app first
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
-
 
 // Then configure it
 app.set("view engine", "ejs");
@@ -92,38 +102,38 @@ app.use(
 // Serve static files (like HTML, CSS, images, etc.) from the "public" folder
 app.use(express.static(path.join(__dirname, "public")));
 // Statically serve uploaded videos
-app.use('/uploads/recorded-videos', express.static(path.join(__dirname, 'public', 'uploads', 'recorded-videos')));
-
+app.use(
+  "/uploads/recorded-videos",
+  express.static(path.join(__dirname, "public", "uploads", "recorded-videos"))
+);
 
 // Middleware to parse form data (important for POST requests)
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // WebSocket connection handling
-wss.on('connection', ws => {
-  console.log('Client connected for video session');
+wss.on("connection", (ws) => {
+  console.log("Client connected for video session");
 
-  ws.on('message', message => {
+  ws.on("message", (message) => {
     const messageString = message.toString();
     console.log(`Received message => ${messageString}`);
-    
+
     // Broadcast the message to all other clients
-    wss.clients.forEach(client => {
+    wss.clients.forEach((client) => {
       if (client !== ws && client.readyState === WebSocket.OPEN) {
         client.send(messageString);
       }
     });
   });
 
-  ws.on('close', () => {
-    console.log('Client disconnected from video session');
+  ws.on("close", () => {
+    console.log("Client disconnected from video session");
   });
 });
 
-
 // MongoDB Connection
 mongoose
-  .connect(process.env.MONGODB_ATLAS_URI, {
-  })
+  .connect(process.env.MONGODB_ATLAS_URI, {})
   .then(() => console.log("Connected to MongoDB Atlas"))
   .catch((error) => console.error("MongoDB connection error:", error));
 
@@ -882,14 +892,17 @@ app.post("/api/users", async (req, res) => {
 // ---------------------------------------------------------------------------------------------------------------------------------------------
 
 // API to fetch all contact messages
-app.get('/api/messages', async (req, res) => {
-  console.log('Received request for /api/messages');
+app.get("/api/messages", async (req, res) => {
+  console.log("Received request for /api/messages");
   try {
     const messages = await ContactMessage.find()
       .sort({ submission_date: -1 })
       .lean();
-    console.log('Queried collection:', ContactMessage.collection.collectionName);
-    const formattedMessages = messages.map(msg => ({
+    console.log(
+      "Queried collection:",
+      ContactMessage.collection.collectionName
+    );
+    const formattedMessages = messages.map((msg) => ({
       id: msg._id.toString(),
       name: msg.name,
       email: msg.email,
@@ -898,85 +911,108 @@ app.get('/api/messages', async (req, res) => {
       message: msg.message,
       submission_date: msg.submission_date,
       is_read: msg.is_read,
-      is_replied: msg.is_replied
+      is_replied: msg.is_replied,
     }));
-    console.log('Fetched contact messages:', formattedMessages.length, formattedMessages);
+    console.log(
+      "Fetched contact messages:",
+      formattedMessages.length,
+      formattedMessages
+    );
     res.json({ success: true, messages: formattedMessages });
   } catch (err) {
-    console.error('Error fetching contact messages:', err);
-    return res.status(500).json({ success: false, message: 'Database error' });
+    console.error("Error fetching contact messages:", err);
+    return res.status(500).json({ success: false, message: "Database error" });
   }
 });
 
 // API to save contact message
-app.post('/api/save-contact-message', async (req, res) => {
-  console.log('Received request for /api/save-contact-message', req.body);
+app.post("/api/save-contact-message", async (req, res) => {
+  console.log("Received request for /api/save-contact-message", req.body);
   try {
     const { name, email, phone, subject, message, submission_date } = req.body;
     if (!name || !email || !subject || !message) {
-      return res.status(400).json({ success: false, message: 'Missing required fields' });
+      return res
+        .status(400)
+        .json({ success: false, message: "Missing required fields" });
     }
     const newMessage = new ContactMessage({
       name,
       email,
-      phone: phone || '',
+      phone: phone || "",
       subject,
       message,
       submission_date: submission_date ? new Date(submission_date) : new Date(),
       is_read: false,
-      is_replied: false
+      is_replied: false,
     });
     await newMessage.save();
-    console.log(`New contact message saved from ${email} with subject: ${subject}`);
-    res.json({ success: true, message: 'Message saved successfully' });
+    console.log(
+      `New contact message saved from ${email} with subject: ${subject}`
+    );
+    res.json({ success: true, message: "Message saved successfully" });
   } catch (err) {
-    console.error('Error saving contact message:', err);
-    return res.status(500).json({ success: false, message: 'Database error: Unable to save message' });
+    console.error("Error saving contact message:", err);
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "Database error: Unable to save message",
+      });
   }
 });
 
 // API to send a reply to a message
-app.post('/api/messages/reply', async (req, res) => {
-  console.log('Received request for /api/messages/reply', req.body);
+app.post("/api/messages/reply", async (req, res) => {
+  console.log("Received request for /api/messages/reply", req.body);
   try {
     const { id, to, subject, message } = req.body;
     if (!id || !to || !subject || !message) {
-      return res.status(400).json({ success: false, message: 'Missing required fields' });
+      return res
+        .status(400)
+        .json({ success: false, message: "Missing required fields" });
     }
     const contactMessage = await ContactMessage.findById(id);
     if (!contactMessage) {
-      return res.status(404).json({ success: false, message: 'Message not found' });
+      return res
+        .status(404)
+        .json({ success: false, message: "Message not found" });
     }
     contactMessage.is_replied = true;
     contactMessage.is_read = true;
     await contactMessage.save();
     console.log(`Reply sent to ${to} with subject: ${subject}`);
-    res.json({ success: true, message: 'Reply sent successfully' });
+    res.json({ success: true, message: "Reply sent successfully" });
   } catch (err) {
-    console.error('Error sending reply:', err);
-    return res.status(500).json({ success: false, message: 'Database or server error' });
+    console.error("Error sending reply:", err);
+    return res
+      .status(500)
+      .json({ success: false, message: "Database or server error" });
   }
 });
 
 // API to mark a message as read
-app.post('/api/messages/mark-read', async (req, res) => {
-  console.log('Received request for /api/messages/mark-read', req.body);
+app.post("/api/messages/mark-read", async (req, res) => {
+  console.log("Received request for /api/messages/mark-read", req.body);
   try {
     const { id } = req.body;
     if (!id) {
-      return res.status(400).json({ success: false, message: 'Message ID is required' });
+      return res
+        .status(400)
+        .json({ success: false, message: "Message ID is required" });
     }
     const contactMessage = await ContactMessage.findById(id);
     if (!contactMessage) {
-      return res.status(404).json({ success: false, message: 'Message not found' });
+      return res
+        .status(404)
+        .json({ success: false, message: "Message not found" });
     }
     contactMessage.is_read = true;
     await contactMessage.save();
     console.log(`Message ${id} marked as read`);
-    res.json({ success: true, message: 'Message marked as read' });
+    res.json({ success: true, message: "Message marked as read" });
   } catch (err) {
-    console.error('Error marking message as read:', err);
-    return res.status(500).json({ success: false, message: 'Database error' });
+    console.error("Error marking message as read:", err);
+    return res.status(500).json({ success: false, message: "Database error" });
   }
 });
 
@@ -1346,7 +1382,7 @@ app.post("/api/upgrade-to-premium", async (req, res) => {
 
     // 1. Update the user's premium status
     console.log("Updating user premium status for ID:", userId);
-    
+
     // First verify the user exists
     const userCheck = await User.findById(userId).session(session);
     if (!userCheck) {
@@ -1354,44 +1390,44 @@ app.post("/api/upgrade-to-premium", async (req, res) => {
       await session.abortTransaction();
       return res.status(404).json({ success: false, error: "User not found" });
     }
-    
+
     console.log("Current user premium status:", userCheck.is_premium);
-    
+
     // Use updateOne instead of findByIdAndUpdate for more direct control
     const updateResult = await User.updateOne(
       { _id: userId },
       { $set: { is_premium: true } },
       { session }
     );
-    
+
     console.log("Update result:", updateResult);
-    
+
     if (updateResult.matchedCount === 0) {
       console.log("No user matched for update");
       await session.abortTransaction();
       return res.status(404).json({ success: false, error: "User not found" });
     }
-    
+
     if (updateResult.modifiedCount === 0) {
       console.log("User found but not modified. May already be premium.");
       // Continue with the process since the user exists
     } else {
       console.log("User premium status updated successfully");
     }
-    
+
     // Re-fetch the user to get the updated document
     const user = await User.findById(userId).session(session);
     console.log("Updated user premium status:", user.is_premium);
 
     // 2. Find an advisor with fewer than 5 clients
     console.log("Looking for available advisor");
-    
+
     // First, get all advisors
     const allAdvisors = await Advisor.find({}).session(session);
     console.log(`Found ${allAdvisors.length} total advisors`);
-    
+
     let advisor = null;
-    
+
     if (allAdvisors.length === 0) {
       console.log("No advisors found in the database");
       // Continue without an advisor
@@ -1401,32 +1437,34 @@ app.post("/api/upgrade-to-premium", async (req, res) => {
         {
           $group: {
             _id: "$advisor_id",
-            client_count: { $sum: 1 }
-          }
-        }
+            client_count: { $sum: 1 },
+          },
+        },
       ]);
-      
+
       console.log("Client counts result:", JSON.stringify(clientCountsResult));
-      
+
       // Create a map of advisor ID to client count
       const advisorClientMap = {};
-      clientCountsResult.forEach(item => {
+      clientCountsResult.forEach((item) => {
         if (item._id) {
           advisorClientMap[item._id.toString()] = item.client_count;
         }
       });
-      
+
       console.log("Advisor client map:", advisorClientMap);
-      
+
       // Find advisors with fewer than 5 clients
-      let availableAdvisors = allAdvisors.filter(advisor => {
+      let availableAdvisors = allAdvisors.filter((advisor) => {
         const clientCount = advisorClientMap[advisor._id.toString()] || 0;
         console.log(`Advisor ${advisor._id} has ${clientCount} clients`);
         return clientCount < 5;
       });
-      
-      console.log(`Found ${availableAdvisors.length} available advisors with fewer than 5 clients`);
-      
+
+      console.log(
+        `Found ${availableAdvisors.length} available advisors with fewer than 5 clients`
+      );
+
       // If we found available advisors with fewer than 5 clients
       if (availableAdvisors && availableAdvisors.length > 0) {
         // Sort by client count (those with fewer clients first)
@@ -1435,32 +1473,35 @@ app.post("/api/upgrade-to-premium", async (req, res) => {
           const countB = advisorClientMap[b._id.toString()] || 0;
           return countA - countB;
         });
-        
+
         // Select the advisor with the fewest clients
         advisor = availableAdvisors[0];
         console.log(`Selected advisor: ${advisor._id} (${advisor.name})`);
-        
+
         try {
           // Check if this user is already assigned to this advisor
           const existingRelationship = await ClientAdvisor.findOne({
             advisor_id: advisor._id,
-            user_id: userId
+            user_id: userId,
           }).session(session);
-          
+
           if (existingRelationship) {
             console.log("User already assigned to this advisor");
           } else {
             // Create new client-advisor relationship
             const clientAdvisorDoc = {
               advisor_id: advisor._id,
-              user_id: userId
+              user_id: userId,
             };
-            
+
             await ClientAdvisor.create([clientAdvisorDoc], { session });
             console.log("New client-advisor relationship created");
           }
         } catch (relationshipError) {
-          console.error("Error creating client-advisor relationship:", relationshipError);
+          console.error(
+            "Error creating client-advisor relationship:",
+            relationshipError
+          );
           throw relationshipError; // Re-throw to be caught by outer catch block
         }
       } else {
@@ -1500,9 +1541,9 @@ app.post("/api/upgrade-to-premium", async (req, res) => {
       await session.abortTransaction();
     }
     console.error("Error in premium upgrade transaction:", error);
-    return res.status(500).json({ 
-      success: false, 
-      error: `Database error: ${error.message || "Unknown error"}` 
+    return res.status(500).json({
+      success: false,
+      error: `Database error: ${error.message || "Unknown error"}`,
     });
   } finally {
     if (session) {
@@ -1567,6 +1608,173 @@ function sendConfirmationEmail(user, advisor) {
   });
 }
 
+// -----------------------------------------------------------------------------
+// USER GOALS
+// -----------------------------------------------------------------------------
+
+// Middleware to check if user is authenticated
+const isUserAuthenticated = (req, res, next) => {
+  if (req.session && req.session.userId) {
+    return next();
+  }
+  return res.status(401).json({ success: false, message: "Not authenticated" });
+};
+
+// GET /api/goals - Fetch all goals for the authenticated user
+app.get("/api/goals", isUserAuthenticated, async (req, res) => {
+  try {
+    const goals = await Goal.find({ user_id: req.session.userId }).sort({
+      target_date: -1,
+    });
+    res.json({
+      status: "success",
+      data: goals.map((goal) => ({
+        id: goal._id,
+        goal_name: goal.goal_name,
+        target_amount: goal.target_amount,
+        current_savings: goal.current_savings,
+        target_date: goal.target_date,
+        description: goal.description,
+        created_at: goal.created_at,
+        priority: goal.priority,
+        category: goal.category
+      })),
+    });
+  } catch (error) {
+    console.error("Error fetching goals:", error);
+    res.status(500).json({
+      status: "error",
+      message: "Failed to fetch goals",
+      details: error.message,
+    });
+  }
+});
+
+// POST /api/goals - Create a new goal
+app.post("/api/goals", isUserAuthenticated, async (req, res) => {
+  const { goal_name, target_amount, target_date, description, priority, category } = req.body;
+
+  if (!goal_name || !target_amount || !target_date) {
+    return res.status(400).json({
+      status: "error",
+      message: "Goal name, target amount, and target date are required",
+    });
+  }
+
+  try {
+    const newGoal = new Goal({
+      user_id: req.session.userId,
+      goal_name,
+      target_amount: parseFloat(target_amount),
+      current_savings: 0,
+      target_date: new Date(target_date),
+      description,
+      priority: priority || "medium",
+      category: category || "other",
+    });
+
+    await newGoal.save();
+    res.status(201).json({
+      status: "success",
+      data: {
+        id: newGoal._id,
+        goal_name: newGoal.goal_name,
+        target_amount: newGoal.target_amount,
+        current_savings: newGoal.current_savings,
+        target_date: newGoal.target_date,
+        description: newGoal.description,
+        created_at: newGoal.created_at,
+      },
+    });
+  } catch (error) {
+    console.error("Error creating goal:", error);
+    res.status(500).json({
+      status: "error",
+      message: "Failed to create goal",
+      details: error.message,
+    });
+  }
+});
+
+// PUT /api/goals/:id - Update an existing goal
+app.put("/api/goals/:id", isUserAuthenticated, async (req, res) => {
+  const goalId = req.params.id;
+  const { goal_name, target_amount, current_savings, target_date, description, priority, category } = req.body;
+
+  try {
+    const goal = await Goal.findOne({
+      _id: goalId,
+      user_id: req.session.userId,
+    });
+    if (!goal) {
+      return res.status(404).json({
+        status: "error",
+        message: "Goal not found or not authorized",
+      });
+    }
+
+    // Update fields if provided
+    if (goal_name) goal.goal_name = goal_name;
+    if (target_amount) goal.target_amount = parseFloat(target_amount);
+    if (current_savings !== undefined)
+      goal.current_savings = parseFloat(current_savings);
+    if (target_date) goal.target_date = new Date(target_date);
+    if (description !== undefined) goal.description = description;
+    if (priority) goal.priority = priority;
+    if (category) goal.category = category;
+
+    await goal.save();
+    res.json({
+      status: "success",
+      data: {
+        id: goal._id,
+        goal_name: goal.goal_name,
+        target_amount: goal.target_amount,
+        current_savings: goal.current_savings,
+        target_date: goal.target_date,
+        description: goal.description,
+        created_at: goal.created_at,
+      },
+    });
+  } catch (error) {
+    console.error("Error updating goal:", error);
+    res.status(500).json({
+      status: "error",
+      message: "Failed to update goal",
+      details: error.message,
+    });
+  }
+});
+
+// DELETE /api/goals/:id - Delete a goal
+app.delete("/api/goals/:id", isUserAuthenticated, async (req, res) => {
+  const goalId = req.params.id;
+
+  try {
+    const goal = await Goal.findOneAndDelete({
+      _id: goalId,
+      user_id: req.session.userId,
+    });
+    if (!goal) {
+      return res.status(404).json({
+        status: "error",
+        message: "Goal not found or not authorized",
+      });
+    }
+    res.json({
+      status: "success",
+      message: "Goal deleted successfully",
+    });
+  } catch (error) {
+    console.error("Error deleting goal:", error);
+    res.status(500).json({
+      status: "error",
+      message: "Failed to delete goal",
+      details: error.message,
+    });
+  }
+});
+
 // ---------------------------------------------------------------------------------------------------------------------------------------------
 // ACCOUNTS
 // ---------------------------------------------------------------------------------------------------------------------------------------------
@@ -1604,7 +1812,12 @@ app.get("/api/user/weekly-activity", async (req, res) => {
       },
       {
         $group: {
-          _id: { $dateToString: { format: "%Y-%m-%d", date: "$transaction_datetime" } },
+          _id: {
+            $dateToString: {
+              format: "%Y-%m-%d",
+              date: "$transaction_datetime",
+            },
+          },
           totalDeposit: {
             $sum: { $cond: [{ $gt: ["$amount", 0] }, "$amount", 0] },
           },
@@ -1622,9 +1835,12 @@ app.get("/api/user/weekly-activity", async (req, res) => {
     for (let i = 6; i >= 0; i--) {
       const date = new Date();
       date.setDate(date.getDate() - i);
-      const dateStr = date.toISOString().split('T')[0]; // YYYY-MM-DD
+      const dateStr = date.toISOString().split("T")[0]; // YYYY-MM-DD
 
-      const dayData = transactions.find((t) => t._id === dateStr) || { totalDeposit: 0, totalWithdraw: 0 };
+      const dayData = transactions.find((t) => t._id === dateStr) || {
+        totalDeposit: 0,
+        totalWithdraw: 0,
+      };
       depositValues.push(dayData.totalDeposit);
       withdrawValues.push(dayData.totalWithdraw);
     }
@@ -1952,7 +2168,12 @@ app.get("/api/credit-card-bill", async (req, res) => {
     // Trim cardNumber to handle potential whitespace
     const cleanedCardNumber = cardNumber.trim();
 
-    console.log("Querying with userId:", objectId.toString(), "cleanedCardNumber:", cleanedCardNumber);
+    console.log(
+      "Querying with userId:",
+      objectId.toString(),
+      "cleanedCardNumber:",
+      cleanedCardNumber
+    );
 
     // Query user_id as ObjectId
     const bill = await CreditCardBill.findOne({
@@ -1961,13 +2182,21 @@ app.get("/api/credit-card-bill", async (req, res) => {
     });
 
     if (!bill) {
-      console.log("No bill found for userId:", userId, "cardNumber:", cleanedCardNumber);
+      console.log(
+        "No bill found for userId:",
+        userId,
+        "cardNumber:",
+        cleanedCardNumber
+      );
       // Debug: Try regex query for card_number
       const regexBill = await CreditCardBill.findOne({
         user_id: objectId,
-        card_number: { $regex: `^${cleanedCardNumber}$`, $options: "i" }
+        card_number: { $regex: `^${cleanedCardNumber}$`, $options: "i" },
       });
-      console.log("Regex query result:", regexBill ? regexBill : "No match with regex");
+      console.log(
+        "Regex query result:",
+        regexBill ? regexBill : "No match with regex"
+      );
       // Debug: Log all bills for this user
       const userBills = await CreditCardBill.find({ user_id: objectId });
       console.log("All bills for userId:", userId, userBills);
@@ -1994,8 +2223,17 @@ app.get("/api/bank-expenses", async (req, res) => {
 
   const userId = req.session.userId;
   const colors = [
-    "#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF",
-    "#FF9F40", "#C9CBCF", "#E7E9ED", "#ADFF2F", "#FFD700", "#808080"
+    "#FF6384",
+    "#36A2EB",
+    "#FFCE56",
+    "#4BC0C0",
+    "#9966FF",
+    "#FF9F40",
+    "#C9CBCF",
+    "#E7E9ED",
+    "#ADFF2F",
+    "#FFD700",
+    "#808080",
   ]; // Predefined colors for segments (add more if needed)
 
   try {
@@ -2006,28 +2244,32 @@ app.get("/api/bank-expenses", async (req, res) => {
       {
         $match: {
           user_id: new mongoose.Types.ObjectId(userId),
-          date: { $gte: thirtyDaysAgo } // Filter for last 30 days
-        }
+          date: { $gte: thirtyDaysAgo }, // Filter for last 30 days
+        },
       },
       {
         $group: {
           _id: "$category", // Group by category (adjust if grouping by bank_name)
-          total: { $sum: "$amount" }
-        }
+          total: { $sum: "$amount" },
+        },
       },
-      { $sort: { total: -1 } } // Sort by highest amount descending
+      { $sort: { total: -1 } }, // Sort by highest amount descending
     ]);
 
-    const labels = expenses.map(e => e._id || "Unknown");
-    const data = expenses.map(e => e.total);
-    const backgroundColor = labels.map((_, index) => colors[index % colors.length]);
+    const labels = expenses.map((e) => e._id || "Unknown");
+    const data = expenses.map((e) => e.total);
+    const backgroundColor = labels.map(
+      (_, index) => colors[index % colors.length]
+    );
 
     res.json({
       labels,
-      datasets: [{
-        data,
-        backgroundColor
-      }]
+      datasets: [
+        {
+          data,
+          backgroundColor,
+        },
+      ],
     });
   } catch (error) {
     console.error("Error fetching bank expenses:", error);
@@ -2159,22 +2401,15 @@ app.get("/api/auth/current-user", (req, res) => {
   }
 });
 
-
-// Middleware to check if user is authenticated
-const isUserAuthenticated = (req, res, next) => {
-  if (req.session && req.session.userId) {
-    return next();
-  }
-  return res.status(401).json({ success: false, message: "Not authenticated" });
-};
-
 // POST /api/blogs - Create a new blog
 app.post("/api/blogs", isUserAuthenticated, async (req, res) => {
   const { title, content } = req.body;
   const author_id = req.session.userId;
 
   if (!title || !content) {
-    return res.status(400).json({ success: false, message: "Title and content are required" });
+    return res
+      .status(400)
+      .json({ success: false, message: "Title and content are required" });
   }
 
   try {
@@ -2240,7 +2475,9 @@ app.post("/api/blogs/:id/like", isUserAuthenticated, async (req, res) => {
   try {
     const blog = await Blog.findById(blogId);
     if (!blog) {
-      return res.status(404).json({ success: false, message: "Blog not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Blog not found" });
     }
 
     const userObjectId = new mongoose.Types.ObjectId(userId);
@@ -2268,7 +2505,9 @@ app.post("/api/blogs/:id/dislike", isUserAuthenticated, async (req, res) => {
   try {
     const blog = await Blog.findById(blogId);
     if (!blog) {
-      return res.status(404).json({ success: false, message: "Blog not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Blog not found" });
     }
 
     const userObjectId = new mongoose.Types.ObjectId(userId);
@@ -2289,26 +2528,30 @@ app.post("/api/blogs/:id/dislike", isUserAuthenticated, async (req, res) => {
 });
 
 // GET /api/blogs/:id/interactions - Check if user has liked/disliked
-app.get("/api/blogs/:id/interactions", isUserAuthenticated, async (req, res) => {
-  const blogId = req.params.id;
-  const userId = req.session.userId;
+app.get(
+  "/api/blogs/:id/interactions",
+  isUserAuthenticated,
+  async (req, res) => {
+    const blogId = req.params.id;
+    const userId = req.session.userId;
 
-  try {
-    const blog = await Blog.findById(blogId);
-    if (!blog) {
-      return res.status(404).json({ message: "Blog not found" });
+    try {
+      const blog = await Blog.findById(blogId);
+      if (!blog) {
+        return res.status(404).json({ message: "Blog not found" });
+      }
+
+      const userObjectId = new mongoose.Types.ObjectId(userId);
+      const liked = blog.likes.some((id) => id.equals(userObjectId));
+      const disliked = blog.dislikes.some((id) => id.equals(userObjectId));
+
+      res.json({ liked, disliked });
+    } catch (error) {
+      console.error("Error fetching interactions:", error);
+      res.status(500).json({ message: "Failed to fetch interactions" });
     }
-
-    const userObjectId = new mongoose.Types.ObjectId(userId);
-    const liked = blog.likes.some((id) => id.equals(userObjectId));
-    const disliked = blog.dislikes.some((id) => id.equals(userObjectId));
-
-    res.json({ liked, disliked });
-  } catch (error) {
-    console.error("Error fetching interactions:", error);
-    res.status(500).json({ message: "Failed to fetch interactions" });
   }
-});
+);
 
 // POST /api/blogs/:id/comments - Add a comment
 app.post("/api/blogs/:id/comments", isUserAuthenticated, async (req, res) => {
@@ -2317,13 +2560,17 @@ app.post("/api/blogs/:id/comments", isUserAuthenticated, async (req, res) => {
   const userId = req.session.userId;
 
   if (!text) {
-    return res.status(400).json({ success: false, message: "Comment text is required" });
+    return res
+      .status(400)
+      .json({ success: false, message: "Comment text is required" });
   }
 
   try {
     const blog = await Blog.findById(blogId);
     if (!blog) {
-      return res.status(404).json({ success: false, message: "Blog not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Blog not found" });
     }
 
     blog.comments.push({
@@ -2345,7 +2592,10 @@ app.get("/api/blogs/:id/comments", async (req, res) => {
   const blogId = req.params.id;
 
   try {
-    const blog = await Blog.findById(blogId).populate("comments.user_id", "name");
+    const blog = await Blog.findById(blogId).populate(
+      "comments.user_id",
+      "name"
+    );
     if (!blog) {
       return res.status(404).json({ message: "Blog not found" });
     }
@@ -2374,12 +2624,19 @@ app.delete("/api/comments/:id", isUserAuthenticated, async (req, res) => {
   try {
     const blog = await Blog.findOne({ "comments._id": commentId });
     if (!blog) {
-      return res.status(404).json({ success: false, message: "Comment not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Comment not found" });
     }
 
     const comment = blog.comments.id(commentId);
     if (!comment.user_id.equals(userId)) {
-      return res.status(403).json({ success: false, message: "Not authorized to delete this comment" });
+      return res
+        .status(403)
+        .json({
+          success: false,
+          message: "Not authorized to delete this comment",
+        });
     }
 
     blog.comments.pull(commentId);
@@ -2387,7 +2644,9 @@ app.delete("/api/comments/:id", isUserAuthenticated, async (req, res) => {
     res.json({ success: true });
   } catch (error) {
     console.error("Error deleting comment:", error);
-    res.status(500).json({ success: false, message: "Failed to delete comment" });
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to delete comment" });
   }
 });
 
@@ -2399,11 +2658,18 @@ app.delete("/api/blogs/:id", isUserAuthenticated, async (req, res) => {
   try {
     const blog = await Blog.findById(blogId);
     if (!blog) {
-      return res.status(404).json({ success: false, message: "Blog not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Blog not found" });
     }
 
     if (!blog.author_id.equals(userId)) {
-      return res.status(403).json({ success: false, message: "Not authorized to delete this blog" });
+      return res
+        .status(403)
+        .json({
+          success: false,
+          message: "Not authorized to delete this blog",
+        });
     }
 
     await Blog.deleteOne({ _id: blogId });
@@ -3153,115 +3419,155 @@ const isAdvisorAuthenticated = (req, res, next) => {
   if (req.session && req.session.advisorId) {
     return next();
   }
-  return res.status(401).json({ status: "error", message: "Not authenticated as an advisor" });
+  return res
+    .status(401)
+    .json({ status: "error", message: "Not authenticated as an advisor" });
 };
 
 // GET /api/videos - Fetch video library for the advisor
 app.get("/api/videos", isAdvisorAuthenticated, async (req, res) => {
-    try {
-        const advisorId = req.session.advisorId;
-        // Check if the advisor has any videos, if not, add some defaults
-        const videoCount = await Video.countDocuments({ advisor_id: advisorId });
+  try {
+    const advisorId = req.session.advisorId;
+    // Check if the advisor has any videos, if not, add some defaults
+    const videoCount = await Video.countDocuments({ advisor_id: advisorId });
 
-        if (videoCount === 0) {
-            await Video.insertMany([
-                { advisor_id: advisorId, title: "Beginner's Guide to Investing", videoId: "Cda-fUJ-GjE" },
-                { advisor_id: advisorId, title: "Understanding Mutual Funds", videoId: "k_gE4a-P57s" },
-                { advisor_id: advisorId, title: "How to Save Money", videoId: "3_kCsig2-oA" }
-            ]);
-        }
-        
-        const videos = await Video.find({ advisor_id: advisorId }).sort({ created_at: -1 });
-        res.json({ videos });
-    } catch (error) {
-        console.error("Error fetching video library:", error);
-        res.status(500).json({ error: "Server error while fetching videos." });
+    if (videoCount === 0) {
+      await Video.insertMany([
+        {
+          advisor_id: advisorId,
+          title: "Beginner's Guide to Investing",
+          videoId: "Cda-fUJ-GjE",
+        },
+        {
+          advisor_id: advisorId,
+          title: "Understanding Mutual Funds",
+          videoId: "k_gE4a-P57s",
+        },
+        {
+          advisor_id: advisorId,
+          title: "How to Save Money",
+          videoId: "3_kCsig2-oA",
+        },
+      ]);
     }
+
+    const videos = await Video.find({ advisor_id: advisorId }).sort({
+      created_at: -1,
+    });
+    res.json({ videos });
+  } catch (error) {
+    console.error("Error fetching video library:", error);
+    res.status(500).json({ error: "Server error while fetching videos." });
+  }
 });
 
 // POST /api/session-notes - Save a note for a session
 app.post("/api/session-notes", isAdvisorAuthenticated, async (req, res) => {
-    const { userId, note } = req.body;
-    if (!userId || !note) {
-        return res.status(400).json({ success: false, error: "Client user ID and note content are required." });
-    }
-    try {
-        const newNote = new SessionNote({
-            advisor_id: req.session.advisorId,
-            user_id: userId,
-            note: note,
-        });
-        await newNote.save();
-        res.json({ success: true, message: "Note saved successfully." });
-    } catch (error) {
-        console.error("Error saving session note:", error);
-        res.status(500).json({ success: false, error: "Failed to save note." });
-    }
+  const { userId, note } = req.body;
+  if (!userId || !note) {
+    return res
+      .status(400)
+      .json({
+        success: false,
+        error: "Client user ID and note content are required.",
+      });
+  }
+  try {
+    const newNote = new SessionNote({
+      advisor_id: req.session.advisorId,
+      user_id: userId,
+      note: note,
+    });
+    await newNote.save();
+    res.json({ success: true, message: "Note saved successfully." });
+  } catch (error) {
+    console.error("Error saving session note:", error);
+    res.status(500).json({ success: false, error: "Failed to save note." });
+  }
 });
 
 // GET /api/session-notes/:userId - Load notes for a client
-app.get("/api/session-notes/:userId", isAdvisorAuthenticated, async (req, res) => {
+app.get(
+  "/api/session-notes/:userId",
+  isAdvisorAuthenticated,
+  async (req, res) => {
     try {
-        const notes = await SessionNote.find({
-            advisor_id: req.session.advisorId,
-            user_id: req.params.userId
-        }).sort({ created_at: -1 });
-        res.json({ notes });
+      const notes = await SessionNote.find({
+        advisor_id: req.session.advisorId,
+        user_id: req.params.userId,
+      }).sort({ created_at: -1 });
+      res.json({ notes });
     } catch (error) {
-        console.error("Error loading session notes:", error);
-        res.status(500).json({ error: "Failed to load notes." });
+      console.error("Error loading session notes:", error);
+      res.status(500).json({ error: "Failed to load notes." });
     }
-});
+  }
+);
 
 // --- Video Recording Upload ---
 // Configure multer for video uploads
 const videoStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const uploadPath = path.join(__dirname, 'public', 'uploads', 'recorded-videos');
+    const uploadPath = path.join(
+      __dirname,
+      "public",
+      "uploads",
+      "recorded-videos"
+    );
     fs.mkdirSync(uploadPath, { recursive: true }); // Ensure directory exists
     cb(null, uploadPath);
   },
   filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, file.fieldname + '-' + uniqueSuffix + '.webm'); // Save files as .webm
-  }
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, file.fieldname + "-" + uniqueSuffix + ".webm"); // Save files as .webm
+  },
 });
 
 const videoUpload = multer({ storage: videoStorage });
 
 // POST /api/videos/upload - Upload a recorded video
-app.post('/api/videos/upload', isAdvisorAuthenticated, videoUpload.single('video'), async (req, res) => {
-  if (!req.file) {
-    return res.status(400).send({ error: 'No video file uploaded.' });
-  }
+app.post(
+  "/api/videos/upload",
+  isAdvisorAuthenticated,
+  videoUpload.single("video"),
+  async (req, res) => {
+    if (!req.file) {
+      return res.status(400).send({ error: "No video file uploaded." });
+    }
 
-  const { title } = req.body;
-  if (!title) {
-    // If upload fails due to missing title, delete the orphaned file
-    fs.unlinkSync(req.file.path);
-    return res.status(400).send({ error: 'Video title is required.' });
-  }
+    const { title } = req.body;
+    if (!title) {
+      // If upload fails due to missing title, delete the orphaned file
+      fs.unlinkSync(req.file.path);
+      return res.status(400).send({ error: "Video title is required." });
+    }
 
-  try {
-    const newVideo = new Video({
-      advisor_id: req.session.advisorId,
-      title: title,
-      filename: req.file.filename,
-      url: `/uploads/recorded-videos/${req.file.filename}`, // Public URL to serve the file
-    });
-    await newVideo.save();
-    
-    res.status(201).json({ success: true, message: 'Video uploaded successfully!', video: newVideo });
-  } catch (error) {
-    console.error('Error saving video to database:', error);
-    res.status(500).json({ error: 'Failed to save video information.' });
+    try {
+      const newVideo = new Video({
+        advisor_id: req.session.advisorId,
+        title: title,
+        filename: req.file.filename,
+        url: `/uploads/recorded-videos/${req.file.filename}`, // Public URL to serve the file
+      });
+      await newVideo.save();
+
+      res
+        .status(201)
+        .json({
+          success: true,
+          message: "Video uploaded successfully!",
+          video: newVideo,
+        });
+    } catch (error) {
+      console.error("Error saving video to database:", error);
+      res.status(500).json({ error: "Failed to save video information." });
+    }
   }
-});
+);
 
 // =========================================================================
 
-
 // Start the server
 server.listen(port, () => {
-    console.log(`Server running on http://localhost:${port}`);
+  console.log(`Server running on http://localhost:${port}`);
 });
